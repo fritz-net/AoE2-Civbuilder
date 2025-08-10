@@ -324,9 +324,9 @@ const chToAppDir = (req, res, next) => {
 const createModFolder = (req, res, next) => {
 	console.log(`[${req.body.seed}]: creating mod folder`);
 	if (req.body.civs === "false") {
-		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${tempdir} 0`);
+		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${__dirname} 0`);
 	} else {
-		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${tempdir} 1`);
+		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${__dirname} 1`);
 	}
 	next();
 };
