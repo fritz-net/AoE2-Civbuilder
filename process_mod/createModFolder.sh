@@ -26,7 +26,9 @@ cp "$3/public/img/thumbnail.jpg" ./
 mkdir -p ./resources/_common
 if [[ $4 -eq 1 ]]
 then
-    mkdir -p ./resources/_commonwpfg/resources/civ_techtree/civ_emblems/uniticons
+    mkdir -p ./resources/_common/wpfg/resources/civ_emblems
+    mkdir -p ./resources/_common/wpfg/resources/uniticons
+    mkdir -p ./resources/_common/wpfg/resources/civ_techtree
 
 fi
 mkdir -p ./resources/_common/dat
@@ -59,22 +61,22 @@ mkdir -p ./resources/_common/wpfg/resources/civ_techtree
 cp -r "$3/public/img/civ_emblems/." ./resources/_common/wpfg/resources/civ_emblems
 
 
-mkdir -p ./resources/_common/br/strings/key-value
-mkdir -p ./resources/_common/de/strings/key-value
-mkdir -p ./resources/_common/es/strings/key-value
-mkdir -p ./resources/_common/fr/strings/key-value
-mkdir -p ./resources/_common/hi/strings/key-value
-mkdir -p ./resources/_common/it/strings/key-value
-mkdir -p ./resources/_common/jp/strings/key-value
-mkdir -p ./resources/_common/ko/strings/key-value
-mkdir -p ./resources/_common/ms/strings/key-value
-mkdir -p ./resources/_common/mx/strings/key-value
-mkdir -p ./resources/_common/tr/strings/key-value
-mkdir -p ./resources/_common/tw/strings/key-value
-mkdir -p ./resources/_common/vi/strings/key-value
-mkdir -p ./resources/_common/zh/strings/key-value
-mkdir -p ./resources/_common/en/strings/key-value
-touch ./resources/_common/en/strings/key-value/key-value-modded-strings-utf8.txt
+mkdir -p ./resources/br/strings/key-value
+mkdir -p ./resources/de/strings/key-value
+mkdir -p ./resources/es/strings/key-value
+mkdir -p ./resources/fr/strings/key-value
+mkdir -p ./resources/hi/strings/key-value
+mkdir -p ./resources/it/strings/key-value
+mkdir -p ./resources/jp/strings/key-value
+mkdir -p ./resources/ko/strings/key-value
+mkdir -p ./resources/ms/strings/key-value
+mkdir -p ./resources/mx/strings/key-value
+mkdir -p ./resources/tr/strings/key-value
+mkdir -p ./resources/tw/strings/key-value
+mkdir -p ./resources/vi/strings/key-value
+mkdir -p ./resources/zh/strings/key-value
+mkdir -p ./resources/en/strings/key-value
+touch ./resources/en/strings/key-value/key-value-modded-strings-utf8.txt
 
 mkdir -p ./widgetui/textures/ingame/icons/civ_techtree_buttons
 mkdir -p ./widgetui/textures/menu/civs
