@@ -18,7 +18,8 @@ RUN git submodule update --init --recursive
 # Ensure Unix line endings for build.sh to avoid cross-platform issues
 RUN apt-get update && apt-get install -y dos2unix && \
     dos2unix ./modding/scripts/build.sh && \
-    chmod +x ./modding/scripts/build.sh && ./modding/scripts/build.sh
+    chmod +x ./modding/scripts/build.sh
+RUN ./modding/scripts/build.sh
 
 # Install Node.js dependencies
 RUN npm ci --omit=dev
