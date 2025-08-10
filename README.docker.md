@@ -43,6 +43,10 @@ docker run -p 4000:4000 aoe2-civbuilder:build-cpp
 **Build the image:**
 ```sh
 docker build -f Dockerfile.prebuilt-cpp -t aoe2-civbuilder:prebuilt-cpp .
+
+
+# or build and run
+docker build -t aoe2-civbuilder:build-cpp -f Dockerfile.build-cpp . && docker run --rm -e CIVBUILDER_HOSTNAME=http://localhost:4000 -p 4000:4000 aoe2-civbuilder:build-cpp
 ```
 
 **Run the container:**
