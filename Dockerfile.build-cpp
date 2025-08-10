@@ -30,4 +30,11 @@ EXPOSE 4000
 
 VOLUME ["/app/modding/requested_mods"]
 
+# --- Test stage ---
+FROM node:20-bullseye AS test
+WORKDIR /app
+COPY . .
+RUN npm install
+CMD ["npm", "test"]
+
 ENTRYPOINT ["node", "server.js"]
