@@ -33,14 +33,11 @@ COPY package*.json ./
 # Install Node.js dependencies
 RUN npm install --omit=dev
 
-# Copy built C++ binaries from cpp-build stage
-COPY --from=cpp-build /app/modding/genieutils/build /app/modding/genieutils/build
-RUN ls /app/modding/genieutils/build
+# Copy built C++ build directory from cpp-build stage
+COPY --from=cpp-build /app/modding/build /app/modding/build
 
 # Copy all source code
 COPY . .
-RUN ls /app/modding/genieutils/build
-
 # Ensure Unix line endings for build.sh to avoid cross-platform issues
 RUN find ./process_mod -name "*.sh" -exec dos2unix {} \; && \
     find ./modding/scripts -name "*.sh" -exec dos2unix {} \;
