@@ -62,7 +62,10 @@ app.get(path.join(routeSubdir, "js/common.js"), (req, res) => {
 			routeSubdir !== defaultRoute;
 		if (needsReplace) {
 			lines[0] = `const hostname = "${hostname.replace(/\/$/, "")}";`;
-			lines[1] = `const route = "${routeSubdir}";`;
+
+			// subdir should NOT end with /; remove LAST slash if any
+			let cleanSubdir = routeSubdir.replace(/\/$/, "");
+			lines[1] = `const route = "${cleanSubdir}";`;
 		}
 		res.type("application/javascript").send(lines.join("\n"));
 	});
