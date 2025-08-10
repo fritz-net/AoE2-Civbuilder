@@ -875,9 +875,10 @@ function getCookie(name) {
 	return null;
 }
 
-async function setCookie(cookie, value) {
-	await axios.post(`${hostname}${route}/setCookie`, { cookie: cookie, value: value });
-}
+// unused
+//async function setCookie(cookie, value) {
+//	await axios.post(`${hostname}${route}/setCookie`, { cookie: cookie, value: value });
+//}
 
 function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));

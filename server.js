@@ -48,6 +48,25 @@ app.use(
 	})
 );
 app.use(parser.json({ limit: "20mb" }));
+// Serve dynamic common.js with correct hostname and route
+// TODO maybe always set those lines on top without replacing at all? or inject them into index html script tag
+app.get(path.join(routeSubdir, "js/common.js"), (req, res) => {
+	const defaultHostname = "https://krakenmeister.com";
+	const defaultRoute = "/civbuilder";
+	const jsPath = path.join(__dirname, "public/js/common.js");
+	fs.readFile(jsPath, "utf8", (err, data) => {
+		if (err) return res.status(500).send("Error loading common.js");
+		let lines = data.split("\n");
+		let needsReplace =
+			hostname !== (defaultHostname + defaultRoute) ||
+			routeSubdir !== defaultRoute;
+		if (needsReplace) {
+			lines[0] = `const hostname = "${hostname.replace(/\/$/, "")}";`;
+			lines[1] = `const route = "${routeSubdir}";`;
+		}
+		res.type("application/javascript").send(lines.join("\n"));
+	});
+});
 app.use(
 	routeSubdir,
 	express.static(path.join(__dirname, "/public"), {
@@ -859,7 +878,7 @@ router.post("/edit", (req, res) => {
 
 router.get("/draft/host/:id", checkCookies, authenticateDraft, function (req, res) {
 	if (req.authenticated == -1) {
-		res.redirect("/civbuilder/draft/" + req.params.id);
+		res.redirect(path.join(hostname, "/draft/" + req.params.id));
 	} else if (req.authenticated == 0) {
 		res.render(__dirname + "/public/pug/error", { error: "Draft does not exist" });
 	} else if (req.authenticated == 1) {
@@ -869,7 +888,7 @@ router.get("/draft/host/:id", checkCookies, authenticateDraft, function (req, re
 
 router.get("/draft/player/:id", checkCookies, authenticateDraft, function (req, res) {
 	if (req.authenticated == -1) {
-		res.redirect("/civbuilder/draft/" + req.params.id);
+		res.redirect(path.join(hostname, "/draft/" + req.params.id));
 	} else if (req.authenticated == 0) {
 		res.render(__dirname + "/public/pug/error", { error: "Draft does not exist" });
 	} else if (req.authenticated == 1) {
@@ -879,13 +898,13 @@ router.get("/draft/player/:id", checkCookies, authenticateDraft, function (req, 
 
 router.post("/join", setID, checkCookies, authenticateDraft, checkSpace, (req, res) => {
 	if (req.authenticated == -1) {
-		res.redirect("/civbuilder/draft/" + req.body.draftID);
+		res.redirect(path.join(hostname, "/draft/" + req.body.draftID));
 	} else if (req.authenticated == 0) {
 		res.render(__dirname + "/public/pug/error", { error: "Draft does not exist" });
 	} else if (req.authenticated == 1) {
 		res.cookie("playerNumber", req.playerNumber);
 		res.cookie("draftID", req.body.draftID);
-		res.redirect("/civbuilder/draft/" + req.body.draftID);
+		res.redirect(path.join(hostname, "/draft/" + req.body.draftID));
 	} else if (req.authenticated == 2) {
 		res.render(__dirname + "/public/pug/error", { error: "Host already joined" });
 	} else if (req.authenticated == 3) {
