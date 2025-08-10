@@ -34,12 +34,8 @@ const routeSubdir = new URL(hostname).pathname.replace(/\/$/, "") || "/";
 const port = 4000;
 
 console.log("running with hostname:", hostname);
+console.log("route subdir:", routeSubdir);
 console.log("temp directory:", dir);
-
-// TODO debug list all env vars
-for (const [key, value] of Object.entries(process.env)) {
-	console.log(`ENV VAR: ${key} = ${value}`);
-}
 
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));

@@ -48,7 +48,7 @@ docker build -f Dockerfile.prebuilt-cpp -t aoe2-civbuilder:prebuilt-cpp .
 docker run -p 4000:4000 aoe2-civbuilder:prebuilt-cpp
 
 # if u like to fix the links
-docker run -p 4000:4000 -e CIVBUILDER_HOSTNAME=/ aoe2-civbuilder:prebuilt-cpp 
+docker run -p 4000:4000 -e CIVBUILDER_HOSTNAME=http://localhost:4000/ aoe2-civbuilder:prebuilt-cpp 
 ```
 
 ---
