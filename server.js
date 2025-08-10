@@ -71,7 +71,7 @@ function os_func() {
 	};
 }
 
-var os = new os_func();
+var osUtil = new os_func();
 
 function retrieveCookies(header) {
 	let pairs = header.split(";");
@@ -302,7 +302,7 @@ const copyCivIcons = (req, res, next) => {
 	}
 
 	console.log(`[${req.body.seed}]: Copying civ icons...`);
-	os.execCommand(
+	osUtil.execCommand(
 		`cp -r ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/. ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/civ_techtree`,
 		function () {
 			next();
@@ -337,7 +337,7 @@ const copyNames = (req, res, next) => {
 	}
 
 	console.log(`[${req.body.seed}]: Copying strings...`);
-	os.execCommand(`sh ./process_mod/copyLanguages.sh ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources`, function () {
+	osUtil.execCommand(`sh ./process_mod/copyLanguages.sh ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources`, function () {
 		next();
 	});
 };
@@ -362,7 +362,7 @@ const addVoiceFiles = (req, res, next) => {
 		}
 	}
 
-	os.execCommand(command, function () {
+	osUtil.execCommand(command, function () {
 		next();
 	});
 };
@@ -375,7 +375,7 @@ const writeUUIcons = (req, res, next) => {
 
 	console.log(`[${req.body.seed}]: Writing UU icons...`);
 	for (var i = 0; i < blanks.length; i++) {
-		os.execCommand(
+		osUtil.execCommand(
 			`cp ./public/img/uniticons/blank.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/uniticons/${blanks[i]}_50730.png`,
 			function () {}
 		);
@@ -386,14 +386,14 @@ const writeUUIcons = (req, res, next) => {
 		//Persians and Saracens are index 7 & 8 but War Elephants and Mamelukes are index 8 & 7
 		var iconsrc = iconids[civ.techtree[i][0]];
 		if (i == civ.techtree.length - 1) {
-			os.execCommand(
+			osUtil.execCommand(
 				`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`,
 				function () {
 					next();
 				}
 			);
 		} else {
-			os.execCommand(
+			osUtil.execCommand(
 				`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`,
 				function () {}
 			);
@@ -431,7 +431,7 @@ const writeTechTree = (req, res, next) => {
 
 const writeDatFile = async (req, res, next) => {
 	console.log(`[${req.body.seed}]: Writing dat file...`);
-	os.execCommand(
+	osUtil.execCommand(
 		`./modding/build/create-data-mod ./modding/requested_mods/${req.body.seed}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/ai/aiconfig.json`,
 		() => {
 			next();
@@ -459,11 +459,11 @@ const writeAIFiles = (req, res, next) => {
 const zipModFolder = (req, res, next) => {
 	console.log(`[${req.body.seed}]: Zipping folder...`);
 	if (req.body.civs === "false") {
-		os.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 0`, function () {
+		osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 0`, function () {
 			next();
 		});
 	} else {
-		os.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 1`, function () {
+		osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 1`, function () {
 			next();
 		});
 	}
@@ -689,7 +689,7 @@ const writeIconsJson = async (req, res, next) => {
 	//   }
 	// }
 	//Copy Civ Icons
-	os.execCommand(
+	osUtil.execCommand(
 		`cp -r ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/. ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/civ_techtree`,
 		function () {
 			//Generate Json
@@ -1024,7 +1024,7 @@ function draftIO(io) {
 				//Welcome to callback hell because I wasted $1800 on a web-dev class where the professor was seemingly incapable of answering a single question
 				process.chdir(dir);
 				//Create Mod Folder
-				os.execCommand(`bash ${dir}/process_mod/createModFolder.sh ./modding/requested_mods ${draft["id"]} ${dir} 1`, function () {
+				osUtil.execCommand(`bash ${dir}/process_mod/createModFolder.sh ./modding/requested_mods ${draft["id"]} ${dir} 1`, function () {
 					//Create Civ Icons
 					for (var i = 0; i < numPlayers; i++) {
 						var civName = nameArr[i];
@@ -1073,7 +1073,7 @@ function draftIO(io) {
 						}
 					}
 					//Copy Civ Icons
-					os.execCommand(
+					osUtil.execCommand(
 						`cp -r ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/. ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/civ_techtree`,
 						function () {
 							//Generate Json
@@ -1133,12 +1133,12 @@ function draftIO(io) {
 								`./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/en/strings/key-value/key-value-modded-strings-utf8.txt`
 							);
 							//Copy Names
-							os.execCommand(
+							osUtil.execCommand(
 								`sh ./process_mod/copyLanguages.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources`,
 								function () {
 									//Write UUIcons
 									for (var i = 0; i < blanks.length; i++) {
-										os.execCommand(
+										osUtil.execCommand(
 											`cp ./public/img/uniticons/blank.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${blanks[i]}_50730.png`,
 											function () {}
 										);
@@ -1146,7 +1146,7 @@ function draftIO(io) {
 									for (var i = 0; i < mod_data.techtree.length; i++) {
 										var iconsrc = iconids[mod_data.techtree[i][0]];
 										if (i == mod_data.techtree.length - 1) {
-											os.execCommand(
+											osUtil.execCommand(
 												`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`,
 												function () {
 													//Write Tech Tree
@@ -1167,13 +1167,13 @@ function draftIO(io) {
 															command += ` ${mod_data.language[i]}`;
 														}
 													}
-													os.execCommand(command, function () {
+													osUtil.execCommand(command, function () {
 														//Write Dat File
-														os.execCommand(
+														osUtil.execCommand(
 															`./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`,
 															function () {
 																//Zip Files
-																os.execCommand(`bash ./process_mod/zipModFolder.sh ${draft["id"]} 1`, function () {
+																osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${draft["id"]} 1`, function () {
 																	draft["gamestate"]["phase"] = 6;
 																	fs.writeFileSync(`${dir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
 																	io.in(roomID).emit("set gamestate", draft);
@@ -1184,7 +1184,7 @@ function draftIO(io) {
 												}
 											);
 										} else {
-											os.execCommand(
+											osUtil.execCommand(
 												`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`,
 												function () {}
 											);
