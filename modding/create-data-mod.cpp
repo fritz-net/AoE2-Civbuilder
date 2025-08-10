@@ -38,6 +38,7 @@ main(int argc, char **argv) {
 		}
 	}
 
+	cout << "[C++]: Writing file to " << argv[3] << endl;
 	df->saveAs(argv[3]);
 
 	return 0;

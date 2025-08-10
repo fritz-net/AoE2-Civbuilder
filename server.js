@@ -308,6 +308,12 @@ const chToTmpDir = (req, res, next) => {
 	next();
 };
 
+const chToAppDir = (req, res, next) => {
+	console.log(`[${req.body.seed}]: changing directory to app: ${__dirname}`);
+	process.chdir(__dirname);
+	next();
+};
+
 const createModFolder = (req, res, next) => {
 	console.log(`[${req.body.seed}]: creating mod folder`);
 	if (req.body.civs === "false") {
@@ -821,7 +827,8 @@ router.get("/build", function (req, res) {
 
 router.post(
 	"/random",
-	chToTmpDir,
+	//chToTmpDir,
+	chToAppDir,
 	createModFolder,
 	createCivIcons,
 	copyCivIcons,
@@ -844,6 +851,8 @@ router.post(
 router.post(
 	"/create",
 	chToTmpDir,
+	//chToTmpDir,
+	chToAppDir,
 	createModFolder,
 	writeIconsJson,
 	writeNames,
@@ -1207,14 +1216,18 @@ function draftIO(io) {
 													}
 													osUtil.execCommand(command, function () {
 														//Write Dat File
+														console.log(`[${draft["id"]}]: Writing dat file...`);
 														osUtil.execCommand(
-															`./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`,
+															`pwd && ./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`,
 															function () {
+																console.log(`[${draft["id"]}]: Dat file written!`);
 																//Zip Files
 																osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${draft["id"]} 1`, function () {
 																	draft["gamestate"]["phase"] = 6;
 																	fs.writeFileSync(`${tempdir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
 																	io.in(roomID).emit("set gamestate", draft);
+
+																	console.log(`[${draft["id"]}]: Mod created!`);
 																});
 															}
 														);
