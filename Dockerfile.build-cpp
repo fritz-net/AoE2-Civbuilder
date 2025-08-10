@@ -22,7 +22,7 @@ RUN cd ./modding/ && ./scripts/build.sh
 FROM node:20-bullseye AS build
 
 RUN apt-get update && \
-    apt-get install -y dos2unix && \
+    apt-get install -y dos2unix libjsoncpp24 && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -50,15 +50,5 @@ ENV NODE_ENV=production
 EXPOSE 4000
 
 VOLUME ["/app/modding/requested_mods"]
-
-# --- Test stage ---
-# FROM node:20-bullseye AS test
-# WORKDIR /app
-# # Copy just package.json and package-lock.json
-# COPY package*.json ./
-# RUN npm install
-#
-# COPY . .
-# CMD ["npm", "test"]
 
 ENTRYPOINT ["node", "server.js"]

@@ -302,12 +302,14 @@ function reshuffleCards(draft) {
 	return available_bonuses;
 }
 
-const chDir = (req, res, next) => {
+const chToTmpDir = (req, res, next) => {
+	console.log(`[${req.body.seed}]: changing directory to temp: ${tempdir}`);
 	process.chdir(tempdir);
 	next();
 };
 
 const createModFolder = (req, res, next) => {
+	console.log(`[${req.body.seed}]: creating mod folder`);
 	if (req.body.civs === "false") {
 		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${tempdir} 0`);
 	} else {
@@ -819,7 +821,7 @@ router.get("/build", function (req, res) {
 
 router.post(
 	"/random",
-	chDir,
+	chToTmpDir,
 	createModFolder,
 	createCivIcons,
 	copyCivIcons,
@@ -841,7 +843,7 @@ router.post(
 
 router.post(
 	"/create",
-	chDir,
+	chToTmpDir,
 	createModFolder,
 	writeIconsJson,
 	writeNames,
