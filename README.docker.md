@@ -47,7 +47,7 @@ docker build -f Dockerfile.prebuilt-cpp -t aoe2-civbuilder:prebuilt-cpp .
 ```sh
 docker run -p 4000:4000 aoe2-civbuilder:prebuilt-cpp
 
-# if u like to fix the links
+# if u like to adjust the links
 docker run -p 4000:4000 -e CIVBUILDER_HOSTNAME=http://localhost:4000/ aoe2-civbuilder:prebuilt-cpp 
 ```
 
@@ -68,14 +68,17 @@ To persist user-generated mods or other data, you can mount a local directory to
 docker run -p 4000:4000 -v $(pwd)/modding/requested_mods:/app/modding/requested_mods aoe2-civbuilder:build-cpp
 ```
 
-Adjust the paths as needed for your environment.
+Adjust the paths as you want for your environment.
 
 ---
 
 ## Environment Variables and Ports
 
 - The default exposed port is **4000**. You can change the host port mapping if needed (e.g., `-p 8080:4000`).
-- If the application supports additional environment variables, set them with `-e VAR=value`. Refer to the main [`README.md`](README.md:1) or Dockerfile comments for details.
+- to set a different hostname then `https://krakenmeister.com/civbuilder`, use the `CIVBUILDER_HOSTNAME` environment variable:
+```sh
+docker run -p 4000:4000 -e CIVBUILDER_HOSTNAME=http://localhost:4000/ aoe2-civbuilder:prebuilt-cpp
+```
 
 ---
 
