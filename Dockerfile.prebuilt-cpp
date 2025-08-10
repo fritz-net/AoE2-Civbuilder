@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y dos2unix && \
     find ./modding/scripts -name "*.sh" -exec dos2unix {} \;
 
 # No C++ build tools or build steps needed; uses precompiled binaries
+COPY ./modding/create-data-mod ./modding/build/create-data-mod
 
 # Install Node.js dependencies
 RUN npm install --omit=dev

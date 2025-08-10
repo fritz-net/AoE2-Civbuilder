@@ -457,10 +457,10 @@ const writeTechTree = (req, res, next) => {
 
 const writeDatFile = async (req, res, next) => {
 	console.log(`[${req.body.seed}]: Writing dat file (with gdb)...`);
-	const gdbCmd = `gdb -batch -ex "run" -ex "bt" --args ./modding/build/create-data-mod ./modding/requested_mods/${req.body.seed}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/ai/aiconfig.json`;
+	const cmdGdb = `gdb -batch -ex "run" -ex "bt" --args ./modding/build/create-data-mod ./modding/requested_mods/${req.body.seed}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/ai/aiconfig.json`;
 	const cmd = `./modding/build/create-data-mod ./modding/requested_mods/${req.body.seed}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/ai/aiconfig.json`;
 	osUtil.execCommand(
-		gdbCmd,
+		cmd,
 		() => {
 			next();
 		},
