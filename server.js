@@ -41,6 +41,9 @@ console.log("temp directory:", dir);
 if (!fs.existsSync(dir)) {
 	console.log("Creating temp directory:", dir);
 	fs.mkdirSync(dir);
+
+	// Ensure drafts directory exists
+	fs.mkdirSync(`${dir}/drafts`, { recursive: true });
 }
 
 app.set("view engine", "pug");
