@@ -1218,7 +1218,7 @@ function draftIO(io) {
 														//Write Dat File
 														console.log(`[${draft["id"]}]: Writing dat file...`);
 														osUtil.execCommand(
-															`pwd && ./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`,
+															`./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`,
 															function () {
 																console.log(`[${draft["id"]}]: Dat file written!`);
 																//Zip Files
