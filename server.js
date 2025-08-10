@@ -827,7 +827,6 @@ router.get("/build", function (req, res) {
 
 router.post(
 	"/random",
-	//chToTmpDir,
 	chToAppDir,
 	createModFolder,
 	createCivIcons,
@@ -850,8 +849,6 @@ router.post(
 
 router.post(
 	"/create",
-	chToTmpDir,
-	//chToTmpDir,
 	chToAppDir,
 	createModFolder,
 	writeIconsJson,
