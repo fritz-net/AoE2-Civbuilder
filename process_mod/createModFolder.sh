@@ -77,4 +77,4 @@ mkdir -p ./resources/_common/en/strings/key-value
 touch ./resources/_common/en/strings/key-value/key-value-modded-strings-utf8.txt
 
 mkdir -p ./widgetui/textures/ingame/icons/civ_techtree_buttons
-mkdir -p ./widgetui/textures/ingame/menu/civs
+mkdir -p ./widgetui/textures/menu/civs
