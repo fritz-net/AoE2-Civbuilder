@@ -6,7 +6,7 @@ This guide explains how to build and run AoE2-Civbuilder using Docker. For gener
 
 ## Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) installed on your system.
+- [Docker](https://docs.docker.com/get-docker/) installed on your system, or preferably [Podman](https://podman.io/) (with optional Podman Desktop UI) since its open source.
 
 ---
 
@@ -14,11 +14,11 @@ This guide explains how to build and run AoE2-Civbuilder using Docker. For gener
 
 AoE2-Civbuilder provides two Dockerfiles for different use cases:
 
-- [`Dockerfile.build-cpp`](Dockerfile.build-cpp:1):  
-  Builds the C++ components from source inside the container. Use this if you want to ensure the latest C++ code is compiled or if you are developing the C++ parts.
+- [`Dockerfile.build-cpp`](Dockerfile.build-cpp:1):
+  Builds the C++ components (the genieutils  for .dat file editing) from source inside the container. Use this if you want to ensure the latest C++ code is compiled or if you are developing/updating the C++/genie parts.
 
-- [`Dockerfile.prebuilt-cpp`](Dockerfile.prebuilt-cpp:1):  
-  Uses precompiled C++ binaries. Use this for faster builds if you do not need to recompile the C++ code.
+- [`Dockerfile.prebuilt-cpp`](Dockerfile.prebuilt-cpp:1):
+  Uses precompiled C++ binaries (the genieutils). Use this for faster builds if you do not need to recompile the C++ code.
 
 ---
 
