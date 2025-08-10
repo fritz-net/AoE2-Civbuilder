@@ -37,6 +37,12 @@ console.log("running with hostname:", hostname);
 console.log("route subdir:", routeSubdir);
 console.log("temp directory:", dir);
 
+// create temp directory if it doesn't exist
+if (!fs.existsSync(dir)) {
+	console.log("Creating temp directory:", dir);
+	fs.mkdirSync(dir);
+}
+
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
