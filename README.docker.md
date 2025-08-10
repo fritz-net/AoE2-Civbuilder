@@ -1,0 +1,87 @@
+# AoE2-Civbuilder Docker Usage Guide
+
+This guide explains how to build and run AoE2-Civbuilder using Docker. For general project information, features, and architecture, see the main [`README.md`](README.md:1).
+
+---
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) installed on your system.
+
+---
+
+## Dockerfiles Overview
+
+AoE2-Civbuilder provides two Dockerfiles for different use cases:
+
+- [`Dockerfile.build-cpp`](Dockerfile.build-cpp:1):  
+  Builds the C++ components from source inside the container. Use this if you want to ensure the latest C++ code is compiled or if you are developing the C++ parts.
+
+- [`Dockerfile.prebuilt-cpp`](Dockerfile.prebuilt-cpp:1):  
+  Uses precompiled C++ binaries. Use this for faster builds if you do not need to recompile the C++ code.
+
+---
+
+## Building and Running
+
+### 1. Using `Dockerfile.build-cpp`
+
+**Build the image:**
+```sh
+docker build -f Dockerfile.build-cpp -t aoe2-civbuilder:build-cpp .
+```
+
+**Run the container:**
+```sh
+docker run -p 3000:3000 aoe2-civbuilder:build-cpp
+```
+
+### 2. Using `Dockerfile.prebuilt-cpp`
+
+**Build the image:**
+```sh
+docker build -f Dockerfile.prebuilt-cpp -t aoe2-civbuilder:prebuilt-cpp .
+```
+
+**Run the container:**
+```sh
+docker run -p 3000:3000 aoe2-civbuilder:prebuilt-cpp
+```
+
+---
+
+## Accessing the Application
+
+Once the container is running, access AoE2-Civbuilder at:  
+[http://localhost:3000](http://localhost:3000)
+
+---
+
+## Data Persistence and Volumes
+
+To persist user-generated mods or other data, you can mount a local directory to the container. For example:
+
+```sh
+docker run -p 3000:3000 -v $(pwd)/modding/requested_mods:/app/modding/requested_mods aoe2-civbuilder:build-cpp
+```
+
+Adjust the paths as needed for your environment.
+
+---
+
+## Environment Variables and Ports
+
+- The default exposed port is **3000**. You can change the host port mapping if needed (e.g., `-p 8080:3000`).
+- If the application supports additional environment variables, set them with `-e VAR=value`. Refer to the main [`README.md`](README.md:1) or Dockerfile comments for details.
+
+---
+
+## Additional Notes
+
+- For development or debugging, you may want to mount the entire project directory as a volume.
+- If you need to recompile the C++ code, use [`Dockerfile.build-cpp`](Dockerfile.build-cpp:1).
+- For faster startup and if you do not need to modify C++ code, use [`Dockerfile.prebuilt-cpp`](Dockerfile.prebuilt-cpp:1).
+
+---
+
+For further details on project structure, features, or troubleshooting, see the main [`README.md`](README.md:1).
