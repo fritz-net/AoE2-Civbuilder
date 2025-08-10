@@ -1,9 +1,5 @@
 
 const os = require("os");
-const dir = path.join(os.tmpdir(), "civbuilder");
-
-const hostname = process.env.CIVBUILDER_HOSTNAME || "https://krakenmeister.com/civbuilder";
-const port = 4000;
 
 const http = require("http");
 const express = require("express");
@@ -30,6 +26,11 @@ console.log("Starting server...");
 
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
+
+
+const dir = path.join(os.tmpdir(), "civbuilder");
+const hostname = process.env.CIVBUILDER_HOSTNAME || "https://krakenmeister.com/civbuilder";
+const port = 4000;
 
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
