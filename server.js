@@ -30,7 +30,16 @@ const io = require("socket.io")(server);
 
 const dir = path.join(os.tmpdir(), "civbuilder");
 const hostname = process.env.CIVBUILDER_HOSTNAME || "https://krakenmeister.com/civbuilder";
+const routeSubdir = new URL(hostname).pathname.replace(/\/$/, "") || "/";
 const port = 4000;
+
+console.log("running with hostname:", hostname);
+console.log("temp directory:", dir);
+
+// TODO debug list all env vars
+for (const [key, value] of Object.entries(process.env)) {
+	console.log(`ENV VAR: ${key} = ${value}`);
+}
 
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
@@ -44,13 +53,13 @@ app.use(
 );
 app.use(parser.json({ limit: "20mb" }));
 app.use(
-	"/civbuilder",
+	routeSubdir,
 	express.static(path.join(__dirname, "/public"), {
 		maxAge: "1y",
 		immutable: true,
 	})
 );
-app.use("/civbuilder", router);
+app.use(routeSubdir, router);
 
 app.use(zip());
 app.use(cookieParser());

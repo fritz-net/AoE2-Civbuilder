@@ -46,6 +46,9 @@ docker build -f Dockerfile.prebuilt-cpp -t aoe2-civbuilder:prebuilt-cpp .
 **Run the container:**
 ```sh
 docker run -p 4000:4000 aoe2-civbuilder:prebuilt-cpp
+
+# if u like to fix the links
+docker run -p 4000:4000 -e CIVBUILDER_HOSTNAME=/ aoe2-civbuilder:prebuilt-cpp 
 ```
 
 ---
@@ -53,7 +56,7 @@ docker run -p 4000:4000 aoe2-civbuilder:prebuilt-cpp
 ## Accessing the Application
 
 Once the container is running, access AoE2-Civbuilder at:  
-[http://localhost:4000](http://localhost:4000)
+[http://localhost:4000/civbuilder](http://localhost:4000/civbuilder)
 
 ---
 
