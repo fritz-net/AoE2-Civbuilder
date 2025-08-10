@@ -28,22 +28,22 @@ const server = require("http").Server(app);
 const io = require("socket.io")(server);
 
 
-const dir = path.join(os.tmpdir(), "civbuilder");
+const tempdir = path.join(os.tmpdir(), "civbuilder");
 const hostname = process.env.CIVBUILDER_HOSTNAME || "https://krakenmeister.com/civbuilder";
 const routeSubdir = new URL(hostname).pathname.replace(/\/$/, "") || "/";
 const port = 4000;
 
 console.log("running with hostname:", hostname);
 console.log("route subdir:", routeSubdir);
-console.log("temp directory:", dir);
+console.log("temp directory:", tempdir);
 
 // create temp directory if it doesn't exist
-if (!fs.existsSync(dir)) {
-	console.log("Creating temp directory:", dir);
-	fs.mkdirSync(dir);
+if (!fs.existsSync(tempdir)) {
+	console.log("Creating temp directory:", tempdir);
+	fs.mkdirSync(tempdir);
 
 	// Ensure drafts directory exists
-	fs.mkdirSync(`${dir}/drafts`, { recursive: true });
+	fs.mkdirSync(`${tempdir}/drafts`, { recursive: true });
 }
 
 app.set("view engine", "pug");
@@ -129,7 +129,7 @@ const createDraft = (req, res, next) => {
 			id += rand;
 		}
 		uniqueID = true;
-		uniqueID = !fs.existsSync(`${dir}/drafts/${id}.json`);
+		uniqueID = !fs.existsSync(`${tempdir}/drafts/${id}.json`);
 	}
 
 	let draft = {};
@@ -193,7 +193,7 @@ const createDraft = (req, res, next) => {
 	gamestate["order"] = [];
 	gamestate["highlighted"] = [];
 	draft["gamestate"] = gamestate;
-	fs.writeFileSync(`${dir}/drafts/${id}.json`, JSON.stringify(draft, null, 2));
+	fs.writeFileSync(`${tempdir}/drafts/${id}.json`, JSON.stringify(draft, null, 2));
 	req.playerlink = `${hostname}/draft/player/${id}`;
 	req.hostlink = `${hostname}/draft/host/${id}`;
 	req.spectatorlink = `${hostname}/draft/${id}`;
@@ -215,17 +215,17 @@ const authenticateDraft = (req, res, next) => {
 		return next();
 	}
 	req.authenticated = 0;
-	if (fs.existsSync(`${dir}/drafts/${req.params.id}.json`)) {
+	if (fs.existsSync(`${tempdir}/drafts/${req.params.id}.json`)) {
 		req.authenticated = 1;
 	}
 	next();
 };
 
 function getDraft(id) {
-	if (!fs.existsSync(`${dir}/drafts/${id}.json`)) {
+	if (!fs.existsSync(`${tempdir}/drafts/${id}.json`)) {
 		return -1;
 	}
-	let data = fs.readFileSync(`${dir}/drafts/${id}.json`);
+	let data = fs.readFileSync(`${tempdir}/drafts/${id}.json`);
 	let draft = JSON.parse(data);
 	return draft;
 }
@@ -240,18 +240,18 @@ const checkSpace = (req, res, next) => {
 	if (req.authenticated == -1) {
 		return next();
 	}
-	if (!fs.existsSync(`${dir}/drafts/${req.body.draftID}.json`)) {
+	if (!fs.existsSync(`${tempdir}/drafts/${req.body.draftID}.json`)) {
 		console.log("Draft authentication failed");
 		return next();
 	}
 
-	let data = fs.readFileSync(`${dir}/drafts/${req.body.draftID}.json`);
+	let data = fs.readFileSync(`${tempdir}/drafts/${req.body.draftID}.json`);
 	let draft = JSON.parse(data);
 	if (req.body.joinType == 0) {
 		//Joining as a host
 		if (draft["players"][0]["name"] == "") {
 			draft["players"][0]["name"] = req.body.civ_name;
-			fs.writeFileSync(`${dir}/drafts/${req.body.draftID}.json`, JSON.stringify(draft, null, 2));
+			fs.writeFileSync(`${tempdir}/drafts/${req.body.draftID}.json`, JSON.stringify(draft, null, 2));
 			req.playerNumber = 0;
 		} else {
 			req.authenticated = 2;
@@ -263,7 +263,7 @@ const checkSpace = (req, res, next) => {
 			if (draft["players"][i]["name"] == "") {
 				draft["players"][i]["name"] = req.body.civ_name;
 				req.playerNumber = i;
-				fs.writeFileSync(`${dir}/drafts/${req.body.draftID}.json`, JSON.stringify(draft, null, 2));
+				fs.writeFileSync(`${tempdir}/drafts/${req.body.draftID}.json`, JSON.stringify(draft, null, 2));
 				return next();
 			}
 		}
@@ -303,15 +303,15 @@ function reshuffleCards(draft) {
 }
 
 const chDir = (req, res, next) => {
-	process.chdir(dir);
+	process.chdir(tempdir);
 	next();
 };
 
 const createModFolder = (req, res, next) => {
 	if (req.body.civs === "false") {
-		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${dir} 0`);
+		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${tempdir} 0`);
 	} else {
-		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${dir} 1`);
+		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${tempdir} 1`);
 	}
 	next();
 };
@@ -385,7 +385,7 @@ const addVoiceFiles = (req, res, next) => {
 	}
 
 	console.log(`[${req.body.seed}]: Adding voice files...`);
-	let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/drs/sounds ${dir}/public/vanillaFiles/voiceFiles`;
+	let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/drs/sounds ${tempdir}/public/vanillaFiles/voiceFiles`;
 	let data = fs.readFileSync(path.join(__dirname, `/modding/requested_mods/${req.body.seed}/data.json`));
 	let info = JSON.parse(data);
 
@@ -965,7 +965,7 @@ function draftIO(io) {
 				console.log("spectator can't be ready");
 			}
 			draft["players"][playerNumber]["ready"] = (draft["players"][playerNumber]["ready"] + 1) % 2;
-			fs.writeFileSync(`${dir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			io.in(roomID).emit("set gamestate", draft);
 		});
 		socket.on("start draft", (roomID) => {
@@ -975,7 +975,7 @@ function draftIO(io) {
 			for (var i = 0; i < draft["preset"]["slots"]; i++) {
 				draft["players"][i]["ready"] = 0;
 			}
-			fs.writeFileSync(`${dir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			io.in(roomID).emit("set gamestate", draft);
 		});
 		socket.on("update civ info", (roomID, playerNumber, civ_name, flag_palette, architecture, language) => {
@@ -1031,10 +1031,10 @@ function draftIO(io) {
 					draft["gamestate"]["order"].push(maxIndex);
 					priorities[maxIndex] = -1;
 				}
-				fs.writeFileSync(`${dir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 				io.in(roomID).emit("set gamestate", draft);
 			} else {
-				fs.writeFileSync(`${dir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			}
 		});
 		socket.on("update tree", (roomID, playerNumber, tree) => {
@@ -1053,14 +1053,14 @@ function draftIO(io) {
 
 			if (nextPhase == 1) {
 				draft["gamestate"]["phase"] = 5;
-				fs.writeFileSync(`${dir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
+				fs.writeFileSync(`${tempdir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
 				io.in(roomID).emit("set gamestate", draft);
 
 				//Create the mod
 				//Welcome to callback hell because I wasted $1800 on a web-dev class where the professor was seemingly incapable of answering a single question
-				process.chdir(dir);
+				process.chdir(tempdir);
 				//Create Mod Folder
-				osUtil.execCommand(`bash ${dir}/process_mod/createModFolder.sh ./modding/requested_mods ${draft["id"]} ${dir} 1`, function () {
+				osUtil.execCommand(`bash ${tempdir}/process_mod/createModFolder.sh ./modding/requested_mods ${draft["id"]} ${tempdir} 1`, function () {
 					//Create Civ Icons
 					for (var i = 0; i < numPlayers; i++) {
 						var civName = nameArr[i];
@@ -1195,7 +1195,7 @@ function draftIO(io) {
 														`./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civilizations.json`
 													);
 													//Add voices
-													let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ${dir}/public/vanillaFiles/voiceFiles`;
+													let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ${tempdir}/public/vanillaFiles/voiceFiles`;
 													let uniqueLanguages = [];
 													for (var i = 0; i < mod_data.language.length; i++) {
 														if (uniqueLanguages.indexOf(mod_data.language[i]) == -1) {
@@ -1211,7 +1211,7 @@ function draftIO(io) {
 																//Zip Files
 																osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${draft["id"]} 1`, function () {
 																	draft["gamestate"]["phase"] = 6;
-																	fs.writeFileSync(`${dir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
+																	fs.writeFileSync(`${tempdir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
 																	io.in(roomID).emit("set gamestate", draft);
 																});
 															}
@@ -1234,7 +1234,7 @@ function draftIO(io) {
 				// fs.writeFileSync(`${dir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 				// io.in(roomID).emit("set gamestate", draft);
 			} else {
-				fs.writeFileSync(`${dir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			}
 		});
 		socket.on("end turn", (roomID, pick, client_turn) => {
@@ -1290,7 +1290,7 @@ function draftIO(io) {
 						draft["players"][i]["ready"] = 0;
 					}
 				}
-				fs.writeFileSync(`${dir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 				io.in(roomID).emit("set gamestate", draft);
 			} else {
 				console.log("Duplicate socket messages, THE BUG avoided");
@@ -1318,7 +1318,7 @@ function draftIO(io) {
 					draft["gamestate"]["highlighted"].push(i);
 				}
 			}
-			fs.writeFileSync(`${dir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			io.in(roomID).emit("set gamestate", draft);
 		});
 		socket.on("clear", (roomID) => {
@@ -1336,7 +1336,7 @@ function draftIO(io) {
 				draft["gamestate"]["cards"][i] = draft["gamestate"]["available_cards"][roundType][rand];
 				draft["gamestate"]["available_cards"][roundType].splice(rand, 1);
 			}
-			fs.writeFileSync(`${dir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			io.in(roomID).emit("set gamestate", draft);
 		});
 	});
