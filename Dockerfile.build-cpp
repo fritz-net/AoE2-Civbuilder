@@ -3,20 +3,13 @@ FROM node:20-bullseye AS cpp-build
 
 # Install build tools for C++ compilation
 RUN apt-get update && \
-    apt-get install -y build-essential cmake git liblz4-dev libboost-iostreams-dev dos2unix && \
+    apt-get install -y build-essential cmake git liblz4-dev libboost-iostreams-dev libjsoncpp-dev dos2unix && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Copy only the genieutils source and CMakeLists.txt for C++ build
 # COPY modding/genieutils/ modding/genieutils/
-# COPY modding/pcrio/ modding/pcrio/
-# COPY modding/CMakeLists.txt modding/CMakeLists.txt
-# COPY modding/scripts/build.sh modding/scripts/build.sh
-# COPY modding/create-data-mod.cpp modding/create-data-mod.cpp
-# COPY modding/civbuilder.cpp modding/civbuilder.cpp
-# COPY modding/helpers.cpp modding/helpers.cpp
-# COPY modding/civbuilder.h modding/civbuilder.h
 COPY modding/ modding/
 
 # Ensure Unix line endings for build.sh to avoid cross-platform issues
