@@ -15,12 +15,5 @@
     "selenium-webdriver": "*",
     "socket.io": "^4.0.1",
     "util": "^0.10.4"
-  },
-  "devDependencies": {
-    "jest": "^29.0.0",
-    "supertest": "^6.3.0"
-  },
-  "scripts": {
-    "test": "jest"
   }
 }
