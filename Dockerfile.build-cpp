@@ -22,7 +22,7 @@ RUN cd ./modding/ && ./scripts/build.sh
 FROM node:20-bullseye AS build
 
 RUN apt-get update && \
-    apt-get install -y dos2unix libjsoncpp24 zip && \
+    apt-get install -y dos2unix libjsoncpp24 zip gdb && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
