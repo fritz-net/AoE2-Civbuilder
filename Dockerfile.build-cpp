@@ -24,9 +24,6 @@ RUN find ./process_mod -name "*.sh" -exec dos2unix {} \; && \
     chmod +x ./modding/scripts/build.sh && \
     cd ./modding/genieutils && ../../modding/scripts/build.sh
 
-RUN dos2unix ./process_mod/createModFolder.sh && chmod +x ./process_mod/createModFolder.sh
-RUN bash ./process_mod/createModFolder.sh ./modding/requested_mods 469935004704526 /tmp/civbuilder 1
-
 ENV NODE_ENV=production
 
 EXPOSE 4000

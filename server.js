@@ -385,7 +385,7 @@ const addVoiceFiles = (req, res, next) => {
 	}
 
 	console.log(`[${req.body.seed}]: Adding voice files...`);
-	let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/drs/sounds ${tempdir}/public/vanillaFiles/voiceFiles`;
+	let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/drs/sounds ./public/vanillaFiles/voiceFiles`;
 	let data = fs.readFileSync(path.join(__dirname, `/modding/requested_mods/${req.body.seed}/data.json`));
 	let info = JSON.parse(data);
 
@@ -1195,7 +1195,7 @@ function draftIO(io) {
 														`./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civilizations.json`
 													);
 													//Add voices
-													let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ${tempdir}/public/vanillaFiles/voiceFiles`;
+													let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ./public/vanillaFiles/voiceFiles`;
 													let uniqueLanguages = [];
 													for (var i = 0; i < mod_data.language.length; i++) {
 														if (uniqueLanguages.indexOf(mod_data.language[i]) == -1) {
