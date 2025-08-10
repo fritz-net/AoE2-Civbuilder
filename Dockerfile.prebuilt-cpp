@@ -1,0 +1,18 @@
+# Dockerfile.prebuilt-cpp
+FROM node:20-bullseye
+
+WORKDIR /app
+
+# Copy source code including prebuilt C++ binaries
+COPY . .
+
+# Install Node.js dependencies
+RUN npm ci --omit=dev
+
+ENV NODE_ENV=production
+
+EXPOSE 4000
+
+VOLUME ["/app/modding/requested_mods"]
+
+ENTRYPOINT ["node", "server.js"]

@@ -1,0 +1,32 @@
+# Dockerfile.build-cpp
+FROM node:20-bullseye AS build
+
+# Install build tools for C++ compilation
+RUN apt-get update && \
+    apt-get install -y build-essential cmake git && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy source code
+COPY . .
+
+# Initialize submodules
+RUN git submodule update --init --recursive
+
+# Build C++ binaries
+# Ensure Unix line endings for build.sh to avoid cross-platform issues
+RUN apt-get update && apt-get install -y dos2unix && \
+    dos2unix ./modding/scripts/build.sh && \
+    chmod +x ./modding/scripts/build.sh && ./modding/scripts/build.sh
+
+# Install Node.js dependencies
+RUN npm ci --omit=dev
+
+ENV NODE_ENV=production
+
+EXPOSE 4000
+
+VOLUME ["/app/modding/requested_mods"]
+
+ENTRYPOINT ["node", "server.js"]
