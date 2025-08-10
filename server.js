@@ -1348,3 +1348,21 @@ module.exports = {
 server.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
 });
+
+// Graceful shutdown on Ctrl+C
+process.on('SIGINT', () => {
+	console.log('Received SIGINT, shutting down...');
+	server.close(() => {
+		console.log('HTTP server closed.');
+		process.exit(0);
+	});
+	// If socket.io is still running, close it
+	if (io && typeof io.close === 'function') {
+		io.close();
+	}
+	// Fallback: force exit after 3s if not closed
+	setTimeout(() => {
+		console.error('Force exiting...');
+		process.exit(1);
+	}, 3000);
+});
