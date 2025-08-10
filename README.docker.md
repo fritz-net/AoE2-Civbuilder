@@ -28,6 +28,8 @@ AoE2-Civbuilder provides two Dockerfiles for different use cases:
 
 **Build the image:**
 ```sh
+git submodule update --init --recursive # once every now and then is enough
+
 docker build -f Dockerfile.build-cpp -t aoe2-civbuilder:build-cpp .
 ```
 
