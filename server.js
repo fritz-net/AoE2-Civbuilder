@@ -97,7 +97,7 @@ function os_func() {
 			if (error) {
 				console.log(`stdout: ${stdout}`);
 				console.error(`exec error: ${error}`);
-				failure();
+				failure(); // TODO this function is not existing as it seems
 			}
 			if (stdout) {
 				console.log(stdout);
@@ -1076,7 +1076,7 @@ function draftIO(io) {
 							draft["players"][i]["flag_palette"][6],
 						];
 						var symbol = draft["players"][i]["flag_palette"][7] - 1;
-						if (civName == "berber" || civName == "inca") {
+						if (civName == "berber" || civName == "inca") { // TODO why do we have this here? both branches have exactly the same code
 							icons.drawFlag(
 								seed,
 								symbol,
