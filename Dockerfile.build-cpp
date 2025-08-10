@@ -3,7 +3,7 @@ FROM node:20-bullseye AS build
 
 # Install build tools for C++ compilation
 RUN apt-get update && \
-    apt-get install -y build-essential cmake git && \
+    apt-get install -y build-essential cmake git liblz4-dev libboost-iostreams-dev && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -19,10 +19,10 @@ RUN git submodule update --init --recursive
 RUN apt-get update && apt-get install -y dos2unix && \
     dos2unix ./modding/scripts/build.sh && \
     chmod +x ./modding/scripts/build.sh
-RUN ./modding/scripts/build.sh
+RUN cd ./modding/genieutils && ../../modding/scripts/build.sh
 
 # Install Node.js dependencies
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 ENV NODE_ENV=production
 
