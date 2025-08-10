@@ -1,0 +1,5 @@
+BasedOnStyle: Google   # keep Google rules except…
+ColumnLimit: 160       # …let lines grow to 200 chars
+IndentWidth: 4            # ← 4 spaces per indent level
+UseTab: Never             # ← never output a literal \t
+TabWidth: 4  

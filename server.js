@@ -1,4 +1,3 @@
-
 const os = require("os");
 
 const http = require("http");
@@ -82,8 +81,17 @@ app.get(path.join(routeSubdir, "js/common.js"), (req, res) => {
 app.use(
 	routeSubdir,
 	express.static(path.join(__dirname, "/public"), {
-		maxAge: "1y",
-		immutable: true,
+		maxAge: "1y", // Cache images for a year
+		immutable: false, // Allow query string versioning to work
+		etag: true, // Enable cache revalidation
+		lastModified: true, // Allow Last-Modified-based revalidation
+		setHeaders: (res, path) => {
+			if (path.endsWith(".png") || path.endsWith(".jpg")) {
+				res.set("Cache-Control", "public, must-revalidate, max-age=31536000");
+			} else {
+				res.set("Cache-Control", "no-cache, must-revalidate");
+			}
+		},
 	})
 );
 app.use(routeSubdir, router);
@@ -154,6 +162,9 @@ const createDraft = (req, res, next) => {
 		player["ready"] = 0;
 		player["name"] = "";
 		player["alias"] = "";
+		player["description"] = "";
+		player["wonder"] = 0;
+		player["castle"] = 0;
 		//Palette (color1, color2, color3, color4, color5), division, overlay, symbol
 		player["flag_palette"] = [3, 4, 5, 6, 7, 3, 3, 3];
 		//Units, buildings, techs
@@ -177,11 +188,7 @@ const createDraft = (req, res, next) => {
 	for (var i = 0; i < 5; i++) {
 		var available_bonuses = [];
 		var numBonus;
-		if (req.body.new_bonuses === "on") {
-			numBonus = numBonuses[i][1];
-		} else {
-			numBonus = numBonuses[i][0];
-		}
+		numBonus = numBonuses[i];
 		for (var j = 0; j < numBonus; j++) {
 			if (draft["preset"]["rarities"][commonJs.card_descriptions[i][j][1]]) {
 				available_bonuses.push(j);
@@ -281,7 +288,7 @@ function reshuffleCards(draft) {
 	var available_bonuses = [];
 	var numBonus;
 
-	numBonus = numBonuses[roundType][0];
+	numBonus = numBonuses[roundType];
 	for (var i = 0; i < numBonus; i++) {
 		var discarded = 1;
 		for (var j = 0; j < numPlayers; j++) {
@@ -331,11 +338,7 @@ const createCivIcons = (req, res, next) => {
 	}
 
 	console.log(`[${req.body.seed}]: Creating civ icons...`);
-	icons.generateFlags(
-		`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs`,
-		`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons`,
-		`./public/img/symbols`
-	);
+	icons.generateFlags(`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs`, `./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons`, `./public/img/symbols`);
 	next();
 };
 
@@ -346,12 +349,9 @@ const copyCivIcons = (req, res, next) => {
 	}
 
 	console.log(`[${req.body.seed}]: Copying civ icons...`);
-	osUtil.execCommand(
-		`cp -r ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/. ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/civ_techtree`,
-		function () {
-			next();
-		}
-	);
+	os.execCommand(`cp -r ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/. ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/civ_techtree`, function () {
+		next();
+	});
 };
 
 const generateJson = (req, res, next) => {
@@ -367,10 +367,7 @@ const writeNames = (req, res, next) => {
 	}
 
 	console.log(`[${req.body.seed}]: Writing strings...`);
-	modStrings.interperateLanguage(
-		`./modding/requested_mods/${req.body.seed}/data.json`,
-		`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/en/strings/key-value/key-value-modded-strings-utf8.txt`
-	);
+	modStrings.interperateLanguage(`./modding/requested_mods/${req.body.seed}/data.json`, `./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/en/strings/key-value/key-value-modded-strings-utf8.txt`);
 	next();
 };
 
@@ -419,10 +416,7 @@ const writeUUIcons = (req, res, next) => {
 
 	console.log(`[${req.body.seed}]: Writing UU icons...`);
 	for (var i = 0; i < blanks.length; i++) {
-		osUtil.execCommand(
-			`cp ./public/img/uniticons/blank.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/uniticons/${blanks[i]}_50730.png`,
-			function () {}
-		);
+		os.execCommand(`cp ./public/img/uniticons/blank.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/uniticons/${blanks[i]}_50730.png`, function () {});
 	}
 	var data = fs.readFileSync(`./modding/requested_mods/${req.body.seed}/data.json`);
 	var civ = JSON.parse(data);
@@ -430,17 +424,11 @@ const writeUUIcons = (req, res, next) => {
 		//Persians and Saracens are index 7 & 8 but War Elephants and Mamelukes are index 8 & 7
 		var iconsrc = iconids[civ.techtree[i][0]];
 		if (i == civ.techtree.length - 1) {
-			osUtil.execCommand(
-				`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`,
-				function () {
-					next();
-				}
-			);
+			os.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {
+				next();
+			});
 		} else {
-			osUtil.execCommand(
-				`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`,
-				function () {}
-			);
+			os.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {});
 		}
 	}
 };
@@ -452,10 +440,7 @@ const writeCivilizations = (req, res, next) => {
 	}
 
 	console.log(`[${req.body.seed}]: Writing civilizations json...`);
-	createCivilizationsJson(
-		`./modding/requested_mods/${req.body.seed}/data.json`,
-		`./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/dat/civilizations.json`
-	);
+	createCivilizationsJson(`./modding/requested_mods/${req.body.seed}/data.json`, `./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/dat/civilizations.json`);
 	next();
 };
 
@@ -466,10 +451,7 @@ const writeTechTree = (req, res, next) => {
 	}
 
 	console.log(`[${req.body.seed}]: Writing tech tree...`);
-	createTechtreeJson.createTechtreeJson(
-		`./modding/requested_mods/${req.body.seed}/data.json`,
-		`./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/dat/civTechTrees.json`
-	);
+	createTechtreeJson.createTechtreeJson(`./modding/requested_mods/${req.body.seed}/data.json`, `./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/dat/civTechTrees.json`);
 	next();
 };
 
@@ -493,10 +475,7 @@ const writeAIFiles = (req, res, next) => {
 	}
 
 	console.log(`[${req.body.seed}]: Writing AI files...`);
-	makeai.createAI(
-		`./modding/requested_mods/${req.body.seed}/data.json`,
-		`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/ai`
-	);
+	makeai.createAI(`./modding/requested_mods/${req.body.seed}/data.json`, `./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/ai`);
 	next();
 };
 
@@ -526,32 +505,16 @@ const writeIconsJson = async (req, res, next) => {
 		if (civs[i]["flag_palette"][0] == -1) {
 			//Secret password unlocked a vanilla flag
 			if (civName == "berber" || civName == "inca") {
-				execSync(
-					`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}s.png`
-				);
+				execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}s.png`);
 			} else {
-				execSync(
-					`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}.png`
-				);
+				execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}.png`);
 			}
-			execSync(
-				`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}.png`
-			);
-			execSync(
-				`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_hover.png`
-			);
-			execSync(
-				`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_pressed.png`
-			);
-			execSync(
-				`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}.png`
-			);
-			execSync(
-				`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_hover.png`
-			);
-			execSync(
-				`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_pressed.png`
-			);
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}.png`);
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_hover.png`);
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_pressed.png`);
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}.png`);
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_hover.png`);
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_pressed.png`);
 			blankOthers = true;
 		} else if (civs[i]["customFlag"] && civs[i]["customFlagData"]) {
 			// Load in custom image for flag
@@ -567,117 +530,75 @@ const writeIconsJson = async (req, res, next) => {
 			if (civName == "berber" || civName == "inca") {
 				writePromises.push(
 					new Promise(function (resolve, reject) {
-						fs.writeFile(
-							`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}s.png`,
-							buffer,
-							(err) => {
-								if (err) reject(err);
-								else resolve(buffer);
-							}
-						);
+						fs.writeFile(`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}s.png`, buffer, (err) => {
+							if (err) reject(err);
+							else resolve(buffer);
+						});
 					})
 				);
 			} else {
 				writePromises.push(
 					new Promise(function (resolve, reject) {
-						fs.writeFile(
-							`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}.png`,
-							buffer,
-							(err) => {
-								if (err) reject(err);
-								else resolve(buffer);
-							}
-						);
+						fs.writeFile(`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}.png`, buffer, (err) => {
+							if (err) reject(err);
+							else resolve(buffer);
+						});
 					})
 				);
 			}
 			writePromises.push(
 				new Promise(function (resolve, reject) {
-					fs.writeFile(
-						`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}.png`,
-						buffer,
-						(err) => {
-							if (err) reject(err);
-							else resolve(buffer);
-						}
-					);
+					fs.writeFile(`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}.png`, buffer, (err) => {
+						if (err) reject(err);
+						else resolve(buffer);
+					});
 				})
 			);
 			writePromises.push(
 				new Promise(function (resolve, reject) {
-					fs.writeFile(
-						`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_hover.png`,
-						buffer,
-						(err) => {
-							if (err) reject(err);
-							else resolve(buffer);
-						}
-					);
+					fs.writeFile(`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_hover.png`, buffer, (err) => {
+						if (err) reject(err);
+						else resolve(buffer);
+					});
 				})
 			);
 			writePromises.push(
 				new Promise(function (resolve, reject) {
-					fs.writeFile(
-						`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_pressed.png`,
-						buffer,
-						(err) => {
-							if (err) reject(err);
-							else resolve(buffer);
-						}
-					);
+					fs.writeFile(`./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_pressed.png`, buffer, (err) => {
+						if (err) reject(err);
+						else resolve(buffer);
+					});
 				})
 			);
 			writePromises.push(
 				new Promise(function (resolve, reject) {
-					fs.writeFile(
-						`./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}.png`,
-						buffer,
-						(err) => {
-							if (err) reject(err);
-							else resolve(buffer);
-						}
-					);
+					fs.writeFile(`./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}.png`, buffer, (err) => {
+						if (err) reject(err);
+						else resolve(buffer);
+					});
 				})
 			);
 			writePromises.push(
 				new Promise(function (resolve, reject) {
-					fs.writeFile(
-						`./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_hover.png`,
-						buffer,
-						(err) => {
-							if (err) reject(err);
-							else resolve(buffer);
-						}
-					);
+					fs.writeFile(`./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_hover.png`, buffer, (err) => {
+						if (err) reject(err);
+						else resolve(buffer);
+					});
 				})
 			);
 			writePromises.push(
 				new Promise(function (resolve, reject) {
-					fs.writeFile(
-						`./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_pressed.png`,
-						buffer,
-						(err) => {
-							if (err) reject(err);
-							else resolve(buffer);
-						}
-					);
+					fs.writeFile(`./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_pressed.png`, buffer, (err) => {
+						if (err) reject(err);
+						else resolve(buffer);
+					});
 				})
 			);
 
 			await Promise.all(writePromises);
 		} else {
 			//Draw the customized flag
-			var seed = [
-				[
-					colours[civs[i]["flag_palette"][0]],
-					colours[civs[i]["flag_palette"][1]],
-					colours[civs[i]["flag_palette"][2]],
-					colours[civs[i]["flag_palette"][3]],
-					colours[civs[i]["flag_palette"][4]],
-				],
-				civs[i]["flag_palette"][5],
-				civs[i]["flag_palette"][6],
-			];
+			var seed = [[colours[civs[i]["flag_palette"][0]], colours[civs[i]["flag_palette"][1]], colours[civs[i]["flag_palette"][2]], colours[civs[i]["flag_palette"][3]], colours[civs[i]["flag_palette"][4]]], civs[i]["flag_palette"][5], civs[i]["flag_palette"][6]];
 			var symbol = civs[i]["flag_palette"][7] - 1;
 
 			if (civName == "berber" || civName == "inca") {
@@ -733,139 +654,133 @@ const writeIconsJson = async (req, res, next) => {
 	//   }
 	// }
 	//Copy Civ Icons
-	osUtil.execCommand(
-		`cp -r ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/. ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/civ_techtree`,
-		function () {
-			//Generate Json
-			var mod_data = {};
-			mod_data.name = [];
-			mod_data.techtree = [];
-			mod_data.castletech = [];
-			mod_data.imptech = [];
-			mod_data.civ_bonus = [];
-			mod_data.team_bonus = [];
-			mod_data.architecture = [];
-			mod_data.language = [];
-			mod_data.modifiers = JSON.parse(req.body.modifiers);
-			mod_data.modifyDat = true;
-			for (var i = 0; i < civs.length; i++) {
-				mod_data.name.push(civs[i]["alias"]);
-				var player_techtree = [];
-				for (var j = 0; j < numBasicTechs; j++) {
-					player_techtree.push(0);
-				}
-				//Unique Unit
-				if (civs[i]["bonuses"][1].length != 0) {
-					player_techtree[0] = civs[i]["bonuses"][1][0];
-				} else {
-					player_techtree[0] = 0;
-				}
-				//Castle Tech
-				if (civs[i]["bonuses"][2].length != 0) {
-					var castletechs = [];
-					for (var j = 0; j < civs[i]["bonuses"][2].length; j++) {
-						castletechs.push(civs[i]["bonuses"][2][j]);
-					}
-					mod_data.castletech.push(castletechs);
-				} else {
-					mod_data.castletech.push([0]);
-				}
-				//Imp Tech
-				if (civs[i]["bonuses"][3].length != 0) {
-					var imptechs = [];
-					for (var j = 0; j < civs[i]["bonuses"][3].length; j++) {
-						imptechs.push(civs[i]["bonuses"][3][j]);
-					}
-					mod_data.imptech.push(imptechs);
-				} else {
-					mod_data.imptech.push([0]);
-				}
-				//Tech Tree
-				for (var j = 0; j < civs[i]["tree"].length; j++) {
-					for (var k = 0; k < civs[i]["tree"][j].length; k++) {
-						player_techtree[indexDictionary[j][civs[i]["tree"][j][k].toString()]] = 1;
-					}
-				}
-				mod_data.techtree.push(player_techtree);
+	os.execCommand(`cp -r ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/. ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/civ_techtree`, function () {
+		//Generate Json
+		var mod_data = {};
+		mod_data.name = [];
+		mod_data.description = [];
+		mod_data.techtree = [];
+		mod_data.castletech = [];
+		mod_data.imptech = [];
+		mod_data.civ_bonus = [];
+		mod_data.team_bonus = [];
+		mod_data.architecture = [];
+		mod_data.language = [];
+		mod_data.wonder = [];
+		mod_data.castle = [];
+		mod_data.modifiers = JSON.parse(req.body.modifiers);
+		mod_data.modifyDat = true;
+		for (var i = 0; i < civs.length; i++) {
+			// Name
+			mod_data.name.push(civs[i]["alias"]);
 
-				mod_data.civ_bonus.push(civs[i]["bonuses"][0]);
-				if (civs[i]["bonuses"][4].length != 0) {
-					var team_bonuses = [];
-					for (var j = 0; j < civs[i]["bonuses"][4].length; j++) {
-						team_bonuses.push(civs[i]["bonuses"][4][j]);
-					}
-					mod_data.team_bonus.push(team_bonuses);
-				} else {
-					mod_data.team_bonus.push([0]);
+			// Description
+			if (!civs[i]["description"]) {
+				civs[i]["description"] = "";
+			}
+			mod_data.description.push(civs[i]["description"]);
+
+			// Wonder
+			if (!civs[i]["wonder"]) {
+				civs[i]["wonder"] = 0;
+			}
+			mod_data.wonder.push(civs[i]["wonder"]);
+
+			// Castle
+			if (!civs[i]["castle"]) {
+				civs[i]["castle"] = 0;
+			}
+			mod_data.castle.push(civs[i]["castle"]);
+
+			var player_techtree = [];
+			for (var j = 0; j < numBasicTechs; j++) {
+				player_techtree.push(0);
+			}
+
+			//Unique Unit
+			if (civs[i]["bonuses"][1].length != 0) {
+				player_techtree[0] = civs[i]["bonuses"][1][0];
+			} else {
+				player_techtree[0] = 0;
+			}
+
+			//Castle Tech
+			if (civs[i]["bonuses"][2].length != 0) {
+				var castletechs = [];
+				for (var j = 0; j < civs[i]["bonuses"][2].length; j++) {
+					castletechs.push(civs[i]["bonuses"][2][j]);
 				}
-				if (civs[i]["architecture"] === undefined) {
-					mod_data.architecture.push(1);
-				} else {
-					mod_data.architecture.push(civs[i]["architecture"]);
+				mod_data.castletech.push(castletechs);
+			} else {
+				mod_data.castletech.push([0]);
+			}
+
+			//Imp Tech
+			if (civs[i]["bonuses"][3].length != 0) {
+				var imptechs = [];
+				for (var j = 0; j < civs[i]["bonuses"][3].length; j++) {
+					imptechs.push(civs[i]["bonuses"][3][j]);
 				}
-				if (civs[i]["language"] === undefined) {
-					mod_data.language.push(0);
-				} else {
-					mod_data.language.push(civs[i]["language"]);
+				mod_data.imptech.push(imptechs);
+			} else {
+				mod_data.imptech.push([0]);
+			}
+
+			//Tech Tree
+			for (var j = 0; j < civs[i]["tree"].length; j++) {
+				for (var k = 0; k < civs[i]["tree"][j].length; k++) {
+					player_techtree[indexDictionary[j][civs[i]["tree"][j][k].toString()]] = 1;
 				}
 			}
-			fs.writeFileSync(`./modding/requested_mods/${req.body.seed}/data.json`, JSON.stringify(mod_data, null, 2));
-			next();
+			mod_data.techtree.push(player_techtree);
+
+			mod_data.civ_bonus.push(civs[i]["bonuses"][0]);
+			if (civs[i]["bonuses"][4].length != 0) {
+				var team_bonuses = [];
+				for (var j = 0; j < civs[i]["bonuses"][4].length; j++) {
+					team_bonuses.push(civs[i]["bonuses"][4][j]);
+				}
+				mod_data.team_bonus.push(team_bonuses);
+			} else {
+				mod_data.team_bonus.push([0]);
+			}
+			if (civs[i]["architecture"] === undefined) {
+				mod_data.architecture.push(1);
+			} else {
+				mod_data.architecture.push(civs[i]["architecture"]);
+			}
+			if (civs[i]["language"] === undefined) {
+				mod_data.language.push(0);
+			} else {
+				mod_data.language.push(civs[i]["language"]);
+			}
 		}
-	);
+		fs.writeFileSync(`./modding/requested_mods/${req.body.seed}/data.json`, JSON.stringify(mod_data, null, 2));
+		next();
+	});
 };
 
 router.get("/", function (req, res) {
 	res.sendFile(__dirname + "/public/html/civbuilder_home.html");
-	// res.sendFile(__dirname + "/public/html/updating.html");
+	//res.sendFile(__dirname + "/public/html/updating.html");
+	// res.sendFile(__dirname + "/public/html/donation.html");
 });
 
 router.get("/build", function (req, res) {
-	// res.sendFile(__dirname + "/public/html/updating.html");
+	//res.sendFile(__dirname + "/public/html/updating.html");
 	res.sendFile(__dirname + "/public/html/civbuilder.html");
+	// res.sendFile(__dirname + "/public/html/donation.html");
 });
 
-router.post(
-	"/random",
-	chToAppDir,
-	createModFolder,
-	createCivIcons,
-	copyCivIcons,
-	generateJson,
-	writeNames,
-	copyNames,
-	addVoiceFiles,
-	writeUUIcons,
-	writeCivilizations,
-	writeTechTree,
-	writeDatFile,
-	writeAIFiles,
-	zipModFolder,
-	(req, res) => {
-		console.log(`[${req.body.seed}]: Completed generation!`);
-		res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
-	}
-);
+router.post("/random", chToAppDir, createModFolder, createCivIcons, copyCivIcons, generateJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
+	console.log(`[${req.body.seed}]: Completed generation!`);
+	res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
+});
 
-router.post(
-	"/create",
-	chToAppDir,
-	createModFolder,
-	writeIconsJson,
-	writeNames,
-	copyNames,
-	addVoiceFiles,
-	writeUUIcons,
-	writeCivilizations,
-	writeTechTree,
-	writeDatFile,
-	writeAIFiles,
-	zipModFolder,
-	(req, res) => {
-		console.log(`[${req.body.seed}]: Completed generation!`);
-		res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
-	}
-);
+router.post("/create", chToAppDir, createModFolder, writeIconsJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
+	console.log(`[${req.body.seed}]: Completed generation!`);
+	res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
+});
 
 router.post("/setCookie", (req, res) => {
 	res.cookie(req.body.cookie, req.body.value);
@@ -1072,17 +987,7 @@ function draftIO(io) {
 					//Create Civ Icons
 					for (var i = 0; i < numPlayers; i++) {
 						var civName = nameArr[i];
-						var seed = [
-							[
-								colours[draft["players"][i]["flag_palette"][0]],
-								colours[draft["players"][i]["flag_palette"][1]],
-								colours[draft["players"][i]["flag_palette"][2]],
-								colours[draft["players"][i]["flag_palette"][3]],
-								colours[draft["players"][i]["flag_palette"][4]],
-							],
-							draft["players"][i]["flag_palette"][5],
-							draft["players"][i]["flag_palette"][6],
-						];
+						var seed = [[colours[draft["players"][i]["flag_palette"][0]], colours[draft["players"][i]["flag_palette"][1]], colours[draft["players"][i]["flag_palette"][2]], colours[draft["players"][i]["flag_palette"][3]], colours[draft["players"][i]["flag_palette"][4]]], draft["players"][i]["flag_palette"][5], draft["players"][i]["flag_palette"][6]];
 						var symbol = draft["players"][i]["flag_palette"][7] - 1;
 						if (civName == "berber" || civName == "inca") { // TODO why do we have this here? both branches have exactly the same code
 							icons.drawFlag(
@@ -1117,131 +1022,106 @@ function draftIO(io) {
 						}
 					}
 					//Copy Civ Icons
-					osUtil.execCommand(
-						`cp -r ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/. ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/civ_techtree`,
-						function () {
-							//Generate Json
-							var mod_data = {};
-							mod_data.name = [];
-							mod_data.techtree = [];
-							mod_data.castletech = [];
-							mod_data.imptech = [];
-							mod_data.civ_bonus = [];
-							mod_data.team_bonus = [];
-							mod_data.architecture = [];
-							mod_data.language = [];
-							mod_data.modifiers = {
-								randomCosts: false,
-								hp: 1,
-								speed: 1,
-								blind: false,
-								infinity: false,
-								building: 1,
-							};
-							mod_data.modifyDat = true;
-							for (var i = 0; i < numPlayers; i++) {
-								mod_data.name.push(draft["players"][i]["alias"]);
-								var player_techtree = [];
-								for (var j = 0; j < numBasicTechs; j++) {
-									player_techtree.push(0);
-								}
-								//Unique Unit
-								player_techtree[0] = draft["players"][i]["bonuses"][1][0];
-								//Castle Tech
-								var castletechs = [];
-								castletechs.push(draft["players"][i]["bonuses"][2][0]);
-								mod_data.castletech.push(castletechs);
-								//Imp Tech
-								var imptechs = [];
-								imptechs.push(draft["players"][i]["bonuses"][3][0]);
-								mod_data.imptech.push(imptechs);
-								//Tech Tree
-								for (var j = 0; j < draft["players"][i]["tree"].length; j++) {
-									for (var k = 0; k < draft["players"][i]["tree"][j].length; k++) {
-										player_techtree[indexDictionary[j][draft["players"][i]["tree"][j][k].toString()]] = 1;
-									}
-								}
-								mod_data.techtree.push(player_techtree);
-								mod_data.civ_bonus.push(draft["players"][i]["bonuses"][0]);
-								mod_data.architecture.push(draft["players"][i]["architecture"]);
-								mod_data.language.push(draft["players"][i]["language"]);
-								var team_bonuses = [];
-								team_bonuses.push(draft["players"][i]["bonuses"][4][0]);
-								mod_data.team_bonus.push(team_bonuses);
+					os.execCommand(`cp -r ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/. ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/civ_techtree`, function () {
+						//Generate Json
+						var mod_data = {};
+						mod_data.name = [];
+						mod_data.description = [];
+						mod_data.techtree = [];
+						mod_data.castletech = [];
+						mod_data.imptech = [];
+						mod_data.civ_bonus = [];
+						mod_data.team_bonus = [];
+						mod_data.architecture = [];
+						mod_data.language = [];
+						mod_data.castle = [];
+						mod_data.wonder = [];
+						mod_data.modifiers = {
+							randomCosts: false,
+							hp: 1,
+							speed: 1,
+							blind: false,
+							infinity: false,
+							building: 1,
+						};
+						mod_data.modifyDat = true;
+						for (var i = 0; i < numPlayers; i++) {
+							mod_data.name.push(draft["players"][i]["alias"]);
+							var player_techtree = [];
+							for (var j = 0; j < numBasicTechs; j++) {
+								player_techtree.push(0);
 							}
-							console.log(JSON.stringify(mod_data, null, 2));
-							fs.writeFileSync(`./modding/requested_mods/${draft["id"]}/data.json`, JSON.stringify(mod_data, null, 2));
-							//Write Names
-							modStrings.interperateLanguage(
-								`./modding/requested_mods/${draft["id"]}/data.json`,
-								`./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/en/strings/key-value/key-value-modded-strings-utf8.txt`
-							);
-							//Copy Names
-							osUtil.execCommand(
-								`sh ./process_mod/copyLanguages.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources`,
-								function () {
-									//Write UUIcons
-									for (var i = 0; i < blanks.length; i++) {
-										osUtil.execCommand(
-											`cp ./public/img/uniticons/blank.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${blanks[i]}_50730.png`,
-											function () {}
-										);
-									}
-									for (var i = 0; i < mod_data.techtree.length; i++) {
-										var iconsrc = iconids[mod_data.techtree[i][0]];
-										if (i == mod_data.techtree.length - 1) {
-											osUtil.execCommand(
-												`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`,
-												function () {
-													//Write Tech Tree
-													createTechtreeJson.createTechtreeJson(
-														`./modding/requested_mods/${draft["id"]}/data.json`,
-														`./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civTechTrees.json`
-													);
-													createCivilizationsJson(
-														`./modding/requested_mods/${draft["id"]}/data.json`,
-														`./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civilizations.json`
-													);
-													//Add voices
-													let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ./public/vanillaFiles/voiceFiles`;
-													let uniqueLanguages = [];
-													for (var i = 0; i < mod_data.language.length; i++) {
-														if (uniqueLanguages.indexOf(mod_data.language[i]) == -1) {
-															uniqueLanguages.push(mod_data.language[i]);
-															command += ` ${mod_data.language[i]}`;
-														}
-													}
-													osUtil.execCommand(command, function () {
-														//Write Dat File
-														console.log(`[${draft["id"]}]: Writing dat file...`);
-														osUtil.execCommand(
-															`./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`,
-															function () {
-																console.log(`[${draft["id"]}]: Dat file written!`);
-																//Zip Files
-																osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${draft["id"]} 1`, function () {
-																	draft["gamestate"]["phase"] = 6;
-																	fs.writeFileSync(`${tempdir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
-																	io.in(roomID).emit("set gamestate", draft);
-
-																	console.log(`[${draft["id"]}]: Mod created!`);
-																});
-															}
-														);
-													});
-												}
-											);
-										} else {
-											osUtil.execCommand(
-												`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`,
-												function () {}
-											);
-										}
-									}
+							mod_data.description.push(draft["players"][i]["description"]);
+							mod_data.castle.push(draft["players"][i]["castle"]);
+							mod_data.wonder.push(draft["players"][i]["wonder"]);
+							//Unique Unit
+							player_techtree[0] = draft["players"][i]["bonuses"][1][0];
+							//Castle Tech
+							var castletechs = [];
+							castletechs.push(draft["players"][i]["bonuses"][2][0]);
+							mod_data.castletech.push(castletechs);
+							//Imp Tech
+							var imptechs = [];
+							imptechs.push(draft["players"][i]["bonuses"][3][0]);
+							mod_data.imptech.push(imptechs);
+							//Tech Tree
+							for (var j = 0; j < draft["players"][i]["tree"].length; j++) {
+								for (var k = 0; k < draft["players"][i]["tree"][j].length; k++) {
+									player_techtree[indexDictionary[j][draft["players"][i]["tree"][j][k].toString()]] = 1;
 								}
-							);
+							}
+							mod_data.techtree.push(player_techtree);
+							mod_data.civ_bonus.push(draft["players"][i]["bonuses"][0]);
+							mod_data.architecture.push(draft["players"][i]["architecture"]);
+							mod_data.language.push(draft["players"][i]["language"]);
+							var team_bonuses = [];
+							team_bonuses.push(draft["players"][i]["bonuses"][4][0]);
+							mod_data.team_bonus.push(team_bonuses);
 						}
-					);
+						console.log(JSON.stringify(mod_data, null, 2));
+						fs.writeFileSync(`./modding/requested_mods/${draft["id"]}/data.json`, JSON.stringify(mod_data, null, 2));
+						//Write Names
+						modStrings.interperateLanguage(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/en/strings/key-value/key-value-modded-strings-utf8.txt`);
+						//Copy Names
+						os.execCommand(`sh ./process_mod/copyLanguages.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources`, function () {
+							//Write UUIcons
+							for (var i = 0; i < blanks.length; i++) {
+								os.execCommand(`cp ./public/img/uniticons/blank.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${blanks[i]}_50730.png`, function () {});
+							}
+							for (var i = 0; i < mod_data.techtree.length; i++) {
+								var iconsrc = iconids[mod_data.techtree[i][0]];
+								if (i == mod_data.techtree.length - 1) {
+									os.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {
+										//Write Tech Tree
+										createTechtreeJson.createTechtreeJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civTechTrees.json`);
+										createCivilizationsJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civilizations.json`);
+										//Add voices
+										let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ${dir}/public/vanillaFiles/voiceFiles`;
+										let uniqueLanguages = [];
+										for (var i = 0; i < mod_data.language.length; i++) {
+											if (uniqueLanguages.indexOf(mod_data.language[i]) == -1) {
+												uniqueLanguages.push(mod_data.language[i]);
+												command += ` ${mod_data.language[i]}`;
+											}
+										}
+										os.execCommand(command, function () {
+											//Write Dat File
+											os.execCommand(`./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`, function () {
+												//Zip Files
+												os.execCommand(`bash ./process_mod/zipModFolder.sh ${draft["id"]} 1`, function () {
+													draft["gamestate"]["phase"] = 6;
+													fs.writeFileSync(`${dir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
+													io.in(roomID).emit("set gamestate", draft);
+												});
+											});
+										});
+									});
+								} else {
+									os.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {});
+								}
+							}
+						});
+					});
 				});
 				// fs.writeFileSync(`${dir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 				// io.in(roomID).emit("set gamestate", draft);
@@ -1267,10 +1147,7 @@ function draftIO(io) {
 				draft["players"][player]["bonuses"][roundType].push(pick);
 
 				//If it's the last turn of a round, distribute new cards, otherwise make the card unavailable to others
-				if (
-					(roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) &&
-					draft["gamestate"]["turn"] % numPlayers == numPlayers - 1
-				) {
+				if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
 					if (roundType == 4) {
 						//Last turn of the game
 						draft["gamestate"]["phase"] = 3;

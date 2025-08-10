@@ -51,8 +51,8 @@ function renderPhase1() {
 	var wrapping = document.createElement("div");
 	wrapping.id = "wrapping";
 
-	var flagbox = document.createElement("div");
-	flagbox.className = "flagbox";
+	var buildmenu = document.createElement("div");
+	buildmenu.id = "buildmenu";
 
 	var header = document.createElement("div");
 	header.id = "header";
@@ -140,9 +140,7 @@ function renderPhase1() {
 			reader.onload = onReaderLoad;
 			reader.readAsDataURL(event.target.files[0]);
 			if (event.target.files[0].size > 800000) {
-				alert(
-					"This is a large image file. This could slow mod creation speed or prohibit it altogether. A smaller or more compressed image is suggested."
-				);
+				alert("This is a large image file. This could slow mod creation speed or prohibit it altogether. A smaller or more compressed image is suggested.");
 			}
 		}
 
@@ -189,17 +187,11 @@ function renderPhase1() {
 	next.innerHTML = "Next";
 	next.onclick = function () {
 		var inputbox = document.getElementById("alias");
-		if (validate(inputbox.value)) {
+		if (validate(inputbox.value, "name") && validate(descriptioninput.value, "description")) {
 			civ["alias"] = inputbox.value;
 			document.title = "Civilization Builder - " + civ["alias"];
 			renderPhase2();
-			if (
-				civ["bonuses"][0].length == 0 &&
-				civ["bonuses"][1].length == 0 &&
-				civ["bonuses"][2].length == 0 &&
-				civ["bonuses"][3].length == 0 &&
-				civ["bonuses"][4].length == 0
-			) {
+			if (civ["bonuses"][0].length == 0 && civ["bonuses"][1].length == 0 && civ["bonuses"][2].length == 0 && civ["bonuses"][3].length == 0 && civ["bonuses"][4].length == 0) {
 				showTechtree(civ["tree"], -1, 3, 0, "");
 			} else {
 				var description = `<span><b>${civ["alias"]}</b></span><br><br>`;
@@ -352,10 +344,54 @@ function renderPhase1() {
 	archbox.appendChild(architectureIconBox);
 	archbox.appendChild(iconforward);
 
+	var advancedbox = document.createElement("div");
+	advancedbox.id = "advancedbox";
+	advancedbox.style.display = "none";
+
+	var advancedbutton = document.createElement("button");
+	advancedbutton.id = "advancedbutton";
+	advancedbutton.innerHTML = "Show Advanced";
+	advancedbutton.onclick = function () {
+		if (document.getElementById("advancedbox")) {
+			if (document.getElementById("advancedbox").style.display == "none") {
+				document.getElementById("advancedbox").style.display = "flex";
+				document.getElementById("advancedbutton").innerHTML = "Hide Advanced";
+			} else {
+				document.getElementById("advancedbox").style.display = "none";
+				document.getElementById("advancedbutton").innerHTML = "Show Advanced";
+			}
+		}
+	};
+
+	var descriptionbox = document.createElement("div");
+	descriptionbox.id = "descriptionbox";
+
+	var descriptioninput = document.createElement("input");
+	descriptioninput.type = "text";
+	if (civ["description"]) {
+		descriptioninput.value = civ["description"];
+	}
+	descriptioninput.id = "descriptioninput";
+	descriptioninput.placeholder = "Infantry";
+	descriptioninput.addEventListener("change", () => {
+		civ["description"] = document.getElementById("descriptioninput").value;
+	});
+
+	var descriptionlabel = document.createElement("div");
+	descriptionlabel.id = "descriptionlabel";
+	descriptionlabel.innerHTML = "Civilization";
+	descriptionlabel.className = "advancedtext";
+
+	descriptionbox.appendChild(descriptioninput);
+	descriptionbox.appendChild(descriptionlabel);
+
 	var langbox = document.createElement("div");
+	langbox.className = "advancedwrapper";
+	langbox.style.width = "80%";
 	langbox.id = "langbox";
 
 	var languagetext = document.createElement("div");
+	languagetext.className = "advancedtext";
 	languagetext.id = "languagetext";
 	languagetext.innerHTML = languages[civ["language"]];
 
@@ -379,25 +415,127 @@ function renderPhase1() {
 	langbox.appendChild(languagetext);
 	langbox.appendChild(langiconforward);
 
+	var wonderbox = document.createElement("div");
+	wonderbox.className = "advancedwrapper";
+	wonderbox.id = "wonderbox";
+
+	var wonderIconBox = document.createElement("div");
+	wonderIconBox.style.display = "flex";
+	wonderIconBox.style.flexDirection = "column";
+	wonderIconBox.style.alignItems = "center";
+	wonderIconBox.style.justifyContent = "space-between";
+	wonderIconBox.style.height = "400px";
+	wonderIconBox.className = "advancedinnerwrapper";
+
+	var wonderIcon = document.createElement("img");
+	wonderIcon.id = "wondericon";
+	wonderIcon.src = `./img/wonders/wonder_${civ["wonder"]}.png`;
+
+	var wondertext = document.createElement("div");
+	wondertext.id = "wondertext";
+	wondertext.className = "advancedtext";
+	wondertext.innerHTML = wonders[civ["wonder"]];
+
+	wonderIconBox.appendChild(wonderIcon);
+	wonderIconBox.appendChild(wondertext);
+
+	var wonderback = document.createElement("button");
+	wonderback.className = "backbutton";
+	wonderback.innerHTML = "<";
+	wonderback.onclick = function () {
+		civ["wonder"] = (civ["wonder"] + (wonders.length - 1)) % wonders.length;
+		document.getElementById("wondericon").src = `./img/wonders/wonder_${civ["wonder"]}.png`;
+		document.getElementById("wondertext").innerHTML = wonders[civ["wonder"]];
+	};
+
+	var wonderforward = document.createElement("button");
+	wonderforward.className = "forwardbutton";
+	wonderforward.innerHTML = ">";
+	wonderforward.onclick = function () {
+		civ["wonder"] = (civ["wonder"] + 1) % wonders.length;
+		document.getElementById("wondericon").src = `./img/wonders/wonder_${civ["wonder"]}.png`;
+		document.getElementById("wondertext").innerHTML = wonders[civ["wonder"]];
+	};
+
+	wonderbox.appendChild(wonderback);
+	wonderbox.appendChild(wonderIconBox);
+	wonderbox.appendChild(wonderforward);
+
+	var castlebox = document.createElement("div");
+	castlebox.id = "castlebox";
+	castlebox.className = "advancedwrapper";
+
+	var castleIconBox = document.createElement("div");
+	castleIconBox.style.display = "flex";
+	castleIconBox.style.flexDirection = "column";
+	castleIconBox.style.alignItems = "center";
+	castleIconBox.style.justifyContent = "center";
+	castleIconBox.className = "advancedinnerwrapper";
+
+	var castleIcon = document.createElement("img");
+	castleIcon.id = "castleicon";
+	castleIcon.src = `./img/castles/castle_${civ["castle"]}.png`;
+
+	var castletext = document.createElement("div");
+	castletext.id = "castletext";
+	castletext.className = "advancedtext";
+	castletext.innerHTML = castles[civ["castle"]];
+
+	castleIconBox.appendChild(castleIcon);
+	castleIconBox.appendChild(castletext);
+
+	var castleback = document.createElement("button");
+	castleback.className = "backbutton";
+	castleback.innerHTML = "<";
+	castleback.onclick = function () {
+		civ["castle"] = (civ["castle"] + (castles.length - 1)) % castles.length;
+		document.getElementById("castleicon").src = `./img/castles/castle_${civ["castle"]}.png`;
+		document.getElementById("castletext").innerHTML = castles[civ["castle"]];
+	};
+
+	var castleforward = document.createElement("button");
+	castleforward.className = "forwardbutton";
+	castleforward.innerHTML = ">";
+	castleforward.onclick = function () {
+		civ["castle"] = (civ["castle"] + 1) % castles.length;
+		document.getElementById("castleicon").src = `./img/castles/castle_${civ["castle"]}.png`;
+		document.getElementById("castletext").innerHTML = castles[civ["castle"]];
+	};
+
+	castlebox.appendChild(castleback);
+	castlebox.appendChild(castleIconBox);
+	castlebox.appendChild(castleforward);
+
+	advancedbox.appendChild(descriptionbox);
+	advancedbox.appendChild(langbox);
+	advancedbox.appendChild(wonderbox);
+	advancedbox.appendChild(castlebox);
+
 	contain.appendChild(pickGrid);
 	contain.appendChild(flagDiv);
 
-	flagbox.appendChild(header);
-	flagbox.appendChild(contain);
-	flagbox.appendChild(archbox);
-	flagbox.appendChild(langbox);
-	flagbox.appendChild(label);
-	flagbox.appendChild(input);
-	flagbox.appendChild(next);
+	buildmenu.appendChild(header);
+	buildmenu.appendChild(contain);
+	buildmenu.appendChild(archbox);
+	buildmenu.appendChild(advancedbutton);
+	buildmenu.appendChild(label);
+	buildmenu.appendChild(input);
+	buildmenu.appendChild(next);
 
-	wrapping.appendChild(flagbox);
+	var buildwrapper = document.createElement("div");
+	buildwrapper.id = "buildwrapper";
+	buildwrapper.appendChild(buildmenu);
+	buildwrapper.appendChild(advancedbox);
+
+	wrapping.appendChild(buildwrapper);
 
 	document.getElementsByTagName("body")[0].appendChild(wrapping);
 	if (!civ["customFlag"]) {
 		clientFlag(civ["flag_palette"], "flag", 1);
 	}
 
-	document.getElementsByClassName("flagbox")[0].style.transform = `scale(${(0.9 * window.innerHeight) / flagbox.getBoundingClientRect().height})`;
+	let scaleFactor = (0.9 * window.innerHeight) / document.getElementById("buildwrapper").getBoundingClientRect().height;
+	document.getElementById("buildwrapper").style.transform = `scale(${scaleFactor})`;
 
 	if (civ["customFlag"]) {
 		customImageCheckbox.checked = true;
@@ -504,14 +642,7 @@ function renderPhase2() {
 			let old_resized_card = document.getElementById("card" + i);
 			let new_resized_card = old_resized_card.cloneNode(true);
 			old_resized_card.parentNode.replaceChild(new_resized_card, old_resized_card);
-			new_resized_card.onmouseover = getFun3(
-				card_descriptions[roundType][i][0],
-				i,
-				cardSize,
-				[0, 255, 0, 0.7],
-				card_descriptions[roundType][i][1],
-				roundType
-			);
+			new_resized_card.onmouseover = getFun3(card_descriptions[roundType][i][0], i, cardSize, [0, 255, 0, 0.7], card_descriptions[roundType][i][1], roundType);
 			new_resized_card.onmouseout = getFun4(i);
 			new_resized_card.addEventListener("click", getFun5(i, cardSize));
 		}
@@ -726,9 +857,7 @@ function renderPhase2() {
 							basicBonusAmount = unitStats[cardId].attacks.basic[j][1];
 						}
 					}
-					detailsElement += `<div>+ ${
-						basicBonusAmount == eliteBonusAmount ? basicBonusAmount : basicBonusAmount + " (" + eliteBonusAmount + ")"
-					} vs. ${classToName[unitStats[cardId].attacks.elite[i][0]]}</div>`;
+					detailsElement += `<div>+ ${basicBonusAmount == eliteBonusAmount ? basicBonusAmount : basicBonusAmount + " (" + eliteBonusAmount + ")"} vs. ${classToName[unitStats[cardId].attacks.elite[i][0]]}</div>`;
 				}
 				if (unitStats[cardId].special) {
 					detailsElement += `<div style="font-size:1.1vw"><u>Special Rule</u>: ${unitStats[cardId].special}</div>`;
@@ -754,9 +883,7 @@ function renderPhase2() {
 
 				let rangeElement = `<div class="statwrapper">
 					<img src="./img/staticons/range.png" class="staticon">
-					<div class="stattext">${
-						unitStats[cardId].range.length == 1 ? unitStats[cardId].range : unitStats[cardId].range[0] + " (" + unitStats[cardId].range[1] + ")"
-					}</div>
+					<div class="stattext">${unitStats[cardId].range.length == 1 ? unitStats[cardId].range : unitStats[cardId].range[0] + " (" + unitStats[cardId].range[1] + ")"}</div>
 				</div>`;
 
 				helptext.innerHTML = `
@@ -777,33 +904,17 @@ function renderPhase2() {
 							${unitStats[cardId].range[0] > 0 ? rangeElement : ""}
 							<div class="statwrapper">
 								<img src="./img/staticons/reloadTime.png" class="staticon">
-								<div class="stattext">${
-									unitStats[cardId].reload.length == 1
-										? unitStats[cardId].reload + " seconds"
-										: unitStats[cardId].reload[0] + " seconds (" + unitStats[cardId].reload[1] + ")"
-								}</div>
+								<div class="stattext">${unitStats[cardId].reload.length == 1 ? unitStats[cardId].reload + " seconds" : unitStats[cardId].reload[0] + " seconds (" + unitStats[cardId].reload[1] + ")"}</div>
 							</div>
 							<div class="statwrapper">
 								<img src="./img/staticons/movementSpeed.png" class="staticon">
-								<div class="stattext">${
-									unitStats[cardId].speed.length == 1
-										? unitStats[cardId].speed
-										: unitStats[cardId].speed[0] + " (" + unitStats[cardId].speed[1] + ")"
-								}</div>
+								<div class="stattext">${unitStats[cardId].speed.length == 1 ? unitStats[cardId].speed : unitStats[cardId].speed[0] + " (" + unitStats[cardId].speed[1] + ")"}</div>
 							</div>
 							<div class="statwrapper">
 								<img src="./img/staticons/armor.png" class="staticon">
-								<div class="stattext" style="margin-right:0.75vw">${
-									unitStats[cardId].armors.basic[0] == unitStats[cardId].armors.elite[0]
-										? unitStats[cardId].armors.basic[0]
-										: unitStats[cardId].armors.basic[0] + " (" + unitStats[cardId].armors.elite[0] + ")"
-								}</div>
+								<div class="stattext" style="margin-right:0.75vw">${unitStats[cardId].armors.basic[0] == unitStats[cardId].armors.elite[0] ? unitStats[cardId].armors.basic[0] : unitStats[cardId].armors.basic[0] + " (" + unitStats[cardId].armors.elite[0] + ")"}</div>
 								<img src="./img/staticons/range-armor.png" class="staticon">
-								<div class="stattext">${
-									unitStats[cardId].armors.basic[1] == unitStats[cardId].armors.elite[1]
-										? unitStats[cardId].armors.basic[1]
-										: unitStats[cardId].armors.basic[1] + " (" + unitStats[cardId].armors.elite[1] + ")"
-								}</div>
+								<div class="stattext">${unitStats[cardId].armors.basic[1] == unitStats[cardId].armors.elite[1] ? unitStats[cardId].armors.basic[1] : unitStats[cardId].armors.basic[1] + " (" + unitStats[cardId].armors.elite[1] + ")"}</div>
 							</div>
 							${detailsElement}
 						</div>
@@ -989,129 +1100,152 @@ function renderPhase2() {
 	}
 
 	//Add all cards stored in gamestate to the board
-	for (var i = 0; i < num_cards[roundType]; i++) {
-		var card = document.createElement("div");
-		card.className = "card";
-		card.id = "card" + i;
-		card.style.width = cardSize + "rem";
-		card.style.height = cardSize + "rem";
-		card.style.margin = marginSize + "rem";
-
-		//Display graphics on the card
-		var prefix;
-		if (roundType == 0) {
-			prefix = "bonus";
-		} else if (roundType == 1) {
-			prefix = "uu";
-		} else if (roundType == 2) {
-			prefix = "castle";
-		} else if (roundType == 3) {
-			prefix = "imp";
-		} else if (roundType == 4) {
-			prefix = "team";
-		}
-		var path = `${prefix}_${i}.jpg`;
-
-		var image = document.createElement("img");
-		image.className = `cardimage ${rarities[card_descriptions[roundType][i][1]]}`;
-		image.id = "cardimage" + i;
-		image.src = "./img/compressedcards/" + path;
-		card.appendChild(image);
-
-		var border = document.createElement("img");
-		border.id = "cardborder" + i;
-		border.className = `cardborder ${rarities[card_descriptions[roundType][i][1]]}`;
-		border.src = "./img/cards/card_border.png";
-		card.appendChild(border);
-
-		var frame = document.createElement("img");
-		frame.className = "cardframe";
-		frame.src = `./img/frames/frame_${rarities[card_descriptions[roundType][i][1]]}.png`;
-		card.appendChild(frame);
-
-		var edition = document.createElement("img");
-		edition.className = "cardedition";
-		edition.src = `./img/editions/edition_${card_descriptions[roundType][i][2]}.png`;
-		card.appendChild(edition);
-
-		//Let player pick a card
-		card.style.cursor = "pointer";
-		if (includesCard(i)) {
-			if (roundType != 1) {
-				let dummyIndex = i;
-
-				let selected_card_wrapper = document.createElement("div");
-				selected_card_wrapper.className = "selectedCardWrapper";
-				selected_card_wrapper.id = "selectedCardWrapper" + i;
-				selected_card_wrapper.style.right = `-${cardSize / 2}rem`;
-				selected_card_wrapper.addEventListener("click", (e) => {
-					e.stopPropagation();
-				});
-
-				let selected_card_background = document.createElement("img");
-				selected_card_background.className = "selectedCardBackground";
-				selected_card_background.src = "./img/compressedcards/card_background.jpg";
-				selected_card_background.style.width = cardSize + "rem";
-				selected_card_background.style.height = cardSize + "rem";
-
-				let selected_card_menu = document.createElement("div");
-				selected_card_menu.className = "selectedCardMenu";
-
-				let selected_card_plus = document.createElement("img");
-				selected_card_plus.className = "selectedCardPlus";
-				selected_card_plus.src = "./img/plus.png";
-				selected_card_plus.addEventListener("click", (e) => {
-					for (let j = 0; j < civ["bonuses"][roundType].length; j++) {
-						if (civ["bonuses"][roundType][j][0] == dummyIndex && civ["bonuses"][roundType][j][1] < 16) {
-							civ["bonuses"][roundType][j][1]++;
-							document.getElementById("selectedCard" + dummyIndex).textContent = `x${civ["bonuses"][roundType][j][1]}`;
-						}
-					}
-					e.stopPropagation();
-				});
-
-				let selected_card_minus = document.createElement("img");
-				selected_card_minus.className = "selectedCardMinus";
-				selected_card_minus.src = "./img/minus.png";
-				selected_card_minus.addEventListener("click", (e) => {
-					for (let j = 0; j < civ["bonuses"][roundType].length; j++) {
-						if (civ["bonuses"][roundType][j][0] == dummyIndex && civ["bonuses"][roundType][j][1] > 1) {
-							civ["bonuses"][roundType][j][1]--;
-							document.getElementById("selectedCard" + dummyIndex).textContent = `x${civ["bonuses"][roundType][j][1]}`;
-						}
-					}
-					e.stopPropagation();
-				});
-
-				let selected_card_value = document.createElement("div");
-				selected_card_value.id = "selectedCard" + dummyIndex;
-				for (let j = 0; j < civ["bonuses"][roundType].length; j++) {
-					if (civ["bonuses"][roundType][j][0] == dummyIndex) {
-						selected_card_value.textContent = `x${civ["bonuses"][roundType][j][1]}`;
-					}
+	// Initially sort by edition
+	for (var editionIndex = 0; editionIndex < numEditions; editionIndex++) {
+		for (var i = 0; i < num_cards[roundType]; i++) {
+			if (editionIndex == 0) {
+				if (card_descriptions[roundType][i][2] > 0) {
+					console.log(card_descriptions[roundType][i][2]);
+					continue;
 				}
+			} else {
+				if (card_descriptions[roundType][i][2] != editionIndex) {
+					continue;
+				}
+			}
 
-				selected_card_menu.appendChild(selected_card_plus);
-				selected_card_menu.appendChild(selected_card_minus);
-				selected_card_menu.appendChild(selected_card_value);
+			var card = document.createElement("div");
+			card.className = "card";
+			card.id = "card" + i;
+			card.style.width = cardSize + "rem";
+			card.style.height = cardSize + "rem";
+			card.style.margin = marginSize + "rem";
 
-				selected_card_wrapper.appendChild(selected_card_background);
-				selected_card_wrapper.appendChild(selected_card_menu);
+			//Display graphics on the card
+			var prefix;
+			if (roundType == 0) {
+				prefix = "bonus";
+			} else if (roundType == 1) {
+				prefix = "uu";
+			} else if (roundType == 2) {
+				prefix = "castle";
+			} else if (roundType == 3) {
+				prefix = "imp";
+			} else if (roundType == 4) {
+				prefix = "team";
+			}
+			var path = `${prefix}_${i}_v${card_descriptions[roundType][i][3]}.jpg`;
 
-				card.appendChild(selected_card_wrapper);
-				card.style.marginRight = cardSize * 0.6 + "rem";
+			var image = document.createElement("img");
+			image.className = `cardimage ${rarities[card_descriptions[roundType][i][1]]}`;
+			image.id = "cardimage" + i;
+			image.src = "./img/compressedcards/" + path;
+			image.srcset = "./img/compressedcards/" + path;
+			card.appendChild(image);
+
+			var border = document.createElement("img");
+			border.id = "cardborder" + i;
+			border.className = `cardborder ${rarities[card_descriptions[roundType][i][1]]}`;
+			border.src = "./img/cards/card_border.png";
+			card.appendChild(border);
+
+			var frame = document.createElement("img");
+			frame.className = "cardframe";
+			frame.src = `./img/frames/frame_${rarities[card_descriptions[roundType][i][1]]}.png`;
+			card.appendChild(frame);
+
+			var edition = document.createElement("img");
+			edition.className = "cardedition";
+			if (card_descriptions[roundType][i][2] <= 0) {
+				edition.src = `./img/editions/edition_0.png`;
+			} else {
+				edition.src = `./img/editions/edition_${card_descriptions[roundType][i][2]}.png`;
+			}
+			card.appendChild(edition);
+
+			//Let player pick a card
+			card.style.cursor = "pointer";
+			if (includesCard(i)) {
+				// card.style.outline = cardSize * (22 / 256) + "rem solid rgba(0, 255, 0, 0.7)";
+				// card.style.outlineOffset = "-" + cardSize * (22 / 256) + "rem";
+
+				if (roundType != 1) {
+					let dummyIndex = i;
+
+					let selected_card_wrapper = document.createElement("div");
+					selected_card_wrapper.className = "selectedCardWrapper";
+					selected_card_wrapper.id = "selectedCardWrapper" + i;
+					selected_card_wrapper.style.right = `-${cardSize / 2}rem`;
+					selected_card_wrapper.addEventListener("click", (e) => {
+						e.stopPropagation();
+					});
+
+					let selected_card_background = document.createElement("img");
+					selected_card_background.className = "selectedCardBackground";
+					selected_card_background.src = "./img/compressedcards/card_background.jpg";
+					selected_card_background.style.width = cardSize + "rem";
+					selected_card_background.style.height = cardSize + "rem";
+
+					let selected_card_menu = document.createElement("div");
+					selected_card_menu.className = "selectedCardMenu";
+
+					let selected_card_plus = document.createElement("img");
+					selected_card_plus.className = "selectedCardPlus";
+					selected_card_plus.src = "./img/plus.png";
+					selected_card_plus.addEventListener("click", (e) => {
+						for (let j = 0; j < civ["bonuses"][roundType].length; j++) {
+							if (civ["bonuses"][roundType][j][0] == dummyIndex && civ["bonuses"][roundType][j][1] < 16) {
+								civ["bonuses"][roundType][j][1]++;
+								document.getElementById("selectedCard" + dummyIndex).textContent = `x${civ["bonuses"][roundType][j][1]}`;
+							}
+						}
+						e.stopPropagation();
+					});
+
+					let selected_card_minus = document.createElement("img");
+					selected_card_minus.className = "selectedCardMinus";
+					selected_card_minus.src = "./img/minus.png";
+					selected_card_minus.addEventListener("click", (e) => {
+						for (let j = 0; j < civ["bonuses"][roundType].length; j++) {
+							if (civ["bonuses"][roundType][j][0] == dummyIndex && civ["bonuses"][roundType][j][1] > 1) {
+								civ["bonuses"][roundType][j][1]--;
+								document.getElementById("selectedCard" + dummyIndex).textContent = `x${civ["bonuses"][roundType][j][1]}`;
+							}
+						}
+						e.stopPropagation();
+					});
+
+					let selected_card_value = document.createElement("div");
+					selected_card_value.id = "selectedCard" + dummyIndex;
+					for (let j = 0; j < civ["bonuses"][roundType].length; j++) {
+						if (civ["bonuses"][roundType][j][0] == dummyIndex) {
+							selected_card_value.textContent = `x${civ["bonuses"][roundType][j][1]}`;
+						}
+					}
+
+					selected_card_menu.appendChild(selected_card_plus);
+					selected_card_menu.appendChild(selected_card_minus);
+					selected_card_menu.appendChild(selected_card_value);
+
+					selected_card_wrapper.appendChild(selected_card_background);
+					selected_card_wrapper.appendChild(selected_card_menu);
+
+					card.appendChild(selected_card_wrapper);
+					card.style.marginRight = cardSize * 0.6 + "rem";
+				}
+			}
+			card.onmouseover = getFun3(card_descriptions[roundType][i][0], i, cardSize, [0, 255, 0, 0.7], card_descriptions[roundType][i][1], roundType);
+			card.onmouseout = getFun4(i);
+			card.addEventListener("click", getFun5(i, cardSize));
+			card.addEventListener("contextmenu", getFun6(i), false);
+			if (includesCard(i)) {
+				selected.appendChild(card);
+			} else {
+				unselected.appendChild(card);
 			}
 		}
-		card.onmouseover = getFun3(card_descriptions[roundType][i][0], i, cardSize, [0, 255, 0, 0.7], card_descriptions[roundType][i][1], roundType);
-		card.onmouseout = getFun4(i);
-		card.addEventListener("click", getFun5(i, cardSize));
-		card.addEventListener("contextmenu", getFun6(i), false);
-		if (includesCard(i)) {
-			selected.appendChild(card);
-		} else {
-			unselected.appendChild(card);
-		}
 	}
+
 	//Add finish button
 	var boardtoolbar = document.createElement("div");
 	boardtoolbar.id = "boardtoolbar";
@@ -1267,7 +1401,7 @@ function renderPhase2() {
 		sharebox.appendChild(linkwrapper1);
 		sharebox.appendChild(edit_text);
 		sharebox.appendChild(linkwrapper2);
-		sharebox.appendChild(validityWrapper);
+		//sharebox.appendChild(validityWrapper);
 		sharebox.appendChild(done_sharing);
 		document.body.appendChild(sharebox);
 	};

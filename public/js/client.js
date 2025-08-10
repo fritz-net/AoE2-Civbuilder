@@ -185,13 +185,7 @@ function startaDraft() {
 			num_players: document.getElementById("numPlayersInput").value,
 			rounds: document.getElementById("roundsInput").value,
 			techtree_currency: document.getElementById("currencyInput").value,
-			allowed_rarities: [
-				document.getElementById("raritySelect0").checked,
-				document.getElementById("raritySelect1").checked,
-				document.getElementById("raritySelect2").checked,
-				document.getElementById("raritySelect3").checked,
-				document.getElementById("raritySelect4").checked,
-			],
+			allowed_rarities: [document.getElementById("raritySelect0").checked, document.getElementById("raritySelect1").checked, document.getElementById("raritySelect2").checked, document.getElementById("raritySelect3").checked, document.getElementById("raritySelect4").checked],
 		});
 	});
 
@@ -480,8 +474,7 @@ function combineCivilizations() {
 	var createHelp = document.createElement("span");
 	createHelp.className = "tooltiptext";
 	createHelp.id = "createHelp";
-	createHelp.textContent =
-		"Select civilization .json files to combine into a mod.zip file. Note that all other civilizations' bonuses will be overwritten in this mod";
+	createHelp.textContent = "Select civilization .json files to combine into a mod.zip file. Note that all other civilizations' bonuses will be overwritten in this mod";
 
 	var vanillaHelp = document.createElement("span");
 	vanillaHelp.className = "tooltiptext";
@@ -512,8 +505,7 @@ function combineCivilizations() {
 	let baseHelp = document.createElement("div");
 	baseHelp.id = "baseHelp";
 	baseHelp.className = "tooltiptextright";
-	baseHelp.textContent =
-		"Which set of civilizations to generate the mod with. Set to custom to use civilizations made using this website, random for randomly generated civilizations, or completely vanilla for usage of modifiers";
+	baseHelp.textContent = "Which set of civilizations to generate the mod with. Set to custom to use civilizations made using this website, random for randomly generated civilizations, or completely vanilla for usage of modifiers";
 
 	baseLabel.appendChild(baseHelp);
 
@@ -777,7 +769,7 @@ function combineCivilizations() {
 					}
 					switch (bonus) {
 						case 102:
-							numDuplicates[6]++;
+							//numDuplicates[6]++;
 							break;
 						case 313:
 							numDuplicates[0]++;
@@ -817,9 +809,7 @@ function combineCivilizations() {
 				"Duplicate Fabric Shields civs!",
 				"Duplicate Berserkergang civs!",
 			];
-			const compatibilityMessage =
-				"\r\n\r\nMultiple civs having the following will result in Data Mod incompatibilities:\r\n" +
-				"Relic bonus, Elite Mercenaries, Free relic bonus";
+			const compatibilityMessage = "\r\n\r\nMultiple civs having the following will result in Data Mod incompatibilities:\r\n" + "Elite Mercenaries, Free relic bonus";
 			for (var i = 0; i < numDuplicates.length; i++) {
 				if (numDuplicates[i] > 1) {
 					errorMessage = errorMessages[i];
@@ -1048,8 +1038,7 @@ if (btn4) {
 
 		var instructionstitle = document.createElement("p");
 		instructionstitle.id = "instructionstitle";
-		instructionstitle.innerHTML =
-			'<iframe allow="fullscreen;" width="800" height="450" src="https://www.youtube.com/embed/JNQdYs9Tl5w"></iframe><br><iframe allow="fullscreen;" width="800" height="450" src="https://youtube.com/embed/2eVGyL93Wmk"</iframe><br><br><b>Publication Instructions:</b><br>';
+		instructionstitle.innerHTML = '<iframe allow="fullscreen;" width="800" height="450" src="https://www.youtube.com/embed/JNQdYs9Tl5w"></iframe><br><iframe allow="fullscreen;" width="800" height="450" src="https://youtube.com/embed/2eVGyL93Wmk"</iframe><br><br><b>Publication Instructions:</b><br>';
 
 		var instructionstext = document.createElement("p");
 		instructionstext.id = "instructionstext";
@@ -1182,6 +1171,15 @@ if (btn7) {
 		var instructionstext = document.createElement("p");
 		instructionstext.id = "instructionstext";
 		instructionstext.innerHTML = `
+			<b>05-02-2025</b><br>
+			&emsp;&emsp;• Updated website with 3K DLC content and April update changes<br>
+			&emsp;&emsp;• Added advanced options to creation -- civilization description, custom wonder, and custom castle selection<br>
+			&emsp;&emsp;• Enabled filtering by civ name for base edition bonuses<br>
+			&emsp;&emsp;• Bonuses initially sorted by edition<br>
+			&emsp;&emsp;• Regional units are colored differently in the technology tree<br><br>
+			<b>02-25-2025</b><br>
+			&emsp;&emsp;• Gave bonuses editions to distinguish vanilla bonuses from custom bonuses (and potentially future bonuses)<br>
+			&emsp;&emsp;• Added image caching to improve loading times<br><br>
 			<b>05-22-2024</b><br>
 			&emsp;&emsp;• Added a rarity system to bonuses/cards to serve as a guideline in power level<br><br>
 			<b>05-19-2024</b><br>
@@ -1406,6 +1404,6 @@ if (donatebutton) {
 var btn8 = document.getElementById("events");
 if (btn8) {
 	btn8.addEventListener("click", function () {
-		window.location.href = "https://krakenmeister.com/events";
+		window.location.href = `${hostname}/events`;
 	});
 }

@@ -147,22 +147,7 @@ function createTechtreeJson(data_json, techtree_json) {
 					}
 					break;
 				case 105:
-					const ecoTechsList = [
-						"Horse Collar",
-						"Heavy Plow",
-						"Crop Rotation",
-						"Caravan",
-						"Guilds",
-						"Double-Bit Axe",
-						"Bow Saw",
-						"Two-Man Saw",
-						"Stone Mining",
-						"Stone Shaft Mining",
-						"Gold Mining",
-						"Gold Shaft Mining",
-						"Wheelbarrow",
-						"Hand Cart",
-					];
+					const ecoTechsList = ["Horse Collar", "Heavy Plow", "Crop Rotation", "Caravan", "Guilds", "Double-Bit Axe", "Bow Saw", "Two-Man Saw", "Stone Mining", "Stone Shaft Mining", "Gold Mining", "Gold Shaft Mining", "Wheelbarrow", "Hand Cart"];
 					for (let k = 0; k < techtree.civ_techs_units.length; k++) {
 						if (ecoTechsList.indexOf(techtree.civ_techs_units[k]["Name"]) != -1) {
 							techtree.civ_techs_units[k]["Age ID"]--;
@@ -181,14 +166,7 @@ function createTechtreeJson(data_json, techtree_json) {
 					break;
 				case 221:
 					for (let k = 0; k < techtree.civ_techs_units.length; k++) {
-						if (
-							techtree.civ_techs_units[k]["Name"] == "Long Swordsman" ||
-							techtree.civ_techs_units[k]["Name"] == "Two-Handed Swordsman" ||
-							techtree.civ_techs_units[k]["Name"] == "Pikeman" ||
-							techtree.civ_techs_units[k]["Name"] == "Halberdier" ||
-							techtree.civ_techs_units[k]["Name"] == "Eagle Warrior" ||
-							techtree.civ_techs_units[k]["Name"] == "Elite Eagle Warrior"
-						) {
+						if (techtree.civ_techs_units[k]["Name"] == "Long Swordsman" || techtree.civ_techs_units[k]["Name"] == "Two-Handed Swordsman" || techtree.civ_techs_units[k]["Name"] == "Pikeman" || techtree.civ_techs_units[k]["Name"] == "Halberdier" || techtree.civ_techs_units[k]["Name"] == "Eagle Warrior" || techtree.civ_techs_units[k]["Name"] == "Elite Eagle Warrior") {
 							techtree.civ_techs_units[k]["Age ID"]--;
 						}
 					}
@@ -221,11 +199,7 @@ function createTechtreeJson(data_json, techtree_json) {
 						}
 					}
 					for (let k = 0; k < techtree.civ_techs_units.length; k++) {
-						if (
-							techtree.civ_techs_units[k]["Name"] == "Horse Collar" ||
-							techtree.civ_techs_units[k]["Name"] == "Heavy Plow" ||
-							techtree.civ_techs_units[k]["Name"] == "Crop Rotation"
-						) {
+						if (techtree.civ_techs_units[k]["Name"] == "Horse Collar" || techtree.civ_techs_units[k]["Name"] == "Heavy Plow" || techtree.civ_techs_units[k]["Name"] == "Crop Rotation") {
 							techtree.civ_techs_units[k]["Building ID"] = 1734;
 						}
 					}
@@ -402,7 +376,6 @@ const unitNodeMap = {
 	"Eagle Scout": 12,
 	"Eagle Warrior": 13,
 	"Elite Eagle Warrior": 125,
-	Supplies: 14,
 	Squires: 15,
 	Arson: 16,
 	"Scout Cavalry": 29,
@@ -693,13 +666,13 @@ const specialNodes = {
 		"Building upgraded from ID": -1,
 		"Draw Node Type": "Building",
 		"Help String ID": 105159,
-		"Link ID": -1,
+		"Link ID": 276,
 		"Link Node Type": "BuildingTech",
 		Name: "Feitoria",
 		"Name String ID": 14159,
 		"Node ID": 1021,
 		"Node Status": "ResearchedCompleted",
-		"Node Type": "BuildingNonTech",
+		"Node Type": "UniqueBuilding",
 		"Picture Index": 53,
 		"Prerequisite IDs": [0, 0, 0, 0, 0],
 		"Prerequisite Types": ["None", "None", "None", "None", "None"],
@@ -1099,7 +1072,7 @@ const specialNodes = {
 };
 
 //Name, Name String ID, Picture Index, Name String ID (Elite), Elite Tech ID, Node ID, Node ID (Elite)
-const numVanillaUnits = 2381;
+const numVanillaUnits = 2462;
 const numVanillaTechs = 1267;
 const UUArray = [
 	["Longbowman", 5107, 41, 5456, 360, 8, 530],
@@ -1185,6 +1158,11 @@ const UUArray = [
 	["Ratha", 14414, 389, 14420, 828, 1759, 1761],
 	["Composite Bowman", 14033, 407, 14034, 918, 1800, 1802],
 	["Monaspa", 14035, 408, 14036, 920, 1803, 1805],
+	["White Feather Guard", 14362, 434, 14363, 1064, 1959, 1961],
+	["Fire Archer", 14366, 436, 14367, 1074, 1968, 1970],
+	["Tiger Cavalry", 14074, 432, 14153, 1036, 1949, 1951],
+	["Iron Pagoda", 14594, 461, 14595, 991, 1908, 1910],
+	["Liao Dao", 14692, 463, 14696, 1002, 1920, 1922],
 ];
 
 const UTArray = [
@@ -2161,6 +2139,114 @@ const UTArray = [
 			"Trigger Tech ID": -1,
 			"Use Type": "Tech",
 		},
+		{
+			"Age ID": 3,
+			"Building ID": 82,
+			"Draw Node Type": "UnitTech",
+			"Help String ID": 107273,
+			"Link ID": -1,
+			"Link Node Type": "BuildingTech",
+			Name: "Silk Road",
+			"Name String ID": 17273,
+			"Node ID": 499,
+			"Node Status": "ResearchedCompleted",
+			"Node Type": "Research",
+			"Picture Index": 107,
+			"Prerequisite IDs": [0, 0, 0, 0, 0],
+			"Prerequisite Types": ["None", "None", "None", "None", "None"],
+			"Trigger Tech ID": -1,
+			"Use Type": "Tech",
+		},
+		{
+			"Age ID": 3,
+			"Building ID": 82,
+			"Draw Node Type": "UnitTech",
+			"Help String ID": 107477,
+			"Link ID": -1,
+			"Link Node Type": "BuildingTech",
+			Name: "Coiled Serpent Array",
+			"Name String ID": 17477,
+			"Node ID": 1070,
+			"Node Status": "ResearchedCompleted",
+			"Node Type": "Research",
+			"Picture Index": 33,
+			"Prerequisite IDs": [0, 0, 0, 0, 0],
+			"Prerequisite Types": ["None", "None", "None", "None", "None"],
+			"Trigger Tech ID": -1,
+			"Use Type": "Tech",
+		},
+		{
+			"Age ID": 3,
+			"Building ID": 82,
+			"Draw Node Type": "UnitTech",
+			"Help String ID": 107480,
+			"Link ID": -1,
+			"Link Node Type": "BuildingTech",
+			Name: "Red Cliff Tactics",
+			"Name String ID": 17480,
+			"Node ID": 1080,
+			"Node Status": "ResearchedCompleted",
+			"Node Type": "Research",
+			"Picture Index": 33,
+			"Prerequisite IDs": [0, 0, 0, 0, 0],
+			"Prerequisite Types": ["None", "None", "None", "None", "None"],
+			"Trigger Tech ID": -1,
+			"Use Type": "Tech",
+		},
+		{
+			"Age ID": 3,
+			"Building ID": 82,
+			"Draw Node Type": "UnitTech",
+			"Help String ID": 107473,
+			"Link ID": -1,
+			"Link Node Type": "BuildingTech",
+			Name: "Tuntian",
+			"Name String ID": 17473,
+			"Node ID": 1061,
+			"Node Status": "ResearchedCompleted",
+			"Node Type": "Research",
+			"Picture Index": 33,
+			"Prerequisite IDs": [0, 0, 0, 0, 0],
+			"Prerequisite Types": ["None", "None", "None", "None", "None"],
+			"Trigger Tech ID": -1,
+			"Use Type": "Tech",
+		},
+		{
+			"Age ID": 3,
+			"Building ID": 82,
+			"Draw Node Type": "UnitTech",
+			"Help String ID": 107466,
+			"Link ID": -1,
+			"Link Node Type": "BuildingTech",
+			Name: "Fortified Bastions",
+			"Name String ID": 17466,
+			"Node ID": 996,
+			"Node Status": "ResearchedCompleted",
+			"Node Type": "Research",
+			"Picture Index": 33,
+			"Prerequisite IDs": [0, 0, 0, 0, 0],
+			"Prerequisite Types": ["None", "None", "None", "None", "None"],
+			"Trigger Tech ID": -1,
+			"Use Type": "Tech",
+		},
+		{
+			"Age ID": 3,
+			"Building ID": 82,
+			"Draw Node Type": "UnitTech",
+			"Help String ID": 107468,
+			"Link ID": -1,
+			"Link Node Type": "BuildingTech",
+			Name: "Lamellar Armor",
+			"Name String ID": 17468,
+			"Node ID": 1006,
+			"Node Status": "ResearchedCompleted",
+			"Node Type": "Research",
+			"Picture Index": 33,
+			"Prerequisite IDs": [0, 0, 0, 0, 0],
+			"Prerequisite Types": ["None", "None", "None", "None", "None"],
+			"Trigger Tech ID": -1,
+			"Use Type": "Tech",
+		},
 	],
 	[
 		{
@@ -2455,12 +2541,12 @@ const UTArray = [
 			"Age ID": 4,
 			"Building ID": 82,
 			"Draw Node Type": "UnitTech",
-			"Help String ID": 107273,
+			"Help String ID": 107084,
 			"Link ID": -1,
 			"Link Node Type": "BuildingTech",
-			Name: "Silk Road",
-			"Name String ID": 17273,
-			"Node ID": 499,
+			Name: "Pirotechnia",
+			"Name String ID": 17084,
+			"Node ID": 902,
 			"Node Status": "ResearchedCompleted",
 			"Node Type": "Research",
 			"Picture Index": 107,
@@ -2872,7 +2958,7 @@ const UTArray = [
 			"Help String ID": 107503,
 			"Link ID": -1,
 			"Link Node Type": "BuildingTech",
-			Name: "Lamellar Armor",
+			Name: "Brigandine Armor",
 			"Name String ID": 17503,
 			"Node ID": numVanillaTechs + 84,
 			"Node Status": "ResearchedCompleted",
@@ -3127,6 +3213,96 @@ const UTArray = [
 			Name: "Shigetō Yumi",
 			"Name String ID": 17514,
 			"Node ID": numVanillaTechs + 93,
+			"Node Status": "ResearchedCompleted",
+			"Node Type": "Research",
+			"Picture Index": 107,
+			"Prerequisite IDs": [0, 0, 0, 0, 0],
+			"Prerequisite Types": ["None", "None", "None", "None", "None"],
+			"Trigger Tech ID": -1,
+			"Use Type": "Tech",
+		},
+		{
+			"Age ID": 4,
+			"Building ID": 82,
+			"Draw Node Type": "UnitTech",
+			"Help String ID": 107476,
+			"Link ID": -1,
+			"Link Node Type": "BuildingTech",
+			Name: "Bolt Magazine",
+			"Name String ID": 17476,
+			"Node ID": 1069,
+			"Node Status": "ResearchedCompleted",
+			"Node Type": "Research",
+			"Picture Index": 107,
+			"Prerequisite IDs": [0, 0, 0, 0, 0],
+			"Prerequisite Types": ["None", "None", "None", "None", "None"],
+			"Trigger Tech ID": -1,
+			"Use Type": "Tech",
+		},
+		{
+			"Age ID": 4,
+			"Building ID": 82,
+			"Draw Node Type": "UnitTech",
+			"Help String ID": 107481,
+			"Link ID": -1,
+			"Link Node Type": "BuildingTech",
+			Name: "Sitting Tiger",
+			"Name String ID": 17481,
+			"Node ID": 1080,
+			"Node Status": "ResearchedCompleted",
+			"Node Type": "Research",
+			"Picture Index": 107,
+			"Prerequisite IDs": [0, 0, 0, 0, 0],
+			"Prerequisite Types": ["None", "None", "None", "None", "None"],
+			"Trigger Tech ID": -1,
+			"Use Type": "Tech",
+		},
+		{
+			"Age ID": 4,
+			"Building ID": 82,
+			"Draw Node Type": "UnitTech",
+			"Help String ID": 107474,
+			"Link ID": -1,
+			"Link Node Type": "BuildingTech",
+			Name: "Ming-Kuang Armor",
+			"Name String ID": 17474,
+			"Node ID": 1062,
+			"Node Status": "ResearchedCompleted",
+			"Node Type": "Research",
+			"Picture Index": 107,
+			"Prerequisite IDs": [0, 0, 0, 0, 0],
+			"Prerequisite Types": ["None", "None", "None", "None", "None"],
+			"Trigger Tech ID": -1,
+			"Use Type": "Tech",
+		},
+		{
+			"Age ID": 4,
+			"Building ID": 82,
+			"Draw Node Type": "UnitTech",
+			"Help String ID": 107467,
+			"Link ID": -1,
+			"Link Node Type": "BuildingTech",
+			Name: "Thunderclap Bombs",
+			"Name String ID": 17467,
+			"Node ID": 997,
+			"Node Status": "ResearchedCompleted",
+			"Node Type": "Research",
+			"Picture Index": 107,
+			"Prerequisite IDs": [0, 0, 0, 0, 0],
+			"Prerequisite Types": ["None", "None", "None", "None", "None"],
+			"Trigger Tech ID": -1,
+			"Use Type": "Tech",
+		},
+		{
+			"Age ID": 4,
+			"Building ID": 82,
+			"Draw Node Type": "UnitTech",
+			"Help String ID": 107469,
+			"Link ID": -1,
+			"Link Node Type": "BuildingTech",
+			Name: "Ordo Cavalry",
+			"Name String ID": 17469,
+			"Node ID": 1007,
 			"Node Status": "ResearchedCompleted",
 			"Node Type": "Research",
 			"Picture Index": 107,

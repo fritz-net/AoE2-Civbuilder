@@ -1,0 +1,6 @@
+/home/kraken/development/civbuilder/modding/CMakeFiles/create-data-mod.dir
+/home/kraken/development/civbuilder/modding/CMakeFiles/edit_cache.dir
+/home/kraken/development/civbuilder/modding/CMakeFiles/rebuild_cache.dir
+/home/kraken/development/civbuilder/modding/genieutils/CMakeFiles/genieutils.dir
+/home/kraken/development/civbuilder/modding/genieutils/CMakeFiles/edit_cache.dir
+/home/kraken/development/civbuilder/modding/genieutils/CMakeFiles/rebuild_cache.dir
