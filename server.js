@@ -1,7 +1,8 @@
 
-const dir = "/home/kraken/website/civbuilder";
+const os = require("os");
+const dir = path.join(os.tmpdir(), "civbuilder");
 
-const hostname = "https://krakenmeister.com/civbuilder";
+const hostname = process.env.CIVBUILDER_HOSTNAME || "https://krakenmeister.com/civbuilder";
 const port = 4000;
 
 const http = require("http");
@@ -1310,4 +1311,6 @@ module.exports = {
 	router: router,
 };
 
-server.listen(port);
+server.listen(port, () => {
+	console.log(`Server listening on port ${port}`);
+});
