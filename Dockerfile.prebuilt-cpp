@@ -6,8 +6,10 @@ WORKDIR /app
 # Copy source code including prebuilt C++ binaries
 COPY . .
 
+# No C++ build tools or build steps needed; uses precompiled binaries
+
 # Install Node.js dependencies
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 ENV NODE_ENV=production
 
