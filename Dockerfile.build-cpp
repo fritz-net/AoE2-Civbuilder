@@ -23,10 +23,8 @@ COPY . .
 
 # Build C++ binaries
 # Ensure Unix line endings for build.sh to avoid cross-platform issues
-RUN dos2unix ./modding/scripts/build.sh && \
-    dos2unix ./process_mod/createModFolder.sh && \
-    dos2unix ./process_mod/copyLanguage.sh && \
-    dos2unix ./process_mod/copyVoices.sh && \
+RUN find ./process_mod -name "*.sh" -exec dos2unix {} \; && \
+    find ./modding/scripts -name "*.sh" -exec dos2unix {} \; && \
     chmod +x ./modding/scripts/build.sh && \
     cd ./modding/genieutils && ../../modding/scripts/build.sh
 
