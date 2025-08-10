@@ -22,7 +22,7 @@ a {
 }
 
 #title {
-	font-size: 12vh;
+	font-size: min(12vh, 6vw);
 	color: var(--primary);
 	text-shadow: 3px 3px 5px black;
 	text-align: center;
@@ -86,30 +86,31 @@ a {
 
 #navigation {
 	position: fixed;
-	width: 8rem;
-	height: 30rem;
+	width: 10vw;
+	height: 1.5vw;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-end;
 	align-items: flex-start;
-	bottom: 2rem;
-	left: 2rem;
+	bottom: 5vh;
+	left: 2vw;
 }
 
 #navigation > * {
-	margin: 0.5rem 0 0.5rem 0;
-	width: 8rem;
-	font-size: 2rem;
+	margin: min(1vw, 2vh) 0 min(1vw, 2vh) 0;
+	width: min(12vw, 24vh);
+	height: min(6vw, 12vh);
+	font-size: min(2.8vw, 5.6vh);
 	text-align: center;
 	padding: 5px;
 }
 
 #navigation > #updates {
-	font-size: 1.6rem;
+	font-size: min(2vw, 4vh);
 }
 
 #navigation > #events {
-	font-size: 1.8rem;
+	font-size: min(2.2vw, 4.4vh);
 }
 
 button {
@@ -293,7 +294,7 @@ input[type="text"] {
 	min-height: 50px;
 }
 
-.bgbox > .readybutton {
+.readybutton {
 	font-size: 2rem;
 	width: 400px;
 	margin: 40px auto 0px auto;
@@ -329,7 +330,7 @@ input[type="text"] {
 }
 
 #header {
-	font-size: 2em;
+	font-size: 3rem;
 }
 
 #contain {
@@ -412,13 +413,13 @@ input[type="text"] {
 	padding: 5px 30px;
 }
 
-.flagbox > #civlabel {
+#civlabel {
 	width: 550px;
-	font-size: 1.6rem;
+	font-size: 2rem;
 	text-align: center;
 }
 
-.flagbox > #alias {
+#alias {
 	width: 450px;
 	font-size: 1.6rem;
 }
@@ -720,7 +721,7 @@ input[type="text"] {
 	font-family: Arial, Helvetica, sans-serif;
 	text-shadow: 1px 1px 3px black;
 	margin: 0 auto;
-	width: 75vw;
+	width: 65vw;
 	background-color: var(--secondary);
 	padding: 20px 20px 30px 20px;
 	border: 2px solid var(--primary);
@@ -852,10 +853,18 @@ upload:focus {
 	margin-right: 20px;
 }
 
-#langbox {
+.advancedwrapper {
 	display: flex;
 	margin-bottom: 1rem;
 	margin-top: 1rem;
+}
+
+.advancedwrapper > .forwardbutton {
+	font-size: 2em;
+}
+
+.advancedwrapper > .backbutton {
+	font-size: 2em;
 }
 
 #architectureicon {
@@ -863,10 +872,25 @@ upload:focus {
 	height: 127px;
 }
 
-#languagetext {
+#wondericon {
+	width: 100%;
+}
+
+#wonderbox {
+	width: 100%;
+}
+
+#castlebox {
+	width: 100%;
+}
+
+.advancedinnerwrapper {
+	width: 50%;
+}
+
+.advancedtext {
 	font-size: 26px;
-	width: 170px;
-	padding: 10px;
+	width: 100%;
 	text-align: center;
 }
 
@@ -952,12 +976,24 @@ upload:focus {
 
 #links {
 	position: fixed;
-	top: 2rem;
-	right: 2rem;
+	top: 1vw;
+	right: 2vh;
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: center;
+}
+
+@media only screen and (max-width: 1026px) {
+	#links {
+		display: none;
+	}
+}
+
+@media only screen and (max-width: 750px) {
+	#navigation {
+		display: none;
+	}
 }
 
 #discordinvite {
@@ -1384,4 +1420,86 @@ select option:checked {
 .editionWrapper {
 	display: flex;
 	flex-direction: row;
+}
+
+#advancedbutton {
+	font-size: 1.2rem;
+	width: 200px;
+	margin: 0;
+	margin-left: 50px;
+}
+
+#advancedbox {
+	width: 600px;
+	height: 100%;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	padding-top: 10px;
+}
+
+#buildmenu {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: center;
+	align-items: center;
+	font-family: "Cinzel", serif;
+	text-shadow: 1px 1px 3px black;
+	font-size: 2rem;
+	margin: 0 auto;
+	width: 600px;
+	padding: 30px 20px 40px 20px;
+}
+
+#buildwrapper {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: var(--secondary);
+	border: 2px solid var(--primary);
+	color: var(--primary);
+}
+
+#descriptionbox {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-direction: row;
+	width: 90%;
+}
+
+#descriptioninput {
+	width: 60%;
+	text-align: center;
+	font-size: 26px;
+	line-height: 26px;
+}
+
+#descriptionlabel {
+	width: 40%;
+}
+
+#smokey {
+	margin-top: 25px;
+	margin-bottom: 25px;
+	height: 200px;
+	width: auto;
+}
+
+#donationgoal {
+	margin-top: 25px;
+	width: 400px;
+	height: 60px;
+}
+
+progress[value] {
+	/* Reset the default appearance */
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+progress[value]::-webkit-progress-bar {
+	background-color: #eee;
+	border-radius: 2px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
 }

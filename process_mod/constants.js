@@ -1,15 +1,18 @@
-//0 = vanilla, 1 = allow generated bonuses
 const numBonuses = [
-	[334, 334], //Civ bonuses
-	[83, 83], //Unique units
-	[54, 54], //Castle techs
-	[54, 54], //Imp techs
-	[76, 76], //Team bonuses
+	363, //Civ bonuses
+	88, //Unique units
+	60, //Castle techs
+	59, //Imp techs
+	80, //Team bonuses
 ];
 
-const numCivs = 45;
+const numCivs = 50;
 
-const numBasicTechs = 162;
+const numBasicTechs = 169;
+
+const numCastles = 50;
+
+const numWonders = 50;
 
 const techtreeNames = [
 	"BRITONS",
@@ -57,6 +60,11 @@ const techtreeNames = [
 	"ROMANS",
 	"ARMENIANS",
 	"GEORGIANS",
+	"SHU",
+	"WU",
+	"WEI",
+	"JURCHENS",
+	"KHITANS",
 ];
 
 //Names and colours for flags
@@ -106,6 +114,11 @@ const nameArr = [
 	"romans",
 	"armenians",
 	"georgians",
+	"shu",
+	"wu",
+	"wei",
+	"jurchens",
+	"khitans",
 ];
 const colours = [
 	[0, 0, 0],
@@ -211,8 +224,13 @@ const iconids = [
 	"389", // Ratha
 	"407", // Composite Bowman
 	"408", // Monaspa
+	"434", // White Feather Guard
+	"436", // Fire Archer
+	"432", // Tiger Cavalry
+	"461", // Iron Pagoda
+	"463", // Liao Dao
 ];
-const blanks = ["040", "079", "107", "116", "134", "143", "185", "198", "201", "229", "270", "354", "371", "372", "387", "385", "391", "392", "409", "410"];
+const blanks = ["040", "079", "107", "116", "134", "143", "185", "198", "201", "229", "270", "354", "371", "372", "387", "385", "391", "392", "409", "410", "433", "435", "437", "462", "464", "465", "466", "467", "178"];
 
 //Maps website techtree indices to data.json techtree indices
 const indexDictionary = [
@@ -281,6 +299,14 @@ const indexDictionary = [
 		1744: 158,
 		1746: 159,
 		1795: 160,
+		1901: 162,
+		1903: 163,
+		1944: 164,
+		1946: 165,
+		1904: 166,
+		1907: 167,
+		1948: 168,
+		1942: 14,
 	},
 	{
 		12: 137,
@@ -377,7 +403,6 @@ const indexDictionary = [
 		441: 99,
 		602: 16,
 		608: 93,
-		716: 14,
 		875: 155,
 		46: 161,
 	},
@@ -393,4 +418,6 @@ module.exports = {
 	indexDictionary,
 	numCivs,
 	techtreeNames,
+	numWonders,
+	numCastles,
 };
