@@ -900,7 +900,7 @@ router.get("/draft/host/:id", checkCookies, authenticateDraft, function (req, re
 
 router.get("/draft/player/:id", checkCookies, authenticateDraft, function (req, res) {
 	if (req.authenticated == -1) {
-		res.redirect(path.join(hostname, "/draft/" + req.params.id));
+		res.redirect(new URL(`/draft/${req.params.id}`, hostname).toString());
 	} else if (req.authenticated == 0) {
 		res.render(__dirname + "/public/pug/error", { error: "Draft does not exist" });
 	} else if (req.authenticated == 1) {
@@ -910,13 +910,13 @@ router.get("/draft/player/:id", checkCookies, authenticateDraft, function (req, 
 
 router.post("/join", setID, checkCookies, authenticateDraft, checkSpace, (req, res) => {
 	if (req.authenticated == -1) {
-		res.redirect(path.join(hostname, "/draft/" + req.body.draftID));
+		res.redirect(new URL(`/draft/${req.body.draftID}`, hostname).toString());
 	} else if (req.authenticated == 0) {
 		res.render(__dirname + "/public/pug/error", { error: "Draft does not exist" });
 	} else if (req.authenticated == 1) {
 		res.cookie("playerNumber", req.playerNumber);
 		res.cookie("draftID", req.body.draftID);
-		res.redirect(path.join(hostname, "/draft/" + req.body.draftID));
+		res.redirect(new URL(`/draft/${req.body.draftID}`, hostname).toString());
 	} else if (req.authenticated == 2) {
 		res.render(__dirname + "/public/pug/error", { error: "Host already joined" });
 	} else if (req.authenticated == 3) {
