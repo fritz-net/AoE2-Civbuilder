@@ -9,16 +9,20 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copy only the genieutils source and CMakeLists.txt for C++ build
-COPY modding/genieutils/ modding/genieutils/
-COPY modding/pcrio/ modding/pcrio/
-COPY modding/CMakeLists.txt modding/CMakeLists.txt
-COPY modding/scripts/build.sh modding/scripts/build.sh
+# COPY modding/genieutils/ modding/genieutils/
+# COPY modding/pcrio/ modding/pcrio/
+# COPY modding/CMakeLists.txt modding/CMakeLists.txt
+# COPY modding/scripts/build.sh modding/scripts/build.sh
+# COPY modding/create-data-mod.cpp modding/create-data-mod.cpp
+# COPY modding/civbuilder.cpp modding/civbuilder.cpp
+# COPY modding/helpers.cpp modding/helpers.cpp
+# COPY modding/civbuilder.h modding/civbuilder.h
+COPY modding/ modding/
 
 # Ensure Unix line endings for build.sh to avoid cross-platform issues
 RUN dos2unix modding/scripts/build.sh && chmod +x modding/scripts/build.sh
 
-# Build genieutils C++ binaries
-#RUN cd ./modding/genieutils && cmake -S . -B build -DSTATIC_COMPILE=TRUE && cmake --build build # we do not need genieutils we just reference it
+# Build all C++ targets (run from modding directory so CMakeLists.txt works)
 RUN cd ./modding/ && ./scripts/build.sh
 
 # --- Stage 2: Build Node.js app and assemble final image ---
