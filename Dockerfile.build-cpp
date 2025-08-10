@@ -3,26 +3,30 @@ FROM node:20-bullseye AS build
 
 # Install build tools for C++ compilation
 RUN apt-get update && \
-    apt-get install -y build-essential cmake git liblz4-dev libboost-iostreams-dev && \
+    apt-get install -y build-essential cmake git liblz4-dev libboost-iostreams-dev dos2unix && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy source code
-COPY . .
-
-# Initialize submodules
-RUN git submodule update --init --recursive
-
-# Build C++ binaries
-# Ensure Unix line endings for build.sh to avoid cross-platform issues
-RUN apt-get update && apt-get install -y dos2unix && \
-    dos2unix ./modding/scripts/build.sh && \
-    chmod +x ./modding/scripts/build.sh
-RUN cd ./modding/genieutils && ../../modding/scripts/build.sh
+# Copy just package.json and package-lock.json
+COPY package*.json ./
 
 # Install Node.js dependencies
 RUN npm install --omit=dev
+
+# --- cpp part ---
+# Initialize submodules
+RUN git submodule update --init --recursive
+
+# Copy all source code
+COPY . .
+
+# Build C++ binaries
+# Ensure Unix line endings for build.sh to avoid cross-platform issues
+RUN dos2unix ./modding/scripts/build.sh && \
+    chmod +x ./modding/scripts/build.sh && \
+    cd ./modding/genieutils && ../../modding/scripts/build.sh
+
 
 ENV NODE_ENV=production
 
@@ -33,8 +37,11 @@ VOLUME ["/app/modding/requested_mods"]
 # --- Test stage ---
 FROM node:20-bullseye AS test
 WORKDIR /app
-COPY . .
+# Copy just package.json and package-lock.json
+COPY package*.json ./
 RUN npm install
+
+COPY . .
 CMD ["npm", "test"]
 
 ENTRYPOINT ["node", "server.js"]
