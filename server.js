@@ -1,3 +1,4 @@
+
 const dir = "/home/kraken/website/civbuilder";
 
 const hostname = "https://krakenmeister.com/civbuilder";
@@ -23,6 +24,8 @@ const makeai = require("./process_mod/modAI.js");
 const { numBonuses, numBasicTechs, nameArr, colours, iconids, blanks, indexDictionary } = require("./process_mod/constants.js");
 const { createCivilizationsJson } = require("./process_mod/createCivilizationsJson.js");
 const commonJs = require("./public/js/common.js");
+
+console.log("Starting server...");
 
 const server = require("http").Server(app);
 const io = require("socket.io")(server);
@@ -1307,4 +1310,4 @@ module.exports = {
 	router: router,
 };
 
-// server.listen(port);
+server.listen(port);

@@ -33,7 +33,7 @@ docker build -f Dockerfile.build-cpp -t aoe2-civbuilder:build-cpp .
 
 **Run the container:**
 ```sh
-docker run -p 3000:3000 aoe2-civbuilder:build-cpp
+docker run -p 4000:4000 aoe2-civbuilder:build-cpp
 ```
 
 ### 2. Using `Dockerfile.prebuilt-cpp`
@@ -45,7 +45,7 @@ docker build -f Dockerfile.prebuilt-cpp -t aoe2-civbuilder:prebuilt-cpp .
 
 **Run the container:**
 ```sh
-docker run -p 3000:3000 aoe2-civbuilder:prebuilt-cpp
+docker run -p 4000:4000 aoe2-civbuilder:prebuilt-cpp
 ```
 
 ---
@@ -53,7 +53,7 @@ docker run -p 3000:3000 aoe2-civbuilder:prebuilt-cpp
 ## Accessing the Application
 
 Once the container is running, access AoE2-Civbuilder at:  
-[http://localhost:3000](http://localhost:3000)
+[http://localhost:4000](http://localhost:4000)
 
 ---
 
@@ -62,7 +62,7 @@ Once the container is running, access AoE2-Civbuilder at:
 To persist user-generated mods or other data, you can mount a local directory to the container. For example:
 
 ```sh
-docker run -p 3000:3000 -v $(pwd)/modding/requested_mods:/app/modding/requested_mods aoe2-civbuilder:build-cpp
+docker run -p 4000:4000 -v $(pwd)/modding/requested_mods:/app/modding/requested_mods aoe2-civbuilder:build-cpp
 ```
 
 Adjust the paths as needed for your environment.
@@ -71,7 +71,7 @@ Adjust the paths as needed for your environment.
 
 ## Environment Variables and Ports
 
-- The default exposed port is **3000**. You can change the host port mapping if needed (e.g., `-p 8080:3000`).
+- The default exposed port is **4000**. You can change the host port mapping if needed (e.g., `-p 8080:4000`).
 - If the application supports additional environment variables, set them with `-e VAR=value`. Refer to the main [`README.md`](README.md:1) or Dockerfile comments for details.
 
 ---
