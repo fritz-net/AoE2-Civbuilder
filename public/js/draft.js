@@ -710,7 +710,7 @@ function renderDraftTable(draft) {
 				} else if (roundType == 4) {
 					prefix = "team";
 				}
-				var path = `${prefix}_${draft["gamestate"]["cards"][i]}.jpg`;
+				var path = `${prefix}_${i}_v${card_descriptions[roundType][i][3]}.jpg`;
 
 				var image = document.createElement("img");
 				image.className = `cardimage ${rarities[card_descriptions[roundType][draft["gamestate"]["cards"][i]][1]]}`;
