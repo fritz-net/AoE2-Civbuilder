@@ -1111,7 +1111,7 @@ function draftIO(io) {
 												//Zip Files
 												osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${draft["id"]} 1`, function () {
 													draft["gamestate"]["phase"] = 6;
-													fs.writeFileSync(`${dir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
+													fs.writeFileSync(`${tempdir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
 													io.in(roomID).emit("set gamestate", draft);
 												});
 											});
