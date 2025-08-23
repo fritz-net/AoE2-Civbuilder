@@ -24,3 +24,9 @@ For drafts, information is passed between clients and server via socket.io. Each
 &emsp;&emsp;3. Get the building graphics of each custom civilization's architecture.<br>
 &emsp;&emsp;4. Give each civilization its unique unit, tech tree, unique techs, civilization bonuses, and team bonus.<br>
 &emsp;&emsp;5. Randomize the costs of all units if the data.json requested it.
+
+
+# run with Docker
+```bash
+docker run --rm -e CIVBUILDER_HOSTNAME=http://localhost:4000 -p 4000:4000 ghcr.io/fritz-net/aoe2-civbuilder:latest
+```
