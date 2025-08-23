@@ -3662,7 +3662,7 @@ void Civbuilder::createCivBonuses() {
             }
         }
         if (attackType != -1) {
-            let percent = 1;
+            int percent = 1;
             e.EffectCommands.push_back(createEC(percent, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(115, attackType)));
         }
     }
