@@ -380,7 +380,7 @@ const card_descriptions = [
 		["All explosive units 2x blast radius", 0, 1, 0],
 		["Gunpowder units +8 attack vs. buildings", 0, 1, 0],
 		["Shock Infantry +1 pierce armor", 0, 1, 0],
-		["Gunpowder units +5% attack per university technology researched (cumulative)", 3, 1, 0],
+		["Gunpowder units +1% attack per university technology researched (cumulative)", 3, 1, 0],
 		["Buildings +3% HP per university technology researched (cumulative)", 1, 1, 0],
 		["Each monastery technology researched brings a monk to your cause", 3, 1, 0],
 		["Folwark replaces Mill", 1, -38, 0],

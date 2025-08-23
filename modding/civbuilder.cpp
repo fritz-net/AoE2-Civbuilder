@@ -3651,7 +3651,7 @@ void Civbuilder::createCivBonuses() {
     }
     this->createCivBonus(276, e, "C-Bonus, Shock Infantry +1P armor");
 
-    // Gunpowder units +5% attack per university tech
+    // Gunpowder units +1% attack per university tech
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["gunpowder"].size(); i++) {
         int attackType = -1;
@@ -3662,12 +3662,13 @@ void Civbuilder::createCivBonuses() {
             }
         }
         if (attackType != -1) {
-            e.EffectCommands.push_back(createEC(5, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(115, attackType)));
+            let percent = 1;
+            e.EffectCommands.push_back(createEC(percent, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(115, attackType)));
         }
     }
     for (int i = 0; i < this->df->Techs.size(); i++) {
         if (this->df->Techs[i].ResearchLocation == 209) {
-            this->createCivBonus(277, e, "Gunpowder +5% attack for uni tech " + to_string(i), {i});
+            this->createCivBonus(277, e, "Gunpowder +1% attack for uni tech " + to_string(i), {i});
         }
     }
 
