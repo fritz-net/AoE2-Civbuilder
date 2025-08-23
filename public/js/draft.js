@@ -273,6 +273,7 @@ function renderFlagTech(draft) {
 		archbox.appendChild(iconforward);
 
 		var langbox = document.createElement("div");
+		langbox.style.width = "80%";
 		langbox.id = "langbox";
 
 		var languagetext = document.createElement("div");

@@ -1097,7 +1097,7 @@ function draftIO(io) {
 										createTechtreeJson.createTechtreeJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civTechTrees.json`);
 										createCivilizationsJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civilizations.json`);
 										//Add voices
-										let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ${dir}/public/vanillaFiles/voiceFiles`;
+										let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ./public/vanillaFiles/voiceFiles`;
 										let uniqueLanguages = [];
 										for (var i = 0; i < mod_data.language.length; i++) {
 											if (uniqueLanguages.indexOf(mod_data.language[i]) == -1) {
