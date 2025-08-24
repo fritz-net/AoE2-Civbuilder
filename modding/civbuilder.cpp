@@ -643,7 +643,7 @@ void Civbuilder::createUU(int civbuilderID, int baseID, string name, vector<int>
 
     eliteTech.LanguageDLLName = techDLL;
     eliteTech.LanguageDLLDescription = techDLL + 1000;
-    eliteTech.LanguageDLLHelp = techDLL + 100000;
+    eliteTech.LanguageDLLHelp = techDLL + 1000 + 20000;
     eliteTech.RequiredTechs.push_back(103);
     eliteTech.RequiredTechs.push_back((int)(this->df->Techs.size() - 1));
     eliteTech.RequiredTechCount = 2;
@@ -1105,7 +1105,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Name = "EMPCAV";
         civ.Units[eID].LanguageDLLName = 5801;
         civ.Units[eID].LanguageDLLCreation = 6801;
-        civ.Units[eID].LanguageDLLHelp = 105801;
+        civ.Units[eID].LanguageDLLHelp = 26801;
         unit::AttackOrArmor ram_bonus = unit::AttackOrArmor();
         ram_bonus.Class = 17;
         ram_bonus.Amount = 8;
