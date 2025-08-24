@@ -2244,17 +2244,17 @@ void Civbuilder::createNewUnits() {
 
     // Create City Walls
     for (Civ &civ : this->df->Civs) {
-        civ.Units[370].Creatable.TrainLocationID = 118;
-        civ.Units[370].Creatable.ButtonID = 8;
-        civ.Units[370].HitPoints = 4800;
-        civ.Units[370].Creatable.DisplayedPierceArmour = 16;
-        civ.Units[370].Type50.DisplayedMeleeArmour = 16;
-        civ.Units[370].Type50.Armours = civ.Units[155].Type50.Armours;
-        civ.Units[370].Type50.Armours[2].Amount = 16;
-        civ.Units[370].Type50.Armours[3].Amount = 16;
-        civ.Units[370].Type50.Armours[6].Amount = 16;
-        civ.Units[370].Creatable.ResourceCosts[0].Amount = 5;
-        civ.Units[370].BlastDefenseLevel = 2;
+        civ.Units[cityWall].Creatable.TrainLocationID = 118;
+        civ.Units[cityWall].Creatable.ButtonID = 8;
+        civ.Units[cityWall].HitPoints = 4800;
+        civ.Units[cityWall].Creatable.DisplayedPierceArmour = 16;
+        civ.Units[cityWall].Type50.DisplayedMeleeArmour = 16;
+        civ.Units[cityWall].Type50.Armours = civ.Units[155].Type50.Armours;
+        civ.Units[cityWall].Type50.Armours[2].Amount = 16;
+        civ.Units[cityWall].Type50.Armours[3].Amount = 16;
+        civ.Units[cityWall].Type50.Armours[6].Amount = 16;
+        civ.Units[cityWall].Creatable.ResourceCosts[0].Amount = 5;
+        civ.Units[cityWall].BlastDefenseLevel = 2;
         for (int i = 0; i < 16; i++) {
             civ.Units[i + 1579].Type50.Armours[1].Amount = 30;
             civ.Units[i + 1579].Creatable.ResourceCosts[0].Amount = 30;

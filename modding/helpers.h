@@ -42,6 +42,7 @@ const int smallFarmDrop = 930;
 const int smallFarmStack = 1037;
 const int smallRiceFarmDrop = 1038;
 const int feudalKnight = 1262;
+const int cityWall = 370;
 
 const vector<int> disableIDs = {74, 13, 545, 45, 70, 72};
 const vector<int> palisadeGates = {789, 790, 791, 792, 793, 794, 795, 796, 797, 798, 799, 800, 801, 802, 803, 804};
