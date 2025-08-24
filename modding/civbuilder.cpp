@@ -3652,19 +3652,21 @@ void Civbuilder::createCivBonuses() {
     }
     this->createCivBonus(276, e, "C-Bonus, Shock Infantry +1P armor");
 
-    // Gunpowder units +1% attack per university tech
+    // Gunpowder units +1 attack per university tech
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["gunpowder"].size(); i++) {
         int attackType = -1;
         for (int j = 0; j < this->df->Civs[0].Units[this->unitClasses["gunpowder"][i]].Type50.Attacks.size(); j++) {
             unit::AttackOrArmor attack = df->Civs[0].Units[this->unitClasses["gunpowder"][i]].Type50.Attacks[j];
-            if (((attack.Class == 4) || (attack.Class == 3)) && (attack.Amount != 0)) {
+            if (((attack.Class == 4) || (attack.Class == 3)) && (attack.Amount != 0)) { // 4=BaseMelee, 3=BasePierce
                 attackType = attack.Class;
+                //break; // early exit ??
             }
         }
         if (attackType != -1) {
-            int percentMultiplicator = 105;
-            e.EffectCommands.push_back(createEC(5, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(percentMultiplicator, attackType)));
+            //int percentMultiplicator = 105;
+            //e.EffectCommands.push_back(createEC(5, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(percentMultiplicator, attackType)));
+            e.EffectCommands.push_back(createEC(5, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(1, attackType)));
         }
     }
     for (int i = 0; i < this->df->Techs.size(); i++) {

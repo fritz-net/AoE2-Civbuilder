@@ -373,7 +373,7 @@ const civBonusStrings = [
 	"All explosive units 2x blast radius",
 	"Gunpowder units +8 attack vs. buildings",
 	"Shock Infantry +1 pierce armor",
-	"Gunpowder units +1% attack per university technology researched (cumulative)",
+	"Gunpowder units +1 attack per university technology researched (cumulative)",
 	"Buildings +3% HP per university technology researched (cumulative)",
 	"Each monastery technology researched brings a monk to your cause",
 	"Folwark replaces Mill",
