@@ -2135,7 +2135,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[royalLancer].Name = "RSLANCER";
         civ.Units[royalLancer].LanguageDLLName = 5242;
         civ.Units[royalLancer].LanguageDLLCreation = 6242;
-        civ.Units[royalLancer].LanguageDLLHelp = 105242;
+        civ.Units[royalLancer].LanguageDLLHelp = 26242;
         civ.Units[royalLancer].StandingGraphic = {10510, 10511};
         civ.Units[royalLancer].Type50.AttackGraphic = 10508;
         civ.Units[royalLancer].DyingGraphic = 10509;
@@ -2152,7 +2152,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[royalElephant].Name = "RBATELE";
         civ.Units[royalElephant].LanguageDLLName = 5241;
         civ.Units[royalElephant].LanguageDLLCreation = 6241;
-        civ.Units[royalElephant].LanguageDLLHelp = 105241;
+        civ.Units[royalElephant].LanguageDLLHelp = 26241;
         civ.Units[royalElephant].StandingGraphic = {2926, -1};
         civ.Units[royalElephant].Type50.AttackGraphic = 2924;
         civ.Units[royalElephant].DyingGraphic = 2925;
@@ -2172,7 +2172,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[impScorpion].Name = "IMPBAL";
         civ.Units[impScorpion].LanguageDLLName = 5240;
         civ.Units[impScorpion].LanguageDLLCreation = 6240;
-        civ.Units[impScorpion].LanguageDLLHelp = 105240;
+        civ.Units[impScorpion].LanguageDLLHelp = 26240;
         civ.Units[impScorpion].HitPoints = 60;
         civ.Units[impScorpion].Type50.DisplayedAttack = 18;
         civ.Units[impScorpion].Type50.Attacks[3].Amount = 18;
@@ -2490,8 +2490,8 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Imperial Scorpion";
     t.LanguageDLLName = 7600;
     t.LanguageDLLDescription = 8600;
-    t.LanguageDLLHelp = 107600;
-    t.LanguageDLLTechTree = 157600;
+    t.LanguageDLLHelp = 28600;
+    t.LanguageDLLTechTree = 17600;
     t.RequiredTechs.push_back(239);
     t.RequiredTechCount = 1;
     t.ResourceCosts[0].Type = 0;
@@ -2520,8 +2520,8 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Royal Battle Elephant";
     t.LanguageDLLName = 7601;
     t.LanguageDLLDescription = 8601;
-    t.LanguageDLLHelp = 107601;
-    t.LanguageDLLTechTree = 157601;
+    t.LanguageDLLHelp = 28601;
+    t.LanguageDLLTechTree = 7601; // TODO does not exist?
     t.RequiredTechCount = 1;
     t.RequiredTechs.push_back(631);
     t.ResourceCosts[0].Type = 0;
@@ -2551,8 +2551,8 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Royal Lancer";
     t.LanguageDLLName = 7602;
     t.LanguageDLLDescription = 8602;
-    t.LanguageDLLHelp = 107602;
-    t.LanguageDLLTechTree = 157602;
+    t.LanguageDLLHelp = 28602;
+    t.LanguageDLLTechTree = 7602;
     t.RequiredTechs.push_back(715);
     t.RequiredTechCount = 1;
     t.ResourceCosts[0].Type = 0;
