@@ -318,7 +318,7 @@ const civBonusStrings = [
 	"Monk units move 20% faster",
 	"Melee Cavalry gain +2 bonus damage vs Skirmishers",
 	"Spearman- and Militia-line upgrades (except Man-at-Arms) available one age earlier",
-	"Can buy cows in mills",
+	"Can buy cows in mills (10 gold)",
 	"Start with an extra horse",
 	"Siege Towers 2x HP",
 	"Siege Towers train 100% faster",

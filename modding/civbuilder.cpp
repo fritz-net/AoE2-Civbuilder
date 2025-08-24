@@ -2197,13 +2197,21 @@ void Civbuilder::createNewUnits() {
         civ.Units[millCow].Creatable.TrainLocationID = 68;
         civ.Units[millCow].Creatable.ButtonID = 2;
         civ.Units[millCow].Creatable.ResourceCosts[0].Type = 3;
-        civ.Units[millCow].Creatable.ResourceCosts[0].Amount = 25;
+        civ.Units[millCow].Creatable.ResourceCosts[0].Amount = 10;
+
+        civ.Units[folwarkCow] = civ.Units[705];
+        civ.Units[folwarkCow].Name = "FOLWARK";
+        civ.Units[folwarkCow].Creatable.TrainLocationID = 1734; // 1734:folwark-age1 ,1711:folwark-age2, 1720:folwark-age3
+        civ.Units[folwarkCow].Creatable.ButtonID = 2;
+        civ.Units[folwarkCow].Creatable.ResourceCosts[0].Type = 3;
+        civ.Units[folwarkCow].Creatable.ResourceCosts[0].Amount = 10;
+
         civ.Units[pastureCow] = civ.Units[705];
         civ.Units[pastureCow].Name = "BIGBABY";
         civ.Units[pastureCow].Creatable.TrainLocationID = 1889;
         civ.Units[pastureCow].Creatable.ButtonID = 2;
         civ.Units[pastureCow].Creatable.ResourceCosts[0].Type = 3;
-        civ.Units[pastureCow].Creatable.ResourceCosts[0].Amount = 25;
+        civ.Units[pastureCow].Creatable.ResourceCosts[0].Amount = 10;
     }
 
     // Create feudal monk
@@ -3184,6 +3192,7 @@ void Civbuilder::createCivBonuses() {
     // Cows from mills
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(2, millCow, 1, -1, 0));
+    e.EffectCommands.push_back(createEC(2, folwarkCow, 1, -1, 0));
     e.EffectCommands.push_back(createEC(2, pastureCow, 1, -1, 0));
     this->createCivBonus(222, e, "C-Bonus, Cows from mills");
 

@@ -32,6 +32,7 @@ const int impScorpion = 1179;
 const int impScorpionProjectile = 1113;
 const int impScorpionProjectileFire = 1114;
 const int millCow = 646;
+const int folwarkCow = 652;
 const int pastureCow = 650;
 const int feudalMonk = 648;
 const int smallFarm = 845;

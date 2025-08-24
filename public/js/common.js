@@ -325,7 +325,7 @@ const card_descriptions = [
 		["Monk units move 20% faster", 2, -23, 0],
 		["Melee Cavalry gain +2 bonus damage vs Skirmishers", 0, 1, 0],
 		["Spearman- and Militia-line upgrades (except Man-at-Arms) available one age earlier", 1, -44, 0],
-		["Can buy cows in mills", 1, 1, 0],
+		["Can buy cows in mills (10 gold)", 1, 1, 0],
 		["Start with an extra horse", 1, -17, 0],
 		["Siege Towers 2x HP", 1, 1, 0],
 		["Siege Towers train 100% faster", 0, 1, 0],
