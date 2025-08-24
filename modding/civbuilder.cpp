@@ -3665,8 +3665,8 @@ void Civbuilder::createCivBonuses() {
         }
         if (attackType != -1) {
             //int percentMultiplicator = 105;
-            //e.EffectCommands.push_back(createEC(5, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(percentMultiplicator, attackType)));
-            e.EffectCommands.push_back(createEC(5, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(1, attackType)));
+            //e.EffectCommands.push_back(createEC(5, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(percentMultiplicator, attackType))); // original percentage based
+            e.EffectCommands.push_back(createEC(4, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(1, attackType)));
         }
     }
     for (int i = 0; i < this->df->Techs.size(); i++) {
