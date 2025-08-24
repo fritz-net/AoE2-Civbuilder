@@ -2153,10 +2153,12 @@ void Civbuilder::createNewUnits() {
         civ.Units[royalElephant].LanguageDLLName = 5241;
         civ.Units[royalElephant].LanguageDLLCreation = 6241;
         civ.Units[royalElephant].LanguageDLLHelp = 26241;
-        civ.Units[royalElephant].StandingGraphic = {2926, -1};
-        civ.Units[royalElephant].Type50.AttackGraphic = 2924;
-        civ.Units[royalElephant].DyingGraphic = 2925;
-        civ.Units[royalElephant].DeadFish.WalkingGraphic = 2927;
+
+        // TODO: seem wrong Shrivamsha_Rider and Genitour 
+        //civ.Units[royalElephant].StandingGraphic = {2926, -1};
+        //civ.Units[royalElephant].Type50.AttackGraphic = 2924;
+        //civ.Units[royalElephant].DyingGraphic = 2925;
+        //civ.Units[royalElephant].DeadFish.WalkingGraphic = 2927;
         civ.Units[royalElephant].HitPoints = 330;
         civ.Units[royalElephant].Type50.DisplayedAttack = 15;
         civ.Units[royalElephant].Type50.Attacks[1].Amount = 15;
