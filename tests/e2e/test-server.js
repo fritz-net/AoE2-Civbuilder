@@ -16,14 +16,14 @@ class TestServer {
       fs.mkdirSync(`${tempdir}/drafts`, { recursive: true });
     }
 
-    // Set environment variables for test server
+    // Set environment variables for test server (use localhost for testing)
     process.env.CIVBUILDER_HOSTNAME = `http://localhost:${this.port}`;
     
     return new Promise((resolve, reject) => {
       // Start server in a child process to avoid conflicts
       this.serverProcess = exec(
-        `cd ${process.cwd()} && PORT=${this.port} node server.js`,
-        { env: { ...process.env, PORT: this.port } }
+        `cd ${process.cwd()} && PORT=${this.port} CIVBUILDER_HOSTNAME=http://localhost:${this.port} node server.js`,
+        { env: { ...process.env, PORT: this.port, CIVBUILDER_HOSTNAME: `http://localhost:${this.port}` } }
       );
 
       let startupTimer;
