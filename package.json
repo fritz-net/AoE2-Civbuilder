@@ -1,10 +1,18 @@
 {
+  "name": "aoe2-civbuilder",
+  "version": "1.0.0",
+  "description": "Age of Empires 2 Civilization Builder",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "jest --testPathPattern=tests/e2e",
+    "test:ci": "jest --testPathPattern=tests/e2e --ci"
+  },
   "dependencies": {
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
     "canvas": "^2.11.2",
     "child_process": "^1.0.2",
-    "chromedriver": "^90.0.0",
     "cookie-parser": "^1.4.6",
     "express": "^4.17.1",
     "express-easy-zip": "^1.1.5",
@@ -12,8 +20,14 @@
     "fs-js": "^1.0.6",
     "path": "^0.12.7",
     "pug": "^3.0.2",
-    "selenium-webdriver": "*",
     "socket.io": "^4.0.1",
     "util": "^0.10.4"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0",
+    "jsdom": "^22.0.0",
+    "jsdom-global": "^3.0.2",
+    "node-fetch": "^2.6.7"
   }
 }

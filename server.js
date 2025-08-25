@@ -30,7 +30,7 @@ const io = require("socket.io")(server);
 const tempdir = path.join(os.tmpdir(), "civbuilder");
 const hostname = process.env.CIVBUILDER_HOSTNAME || "https://krakenmeister.com/civbuilder";
 const routeSubdir = new URL(hostname).pathname.replace(/\/$/, "") || "/";
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 console.log("running with hostname:", hostname);
 console.log("route subdir:", routeSubdir);

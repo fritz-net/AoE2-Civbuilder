@@ -10,3 +10,9 @@ modding/requested_mods/*
 database.json
 drafts/*.json
 process_mod/randomName.js
+
+# Test artifacts and coverage
+test-results/
+coverage/
+junit.xml
+*.log
