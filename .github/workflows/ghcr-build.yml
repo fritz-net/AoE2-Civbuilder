@@ -75,6 +75,9 @@ jobs:
       - name: Setup C++ Build Environment (fallback)
         run: |
           sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository universe
+          sudo apt-get update
           sudo apt-get install -y build-essential cmake libcheck-dev
 
       - name: Build C++ Backend (fallback if service unavailable)
