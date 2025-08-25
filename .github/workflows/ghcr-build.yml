@@ -9,7 +9,7 @@ permissions:
   packages: write
 
 jobs:
-  e2e-tests:
+  simple-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository (with submodules)
@@ -26,16 +26,62 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run E2E tests
-        run: npm run test:ci
+      - name: Run Simple E2E tests
+        run: npm run test:simple
         env:
           CI: true
 
       - name: Upload test results
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: simple-test-results
+          path: |
+            test-results/
+            coverage/
+          retention-days: 7
+
+  complex-tests:
+    runs-on: ubuntu-latest
+    needs: simple-tests  # Run complex tests only if simple tests pass
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Setup C++ Build Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake libcheck-dev
+
+      - name: Build C++ Backend
+        run: |
+          cd modding
+          ./scripts/build.sh
+        env:
+          CIVBUILDER_HOSTNAME: http://localhost:4000
+
+      - name: Run Complex E2E tests with C++ Backend
+        run: npm run test:complex
+        env:
+          CI: true
+          CIVBUILDER_HOSTNAME: http://localhost:4000
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: complex-test-results
           path: |
             test-results/
             coverage/
@@ -43,7 +89,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    needs: e2e-tests  # Only build if E2E tests pass
+    needs: [simple-tests, complex-tests]  # Only build if both test jobs pass
     steps:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4

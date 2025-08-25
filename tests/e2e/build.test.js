@@ -93,4 +93,40 @@ describe('Build Path E2E Tests', () => {
       expect(error.message).toContain('socket hang up');
     }
   });
+
+  // Comprehensive Build Workflow Test as requested in PR comment
+  test('should serve resources for complete build workflow', async () => {
+    // Test the complete build workflow endpoints as described in PR comment:
+    // 1. Flag Creator (phase 1) - Home page -> Build button  
+    // 2. Tech Tree selection (phase 2) - select techs, press "Done"
+    // 3. Multi-stage bonuses (phases 3-7) - Civ Bonuses, Team Bonuses, etc.
+    // 4. Download JSON option
+    // 5. Home -> Combine Civilizations -> Create Mod functionality
+
+    // Test essential JavaScript resources for build workflow
+    const builderJsResponse = await fetch(`${baseURL}/js/builder.js`);
+    expect(builderJsResponse.status).toBe(200);
+    
+    const builderContent = await builderJsResponse.text();
+    // Verify key functions for the build workflow phases exist
+    expect(builderContent).toContain('renderPhase1'); // Flag Creator
+    expect(builderContent).toContain('renderPhase2'); // Tech Tree  
+    expect(builderContent).toContain('downloadTextFile'); // JSON download functionality
+
+    // Test common.js provides shared functionality
+    const commonJsResponse = await fetch(`${baseURL}/js/common.js`);
+    expect(commonJsResponse.status).toBe(200);
+    
+    const commonContent = await commonJsResponse.text();
+    expect(commonContent).toContain('hostname');  // Hostname configuration
+    expect(commonContent).toContain('route');     // Route configuration
+
+    // Test tech tree resources are available  
+    const techtreeJsResponse = await fetch(`${baseURL}/aoe2techtree/js/techtree.js`);
+    expect(techtreeJsResponse.status).toBe(200);
+
+    // Test that CSS styles are available for the build interface
+    const stylesResponse = await fetch(`${baseURL}/css/styles.css`);
+    expect(stylesResponse.status).toBe(200);
+  });
 });

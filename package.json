@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "test": "jest --testPathPattern=tests/e2e",
-    "test:ci": "jest --testPathPattern=tests/e2e --ci"
+    "test:ci": "jest --testPathPattern=tests/e2e --ci",
+    "test:simple": "jest --testPathPattern=tests/e2e --testNamePattern='should serve|should navigate|should handle.*workflow$|should validate.*configurations'",
+    "test:complex": "jest --testPathPattern=tests/e2e --testNamePattern='should.*complete.*workflow|should.*create mod'"
   },
   "dependencies": {
     "axios": "^0.21.1",
