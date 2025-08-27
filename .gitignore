@@ -1,4 +1,3 @@
-package-lock.json
 #modding/genieutils
 modding/oldgenieutils
 node_modules
@@ -10,3 +9,9 @@ modding/requested_mods/*
 database.json
 drafts/*.json
 process_mod/randomName.js
+
+# Test artifacts and coverage
+test-results/
+coverage/
+junit.xml
+*.log

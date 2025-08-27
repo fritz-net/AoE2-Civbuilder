@@ -3673,7 +3673,7 @@ void Civbuilder::createCivBonuses() {
     }
     for (int i = 0; i < this->df->Techs.size(); i++) {
         if (this->df->Techs[i].ResearchLocation == 209) {
-            this->createCivBonus(277, e, "Gunpowder +1% attack for uni tech " + to_string(i), {i});
+            this->createCivBonus(277, e, "Gunpowder +1 attack for uni tech " + to_string(i), {i});
         }
     }
 
