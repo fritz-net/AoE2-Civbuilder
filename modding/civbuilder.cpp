@@ -3834,7 +3834,7 @@ void Civbuilder::createCivBonuses() {
     // Less bonus damage from higher elevation
     this->civBonuses[320] = {926};
 
-    // Cavalry regen
+    // Cavalry regen - Ordo Cavalry
     this->civBonuses[321] = {937, 938, 939};
 
     // Flaming camel bonus
