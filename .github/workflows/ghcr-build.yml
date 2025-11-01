@@ -186,8 +186,8 @@ jobs:
           
           echo ""
           echo "=== Testing connectivity ==="
-          # Wait with verbose output
-          for i in {1..24}; do
+          # Optimized wait: try every 2 seconds for up to 60 seconds (30 attempts)
+          for i in {1..30}; do
             if curl -f http://localhost:4000/ > /dev/null 2>&1; then
               echo "✓ Service is ready on attempt $i!"
               echo ""
@@ -195,19 +195,19 @@ jobs:
               curl -v http://localhost:4000/ 2>&1 | head -20
               exit 0
             fi
-            echo "Attempt $i/24: Service not ready yet, waiting 5 seconds..."
+            echo "Attempt $i/30: Service not ready yet, waiting 2 seconds..."
             
-            # Show container status every 5 attempts
-            if [ $((i % 5)) -eq 0 ]; then
+            # Show container status every 10 attempts
+            if [ $((i % 10)) -eq 0 ]; then
               echo "  Container status:"
               docker ps -a --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}" --format "table {{.ID}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || echo "  (Could not get container status)"
             fi
             
-            sleep 5
+            sleep 2
           done
           
           echo ""
-          echo "ERROR: Service did not start in time after 120 seconds"
+          echo "ERROR: Service did not start in time after 60 seconds"
           echo ""
           echo "=== Final container status ==="
           docker ps -a

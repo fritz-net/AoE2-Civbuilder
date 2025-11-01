@@ -17,7 +17,7 @@ describe('Complex E2E Workflow Tests', () => {
       console.log('Using C++ backend service at:', baseURL);
       
       // Verify the backend is accessible
-      let retries = 30;
+      let retries = 20;  // Reduced from 30
       let connected = false;
       let lastError = null;
       console.log(`Attempting to connect to C++ backend service at ${baseURL}...`);
@@ -25,7 +25,7 @@ describe('Complex E2E Workflow Tests', () => {
       while (retries > 0 && !connected) {
         try {
           const response = await fetch(`${baseURL}/`);
-          console.log(`Connection attempt ${31 - retries}/30: Status ${response.status}`);
+          console.log(`Connection attempt ${21 - retries}/20: Status ${response.status}`);
           if (response.status === 200) {
             connected = true;
             console.log('✓ Successfully connected to C++ backend service');
@@ -35,15 +35,15 @@ describe('Complex E2E Workflow Tests', () => {
         } catch (error) {
           lastError = error;
           retries--;
-          console.log(`Connection attempt ${31 - retries}/30 failed: ${error.message}`);
+          console.log(`Connection attempt ${21 - retries}/20 failed: ${error.message}`);
           if (retries > 0) {
-            console.log(`Retrying in 2 seconds... (${retries} attempts remaining)`);
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            console.log(`Retrying in 1 second... (${retries} attempts remaining)`);
+            await new Promise(resolve => setTimeout(resolve, 1000));  // Reduced from 2000ms
           }
         }
       }
       if (!connected) {
-        const errorMsg = `Could not connect to C++ backend service after 30 attempts. Last error: ${lastError ? lastError.message : 'Unknown'}`;
+        const errorMsg = `Could not connect to C++ backend service after 20 attempts. Last error: ${lastError ? lastError.message : 'Unknown'}`;
         console.error(errorMsg);
         throw new Error(errorMsg);
       }
@@ -60,7 +60,7 @@ describe('Complex E2E Workflow Tests', () => {
       }
       console.log('Using test server at:', baseURL);
     }
-  }, 120000);
+  }, 60000);  // Reduced from 120000 (60s should be enough with optimized retries)
 
   afterAll(async () => {
     if (testServer) {
