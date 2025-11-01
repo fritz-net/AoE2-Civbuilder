@@ -49,7 +49,7 @@ describe('Complex E2E Workflow Tests', () => {
       }
       console.log('Using test server at:', baseURL);
     }
-  }, 30000);  // 30s timeout for beforeAll - starting test server or verifying backend
+  }, 15_000);  // Timeout for beforeAll
 
   afterAll(async () => {
     if (testServer) {
@@ -140,7 +140,7 @@ describe('Complex E2E Workflow Tests', () => {
         expect(error.message).toMatch(/socket hang up|ECONNRESET|EPIPE|failed, reason/);
       }
     }
-  }, 60000);
+  }, 15_000);
 
   // Draft Workflow - Complete API-based testing of the 13-step process  
   test('should complete full draft workflow with mod creation', async () => {
@@ -286,7 +286,7 @@ describe('Complex E2E Workflow Tests', () => {
         throw error;
       }
     }
-  }, 60000);
+  }, 15_000);
 
   // Test build workflow up to JSON creation (simple test - should work without C++ backend)
   test('should complete build workflow until JSON creation', async () => {
