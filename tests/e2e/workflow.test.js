@@ -16,7 +16,7 @@ describe('Complex E2E Workflow Tests', () => {
     if (!isReady) {
       throw new Error('Test server failed to start');
     }
-  }, 60000);
+  }, 15_000);
 
   afterAll(async () => {
     if (testServer) {
@@ -34,6 +34,8 @@ describe('Complex E2E Workflow Tests', () => {
     // 5. Combine Civilizations -> Create Mod
 
     try {
+      console.log('Opening build page...');
+
       // Step 1: Test build page accessibility
       const buildResponse = await fetch(`${baseURL}/build`);
       expect(buildResponse.status).toBe(200);
@@ -57,6 +59,7 @@ describe('Complex E2E Workflow Tests', () => {
         civs: 'false' // Disable civ generation for test
       };
 
+      console.log('Submitting mod creation request...');
       const createResponse = await fetch(`${baseURL}/create`, {
         method: 'POST',
         headers: {
@@ -84,7 +87,7 @@ describe('Complex E2E Workflow Tests', () => {
       console.error('Build workflow test failed unexpectedly:', error.message);
       throw error; // Re-throw to fail the test properly
     }
-  }, 60000);
+  }, 15_000);
 
   // Draft Workflow - Complete API-based testing of the 13-step process  
   test('should complete full draft workflow with mod creation', async () => {
@@ -170,7 +173,7 @@ describe('Complex E2E Workflow Tests', () => {
       console.error('Draft workflow test failed unexpectedly:', error.message);
       throw error; // Re-throw to fail the test properly
     }
-  }, 60000);
+  }, 15_000);
 
   // Test build workflow up to JSON creation (simple test - should work without C++ backend)
   test('should complete build workflow until JSON creation', async () => {
