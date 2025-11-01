@@ -14,38 +14,27 @@ describe('Complex E2E Workflow Tests', () => {
     if (useExternalBackend) {
       // Use the C++ backend service running in CI
       baseURL = 'http://localhost:4000';
-      console.log('Using C++ backend service at:', baseURL);
+      console.log('=== Using C++ backend service (CI mode) ===');
+      console.log(`Backend URL: ${baseURL}`);
+      console.log(`Environment: CIVBUILDER_HOSTNAME=${process.env.CIVBUILDER_HOSTNAME}`);
       
-      // Verify the backend is accessible
-      let retries = 20;  // Reduced from 30
-      let connected = false;
-      let lastError = null;
-      console.log(`Attempting to connect to C++ backend service at ${baseURL}...`);
-      
-      while (retries > 0 && !connected) {
-        try {
-          const response = await fetch(`${baseURL}/`);
-          console.log(`Connection attempt ${21 - retries}/20: Status ${response.status}`);
-          if (response.status === 200) {
-            connected = true;
-            console.log('✓ Successfully connected to C++ backend service');
-          } else {
-            console.log(`Received non-200 status: ${response.status}`);
-          }
-        } catch (error) {
-          lastError = error;
-          retries--;
-          console.log(`Connection attempt ${21 - retries}/20 failed: ${error.message}`);
-          if (retries > 0) {
-            console.log(`Retrying in 1 second... (${retries} attempts remaining)`);
-            await new Promise(resolve => setTimeout(resolve, 1000));  // Reduced from 2000ms
-          }
+      // CI workflow already waited for service - just verify it's accessible
+      console.log('Verifying backend is accessible...');
+      try {
+        const response = await fetch(`${baseURL}/`);
+        console.log(`Backend response status: ${response.status}`);
+        
+        if (response.status === 200) {
+          console.log('✓ C++ backend is ready and responding');
+        } else {
+          throw new Error(`Backend returned unexpected status: ${response.status}`);
         }
-      }
-      if (!connected) {
-        const errorMsg = `Could not connect to C++ backend service after 20 attempts. Last error: ${lastError ? lastError.message : 'Unknown'}`;
-        console.error(errorMsg);
-        throw new Error(errorMsg);
+      } catch (error) {
+        console.error('✗ FAILED to connect to C++ backend');
+        console.error(`Error: ${error.message}`);
+        console.error('The CI workflow should have already verified the service is ready.');
+        console.error('This indicates a problem with the service or network configuration.');
+        throw error;
       }
     } else {
       // Start test server for local development
@@ -60,7 +49,7 @@ describe('Complex E2E Workflow Tests', () => {
       }
       console.log('Using test server at:', baseURL);
     }
-  }, 60000);  // Reduced from 120000 (60s should be enough with optimized retries)
+  }, 30000);  // Reduced timeout since we removed retries - test server or quick verification
 
   afterAll(async () => {
     if (testServer) {
