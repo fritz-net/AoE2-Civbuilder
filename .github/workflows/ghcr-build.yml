@@ -86,8 +86,9 @@ jobs:
           - 4000:4000
         env:
           CIVBUILDER_HOSTNAME: http://localhost:4000
+        # Simplified health check - just check if port is responding
         options: --health-cmd="curl -f http://localhost:4000/ || exit 1"
-                 --health-interval=30s --health-timeout=10s --health-retries=3
+                 --health-interval=10s --health-timeout=5s --health-retries=10 --health-start-period=30s
     
     steps:
       - name: Checkout repository (with submodules)
@@ -106,29 +107,75 @@ jobs:
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+      
+      - name: Debug - Check network connectivity
+        run: |
+          echo "=== Network diagnostics ==="
+          echo "Checking if port 4000 is listening..."
+          netstat -tuln | grep 4000 || echo "Port 4000 not found in netstat"
+          echo ""
+          echo "Attempting direct connection test..."
+          nc -zv localhost 4000 || echo "Netcat connection failed"
+          echo ""
+          echo "DNS resolution check..."
+          ping -c 1 localhost || echo "Localhost ping failed"
 
       - name: Wait for C++ backend service
         run: |
           echo "Waiting for C++ backend service to be ready..."
           echo "Testing connection to http://localhost:4000/"
           
-          # Try to get service logs if available
-          docker ps -a || true
+          # Show all containers
+          echo "=== Docker containers ==="
+          docker ps -a
           
+          # Try to find and show logs of the civbuilder service
+          echo ""
+          echo "=== Checking service container logs ==="
+          CONTAINER_ID=$(docker ps -q --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}" 2>/dev/null || echo "")
+          if [ -n "$CONTAINER_ID" ]; then
+            echo "Found container: $CONTAINER_ID"
+            echo "Container logs (last 50 lines):"
+            docker logs --tail 50 $CONTAINER_ID 2>&1 || echo "Could not retrieve logs"
+          else
+            echo "Container not found by ancestor, trying by name..."
+            docker logs civbuilder-backend 2>&1 | head -50 || echo "Could not find container by name either"
+          fi
+          
+          echo ""
+          echo "=== Testing connectivity ==="
           # Wait with verbose output
           for i in {1..24}; do
             if curl -f http://localhost:4000/ > /dev/null 2>&1; then
-              echo "✓ Service is ready!"
+              echo "✓ Service is ready on attempt $i!"
+              echo ""
+              echo "=== Service response ==="
               curl -v http://localhost:4000/ 2>&1 | head -20
               exit 0
             fi
             echo "Attempt $i/24: Service not ready yet, waiting 5 seconds..."
+            
+            # Show container status every 5 attempts
+            if [ $((i % 5)) -eq 0 ]; then
+              echo "  Container status:"
+              docker ps -a --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}" --format "table {{.ID}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || echo "  (Could not get container status)"
+            fi
+            
             sleep 5
           done
           
+          echo ""
           echo "ERROR: Service did not start in time after 120 seconds"
-          echo "Checking Docker service logs..."
-          docker logs $(docker ps -q --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}") || true
+          echo ""
+          echo "=== Final container status ==="
+          docker ps -a
+          echo ""
+          echo "=== Final service logs ==="
+          if [ -n "$CONTAINER_ID" ]; then
+            docker logs $CONTAINER_ID 2>&1 | tail -100
+          else
+            docker logs civbuilder-backend 2>&1 | tail -100 || echo "Could not retrieve logs"
+          fi
           exit 1
 
       - name: Run Complex E2E tests with C++ Backend
