@@ -110,9 +110,26 @@ jobs:
       - name: Wait for C++ backend service
         run: |
           echo "Waiting for C++ backend service to be ready..."
-          timeout 120 bash -c 'until curl -f http://localhost:4000/ > /dev/null 2>&1; do
-            sleep 5; echo "Waiting..."; done' ||
-            (echo "Service did not start in time" && exit 1)
+          echo "Testing connection to http://localhost:4000/"
+          
+          # Try to get service logs if available
+          docker ps -a || true
+          
+          # Wait with verbose output
+          for i in {1..24}; do
+            if curl -f http://localhost:4000/ > /dev/null 2>&1; then
+              echo "✓ Service is ready!"
+              curl -v http://localhost:4000/ 2>&1 | head -20
+              exit 0
+            fi
+            echo "Attempt $i/24: Service not ready yet, waiting 5 seconds..."
+            sleep 5
+          done
+          
+          echo "ERROR: Service did not start in time after 120 seconds"
+          echo "Checking Docker service logs..."
+          docker logs $(docker ps -q --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}") || true
+          exit 1
 
       - name: Run Complex E2E tests with C++ Backend
         run: npm run test:complex

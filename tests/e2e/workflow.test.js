@@ -19,22 +19,33 @@ describe('Complex E2E Workflow Tests', () => {
       // Verify the backend is accessible
       let retries = 30;
       let connected = false;
+      let lastError = null;
+      console.log(`Attempting to connect to C++ backend service at ${baseURL}...`);
+      
       while (retries > 0 && !connected) {
         try {
           const response = await fetch(`${baseURL}/`);
+          console.log(`Connection attempt ${31 - retries}/30: Status ${response.status}`);
           if (response.status === 200) {
             connected = true;
-            console.log('Successfully connected to C++ backend service');
+            console.log('✓ Successfully connected to C++ backend service');
+          } else {
+            console.log(`Received non-200 status: ${response.status}`);
           }
         } catch (error) {
+          lastError = error;
           retries--;
+          console.log(`Connection attempt ${31 - retries}/30 failed: ${error.message}`);
           if (retries > 0) {
+            console.log(`Retrying in 2 seconds... (${retries} attempts remaining)`);
             await new Promise(resolve => setTimeout(resolve, 2000));
           }
         }
       }
       if (!connected) {
-        throw new Error('Could not connect to C++ backend service');
+        const errorMsg = `Could not connect to C++ backend service after 30 attempts. Last error: ${lastError ? lastError.message : 'Unknown'}`;
+        console.error(errorMsg);
+        throw new Error(errorMsg);
       }
     } else {
       // Start test server for local development
@@ -59,6 +70,9 @@ describe('Complex E2E Workflow Tests', () => {
 
   // Build Workflow - Complete API-based testing of the 5-step process
   test('should complete full build workflow with mod creation', async () => {
+    console.log('=== Starting Build Workflow Test ===');
+    console.log(`Using backend: ${useExternalBackend ? 'C++ backend' : 'Test server'} at ${baseURL}`);
+    
     // This tests the complete build workflow as described in PR comment:
     // 1. Create color, select style of architecture, set civ name
     // 2. Tech tree: select at least one tech and then press "Done"  
@@ -67,26 +81,33 @@ describe('Complex E2E Workflow Tests', () => {
     // 5. Combine Civilizations -> Create Mod
 
     // Step 1: Test build page accessibility
+    console.log('Step 1: Testing build page accessibility...');
     const buildResponse = await fetch(`${baseURL}/build`);
+    console.log(`Build page response status: ${buildResponse.status}`);
     expect(buildResponse.status).toBe(200);
     
     const buildHtml = await buildResponse.text();
     expect(buildHtml).toContain('Civilization Builder');
     expect(buildHtml).toContain('builder.js');
+    console.log('✓ Build page is accessible');
 
     // Step 2-4: Test that builder.js contains required functionality
+    console.log('Step 2-4: Testing builder.js resources...');
     const builderJsResponse = await fetch(`${baseURL}/js/builder.js`);
+    console.log(`builder.js response status: ${builderJsResponse.status}`);
     expect(builderJsResponse.status).toBe(200);
     
     const builderContent = await builderJsResponse.text();
     expect(builderContent).toContain('renderPhase1'); // Flag Creator (Step 1)
     expect(builderContent).toContain('renderPhase2'); // Tech Tree (Step 2)
     expect(builderContent).toContain('downloadTextFile'); // JSON download (Step 4)
+    console.log('✓ Builder.js contains required functionality');
 
     // Step 5: Test mod creation endpoint (/create) exists and is accessible
     // Note: The /create endpoint requires valid civilization data to succeed.
     // We test that the endpoint exists and the C++ backend can process requests,
     // but we don't expect success with invalid/minimal data.
+    console.log('Step 5: Testing /create endpoint...');
     const mockCivData = {
       seed: 'test-build-workflow-' + Date.now(),
       civs: 'false' // Minimal data for testing endpoint existence
@@ -101,6 +122,8 @@ describe('Complex E2E Workflow Tests', () => {
         body: new URLSearchParams(mockCivData).toString()
       });
 
+      console.log(`/create endpoint response status: ${createResponse.status}`);
+      
       // The /create endpoint requires valid civ data, so 500 is expected with our test data
       // We verify the endpoint exists (not 404) and the backend is processing requests
       expect(createResponse.status).not.toBe(404);
@@ -112,13 +135,14 @@ describe('Complex E2E Workflow Tests', () => {
       }
       
       if (useExternalBackend) {
-        console.log('Build workflow with C++ backend validated successfully - endpoint accessible and processing requests');
+        console.log('✓ Build workflow with C++ backend validated successfully - endpoint accessible and processing requests');
       } else {
-        console.log('Build workflow API structure validated successfully (C++ backend not available)');
+        console.log('✓ Build workflow API structure validated successfully (C++ backend not available)');
       }
     } catch (error) {
+      console.error(`/create endpoint error: ${error.message}`);
       if (useExternalBackend) {
-        // With C++ backend, connection errors should fail the test
+        console.error('FAIL: /create endpoint should be accessible with C++ backend');
         throw error;
       } else {
         // Without C++ backend, connection errors are expected when server can't process C++ operations
@@ -130,6 +154,9 @@ describe('Complex E2E Workflow Tests', () => {
 
   // Draft Workflow - Complete API-based testing of the 13-step process  
   test('should complete full draft workflow with mod creation', async () => {
+    console.log('=== Starting Draft Workflow Test ===');
+    console.log(`Using backend: ${useExternalBackend ? 'C++ backend' : 'Test server'} at ${baseURL}`);
+    
     // This tests the complete draft workflow as described in PR comment:
     // 1. Home -> "Create Draft"
     // 2. Select "1" as "Number of Players" and "1" as "Bonuses Per Player", "Start Draft"
@@ -140,6 +167,7 @@ describe('Complex E2E Workflow Tests', () => {
     // 12-13. "Creating Mod..." -> "Mod Created" -> "Download MOD"
 
     // Steps 1-3: Test draft creation workflow
+    console.log('Steps 1-3: Testing draft creation...');
     const draftData = {
       num_players: 2,  // UI minimum is 2 players (see draft.test.js)
       rounds: 1,       // Use 1 bonus as requested in comment for speed  
@@ -156,6 +184,8 @@ describe('Complex E2E Workflow Tests', () => {
         body: new URLSearchParams(draftData).toString()
       });
 
+      console.log(`Draft creation response status: ${draftResponse.status}`);
+      
       // Draft creation should work with both C++ backend and test server
       // since it's just creating a JSON file
       expect([200, 500]).toContain(draftResponse.status);
@@ -169,24 +199,30 @@ describe('Complex E2E Workflow Tests', () => {
         expect(draftHtml).toContain('Spectator Link');
         expect(draftHtml).toContain('/draft/host/');
         
+        console.log('✓ Draft created successfully');
         if (useExternalBackend) {
-          console.log('Draft creation with C++ backend successful');
+          console.log('✓ Draft creation with C++ backend validated');
         } else {
-          console.log('Draft creation with test server successful');
+          console.log('✓ Draft creation with test server validated');
         }
+      } else {
+        console.log(`Draft creation returned status ${draftResponse.status}`);
       }
     } catch (error) {
+      console.error(`Draft creation failed with error: ${error.message}`);
       if (useExternalBackend) {
         // With C++ backend, connection errors should fail the test
+        console.error('FAIL: Draft creation should work with C++ backend');
         throw error;
       } else {
         // Without C++ backend, handle connection errors gracefully
-        console.log('Draft creation test skipped - connection error:', error.message);
+        console.log('Draft creation test skipped - connection error (expected without C++ backend)');
         expect(error.message).toMatch(/socket hang up|ECONNRESET|EPIPE|failed, reason/);
       }
     }
 
     // Step 4: Test join endpoint
+    console.log('Step 4: Testing join endpoint...');
     try {
       const joinData = {
         draftID: 'test-draft-workflow-' + Date.now(),
@@ -201,19 +237,25 @@ describe('Complex E2E Workflow Tests', () => {
         body: new URLSearchParams(joinData).toString()
       });
 
+      console.log(`Join endpoint response status: ${joinResponse.status}`);
       expect([200, 302, 400, 404]).toContain(joinResponse.status);
+      console.log('✓ Join endpoint is accessible');
     } catch (error) {
+      console.log(`Join endpoint error: ${error.message}`);
       // Join endpoint may fail if draft doesn't exist or server crashed
       if (!useExternalBackend) {
-        console.log('Join endpoint test skipped - connection error');
+        console.log('Join endpoint test skipped - connection error (expected without C++ backend)');
       } else {
+        console.error('FAIL: Join endpoint should be accessible with C++ backend');
         throw error;
       }
     }
 
     // Steps 5-11: Test draft interface resources
+    console.log('Steps 5-11: Testing draft interface resources...');
     try {
       const draftJsResponse = await fetch(`${baseURL}/js/draft.js`);
+      console.log(`draft.js response status: ${draftJsResponse.status}`);
       expect(draftJsResponse.status).toBe(200);
       
       const draftContent = await draftJsResponse.text();
@@ -221,28 +263,37 @@ describe('Complex E2E Workflow Tests', () => {
       expect(draftContent).toContain('readyLobby');    // Lobby management
       expect(draftContent).toContain('endTurn');       // Turn management for drafting
       expect(draftContent).toContain('socket');        // Socket.io for real-time communication
+      console.log('✓ draft.js contains required functionality');
 
       // Test draft pages are accessible
       const joinPageResponse = await fetch(`${baseURL}/html/join.html`);
+      console.log(`join.html response status: ${joinPageResponse.status}`);
       expect(joinPageResponse.status).toBe(200);
 
       const draftPageResponse = await fetch(`${baseURL}/html/draft.html`);
+      console.log(`draft.html response status: ${draftPageResponse.status}`);
       expect(draftPageResponse.status).toBe(200);
+      console.log('✓ Draft HTML pages are accessible');
 
       // Steps 12-13: Test Socket.IO for real-time draft communication
       const socketResponse = await fetch(`${baseURL}/socket.io/socket.io.js`);
+      console.log(`socket.io.js response status: ${socketResponse.status}`);
       expect(socketResponse.status).toBe(200);
+      console.log('✓ Socket.IO is accessible');
 
       if (useExternalBackend) {
-        console.log('Draft workflow with C++ backend validated successfully');
+        console.log('✓ Draft workflow with C++ backend validated successfully');
       } else {
-        console.log('Draft workflow API structure validated successfully (C++ backend not available)');
+        console.log('✓ Draft workflow API structure validated successfully (C++ backend not available)');
       }
     } catch (error) {
+      console.error(`Draft resource test error: ${error.message}`);
       // If test server crashed, skip resource tests
       if (!useExternalBackend) {
         console.log('Draft resource tests skipped - test server unavailable after draft creation');
       } else {
+        console.error('FAIL: Draft resources should be accessible with C++ backend');
+        throw error;
         throw error;
       }
     }
