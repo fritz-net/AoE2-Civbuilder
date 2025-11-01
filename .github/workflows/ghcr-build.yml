@@ -119,6 +119,48 @@ jobs:
           echo ""
           echo "DNS resolution check..."
           ping -c 1 localhost || echo "Localhost ping failed"
+      
+      - name: Check for container crashes
+        run: |
+          echo "=== Checking for container crashes ==="
+          # Wait a moment for container to potentially crash
+          sleep 5
+          
+          # Find the container
+          CONTAINER_ID=$(docker ps -aq --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}" 2>/dev/null | head -1)
+          
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "ERROR: Container not found!"
+            docker ps -a
+            exit 1
+          fi
+          
+          # Check if container is running or exited
+          CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' $CONTAINER_ID 2>/dev/null || echo "unknown")
+          echo "Container ID: $CONTAINER_ID"
+          echo "Container Status: $CONTAINER_STATUS"
+          
+          if [ "$CONTAINER_STATUS" = "exited" ] || [ "$CONTAINER_STATUS" = "dead" ]; then
+            echo ""
+            echo "ERROR: Container has crashed or exited!"
+            echo ""
+            echo "Exit Code:"
+            docker inspect --format='{{.State.ExitCode}}' $CONTAINER_ID
+            echo ""
+            echo "Container logs:"
+            docker logs $CONTAINER_ID 2>&1
+            exit 1
+          elif [ "$CONTAINER_STATUS" = "restarting" ]; then
+            echo "WARNING: Container is restarting repeatedly!"
+            echo ""
+            echo "Container logs:"
+            docker logs $CONTAINER_ID 2>&1 | tail -100
+          else
+            echo "Container is running (status: $CONTAINER_STATUS)"
+            echo ""
+            echo "Recent logs:"
+            docker logs --tail 20 $CONTAINER_ID 2>&1
+          fi
 
       - name: Wait for C++ backend service
         run: |
