@@ -5,5 +5,8 @@ module.exports = {
   collectCoverage: false,
   verbose: true,
   detectOpenHandles: true,
-  forceExit: true
+  forceExit: true,
+  // Run all tests even if some fail
+  bail: false,
+  maxWorkers: 1  // Run tests serially to avoid port conflicts
 };
