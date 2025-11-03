@@ -266,9 +266,121 @@ jobs:
             coverage/
           retention-days: 7
 
+  playwright-ui-tests:
+    runs-on: ubuntu-latest
+    needs: build-for-testing
+    services:
+      civbuilder-backend:
+        image: ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}
+        ports:
+          - 4000:4000
+        options: >-
+          --health-cmd "curl -f http://localhost:4000/ || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 30s
+        env:
+          CIVBUILDER_HOSTNAME: http://localhost:4000
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Check container status
+        run: |
+          echo "========================================="
+          echo "Checking C++ backend container status"
+          echo "========================================="
+          
+          sleep 5
+          
+          CONTAINER_ID=$(docker ps -aq --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}" 2>/dev/null | head -1)
+          
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "ERROR: Container not found!"
+            docker ps -a
+            exit 1
+          fi
+          
+          CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' $CONTAINER_ID 2>/dev/null || echo "unknown")
+          echo "Container ID: $CONTAINER_ID"
+          echo "Container Status: $CONTAINER_STATUS"
+          
+          if [ "$CONTAINER_STATUS" = "exited" ] || [ "$CONTAINER_STATUS" = "dead" ]; then
+            echo "ERROR: Container has crashed or exited!"
+            docker inspect --format='{{.State.ExitCode}}' $CONTAINER_ID
+            docker logs $CONTAINER_ID 2>&1
+            exit 1
+          else
+            echo "Container is running (status: $CONTAINER_STATUS)"
+            docker logs --tail 20 $CONTAINER_ID 2>&1
+          fi
+
+      - name: Wait for C++ backend service
+        run: |
+          echo "Waiting for C++ backend service..."
+          
+          for i in {1..30}; do
+            if curl -f http://localhost:4000/ > /dev/null 2>&1; then
+              echo "✓ Backend is ready!"
+              curl -I http://localhost:4000/
+              exit 0
+            fi
+            echo "Attempt $i/30: Backend not ready yet..."
+            sleep 2
+          done
+          
+          echo "ERROR: Backend did not become ready in time"
+          docker logs $(docker ps -aq --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}" | head -1) 2>&1
+          exit 1
+
+      - name: Run Playwright UI E2E tests
+        run: npm run test:playwright:ci
+        env:
+          CI: true
+          CIVBUILDER_HOSTNAME: http://localhost:4000
+
+      - name: Generate test summary for GitHub Actions
+        if: always()
+        run: node scripts/generate-test-summary.js playwright-jest-results.json
+
+      - name: Upload Playwright test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: |
+            playwright-jest-results.json
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+      - name: Upload Playwright screenshots/videos on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failures
+          path: |
+            test-results/
+          retention-days: 7
+
   build:
     runs-on: ubuntu-latest
-    needs: [simple-tests, complex-tests]  # Only build if both test jobs pass
+    needs: [simple-tests, complex-tests, playwright-ui-tests]  # Only build if all test jobs pass
     steps:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4

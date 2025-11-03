@@ -15,3 +15,10 @@ test-results/
 coverage/
 junit.xml
 *.log
+
+# Playwright
+playwright-report/
+playwright-results.json
+playwright-jest-results.json
+playwright/.cache/
+tests/e2e/downloads/
