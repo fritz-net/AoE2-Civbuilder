@@ -3,14 +3,420 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+
 permissions:
   contents: read
   packages: write
 
 jobs:
+  simple-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Simple E2E tests
+        run: npm run test:simple
+        env:
+          CI: true
+
+      - name: Publish Simple Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            junit.xml
+            test-results/**/*.xml
+          check_name: Simple E2E Test Results
+          comment_mode: off
+
+      - name: Upload test results artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: simple-test-results
+          path: |
+            junit.xml
+            test-results/
+            coverage/
+          retention-days: 7
+
+  build-for-testing:
+    runs-on: ubuntu-latest
+    needs: simple-tests  # Build only if simple tests pass
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+
+      - name: Set up QEMU and Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image for testing
+        id: build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile.build-cpp
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  complex-tests:
+    runs-on: ubuntu-latest
+    needs: build-for-testing  # Run complex tests with the freshly built image
+    services:
+      # Run the C++ backend as a Docker service using the current code
+      civbuilder-backend:
+        image: ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}
+        ports:
+          - 4000:4000
+        env:
+          CIVBUILDER_HOSTNAME: http://localhost:4000
+        # Simplified health check - just check if port is responding
+        options: --health-cmd="curl -f http://localhost:4000/ || exit 1"
+                 --health-interval=10s --health-timeout=5s --health-retries=10 --health-start-period=30s
+    
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      
+      - name: Debug - Check network connectivity
+        run: |
+          echo "=== Network diagnostics ==="
+          echo "Checking if port 4000 is listening..."
+          netstat -tuln | grep 4000 || echo "Port 4000 not found in netstat"
+          echo ""
+          echo "Attempting direct connection test..."
+          nc -zv localhost 4000 || echo "Netcat connection failed"
+          echo ""
+          echo "DNS resolution check..."
+          ping -c 1 localhost || echo "Localhost ping failed"
+      
+      - name: Check for container crashes
+        run: |
+          echo "=== Checking for container crashes ==="
+          # Wait a moment for container to potentially crash
+          sleep 5
+          
+          # Find the container
+          CONTAINER_ID=$(docker ps -aq --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}" 2>/dev/null | head -1)
+          
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "ERROR: Container not found!"
+            docker ps -a
+            exit 1
+          fi
+          
+          # Check if container is running or exited
+          CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' $CONTAINER_ID 2>/dev/null || echo "unknown")
+          echo "Container ID: $CONTAINER_ID"
+          echo "Container Status: $CONTAINER_STATUS"
+          
+          if [ "$CONTAINER_STATUS" = "exited" ] || [ "$CONTAINER_STATUS" = "dead" ]; then
+            echo ""
+            echo "ERROR: Container has crashed or exited!"
+            echo ""
+            echo "Exit Code:"
+            docker inspect --format='{{.State.ExitCode}}' $CONTAINER_ID
+            echo ""
+            echo "Container logs:"
+            docker logs $CONTAINER_ID 2>&1
+            exit 1
+          elif [ "$CONTAINER_STATUS" = "restarting" ]; then
+            echo "WARNING: Container is restarting repeatedly!"
+            echo ""
+            echo "Container logs:"
+            docker logs $CONTAINER_ID 2>&1 | tail -100
+          else
+            echo "Container is running (status: $CONTAINER_STATUS)"
+            echo ""
+            echo "Recent logs:"
+            docker logs --tail 20 $CONTAINER_ID 2>&1
+          fi
+
+      - name: Wait for C++ backend service
+        run: |
+          echo "========================================="
+          echo "Waiting for C++ backend service startup"
+          echo "========================================="
+          echo ""
+          echo "Target: http://localhost:4000/"
+          echo "Max wait: 60 seconds (30 attempts × 2s)"
+          echo ""
+          
+          # Show all containers
+          echo "--- Docker containers ---"
+          docker ps -a
+          echo ""
+          
+          # Try to find the civbuilder container
+          CONTAINER_ID=$(docker ps -q --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}" 2>/dev/null | head -1)
+          
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "ERROR: Container not found by image!"
+            echo "Trying to find by name pattern..."
+            CONTAINER_ID=$(docker ps -aq --filter "name=civbuilder" | head -1)
+          fi
+          
+          if [ -n "$CONTAINER_ID" ]; then
+            echo "--- Container found: $CONTAINER_ID ---"
+            echo "Status:"
+            docker inspect --format='State: {{.State.Status}} | Health: {{.State.Health.Status}} | Exit: {{.State.ExitCode}}' $CONTAINER_ID 2>/dev/null || echo "Could not inspect"
+            echo ""
+            echo "Recent logs (last 30 lines):"
+            docker logs --tail 30 $CONTAINER_ID 2>&1
+            echo ""
+          else
+            echo "WARNING: Could not find container!"
+          fi
+          
+          echo "--- Testing connectivity ---"
+          # Wait with clear progress
+          for i in {1..30}; do
+            if curl -f http://localhost:4000/ > /dev/null 2>&1; then
+              echo ""
+              echo "========================================="
+              echo "✓ SUCCESS: Service is ready (attempt $i)"
+              echo "========================================="
+              echo ""
+              curl -I http://localhost:4000/ 2>&1 | head -10
+              exit 0
+            fi
+            
+            # Compact progress indicator
+            printf "Attempt %2d/30: Not ready, waiting 2s..." "$i"
+            
+            # Show detailed status every 10 attempts
+            if [ $((i % 10)) -eq 0 ]; then
+              echo ""
+              if [ -n "$CONTAINER_ID" ]; then
+                echo "  Container status: $(docker inspect --format='{{.State.Status}}' $CONTAINER_ID 2>/dev/null || echo 'unknown')"
+                echo "  Recent log: $(docker logs --tail 1 $CONTAINER_ID 2>&1 || echo 'no logs')"
+              fi
+            else
+              echo ""
+            fi
+            
+            sleep 2
+          done
+          
+          echo ""
+          echo "========================================="
+          echo "✗ FAILURE: Service not ready after 60s"
+          echo "========================================="
+          echo ""
+          
+          if [ -n "$CONTAINER_ID" ]; then
+            echo "--- Final container state ---"
+            docker inspect --format='State: {{.State.Status}} | Health: {{.State.Health.Status}} | Exit: {{.State.ExitCode}} | Error: {{.State.Error}}' $CONTAINER_ID
+            echo ""
+            echo "--- Full container logs ---"
+            docker logs $CONTAINER_ID 2>&1
+          else
+            echo "--- All containers ---"
+            docker ps -a
+            echo ""
+            echo "Attempting to get any civbuilder logs..."
+            docker logs civbuilder-backend 2>&1 || echo "No logs available"
+          fi
+          
+          exit 1
+
+      - name: Run Complex E2E tests with C++ Backend
+        run: npm run test:complex
+        env:
+          CI: true
+          CIVBUILDER_HOSTNAME: http://localhost:4000
+
+      - name: Publish Complex Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            junit.xml
+            test-results/**/*.xml
+          check_name: Complex E2E Test Results
+          comment_mode: off
+
+      - name: Upload test results artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: complex-test-results
+          path: |
+            junit.xml
+            test-results/
+            coverage/
+          retention-days: 7
+
+  playwright-ui-tests:
+    runs-on: ubuntu-latest
+    needs: build-for-testing
+    services:
+      civbuilder-backend:
+        image: ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}
+        ports:
+          - 4000:4000
+        options: >-
+          --health-cmd "curl -f http://localhost:4000/ || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 30s
+        env:
+          CIVBUILDER_HOSTNAME: http://localhost:4000
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Check container status
+        run: |
+          echo "========================================="
+          echo "Checking C++ backend container status"
+          echo "========================================="
+          
+          sleep 5
+          
+          CONTAINER_ID=$(docker ps -aq --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}" 2>/dev/null | head -1)
+          
+          if [ -z "$CONTAINER_ID" ]; then
+            echo "ERROR: Container not found!"
+            docker ps -a
+            exit 1
+          fi
+          
+          CONTAINER_STATUS=$(docker inspect --format='{{.State.Status}}' $CONTAINER_ID 2>/dev/null || echo "unknown")
+          echo "Container ID: $CONTAINER_ID"
+          echo "Container Status: $CONTAINER_STATUS"
+          
+          if [ "$CONTAINER_STATUS" = "exited" ] || [ "$CONTAINER_STATUS" = "dead" ]; then
+            echo "ERROR: Container has crashed or exited!"
+            docker inspect --format='{{.State.ExitCode}}' $CONTAINER_ID
+            docker logs $CONTAINER_ID 2>&1
+            exit 1
+          else
+            echo "Container is running (status: $CONTAINER_STATUS)"
+            docker logs --tail 20 $CONTAINER_ID 2>&1
+          fi
+
+      - name: Wait for C++ backend service
+        run: |
+          echo "Waiting for C++ backend service..."
+          
+          for i in {1..30}; do
+            if curl -f http://localhost:4000/ > /dev/null 2>&1; then
+              echo "✓ Backend is ready!"
+              curl -I http://localhost:4000/
+              exit 0
+            fi
+            echo "Attempt $i/30: Backend not ready yet..."
+            sleep 2
+          done
+          
+          echo "ERROR: Backend did not become ready in time"
+          docker logs $(docker ps -aq --filter "ancestor=ghcr.io/fritz-net/aoe2-civbuilder:test-${{ github.sha }}" | head -1) 2>&1
+          exit 1
+
+      - name: Run Playwright UI E2E tests
+        run: npx playwright test
+        env:
+          CI: true
+          CIVBUILDER_HOSTNAME: http://localhost:4000
+
+      - name: Publish Playwright Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            playwright-results.xml
+            test-results/**/*.xml
+          check_name: Playwright UI E2E Test Results
+          comment_mode: off
+
+      - name: Upload Playwright HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload Playwright test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: |
+            playwright-results.json
+            playwright-results.xml
+            test-results/
+          retention-days: 7
+
+      - name: Upload Playwright screenshots/videos on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failures
+          path: |
+            test-results/
+          retention-days: 7
+
   build:
     runs-on: ubuntu-latest
+    needs: [simple-tests, complex-tests, playwright-ui-tests]  # Only build if all test jobs pass
     steps:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
@@ -35,6 +441,7 @@ jobs:
           file: Dockerfile.build-cpp
           platforms: linux/amd64
           push: ${{ github.event_name == 'push' }}
-          tags: ghcr.io/fritz-net/aoe2-civbuilder:latest,ghcr.io/fritz-net/aoe2-civbuilder:${{ github.sha }}
+          tags: ghcr.io/fritz-net/aoe2-civbuilder:latest,
+                ghcr.io/fritz-net/aoe2-civbuilder:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

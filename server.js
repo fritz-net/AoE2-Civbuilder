@@ -30,7 +30,7 @@ const io = require("socket.io")(server);
 const tempdir = path.join(os.tmpdir(), "civbuilder");
 const hostname = process.env.CIVBUILDER_HOSTNAME || "https://krakenmeister.com/civbuilder";
 const routeSubdir = new URL(hostname).pathname.replace(/\/$/, "") || "/";
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 console.log("running with hostname:", hostname);
 console.log("route subdir:", routeSubdir);
@@ -1240,6 +1240,33 @@ module.exports = {
 
 server.listen(port, () => {
 	console.log(`Server listening on port ${port}`);
+});
+
+// Handle server listen errors
+server.on('error', (error) => {
+	console.error('Server error:', error);
+	if (error.code === 'EADDRINUSE') {
+		console.error(`Port ${port} is already in use`);
+		process.exit(1);
+	} else if (error.code === 'EACCES') {
+		console.error(`Permission denied to bind to port ${port}`);
+		process.exit(1);
+	} else {
+		console.error('Unexpected server error:', error);
+		// Don't exit for other errors - keep trying
+	}
+});
+
+// Handle uncaught exceptions to prevent container crashes
+process.on('uncaughtException', (error) => {
+	console.error('Uncaught Exception:', error);
+	console.error('Stack:', error.stack);
+	// Don't exit - keep server running
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+	console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+	// Don't exit - keep server running
 });
 
 // Graceful shutdown on Ctrl+C
