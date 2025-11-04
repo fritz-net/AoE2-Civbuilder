@@ -34,7 +34,6 @@ jobs:
       - name: Publish Simple Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
-        continue-on-error: true
         with:
           files: |
             junit.xml
@@ -42,12 +41,13 @@ jobs:
           check_name: Simple E2E Test Results
           comment_mode: off
 
-      - name: Upload test results
-        if: failure()
+      - name: Upload test results artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: simple-test-results
           path: |
+            junit.xml
             test-results/
             coverage/
           retention-days: 7
@@ -270,7 +270,6 @@ jobs:
       - name: Publish Complex Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
-        continue-on-error: true
         with:
           files: |
             junit.xml
@@ -278,12 +277,13 @@ jobs:
           check_name: Complex E2E Test Results
           comment_mode: off
 
-      - name: Upload test results
-        if: failure()
+      - name: Upload test results artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: complex-test-results
           path: |
+            junit.xml
             test-results/
             coverage/
           retention-days: 7
@@ -379,9 +379,10 @@ jobs:
       - name: Publish Playwright Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
-        continue-on-error: true
         with:
-          files: playwright-results.xml
+          files: |
+            playwright-results.xml
+            test-results/**/*.xml
           check_name: Playwright UI E2E Test Results
           comment_mode: off
 
