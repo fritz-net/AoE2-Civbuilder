@@ -31,6 +31,16 @@ jobs:
         env:
           CI: true
 
+      - name: Publish Simple Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            test-results/**/*.xml
+            junit.xml
+          check_name: Simple E2E Test Results
+          comment_mode: off
+
       - name: Upload test results
         if: failure()
         uses: actions/upload-artifact@v4
@@ -256,6 +266,16 @@ jobs:
           CI: true
           CIVBUILDER_HOSTNAME: http://localhost:4000
 
+      - name: Publish Complex Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            test-results/**/*.xml
+            junit.xml
+          check_name: Complex E2E Test Results
+          comment_mode: off
+
       - name: Upload test results
         if: failure()
         uses: actions/upload-artifact@v4
@@ -349,14 +369,26 @@ jobs:
           exit 1
 
       - name: Run Playwright UI E2E tests
-        run: npm run test:playwright:ci
+        run: npx playwright test
         env:
           CI: true
           CIVBUILDER_HOSTNAME: http://localhost:4000
 
-      - name: Generate test summary for GitHub Actions
+      - name: Publish Playwright Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
-        run: node scripts/generate-test-summary.js playwright-jest-results.json
+        with:
+          files: playwright-results.xml
+          check_name: Playwright UI E2E Test Results
+          comment_mode: off
+
+      - name: Upload Playwright HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report
+          path: playwright-report/
+          retention-days: 7
 
       - name: Upload Playwright test results
         if: always()
@@ -364,8 +396,8 @@ jobs:
         with:
           name: playwright-test-results
           path: |
-            playwright-jest-results.json
-            playwright-report/
+            playwright-results.json
+            playwright-results.xml
             test-results/
           retention-days: 7
 

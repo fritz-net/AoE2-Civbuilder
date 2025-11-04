@@ -8,9 +8,7 @@
     "test": "jest --testPathPattern=tests/e2e",
     "test:ci": "jest --testPathPattern=tests/e2e --ci",
     "test:simple": "jest --testPathPattern=tests/e2e --testNamePattern='should serve|should navigate|should handle.*workflow$|should validate.*configurations|should.*complete.*workflow until'",
-    "test:complex": "jest --testPathPattern=tests/e2e --testNamePattern='should.*complete.*full.*workflow|should.*create mod.*workflow'",
-    "test:playwright": "jest tests/e2e/ui-workflow.test.js",
-    "test:playwright:ci": "jest tests/e2e/ui-workflow.test.js --ci --json --outputFile=playwright-jest-results.json"
+    "test:complex": "jest --testPathPattern=tests/e2e --testNamePattern='should.*complete.*full.*workflow|should.*create mod.*workflow'"
   },
   "dependencies": {
     "axios": "^0.21.1",
@@ -31,6 +29,7 @@
     "@playwright/test": "^1.55.0",
     "jest": "^29.0.0",
     "jest-environment-jsdom": "^29.0.0",
+    "jest-junit": "^16.0.0",
     "jsdom": "^22.0.0",
     "jsdom-global": "^3.0.2",
     "node-fetch": "^2.6.7",

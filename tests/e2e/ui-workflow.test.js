@@ -1,66 +1,13 @@
-const { chromium } = require('playwright');
-const fs = require('fs').promises;
+const { test, expect } = require('@playwright/test');
 const path = require('path');
 
-describe('UI E2E Workflow Tests with Playwright', () => {
-  let browser;
-  let context;
-  let page;
-  let baseURL;
-  const downloadDir = path.join(__dirname, 'downloads');
-
-  beforeAll(async () => {
-    // Use C++ backend in CI, or localhost in development
-    baseURL = process.env.CIVBUILDER_HOSTNAME || 'http://localhost:4000';
-    console.log(`Testing against: ${baseURL}`);
-    
-    // Ensure download directory exists
-    try {
-      await fs.mkdir(downloadDir, { recursive: true });
-    } catch (err) {
-      // Directory might already exist
-    }
-
-    // Launch browser
-    browser = await chromium.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
-    
-    context = await browser.newContext({
-      acceptDownloads: true,
-      viewport: { width: 1280, height: 720 }
-    });
-    
-    page = await context.newPage();
-    
-    // Set longer timeout for CI environments
-    page.setDefaultTimeout(15000);
-  }, 30000);
-
-  afterAll(async () => {
-    if (page) await page.close();
-    if (context) await context.close();
-    if (browser) await browser.close();
-    
-    // Clean up downloads
-    try {
-      const files = await fs.readdir(downloadDir);
-      for (const file of files) {
-        await fs.unlink(path.join(downloadDir, file));
-      }
-      await fs.rmdir(downloadDir);
-    } catch (err) {
-      // Ignore cleanup errors
-    }
-  });
-
-  test('should complete full build workflow with UI interaction', async () => {
+test.describe('UI E2E Workflow Tests with Playwright', () => {
+  test('should complete full build workflow with UI interaction', async ({ page }) => {
     console.log('\n=== Starting Build Workflow UI Test ===');
     
     // Step 1: Navigate to build page
     console.log('Step 1: Navigating to /build page...');
-    await page.goto(`${baseURL}/build`);
+    await page.goto('/build');
     await page.waitForLoadState('networkidle');
     
     // Verify we're on the build page
@@ -111,21 +58,19 @@ describe('UI E2E Workflow Tests with Playwright', () => {
       ]);
       
       if (download) {
-        const downloadPath = path.join(downloadDir, await download.suggestedFilename());
-        await download.saveAs(downloadPath);
         console.log(`✓ Downloaded file: ${await download.suggestedFilename()}`);
       }
     }
 
     console.log('✓ Build workflow UI test completed');
-  }, 45000);
+  });
 
-  test('should complete full draft workflow with UI interaction', async () => {
+  test('should complete full draft workflow with UI interaction', async ({ page }) => {
     console.log('\n=== Starting Draft Workflow UI Test ===');
     
     // Step 1: Navigate to home page
     console.log('Step 1: Navigating to home page...');
-    await page.goto(`${baseURL}/`);
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
     console.log('✓ Home page loaded');
 
@@ -175,7 +120,8 @@ describe('UI E2E Workflow Tests with Playwright', () => {
             
             // Step 5: Navigate to host link
             console.log('Step 5: Navigating to host link...');
-            await page.goto(`${baseURL}${href}`);
+            const fullHref = href.startsWith('http') ? href : `${href}`;
+            await page.goto(fullHref);
             await page.waitForLoadState('networkidle');
             console.log('✓ Navigated to draft host page');
             
@@ -201,12 +147,12 @@ describe('UI E2E Workflow Tests with Playwright', () => {
     }
 
     console.log('✓ Draft workflow UI test completed');
-  }, 60000);
+  });
 
-  test('should verify build page UI elements exist', async () => {
+  test('should verify build page UI elements exist', async ({ page }) => {
     console.log('\n=== Verifying Build Page UI Elements ===');
     
-    await page.goto(`${baseURL}/build`);
+    await page.goto('/build');
     await page.waitForLoadState('networkidle');
     
     // Check for essential UI elements
@@ -221,12 +167,12 @@ describe('UI E2E Workflow Tests with Playwright', () => {
     console.log('✓ builder.js script loaded');
     
     console.log('✓ Build page UI elements verified');
-  }, 30000);
+  });
 
-  test('should verify home page UI elements exist', async () => {
+  test('should verify home page UI elements exist', async ({ page }) => {
     console.log('\n=== Verifying Home Page UI Elements ===');
     
-    await page.goto(`${baseURL}/`);
+    await page.goto('/');
     await page.waitForLoadState('networkidle');
     
     const bodyText = await page.textContent('body');
@@ -239,5 +185,5 @@ describe('UI E2E Workflow Tests with Playwright', () => {
     console.log(`✓ Found ${links.length} links on home page`);
     
     console.log('✓ Home page UI elements verified');
-  }, 30000);
+  });
 });
