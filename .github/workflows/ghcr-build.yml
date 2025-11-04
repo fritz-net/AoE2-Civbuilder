@@ -34,10 +34,11 @@ jobs:
       - name: Publish Simple Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
+        continue-on-error: true
         with:
           files: |
-            test-results/**/*.xml
             junit.xml
+            test-results/**/*.xml
           check_name: Simple E2E Test Results
           comment_mode: off
 
@@ -269,10 +270,11 @@ jobs:
       - name: Publish Complex Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
+        continue-on-error: true
         with:
           files: |
-            test-results/**/*.xml
             junit.xml
+            test-results/**/*.xml
           check_name: Complex E2E Test Results
           comment_mode: off
 
@@ -377,6 +379,7 @@ jobs:
       - name: Publish Playwright Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
+        continue-on-error: true
         with:
           files: playwright-results.xml
           check_name: Playwright UI E2E Test Results
