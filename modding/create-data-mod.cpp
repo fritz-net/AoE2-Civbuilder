@@ -5,6 +5,7 @@
 #include <jsoncpp/json/json.h>
 #include <string>
 #include <stdexcept>
+#include <memory>
 
 #define SLOBYTE(x) (*((int8_t *)&(x)))
 #define HIBYTE(x) (*((uint8_t *)&(x) + 1))
@@ -15,7 +16,7 @@ using namespace genie;
 
 int main(int argc, char **argv) {
   try {
-    auto *df = new DatFile();
+    unique_ptr<DatFile> df(new DatFile());
     df->setGameVersion(GV_LatestDE2);
 
     df->load(argv[2]);
@@ -25,19 +26,19 @@ int main(int argc, char **argv) {
     ifstream cfgfile(argv[1]);
     // reader.parse(cfgfile, cfg);
     cfgfile >> cfg;
-    Civbuilder cb = Civbuilder(df, cfg, "logs.txt", argv[4]);
+    Civbuilder cb = Civbuilder(df.get(), cfg, "logs.txt", argv[4]);
 
     cout << "[C++]: Modify dat = " << cfg["modifyDat"] << endl;
 
     if (cfg["modifyDat"].asBool()) {
       cb.configure();
     } else {
-      applyModifiers(df, cfg["modifiers"]["blind"].asBool(),
+      applyModifiers(df.get(), cfg["modifiers"]["blind"].asBool(),
                      cfg["modifiers"]["building"].asDouble(),
                      cfg["modifiers"]["speed"].asDouble(),
                      cfg["modifiers"]["hp"].asDouble());
       if (cfg["modifiers"]["randomCosts"].asBool()) {
-        randomizeCosts(df);
+        randomizeCosts(df.get());
       }
     }
 
