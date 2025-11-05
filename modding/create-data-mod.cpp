@@ -46,12 +46,12 @@ int main(int argc, char **argv) {
     df->saveAs(argv[3]);
 
     return 0;
-  } catch (const std::length_error& e) {
+  } catch (const length_error& e) {
     cerr << "[C++]: Error loading dat file: " << e.what() << endl;
     cerr << "[C++]: This dat file is not supported or corrupted." << endl;
     cerr << "[C++]: Dat file: " << argv[2] << endl;
     return 2; // Exit code 2 for unsupported dat file
-  } catch (const std::exception& e) {
+  } catch (const exception& e) {
     cerr << "[C++]: Unexpected error: " << e.what() << endl;
     return 1; // Exit code 1 for other errors
   }
