@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 test.describe('Draft Workflow E2E Tests', () => {
   let downloadedZipPath;
@@ -156,7 +157,7 @@ test.describe('Draft Workflow E2E Tests', () => {
     const download = await downloadPromise;
 
     // Step 20: Save and verify the zip file
-    downloadedZipPath = path.join('/tmp', download.suggestedFilename());
+    downloadedZipPath = path.join(os.tmpdir(), download.suggestedFilename());
     await download.saveAs(downloadedZipPath);
 
     console.log('Downloaded ZIP to:', downloadedZipPath);

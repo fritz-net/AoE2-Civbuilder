@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 test.describe('Build Workflow E2E Tests', () => {
   let downloadedJsonPath;
@@ -122,7 +123,7 @@ test.describe('Build Workflow E2E Tests', () => {
     const download = await downloadPromise;
     
     // Save the downloaded file
-    downloadedJsonPath = path.join('/tmp', download.suggestedFilename());
+    downloadedJsonPath = path.join(os.tmpdir(), download.suggestedFilename());
     await download.saveAs(downloadedJsonPath);
     
     console.log('Downloaded JSON to:', downloadedJsonPath);
@@ -164,7 +165,7 @@ test.describe('Build Workflow E2E Tests', () => {
       const zipDownload = await zipDownloadPromise;
       
       // Save the downloaded zip
-      downloadedZipPath = path.join('/tmp', zipDownload.suggestedFilename());
+      downloadedZipPath = path.join(os.tmpdir(), zipDownload.suggestedFilename());
       await zipDownload.saveAs(downloadedZipPath);
       
       console.log('Downloaded ZIP to:', downloadedZipPath);
