@@ -10,3 +10,8 @@ modding/requested_mods/*
 database.json
 drafts/*.json
 process_mod/randomName.js
+
+# Playwright
+playwright-report/
+test-results/
+playwright/.cache/
