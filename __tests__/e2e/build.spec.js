@@ -15,114 +15,118 @@ test.describe('Build Workflow E2E Tests', () => {
     await page.click('#startBuild');
     await page.waitForURL('**/build');
 
-    // Step 3: Wait for the page to load and select color, architecture, and civ name
-    await page.waitForSelector('#colorPicker', { timeout: 10000 });
+    // Step 3: Wait for the page to load - Phase 1: Flag Creator
+    await page.waitForSelector('#header', { timeout: 10000 });
+    await expect(page.locator('#header')).toHaveText('Flag Creator');
     
-    // Select a color
-    const colorOptions = await page.locator('#colorPicker option');
-    const count = await colorOptions.count();
-    if (count > 1) {
-      await page.selectOption('#colorPicker', { index: 1 });
-    }
-
-    // Select an architecture style
-    const archOptions = await page.locator('#archPicker option');
-    const archCount = await archOptions.count();
-    if (archCount > 1) {
-      await page.selectOption('#archPicker', { index: 1 });
-    }
+    // Wait for canvas to be visible
+    await page.waitForSelector('#flag', { timeout: 5000 });
 
     // Enter a civilization name
-    await page.fill('#civName', 'TestCiv');
+    const aliasInput = page.locator('#alias');
+    await expect(aliasInput).toBeVisible({ timeout: 5000 });
+    await aliasInput.fill('TestCiv');
 
-    // Click "Continue" or next button
-    const continueButton = page.locator('button:has-text("Continue")');
-    if (await continueButton.count() > 0) {
-      await continueButton.click();
-    }
+    // Click "Next" button to proceed to phase 2
+    const nextButton = page.locator('button.readybutton:has-text("Next")');
+    await expect(nextButton).toBeVisible({ timeout: 5000 });
+    await nextButton.click();
 
     // Step 4: Select at least one tech in techtree and press "Done"
-    // Wait for techtree to load
-    await page.waitForTimeout(2000); // Give time for techtree to render
+    // Wait for techtree to load - we should see a tech tree after clicking Next
+    // The tech tree uses SVG elements
+    await page.waitForTimeout(3000); // Give time for techtree to render
     
-    // Look for techtree elements - they might be in SVG or specific selectors
-    // Try to find a tech/unit to click
-    const techElements = page.locator('.tech, .unit, [data-tech], [data-unit], rect[fill]:not([fill="none"])');
-    const techCount = await techElements.count();
+    // Look for Done button (it appears when techtree is loaded)
+    const doneButton = page.locator('button:has-text("Done"), #doneButton');
+    await expect(doneButton.first()).toBeVisible({ timeout: 10000 });
     
-    if (techCount > 0) {
-      // Click on the first available tech/unit
-      await techElements.first().click({ timeout: 5000 }).catch(() => {
-        console.log('Could not click tech element, continuing...');
-      });
+    // Try to click on a tech element - techs are typically clickable SVG rects
+    // We'll try to find and click a tech if possible
+    try {
+      const techRects = page.locator('svg rect[fill]:not([fill="none"])').first();
+      if (await techRects.count() > 0) {
+        await techRects.click({ timeout: 2000 });
+      }
+    } catch (e) {
+      console.log('Could not click tech element, continuing...');
     }
 
-    // Click "Done" button
-    const doneButton = page.locator('button:has-text("Done")');
-    await expect(doneButton).toBeVisible({ timeout: 10000 });
-    await doneButton.click();
+    // Click "Done" button to proceed to bonus selection
+    await doneButton.first().click();
 
     // Step 5: Navigate through multi-stage boni pages
-    // Start with "Civ Bonuses" page - should be loaded after Done
-    await page.waitForTimeout(1000);
-
+    // Phase 2 allows navigation through different bonus types using < > buttons
     // We need to select 1 bonus per page and navigate through:
-    // - Civ Bonuses
-    // - Team Bonuses
-    // - Imperial Unique Tech
-    // - Castle Unique Tech
-    // - Unique Unit
+    // - Civilization Bonuses (roundType 0)
+    // - Unique Units (roundType 1)
+    // - Castle Unique Tech (roundType 2)
+    // - Imperial Unique Tech (roundType 3)
+    // - Team Bonuses (roundType 4)
+
+    await page.waitForTimeout(2000);
+
+    // We should see the phase header
+    const phaseHeader = page.locator('#sidephase');
+    await expect(phaseHeader).toBeVisible({ timeout: 5000 });
 
     const bonusPages = [
-      'Civ Bonuses',
-      'Team Bonus',
-      'Imperial Unique Tech',
+      'Civilization Bonuses',
+      'Unique Units',
       'Castle Unique Tech',
-      'Unique Unit'
+      'Imperial Unique Tech',
+      'Team Bonuses'
     ];
 
-    for (const pageName of bonusPages) {
-      // Wait for the page heading or switcher to show current page
+    for (let i = 0; i < bonusPages.length; i++) {
+      const pageName = bonusPages[i];
+      console.log('Processing bonus page:', pageName);
+      
+      // Wait for page to load
       await page.waitForTimeout(1000);
       
-      // Try to find a bonus/option to select
-      // Look for clickable elements like cards, divs, or buttons representing bonuses
-      const bonusElements = page.locator('.bonus, .card, .option, [onclick], div[style*="cursor: pointer"]');
-      const bonusCount = await bonusElements.count();
-      
-      if (bonusCount > 0) {
-        // Click on the first bonus
-        await bonusElements.first().click({ timeout: 5000 }).catch(() => {
-          console.log(`Could not click bonus on ${pageName}, continuing...`);
-        });
+      // Verify we're on the correct page
+      const headerText = await phaseHeader.textContent();
+      console.log('Current phase:', headerText);
+
+      // Try to find and click a bonus card
+      // Cards are identified with id like "card0", "card1", etc.
+      const card = page.locator('[id^="card"]').first();
+      if (await card.count() > 0) {
+        try {
+          await card.click({ timeout: 3000 });
+          await page.waitForTimeout(500);
+        } catch (e) {
+          console.log(`Could not click card on ${pageName}, continuing...`);
+        }
       }
 
-      // Wait a bit after selection
-      await page.waitForTimeout(500);
-
-      // Check if we're on the last page
-      if (pageName === 'Unique Unit') {
-        // On the last page, we should download the JSON
-        break;
+      // Navigate to next page if not the last one
+      if (i < bonusPages.length - 1) {
+        const rightButton = page.locator('#buttonright');
+        await rightButton.click();
+        await page.waitForTimeout(500);
       }
     }
 
     // Step 6: Download the JSON file
-    // Look for a "Download" or similar button
+    // Look for the "Download" button (id="finish")
+    await page.waitForTimeout(1000);
+    
     const downloadPromise = page.waitForEvent('download');
     
-    const downloadButton = page.locator('button:has-text("Download"), button:has-text("download"), #downloadButton, #download');
-    if (await downloadButton.count() > 0) {
-      await downloadButton.first().click();
-      const download = await downloadPromise;
-      
-      // Save the downloaded file
-      downloadedJsonPath = path.join('/tmp', download.suggestedFilename());
-      await download.saveAs(downloadedJsonPath);
-      
-      console.log('Downloaded JSON to:', downloadedJsonPath);
-      expect(fs.existsSync(downloadedJsonPath)).toBeTruthy();
-    }
+    const downloadButton = page.locator('#finish');
+    await expect(downloadButton).toBeVisible({ timeout: 5000 });
+    await downloadButton.click();
+    
+    const download = await downloadPromise;
+    
+    // Save the downloaded file
+    downloadedJsonPath = path.join('/tmp', download.suggestedFilename());
+    await download.saveAs(downloadedJsonPath);
+    
+    console.log('Downloaded JSON to:', downloadedJsonPath);
+    expect(fs.existsSync(downloadedJsonPath)).toBeTruthy();
 
     // Step 7: Exit using "Home" button and confirm alert
     await page.waitForTimeout(500);
@@ -130,13 +134,13 @@ test.describe('Build Workflow E2E Tests', () => {
     // Set up dialog handler before clicking Home
     page.on('dialog', async dialog => {
       expect(dialog.type()).toBe('confirm');
+      expect(dialog.message()).toContain('home');
       await dialog.accept();
     });
 
-    const homeButton = page.locator('button:has-text("Home"), #home, #homeButton');
-    if (await homeButton.count() > 0) {
-      await homeButton.first().click();
-    }
+    const homeButton = page.locator('#homeBtn');
+    await expect(homeButton).toBeVisible({ timeout: 5000 });
+    await homeButton.click();
 
     // Should be back at home page
     await page.waitForURL('**/');
@@ -146,22 +150,17 @@ test.describe('Build Workflow E2E Tests', () => {
     await page.click('#combineButton');
     await page.waitForTimeout(1000);
 
-    // Step 9: Click "Create Mod"
-    const createModButton = page.locator('button:has-text("Create Mod"), #createMod');
-    await expect(createModButton.first()).toBeVisible({ timeout: 10000 });
-    await createModButton.first().click();
-
-    // Step 10: Select the JSON file we downloaded earlier
+    // Step 9: Wait for the file input to appear
+    // The combineCivilizations function creates an input with id="viewCiv"
+    const fileInput = page.locator('input[type="file"]#viewCiv');
+    await expect(fileInput).toBeVisible({ timeout: 5000 });
+    
+    // Step 10: Upload the JSON file we downloaded earlier
     if (downloadedJsonPath && fs.existsSync(downloadedJsonPath)) {
-      // Wait for file input
-      const fileInput = page.locator('input[type="file"]');
-      await expect(fileInput).toBeVisible({ timeout: 5000 });
-      
-      // Upload the file
       await fileInput.setInputFiles(downloadedJsonPath);
       
       // Wait for processing and download
-      const zipDownloadPromise = page.waitForEvent('download', { timeout: 30000 });
+      const zipDownloadPromise = page.waitForEvent('download', { timeout: 60000 });
       const zipDownload = await zipDownloadPromise;
       
       // Save the downloaded zip
