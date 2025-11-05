@@ -1,5 +1,5 @@
 //Create canvas with black background
-const fs = require("fs-js");
+const fs = require("fs");
 const { createCanvas, loadImage, Image } = require("canvas");
 
 module.exports = {
