@@ -984,7 +984,7 @@ function draftIO(io) {
 				//Welcome to callback hell because I wasted $1800 on a web-dev class where the professor was seemingly incapable of answering a single question
 				//process.chdir(tempdir);
 				//Create Mod Folder
-				osUtil.execCommand(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${draft["id"]} ${tempdir} 1`, function () {
+				osUtil.execCommand(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${draft["id"]} ${__dirname} 1`, function () {
 					//Create Civ Icons
 					for (var i = 0; i < numPlayers; i++) {
 						var civName = nameArr[i];
