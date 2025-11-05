@@ -13,7 +13,7 @@ test.describe('Build Workflow E2E Tests', () => {
     await expect(page.locator('h1#title')).toHaveText('Civilization Builder');
 
     // Step 2: Click "Build Civilization" to go to /build
-    await page.click('#startBuild');
+    await page.locator('#startBuild').click();
     await page.waitForURL('**/build');
 
     // Step 3: Wait for the page to load - Phase 1: Flag Creator
@@ -148,7 +148,7 @@ test.describe('Build Workflow E2E Tests', () => {
     await expect(page.locator('h1#title')).toHaveText('Civilization Builder');
 
     // Step 8: Combine civilizations - click "Combine Civilizations"
-    await page.click('#combineButton');
+    await page.locator('#combineButton').click();
     await page.waitForTimeout(1000);
 
     // Step 9: Wait for the file input to appear

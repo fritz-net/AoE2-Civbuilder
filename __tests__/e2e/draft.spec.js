@@ -12,7 +12,7 @@ test.describe('Draft Workflow E2E Tests', () => {
     await expect(page.locator('h1#title')).toHaveText('Civilization Builder');
 
     // Step 2: Click "Create Draft" to enter draft creation
-    await page.click('#startDraft');
+    await page.locator('#startDraft').click();
     await page.waitForTimeout(1000);
 
     // Step 3: Select "1" as "Number of Players" and "1" as "Bonuses Per Player"
