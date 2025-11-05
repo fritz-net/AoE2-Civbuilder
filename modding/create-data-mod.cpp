@@ -16,7 +16,7 @@ using namespace genie;
 
 int main(int argc, char **argv) {
   try {
-    unique_ptr<DatFile> df(new DatFile());
+    auto df = make_unique<DatFile>();
     df->setGameVersion(GV_LatestDE2);
 
     df->load(argv[2]);
