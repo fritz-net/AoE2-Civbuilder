@@ -36,11 +36,13 @@ test.describe('Build Workflow E2E Tests', () => {
     // Step 4: Select at least one tech in techtree and press "Done"
     // Wait for techtree to load - we should see a tech tree after clicking Next
     // The tech tree uses SVG elements
-    await page.waitForTimeout(3000); // Give time for techtree to render
     
     // Look for Done button (it appears when techtree is loaded)
     const doneButton = page.locator('button:has-text("Done"), #doneButton');
     await expect(doneButton.first()).toBeVisible({ timeout: 10000 });
+    
+    // Wait for SVG content to load
+    await page.waitForSelector('svg', { timeout: 5000 });
     
     // Try to click on a tech element - techs are typically clickable SVG rects
     // We'll try to find and click a tech if possible
@@ -85,10 +87,6 @@ test.describe('Build Workflow E2E Tests', () => {
       
       // Wait for page to load
       await page.waitForTimeout(1000);
-      
-      // Verify we're on the correct page
-      const headerText = await phaseHeader.textContent();
-      console.log('Current phase:', headerText);
 
       // Try to find and click a bonus card
       // Cards are identified with id like "card0", "card1", etc.

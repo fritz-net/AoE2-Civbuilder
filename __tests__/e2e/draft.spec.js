@@ -5,6 +5,7 @@ const os = require('os');
 
 test.describe('Draft Workflow E2E Tests', () => {
   let downloadedZipPath;
+  const NUM_BONUS_ROUNDS = 5; // Civ Bonuses, Unique Units, Castle Tech, Imperial Tech, Team Bonuses
 
   test('should complete the /draft workflow and create a mod', async ({ page }) => {
     // Step 1: Navigate to home page
@@ -95,7 +96,7 @@ test.describe('Draft Workflow E2E Tests', () => {
 
     // We'll try to select bonuses by clicking on cards
     // The draft progresses automatically after each selection
-    for (let round = 0; round < 5; round++) {
+    for (let round = 0; round < NUM_BONUS_ROUNDS; round++) {
       console.log('Draft round:', round);
       
       // Wait for cards to appear
