@@ -1,10 +1,13 @@
-# --- Stage 1: Build C++ binaries ---
-FROM node:20-bullseye AS cpp-build
+# --- Stage 1: C++ build dependencies ---
+FROM node:20-bullseye AS cpp-dependencies
 
 # Install build tools for C++ compilation
 RUN apt-get update && \
     apt-get install -y build-essential cmake git liblz4-dev libboost-iostreams-dev libjsoncpp-dev dos2unix && \
     rm -rf /var/lib/apt/lists/*
+
+# --- Stage 2: Build C++ binaries ---
+FROM cpp-dependencies AS cpp-build
 
 WORKDIR /app
 
@@ -18,12 +21,8 @@ RUN dos2unix modding/scripts/build.sh && chmod +x modding/scripts/build.sh
 # Build all C++ targets (run from modding directory so CMakeLists.txt works)
 RUN cd ./modding/ && ./scripts/build.sh
 
-# --- Stage 2: Build Node.js app and assemble final image ---
-FROM node:20-bullseye AS build
-
-RUN apt-get update && \
-    apt-get install -y dos2unix libjsoncpp24 zip && \
-    rm -rf /var/lib/apt/lists/*
+# --- Stage 3: Node.js dependencies ---
+FROM node:20-bullseye AS node-dependencies
 
 WORKDIR /app
 
@@ -33,6 +32,18 @@ COPY package*.json ./
 # Install Node.js dependencies
 RUN npm install --omit=dev
 
+# --- Stage 4: Final runtime image ---
+FROM node:20-bullseye AS build
+
+RUN apt-get update && \
+    apt-get install -y dos2unix libjsoncpp24 zip && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy Node.js dependencies from node-dependencies stage
+COPY --from=node-dependencies /app/node_modules ./node_modules
+COPY --from=node-dependencies /app/package*.json ./
 
 # Copy all source code
 COPY . .
