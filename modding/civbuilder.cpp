@@ -33,10 +33,11 @@ void Civbuilder::setTrainButtonID(unit::Creatable& creatable, uint8_t buttonID) 
     creatable.TrainLocations[0].ButtonID = buttonID;
 }
 
-void Civbuilder::setTrainLocation(unit::Creatable& creatable, int16_t unitID, uint8_t buttonID) {
+void Civbuilder::setTrainLocation(unit::Creatable& creatable, int16_t unitID, uint8_t buttonID, int32_t HotKeyID = 16000) {
     ensureTrainLocation(creatable);
     creatable.TrainLocations[0].UnitID = unitID;
     creatable.TrainLocations[0].ButtonID = buttonID;
+    creatable.TrainLocations[0].HotKeyID = HotKeyID;
 }
 
 void Civbuilder::setTrainTime(unit::Creatable& creatable, int16_t trainTime) {
@@ -777,13 +778,16 @@ void Civbuilder::createUU(int civbuilderID, int baseID, string name, vector<int>
     int eliteTechID;
 
     for (Civ &civ : this->df->Civs) {
+        // base unique unit
         civ.Units.push_back(civ.Units[baseID]);
         civ.UnitPointers.push_back(1);
-        setTrainLocation(civ.Units[(int)(civ.Units.size() - 1)].Creatable, 82, 1);
+        setTrainLocation(civ.Units[(int)(civ.Units.size() - 1)].Creatable, 82, 1, 16101);
         civ.Units[(int)(civ.Units.size() - 1)].Creatable.HeroMode = 0;
+
+        // elite unique unit
         civ.Units.push_back(civ.Units[baseID]);
         civ.UnitPointers.push_back(1);
-        setTrainLocation(civ.Units[(int)(civ.Units.size() - 1)].Creatable, 82, 1);
+        setTrainLocation(civ.Units[(int)(civ.Units.size() - 1)].Creatable, 82, 1, 16101);
         civ.Units[(int)(civ.Units.size() - 1)].Creatable.HeroMode = 0;
     }
     int uuID = ((int)(this->df->Civs[0].Units.size())) - 2;
@@ -803,6 +807,7 @@ void Civbuilder::createUU(int civbuilderID, int baseID, string name, vector<int>
     uuTech.Repeatable = true;
     uuTech.Civ = 99;
     uuTech.EffectID = (int)(this->df->Effects.size() - 1);
+    setResearchLocation(uuTech, -1, 0, 0);
     this->df->Techs.push_back(uuTech);
     uuTechID = (int)(this->df->Techs.size() - 1);
 
@@ -1208,13 +1213,16 @@ void Civbuilder::createNewUnits() {
         civ.Units[uuID].Type50.DisplayedMeleeArmour = 2;
         civ.Units[uuID].Creatable.DisplayedPierceArmour = 2;
         civ.Units[uuID].HitPoints = 90;
+
         civ.Units[eID].Name = "ECRUSADERKNIGHT";
         civ.Units[eID].LanguageDLLName = 5243;
         civ.Units[eID].LanguageDLLCreation = 6243;
         civ.Units[eID].LanguageDLLHelp = 105243;
+
         civ.Units[uuID].Creatable.HeroMode = 2;
         civ.Units[eID].Creatable.HeroMode = 2;
     }
+
     // Xolotl Warriors
     createUU(40, 1570, "Xolotl Warrior", {800, 0, 0, 800}, 60, 7605);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
@@ -1224,6 +1232,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].LanguageDLLName = 5244;
         civ.Units[eID].LanguageDLLCreation = 6244;
         civ.Units[eID].LanguageDLLHelp = 105244;
+
         civ.Units[uuID].Type50.ReloadTime = 0.9;
         civ.Units[uuID].Type50.DisplayedReloadTime = 0.9;
         civ.Units[uuID].Type50.Attacks[0].Amount = 5;
@@ -1231,6 +1240,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[uuID].Type50.Armours[2].Amount = 0;
         civ.Units[uuID].Creatable.DisplayedPierceArmour = 0;
         civ.Units[uuID].HitPoints = 95;
+
         civ.Units[eID].Type50.ReloadTime = 0.8;
         civ.Units[eID].Type50.DisplayedReloadTime = 0.8;
         civ.Units[eID].Type50.Attacks[0].Amount = 6;
@@ -1238,11 +1248,13 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.Armours[0].Amount = 3;
         civ.Units[eID].Type50.DisplayedMeleeArmour = 3;
         civ.Units[eID].HitPoints = 115;
+
         civ.Units[uuID].Creatable.ResourceCosts[0].Amount = 30;
         civ.Units[uuID].Creatable.ResourceCosts[1].Amount = 60;
         civ.Units[eID].Creatable.ResourceCosts[0].Amount = 30;
         civ.Units[eID].Creatable.ResourceCosts[1].Amount = 60;
     }
+
     // Saboteur
     createUU(41, 706, "Saboteur", {0, 600, 600, 0}, 40, 7606);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);

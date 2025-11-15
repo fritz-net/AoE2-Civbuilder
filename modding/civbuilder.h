@@ -53,7 +53,7 @@ class Civbuilder {
     void ensureTrainLocation(unit::Creatable& creatable);
     void setTrainLocationID(unit::Creatable& creatable, int16_t unitID);
     void setTrainButtonID(unit::Creatable& creatable, uint8_t buttonID);
-    void setTrainLocation(unit::Creatable& creatable, int16_t unitID, uint8_t buttonID);
+    void setTrainLocation(unit::Creatable& creatable, int16_t unitID, uint8_t buttonID, int32_t HotKeyID = 16000);
     void setTrainTime(unit::Creatable& creatable, int16_t trainTime);
 
     // Helper methods for ResearchLocation manipulation
