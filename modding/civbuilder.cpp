@@ -33,6 +33,12 @@ void Civbuilder::setTrainButtonID(unit::Creatable& creatable, uint8_t buttonID) 
     creatable.TrainLocations[0].ButtonID = buttonID;
 }
 
+void Civbuilder::setTrainLocation(unit::Creatable& creatable, int16_t unitID, uint8_t buttonID) {
+    ensureTrainLocation(creatable);
+    creatable.TrainLocations[0].UnitID = unitID;
+    creatable.TrainLocations[0].ButtonID = buttonID;
+}
+
 void Civbuilder::setTrainTime(unit::Creatable& creatable, int16_t trainTime) {
     ensureTrainLocation(creatable);
     creatable.TrainLocations[0].TrainTime = trainTime;
@@ -748,13 +754,11 @@ void Civbuilder::createUU(int civbuilderID, int baseID, string name, vector<int>
     for (Civ &civ : this->df->Civs) {
         civ.Units.push_back(civ.Units[baseID]);
         civ.UnitPointers.push_back(1);
-        setTrainLocationID(civ.Units[(int)(civ.Units.size() - 1)].Creatable, 82);
-        setTrainButtonID(civ.Units[(int)(civ.Units.size() - 1)].Creatable, 1);
+        setTrainLocation(civ.Units[(int)(civ.Units.size() - 1)].Creatable, 82, 1);
         civ.Units[(int)(civ.Units.size() - 1)].Creatable.HeroMode = 0;
         civ.Units.push_back(civ.Units[baseID]);
         civ.UnitPointers.push_back(1);
-        setTrainLocationID(civ.Units[(int)(civ.Units.size() - 1)].Creatable, 82);
-        setTrainButtonID(civ.Units[(int)(civ.Units.size() - 1)].Creatable, 1);
+        setTrainLocation(civ.Units[(int)(civ.Units.size() - 1)].Creatable, 82, 1);
         civ.Units[(int)(civ.Units.size() - 1)].Creatable.HeroMode = 0;
     }
     int uuID = ((int)(this->df->Civs[0].Units.size())) - 2;
@@ -1185,8 +1189,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].LanguageDLLHelp = 105243;
         civ.Units[uuID].Creatable.HeroMode = 2;
         civ.Units[eID].Creatable.HeroMode = 2;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     // Xolotl Warriors
     createUU(40, 1570, "Xolotl Warrior", {800, 0, 0, 800}, 60, 7605);
@@ -1215,8 +1217,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[uuID].Creatable.ResourceCosts[1].Amount = 60;
         civ.Units[eID].Creatable.ResourceCosts[0].Amount = 30;
         civ.Units[eID].Creatable.ResourceCosts[1].Amount = 60;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     // Saboteur
     createUU(41, 706, "Saboteur", {0, 600, 600, 0}, 40, 7606);
@@ -1256,8 +1256,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Bird.TaskList.push_back(civ.Units[1120].Bird.TaskList[5]);
         civ.Units[uuID].Type50.BlastWidth = 1;
         civ.Units[eID].Type50.BlastWidth = 2.5;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 0, 50, 50});
     // Ninja
@@ -1289,8 +1287,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.DisplayedPierceArmour = 2;
         civ.Units[uuID].Type50.BreakOffCombat = 1;
         civ.Units[eID].Type50.BreakOffCombat = 1;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     // Flamethrower
     createUU(43, 188, "Flamethrower", {0, 1000, 0, 1000}, 75, 7608);
@@ -1319,8 +1315,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.Attacks[2].Amount = 0;
         civ.Units[eID].Type50.MaxRange = 5;
         civ.Units[eID].Type50.DisplayedRange = 5;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 125, 0, 50});
     // Photonman
@@ -1359,8 +1353,6 @@ void Civbuilder::createNewUnits() {
         ramAttack.Amount = 10;
         civ.Units[uuID].Type50.Attacks.push_back(ramAttack);
         civ.Units[eID].Type50.Attacks.push_back(ramAttack);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     this->unitClasses["gunpowder"].push_back(uuID);
     this->unitClasses["gunpowder"].push_back(eID);
@@ -1400,8 +1392,6 @@ void Civbuilder::createNewUnits() {
             civ.Units[uuID].Bird.TaskList.push_back(shockPowerUpTasks[i]);
             civ.Units[eID].Bird.TaskList.push_back(shockPowerUpTasks[i]);
         }
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {50, 0, 0, 85});
     setCombatStats(this->df, uuID, {{4, 9}}, {{4, 1}, {3, 0}, {19, 0}});
@@ -1441,8 +1431,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Bird.TaskList.push_back(civ.Units[1723].Bird.TaskList[2]);
         civ.Units[eID].Bird.TaskList.push_back(civ.Units[1723].Bird.TaskList[3]);
         civ.Units[eID].Bird.TaskList.push_back(civ.Units[1723].Bird.TaskList[4]);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     // Amazon Warrior
     createUU(48, 825, "Amazon Warrior", {600, 0, 0, 1000}, 70, 7613);
@@ -1474,8 +1462,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[uuID].Type50.Attacks.push_back(animal_bonus);
         civ.Units[eID].Type50.Attacks.push_back(animal_bonus);
         civ.Units[eID].Speed = 1.2;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     // Amazon Archer
     createUU(49, 850, "Amazon Archer", {600, 0, 0, 400}, 60, 7614);
@@ -1511,8 +1497,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[uuID].Creatable.ResourceCosts[1].Amount = 35;
         civ.Units[eID].Creatable.ResourceCosts[0].Amount = 25;
         civ.Units[eID].Creatable.ResourceCosts[1].Amount = 35;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     // Iroquois Warrior
     createUU(50, 1374, "Iroquois Warrior", {800, 0, 0, 700}, 70, 7615);
@@ -1546,8 +1530,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.Attacks[2].Amount = 11;
         civ.Units[eID].Type50.DisplayedAttack = 11;
         civ.Units[eID].HitPoints = 80;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     // Varangian Guard
     createUU(51, 1681, "Varangian Guard", {900, 0, 0, 900}, 90, 7616);
@@ -1585,8 +1567,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[uuID].Type50.Attacks.push_back(archer_bonus);
         archer_bonus.Amount = 10;
         civ.Units[eID].Type50.Attacks.push_back(archer_bonus);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {70, 0, 0, 45});
     // Gendarme
@@ -1605,8 +1585,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Speed = 1.3;
         setTrainTime(civ.Units[uuID].Creatable, 20);
         setTrainTime(civ.Units[eID].Creatable, 20);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {95, 0, 0, 85});
     setCombatStats(this->df, uuID, {{4, 10}}, {{3, 5}, {4, 5}, {8, 0}, {19, 0}});
@@ -1631,8 +1609,6 @@ void Civbuilder::createNewUnits() {
         setTrainTime(civ.Units[eID].Creatable, 11);
         civ.Units[uuID].Speed = 1.1;
         civ.Units[eID].Speed = 1.1;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {40, 0, 0, 30});
     setCombatStats(this->df, uuID, {{29, 5}, {21, 1}, {1, 5}, {4, 6}, {8, 0}, {32, 5}}, {{4, 1}, {3, -1}, {19, 0}});
@@ -1653,8 +1629,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Speed = 1.3;
         setTrainTime(civ.Units[uuID].Creatable, 22);
         setTrainTime(civ.Units[eID].Creatable, 22);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {80, 0, 0, 75});
     setCombatStats(this->df, uuID, {{4, 11}}, {{3, 1}, {4, 6}, {8, 0}, {19, 0}});
@@ -1679,8 +1653,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.MaxRange = 6;
         civ.Units[uuID].Type50.DisplayedRange = 5;
         civ.Units[eID].Type50.DisplayedRange = 6;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 65, 0, 55});
     setCombatStats(this->df, uuID, {{27, 2}, {3, 5}, {21, 3}}, {{28, 0}, {4, 1}, {3, 0}, {15, 0}, {8, 0}, {19, 0}});
@@ -1719,8 +1691,6 @@ void Civbuilder::createNewUnits() {
         }
         civ.Units[uuID].Type50.BreakOffCombat = 96;
         civ.Units[eID].Type50.BreakOffCombat = 96;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {75, 0, 0, 60});
     setCombatStats(this->df, uuID, {{4, 10}}, {{4, 4}, {3, 1}, {8, 0}, {19, 0}});
@@ -1741,8 +1711,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].HitPoints = 65;
         setTrainTime(civ.Units[uuID].Creatable, 11);
         setTrainTime(civ.Units[eID].Creatable, 9);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {70, 0, 0, 35});
     setCombatStats(this->df, uuID, {{4, 16}, {10, 10}, {23, 6}, {32, 6}, {25, 5}}, {{4, -2}, {3, 2}, {8, 0}, {19, 0}});
@@ -1780,8 +1748,6 @@ void Civbuilder::createNewUnits() {
             civ.Units[uuID].Bird.TaskList.push_back(camelPowerUpTasks[i]);
             civ.Units[eID].Bird.TaskList.push_back(camelPowerUpTasks[i]);
         }
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {70, 0, 0, 70});
     setCombatStats(this->df, uuID, {{4, 9}}, {{4, 0}, {3, 1}, {8, 0}, {19, 0}});
@@ -1806,8 +1772,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.MaxRange = 4;
         civ.Units[uuID].Type50.DisplayedRange = 4;
         civ.Units[eID].Type50.DisplayedRange = 4;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 50, 0, 70});
     setCombatStats(this->df, uuID, {{3, 7}}, {{28, 0}, {4, -2}, {3, 0}, {15, 0}, {8, 0}, {19, 0}});
@@ -1826,16 +1790,12 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].HitPoints = 80;
         setTrainTime(civ.Units[uuID].Creatable, 17);
         setTrainTime(civ.Units[eID].Creatable, 17);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 80, 0, 30});
     setCombatStats(this->df, uuID, {{3, 5}, {28, 2}, {15, 3}, {27, 1}}, {{4, 0}, {15, 1}, {8, -1}, {3, 3}, {19, 0}});
     setCombatStats(this->df, eID, {{3, 6}, {28, 3}, {15, 5}, {27, 1}}, {{4, 0}, {15, 1}, {8, -1}, {3, 4}, {19, 0}});
     for (Civ &civ : this->df->Civs) {
         civ.Units[eID].Creatable.ResourceCosts[1].Amount = 15;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     this->unitClasses["skirmisher"].push_back(uuID);
     this->unitClasses["skirmisher"].push_back(eID);
@@ -1855,8 +1815,6 @@ void Civbuilder::createNewUnits() {
         setTrainTime(civ.Units[eID].Creatable, 14);
         civ.Units[uuID].Speed = 1.1;
         civ.Units[eID].Speed = 1.1;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {55, 0, 0, 5});
     setCombatStats(this->df, uuID, {{4, 6}, {8, 22}, {5, 25}, {30, 16}}, {{1, 0}, {4, 0}, {3, 1}, {27, 0}, {19, 0}});
@@ -1883,8 +1841,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.MaxRange = 2;
         civ.Units[uuID].Type50.DisplayedRange = 2;
         civ.Units[eID].Type50.DisplayedRange = 2;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {40, 0, 0, 50});
     setCombatStats(this->df, uuID, {{4, 5}, {8, 5}, {5, 15}, {30, 3}}, {{1, 0}, {3, 1}, {4, 1}, {27, 0}, {19, 0}});
@@ -1908,8 +1864,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Speed = 1.33;
         setTrainTime(civ.Units[uuID].Creatable, 15);
         setTrainTime(civ.Units[eID].Creatable, 15);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 0, 0, 75});
     setCombatStats(this->df, uuID, {{4, 7}}, {{4, 1}, {3, 0}, {8, 0}, {19, 0}});
@@ -1924,8 +1878,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.ResourceCosts[1].Type = 0;
         civ.Units[eID].Creatable.ResourceCosts[1].Amount = 0;
         civ.Units[eID].Creatable.ResourceCosts[1].Flag = 1;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     // Teulu
     createUU(64, 1683, "Teulu", {600, 0, 0, 550}, 45, 7629);
@@ -1947,8 +1899,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[uuID].Creatable.RechargeRate = 0.1;
         civ.Units[uuID].Creatable.ChargeEvent = 0;
         civ.Units[uuID].Creatable.ChargeType = 2;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {65, 0, 0, 40});
     setCombatStats(this->df, uuID, {{4, 10}}, {{1, 0}, {4, 0}, {3, 1}, {19, 0}});
@@ -1971,8 +1921,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Speed = 0.9;
         civ.Units[uuID].Type50.DisplayedReloadTime = 4;
         civ.Units[eID].Type50.DisplayedReloadTime = 4;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {90, 0, 0, 10});
     setCombatStats(this->df, uuID, {{4, 20}}, {{1, 0}, {4, 0}, {3, 3}, {19, 0}});
@@ -1993,8 +1941,6 @@ void Civbuilder::createNewUnits() {
         setTrainTime(civ.Units[eID].Creatable, 14);
         civ.Units[uuID].Speed = 1.45;
         civ.Units[eID].Speed = 1.45;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {25, 0, 0, 85});
     setCombatStats(this->df, uuID, {{4, 12}, {19, 8}, {36, 25}}, {{4, 1}, {3, 1}, {8, 0}, {19, 0}});
@@ -2015,8 +1961,6 @@ void Civbuilder::createNewUnits() {
         setTrainTime(civ.Units[eID].Creatable, 13);
         civ.Units[uuID].Speed = 0.95;
         civ.Units[eID].Speed = 0.95;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {75, 0, 0, 35});
     setCombatStats(this->df, uuID, {{4, 9}, {1, 5}, {8, 5}, {32, 5}}, {{4, 1}, {3, 1}, {1, 0}, {19, 0}});
@@ -2041,8 +1985,6 @@ void Civbuilder::createNewUnits() {
         setTrainTime(civ.Units[eID].Creatable, 20);
         civ.Units[uuID].Speed = 1.4;
         civ.Units[eID].Speed = 1.4;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {75, 0, 0, 55});
     setCombatStats(this->df, uuID, {{4, 9}, {8, 4}}, {{8, 0}, {4, 0}, {3, 0}, {19, 0}});
@@ -2069,8 +2011,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.DisplayedRange = 0;
         setTrainTime(civ.Units[uuID].Creatable, 7);
         setTrainTime(civ.Units[eID].Creatable, 7);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {45, 0, 0, 15});
     setCombatStats(this->df, uuID, {{3, 15}}, {{1, 0}, {4, 0}, {3, 0}, {19, 0}});
@@ -2133,8 +2073,6 @@ void Civbuilder::createNewUnits() {
             civ.Units[uuID].Bird.TaskList.push_back(landsknechtPowerUpTasks[i]);
             civ.Units[eID].Bird.TaskList.push_back(landsknechtPowerUpTasks[i]);
         }
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setCombatStats(this->df, uuID, {{4, 12}, {21, 2}}, {{1, 3}, {4, 1}, {3, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 14}, {21, 2}}, {{1, 3}, {4, 1}, {3, 0}, {19, 0}});
@@ -2156,8 +2094,6 @@ void Civbuilder::createNewUnits() {
         setTrainTime(civ.Units[eID].Creatable, 28);
         civ.Units[uuID].Speed = 1.25;
         civ.Units[eID].Speed = 1.25;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {95, 0, 0, 75});
     setCombatStats(this->df, uuID, {{4, 15}}, {{8, 0}, {3, 2}, {4, 2}, {19, 0}});
@@ -2180,8 +2116,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Speed = 1.25;
         civ.Units[uuID].Type50.BonusDamageResistance = 0.5;
         civ.Units[eID].Type50.BonusDamageResistance = 0.5;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 40, 0, 70});
     setCombatStats(this->df, uuID, {{3, 6}, {1, 3}, {32, 3}}, {{28, 0}, {15, 0}, {8, 0}, {19, 2}, {4, 1}, {3, 0}});
@@ -2202,8 +2136,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Speed = 1.48;
         setTrainTime(civ.Units[uuID].Creatable, 14);
         setTrainTime(civ.Units[eID].Creatable, 14);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {50, 0, 0, 35});
     setCombatStats(this->df, uuID, {{4, 11}, {30, 8}, {5, 25}}, {{4, 1}, {3, 0}, {8, 12}, {19, 0}});
@@ -2224,8 +2156,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Speed = 1.3;
         setTrainTime(civ.Units[uuID].Creatable, 21);
         setTrainTime(civ.Units[eID].Creatable, 21);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {85, 0, 0, 50});
     setCombatStats(this->df, uuID, {{4, 13}}, {{4, 3}, {3, 0}, {8, 0}, {19, 0}});
@@ -2254,8 +2184,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.RechargeRate = 10;
         civ.Units[eID].Creatable.ChargeEvent = 0;
         civ.Units[eID].Creatable.ChargeType = 4;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 0, 0, 100});
     setCombatStats(this->df, uuID, {{4, 11}, {25, 0}, {20, 0}}, {{4, 0}, {3, 0}, {25, 0}, {19, 0}});
@@ -2269,8 +2197,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.ResourceCosts[1].Type = 0;
         civ.Units[eID].Creatable.ResourceCosts[1].Amount = 0;
         civ.Units[eID].Creatable.ResourceCosts[1].Flag = 1;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     // Castellan
     createUU(76, 1718, "Castellan", {700, 0, 0, 900}, 75, 7641);
@@ -2303,8 +2229,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Bird.TaskList.push_back(powerUpTask);
         civ.Units[uuID].Type50.BreakOffCombat = 96;
         civ.Units[eID].Type50.BreakOffCombat = 96;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     // Wind Warrior
     createUU(77, 749, "Wind Warrior", {600, 0, 0, 900}, 65, 7642);
@@ -2323,8 +2247,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].HitPoints = 65;
         setTrainTime(civ.Units[uuID].Creatable, 12);
         setTrainTime(civ.Units[eID].Creatable, 12);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     setUnitCosts(this->df, {uuID, eID}, {55, 0, 0, 35});
     setCombatStats(this->df, uuID, {{4, 8}, {20, 8}, {11, 1}}, {{1, 0}, {4, 0}, {3, 1}, {19, 0}});
@@ -2341,8 +2263,6 @@ void Civbuilder::createNewUnits() {
         setTrainLocationID(civ.Units[tcSpearman].Creatable, 109);
         setTrainLocationID(civ.Units[tcPikeman].Creatable, 109);
         setTrainLocationID(civ.Units[tcHalberdier].Creatable, 109);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     this->df->Effects[189].EffectCommands.push_back(createEC(3, tcSpearman, tcHalberdier, -1, 0));
     this->duplicationUnits.push_back({93, tcSpearman, tcPikeman});
@@ -2354,8 +2274,7 @@ void Civbuilder::createNewUnits() {
         civ.Resources[29] = 1;
         civ.Units[tcSiegeTower] = civ.Units[1105];
         civ.Units[tcSiegeTower].Name = "SIEGTWR_F";
-        setTrainLocationID(civ.Units[tcSiegeTower].Creatable, 109);
-        setTrainButtonID(civ.Units[tcSiegeTower].Creatable, 9);
+        setTrainLocation(civ.Units[tcSiegeTower].Creatable, 109, 9);
         civ.Units[tcSiegeTower].Creatable.ResourceCosts[0].Type = 29;
         civ.Units[tcSiegeTower].Creatable.ResourceCosts[0].Amount = 1;
         civ.Units[tcSiegeTower].Creatable.ResourceCosts[0].Flag = 1;
@@ -2363,8 +2282,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[tcSiegeTower].Creatable.ResourceCosts[2].Type = -1;
         civ.Units[tcSiegeTower].Creatable.ResourceCosts[2].Amount = 0;
         civ.Units[tcSiegeTower].Creatable.ResourceCosts[2].Flag = 0;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     this->duplicationUnits.push_back({1105, tcSiegeTower, -1});
 
@@ -2393,8 +2310,6 @@ void Civbuilder::createNewUnits() {
                 civ.Units[newFarms[i]].OutlineSize.y = 1;
             }
         }
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     this->duplicationUnits.push_back({50, smallFarm, -1});
     this->duplicationUnits.push_back({357, smallDeadFarm, -1});
@@ -2418,8 +2333,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[royalLancer].HitPoints = 100;
         civ.Units[royalLancer].Type50.DisplayedAttack = 13;
         civ.Units[royalLancer].Type50.Attacks[0].Amount = 13;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     this->unitClasses["steppe"].push_back(royalLancer);
 
@@ -2441,8 +2354,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[royalElephant].Type50.Attacks[1].Amount = 15;
         civ.Units[royalElephant].Creatable.DisplayedPierceArmour = 4;
         civ.Units[royalElephant].Type50.Armours[3].Amount = 4;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     this->unitClasses["elephant"].push_back(royalElephant);
     this->unitClasses["stable"].push_back(royalElephant);
@@ -2465,8 +2376,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[impScorpionProjectile].Type50.Attacks[2].Amount = 14;
         civ.Units[impScorpionProjectileFire].Type50.DisplayedAttack = 14;
         civ.Units[impScorpionProjectileFire].Type50.Attacks[2].Amount = 14;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     df->Effects[47].EffectCommands.push_back(createEC(3, impScorpionProjectile, impScorpionProjectileFire, -1, 0));
     df->Effects[47].EffectCommands.push_back(createEC(4, impScorpion, -1, 9, amountTypetoD(1, 3)));
@@ -2477,19 +2386,15 @@ void Civbuilder::createNewUnits() {
     for (Civ &civ : this->df->Civs) {
         civ.Units[millCow] = civ.Units[705];
         civ.Units[millCow].Name = "BABY";
-        setTrainLocationID(civ.Units[millCow].Creatable, 68);
-        setTrainButtonID(civ.Units[millCow].Creatable, 2);
+        setTrainLocation(civ.Units[millCow].Creatable, 68, 2);
         civ.Units[millCow].Creatable.ResourceCosts[0].Type = 3;
         civ.Units[millCow].Creatable.ResourceCosts[0].Amount = 10;
 
         civ.Units[pastureCow] = civ.Units[705];
         civ.Units[pastureCow].Name = "BIGBABY";
-        setTrainLocationID(civ.Units[pastureCow].Creatable, 1889);
-        setTrainButtonID(civ.Units[pastureCow].Creatable, 2);
+        setTrainLocation(civ.Units[pastureCow].Creatable, 1889, 2);
         civ.Units[pastureCow].Creatable.ResourceCosts[0].Type = 3;
         civ.Units[pastureCow].Creatable.ResourceCosts[0].Amount = 10;
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
 
     // Create feudal monk
@@ -2512,8 +2417,6 @@ void Civbuilder::createNewUnits() {
                 }
             }
         }
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
 
     // Create feudal knight
@@ -2525,8 +2428,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[feudalKnight].LineOfSight = 3;
         civ.Units[feudalKnight].Bird.SearchRadius = 3;
         setTrainTime(civ.Units[feudalKnight].Creatable, 45);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
     // this->df->Effects[175].EffectCommands.push_back(createEC(3, feudalKnight, 283, -1, 0));
     // this->df->Effects[253].EffectCommands.push_back(createEC(3, feudalKnight, 569, -1, 0));
@@ -2534,8 +2435,7 @@ void Civbuilder::createNewUnits() {
 
     // Create City Walls
     for (Civ &civ : this->df->Civs) {
-        setTrainLocationID(civ.Units[cityWall].Creatable, 118);
-        setTrainButtonID(civ.Units[cityWall].Creatable, 8);
+        setTrainLocation(civ.Units[cityWall].Creatable, 118, 8);
         civ.Units[cityWall].HitPoints = 4800;
         civ.Units[cityWall].Creatable.DisplayedPierceArmour = 16;
         civ.Units[cityWall].Type50.DisplayedMeleeArmour = 16;
@@ -2550,8 +2450,6 @@ void Civbuilder::createNewUnits() {
             civ.Units[i + 1579].Creatable.ResourceCosts[0].Amount = 30;
         }
         setTrainButtonID(civ.Units[1582].Creatable, 11);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
 
     // Allow siege towers to shoot
@@ -2582,8 +2480,6 @@ void Civbuilder::createNewUnits() {
             civ.Units[siegeTowers[i]].Type50.GraphicDisplacement = {0, 1, 5};
             civ.Units[siegeTowers[i]].Creatable.ProjectileSpawningArea = {1, 0.5, 2};
         }
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
 
     // Headhunter kidnapper
@@ -2616,8 +2512,6 @@ void Civbuilder::createNewUnits() {
         civ.Units[headhunterKidnapperElite].Bird.TaskList.erase(civ.Units[headhunterKidnapperElite].Bird.TaskList.begin());
         civ.Units[headhunterKidnapper].Bird.TaskList.push_back(kidnapTask);
         civ.Units[headhunterKidnapperElite].Bird.TaskList.push_back(kidnapTask);
-        setTrainLocationID(civ.Units[uuID].Creatable, 82);
-        setTrainLocationID(civ.Units[eID].Creatable, 82);
     }
 }
 
@@ -6347,15 +6241,13 @@ void Civbuilder::assignUniqueTechs() {
                         civ.UnitPointers.push_back(1);
                         int duplicateUU = (int)(civ.Units.size() - 1);
                         civ.Units[duplicateUU].Name = "BARRACKSUU" + to_string(i);
-                        setTrainLocationID(civ.Units[duplicateUU].Creatable, 12);
-                        setTrainButtonID(civ.Units[duplicateUU].Creatable, 14);
+                        setTrainLocation(civ.Units[duplicateUU].Creatable, 12, 14);
 
                         civ.Units.push_back(civ.Units[uniqueElite]);
                         civ.UnitPointers.push_back(1);
                         int duplicateUUelite = (int)(civ.Units.size() - 1);
                         civ.Units[duplicateUUelite].Name = "BARRACKSUUE" + to_string(i);
-                        setTrainLocationID(civ.Units[duplicateUUelite].Creatable, 12);
-                        setTrainButtonID(civ.Units[duplicateUUelite].Creatable, 14);
+                        setTrainLocation(civ.Units[duplicateUUelite].Creatable, 12, 14);
                     }
                     int dupUU = (int)(df->Civs[0].Units.size() - 2);
                     int dupUUe = (int)(df->Civs[0].Units.size() - 1);
@@ -6392,15 +6284,13 @@ void Civbuilder::assignUniqueTechs() {
                         civ.UnitPointers.push_back(1);
                         int duplicateUU = (int)(civ.Units.size() - 1);
                         civ.Units[duplicateUU].Name = "STABLEUU";
-                        setTrainLocationID(civ.Units[duplicateUU].Creatable, 101);
-                        setTrainButtonID(civ.Units[duplicateUU].Creatable, 13);
+                        setTrainLocation(civ.Units[duplicateUU].Creatable, 101, 13);
 
                         civ.Units.push_back(civ.Units[uniqueElite]);
                         civ.UnitPointers.push_back(1);
                         int duplicateUUelite = (int)(civ.Units.size() - 1);
                         civ.Units[duplicateUUelite].Name = "STABLEUUE";
-                        setTrainLocationID(civ.Units[duplicateUUelite].Creatable, 101);
-                        setTrainButtonID(civ.Units[duplicateUUelite].Creatable, 13);
+                        setTrainLocation(civ.Units[duplicateUUelite].Creatable, 101, 13);
                     }
                     int dupUU = (int)(this->df->Civs[0].Units.size() - 2);
                     int dupUUe = (int)(this->df->Civs[0].Units.size() - 1);
@@ -6486,8 +6376,7 @@ void Civbuilder::assignUniqueTechs() {
                         civ.Units[1260] = civ.Units[uniqueElite];
                         civ.Units[1260].Name = "MKIPCHAK";
                         // civ.Units[1260].Creatable.TrainLocationID = -1;
-                        setTrainLocationID(civ.Units[1260].Creatable, 82);
-                        setTrainButtonID(civ.Units[1260].Creatable, 4);
+                        setTrainLocation(civ.Units[1260].Creatable, 82, 4);
                         civ.Units[1260].Creatable.ResourceCosts[0].Type = 214;
                         civ.Units[1260].Creatable.ResourceCosts[0].Amount = 1;
                         // civ.Units[1260].Creatable.ResourceCosts[1].Type = 215;
@@ -6534,15 +6423,13 @@ void Civbuilder::assignCivBonuses() {
                         civ.UnitPointers.push_back(1);
                         int duplicateUU = (int)(civ.Units.size() - 1);
                         civ.Units[duplicateUU].Name = "KREPOSTUNIT" + to_string(i);
-                        setTrainLocationID(civ.Units[duplicateUU].Creatable, 1251);
-                        setTrainButtonID(civ.Units[duplicateUU].Creatable, 1);
+                        setTrainLocation(civ.Units[duplicateUU].Creatable, 1251, 1);
 
                         civ.Units.push_back(civ.Units[uniqueElite]);
                         civ.UnitPointers.push_back(1);
                         int duplicateUUelite = (int)(civ.Units.size() - 1);
                         civ.Units[duplicateUUelite].Name = "EKREPOSTUNIT" + to_string(i);
-                        setTrainLocationID(civ.Units[duplicateUUelite].Creatable, 1251);
-                        setTrainButtonID(civ.Units[duplicateUUelite].Creatable, 1);
+                        setTrainLocation(civ.Units[duplicateUUelite].Creatable, 1251, 1);
                     }
                     int dupUU = (int)(this->df->Civs[0].Units.size() - 2);
                     int dupUUe = (int)(this->df->Civs[0].Units.size() - 1);
@@ -6569,15 +6456,13 @@ void Civbuilder::assignCivBonuses() {
                         civ.UnitPointers.push_back(1);
                         int duplicateUU = (int)(civ.Units.size() - 1);
                         civ.Units[duplicateUU].Name = "DONJONUNIT" + to_string(i);
-                        setTrainLocationID(civ.Units[duplicateUU].Creatable, 1665);
-                        setTrainButtonID(civ.Units[duplicateUU].Creatable, 1);
+                        setTrainLocation(civ.Units[duplicateUU].Creatable, 1665, 1);
 
                         civ.Units.push_back(civ.Units[uniqueElite]);
                         civ.UnitPointers.push_back(1);
                         int duplicateUUelite = (int)(civ.Units.size() - 1);
                         civ.Units[duplicateUUelite].Name = "EDONJONUNIT" + to_string(i);
-                        setTrainLocationID(civ.Units[duplicateUUelite].Creatable, 1665);
-                        setTrainButtonID(civ.Units[duplicateUUelite].Creatable, 1);
+                        setTrainLocation(civ.Units[duplicateUUelite].Creatable, 1665, 1);
                     }
                     int dupUU = (int)(this->df->Civs[0].Units.size() - 2);
                     int dupUUe = (int)(this->df->Civs[0].Units.size() - 1);

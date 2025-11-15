@@ -53,6 +53,7 @@ class Civbuilder {
     void ensureTrainLocation(unit::Creatable& creatable);
     void setTrainLocationID(unit::Creatable& creatable, int16_t unitID);
     void setTrainButtonID(unit::Creatable& creatable, uint8_t buttonID);
+    void setTrainLocation(unit::Creatable& creatable, int16_t unitID, uint8_t buttonID);
     void setTrainTime(unit::Creatable& creatable, int16_t trainTime);
 
    public:
