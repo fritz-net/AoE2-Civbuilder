@@ -33,7 +33,7 @@ void Civbuilder::setTrainButtonID(unit::Creatable& creatable, uint8_t buttonID) 
     creatable.TrainLocations[0].ButtonID = buttonID;
 }
 
-void Civbuilder::setTrainLocation(unit::Creatable& creatable, int16_t unitID, uint8_t buttonID, int32_t HotKeyID = 16000) {
+void Civbuilder::setTrainLocation(unit::Creatable& creatable, int16_t unitID, uint8_t buttonID, int32_t HotKeyID) {
     ensureTrainLocation(creatable);
     creatable.TrainLocations[0].UnitID = unitID;
     creatable.TrainLocations[0].ButtonID = buttonID;
