@@ -44,6 +44,24 @@ void Civbuilder::setTrainTime(unit::Creatable& creatable, int16_t trainTime) {
     creatable.TrainLocations[0].TrainTime = trainTime;
 }
 
+// Helper methods for ResearchLocation manipulation
+void Civbuilder::ensureResearchLocation(Tech& tech) {
+    if (tech.ResearchLocations.empty()) {
+        tech.ResearchLocations.emplace_back();
+    }
+}
+
+void Civbuilder::setResearchLocation(Tech& tech, int16_t locationID, int16_t researchTime, uint8_t buttonID) {
+    ensureResearchLocation(tech);
+    tech.ResearchLocations[0].LocationID = locationID;
+    tech.ResearchLocations[0].ResearchTime = researchTime;
+    tech.ResearchLocations[0].ButtonID = buttonID;
+    // Also set the old fields for backwards compatibility
+    tech.ResearchLocation = locationID;
+    tech.ResearchTime = researchTime;
+    tech.ButtonID = buttonID;
+}
+
 
 void Civbuilder::initialize() {
     // Log loaded dat file information
@@ -683,18 +701,16 @@ void Civbuilder::createUT(int civbuilderID, int type, Effect utEffect, string na
     this->df->Effects.push_back(utEffect);
     Tech ut = Tech();
     ut.Name = name;
-    ut.ResearchLocation = 82;
-    ut.ResearchTime = techTime;
     ut.RequiredTechs.push_back(102 + type);
     ut.RequiredTechCount = 1;
     ut.Civ = 99;
 
     if (type == 0) {
         ut.IconID = 33;
-        ut.ButtonID = 7;
+        setResearchLocation(ut, 82, techTime, 7);
     } else if (type == 1) {
         ut.IconID = 107;
-        ut.ButtonID = 8;
+        setResearchLocation(ut, 82, techTime, 8);
     }
 
     int writeIndex = 0;
@@ -791,9 +807,7 @@ void Civbuilder::createUU(int civbuilderID, int baseID, string name, vector<int>
     eliteTech.Name = "Elite " + name;
     eliteTech.FullTechMode = 1;
     eliteTech.IconID = 105;
-    eliteTech.ButtonID = 6;
     eliteTech.Repeatable = true;
-    eliteTech.ResearchLocation = 82;
 
     int writeIndex = 0;
     for (int i = 0; i < techCosts.size(); i++) {
@@ -804,7 +818,9 @@ void Civbuilder::createUU(int civbuilderID, int baseID, string name, vector<int>
             writeIndex++;
         }
     }
-    eliteTech.ResearchTime = techTime;
+
+    // Set research location using the new helper method
+    setResearchLocation(eliteTech, 82, techTime, 6);
 
     eliteTech.LanguageDLLName = techDLL;
     eliteTech.LanguageDLLDescription = techDLL + 1000;

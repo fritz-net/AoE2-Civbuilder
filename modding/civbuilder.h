@@ -56,6 +56,10 @@ class Civbuilder {
     void setTrainLocation(unit::Creatable& creatable, int16_t unitID, uint8_t buttonID);
     void setTrainTime(unit::Creatable& creatable, int16_t trainTime);
 
+    // Helper methods for ResearchLocation manipulation
+    void ensureResearchLocation(Tech& tech);
+    void setResearchLocation(Tech& tech, int16_t locationID, int16_t researchTime, uint8_t buttonID);
+
    public:
     Civbuilder(DatFile *df, Value config, string logpath, string aipath);
     ~Civbuilder();
