@@ -1,6 +1,0 @@
-/home/runner/work/AoE2-Civbuilder/AoE2-Civbuilder/modding/_codeql_build_dir/CMakeFiles/create-data-mod.dir
-/home/runner/work/AoE2-Civbuilder/AoE2-Civbuilder/modding/_codeql_build_dir/CMakeFiles/edit_cache.dir
-/home/runner/work/AoE2-Civbuilder/AoE2-Civbuilder/modding/_codeql_build_dir/CMakeFiles/rebuild_cache.dir
-/home/runner/work/AoE2-Civbuilder/AoE2-Civbuilder/modding/_codeql_build_dir/genieutils/CMakeFiles/genieutils.dir
-/home/runner/work/AoE2-Civbuilder/AoE2-Civbuilder/modding/_codeql_build_dir/genieutils/CMakeFiles/edit_cache.dir
-/home/runner/work/AoE2-Civbuilder/AoE2-Civbuilder/modding/_codeql_build_dir/genieutils/CMakeFiles/rebuild_cache.dir
