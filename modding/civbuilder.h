@@ -59,6 +59,7 @@ class Civbuilder {
     // Helper methods for ResearchLocation manipulation
     void ensureResearchLocation(Tech& tech);
     void setResearchLocation(Tech& tech, int16_t locationID, int16_t researchTime, uint8_t buttonID);
+    int16_t getResearchLocation(const Tech& tech);
 
    public:
     Civbuilder(DatFile *df, Value config, string logpath, string aipath);

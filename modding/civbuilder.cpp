@@ -62,6 +62,15 @@ void Civbuilder::setResearchLocation(Tech& tech, int16_t locationID, int16_t res
     tech.ButtonID = buttonID;
 }
 
+int16_t Civbuilder::getResearchLocation(const Tech& tech) {
+    // Prefer reading from the vector if available
+    if (!tech.ResearchLocations.empty()) {
+        return tech.ResearchLocations[0].LocationID;
+    }
+    // Fall back to the old field
+    return tech.ResearchLocation;
+}
+
 
 void Civbuilder::initialize() {
     // Log loaded dat file information
@@ -2705,10 +2714,8 @@ void Civbuilder::createCivBonuses() {
     t.ResourceCosts[1].Type = 1;
     t.ResourceCosts[1].Amount = 1000;
     t.ResourceCosts[1].Flag = 1;
-    t.ResearchTime = 150;
-    t.ResearchLocation = 49;
+    setResearchLocation(t, 49, 150, 8);
     t.IconID = 38;
-    t.ButtonID = 8;
     t.Civ = 99;
     t.EffectID = (this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
@@ -2735,11 +2742,9 @@ void Civbuilder::createCivBonuses() {
     t.ResourceCosts[1].Type = 3;
     t.ResourceCosts[1].Amount = 1000;
     t.ResourceCosts[1].Flag = 1;
-    t.ResearchTime = 200;
     t.Civ = 99;
     t.IconID = 121;
-    t.ButtonID = 9;
-    t.ResearchLocation = 101;
+    setResearchLocation(t, 101, 200, 9);
     t.EffectID = (this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
     this->civBonuses[309] = {(int)(this->df->Techs.size() - 1)};
@@ -2766,9 +2771,7 @@ void Civbuilder::createCivBonuses() {
     t.ResourceCosts[1].Type = 3;
     t.ResourceCosts[1].Amount = 900;
     t.ResourceCosts[1].Flag = 1;
-    t.ResearchTime = 100;
-    t.ResearchLocation = 101;
-    t.ButtonID = 9;
+    setResearchLocation(t, 101, 100, 9);
     t.IconID = 123;
     t.Civ = 99;
     t.EffectID = (this->df->Effects.size() - 1);
@@ -2830,7 +2833,7 @@ void Civbuilder::createCivBonuses() {
     // Blacksmith upgrades don't cost gold
     e.EffectCommands.clear();
     for (int i = 0; i < this->df->Techs.size(); i++) {
-        if (this->df->Techs[i].ResearchLocation == 103) {
+        if (getResearchLocation(this->df->Techs[i]) == 103) {
             e.EffectCommands.push_back(createEC(101, i, 3, 0, 0));
         }
     }
@@ -3159,7 +3162,7 @@ void Civbuilder::createCivBonuses() {
     // Blacksmith upgrades are free an age after they become available
     const vector<int> blacksmith_2_3 = {199, 200, 211, 212, 67, 68, 81, 82, 74, 76};
     for (int i = 0; i < this->df->Techs.size(); i++) {
-        if (this->df->Techs[i].ResearchLocation == 103) {
+        if (getResearchLocation(this->df->Techs[i]) == 103) {
             int ageRequirement = -1;
             for (int j = 0; j < this->df->Techs[i].getRequiredTechsSize(); j++) {
                 if (this->df->Techs[i].RequiredTechs[j] == 101 || this->df->Techs[i].RequiredTechs[j] == 102) {
@@ -3456,7 +3459,7 @@ void Civbuilder::createCivBonuses() {
     // Market techs cost no gold
     e.EffectCommands.clear();
     for (int i = 0; i < this->df->Techs.size(); i++) {
-        if (this->df->Techs[i].ResearchLocation == 84) {
+        if (getResearchLocation(this->df->Techs[i]) == 84) {
             e.EffectCommands.push_back(createEC(101, i, 3, 0, 0));
         }
     }
@@ -3524,10 +3527,8 @@ void Civbuilder::createCivBonuses() {
     t.ResourceCosts[1].Type = 1;
     t.ResourceCosts[1].Amount = 400;
     t.ResourceCosts[1].Flag = 1;
-    t.ResearchTime = 200;
-    t.ResearchLocation = 209;
+    setResearchLocation(t, 209, 200, 8);
     t.IconID = 46;
-    t.ButtonID = 8;
     t.Civ = -1;
     t.EffectID = (this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
@@ -3688,7 +3689,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 4, 14, 1));
     for (int i = 0; i < this->df->Techs.size(); i++) {
-        if (this->df->Techs[i].ResearchLocation == 109) {
+        if (getResearchLocation(this->df->Techs[i]) == 109) {
             this->createCivBonus(258, e, "C-Bonus, +1 capacity TC tech " + to_string(i), {i});
         }
     }
@@ -3875,7 +3876,7 @@ void Civbuilder::createCivBonuses() {
         }
     }
     for (int i = 0; i < this->df->Techs.size(); i++) {
-        if (this->df->Techs[i].ResearchLocation == 209) {
+        if (getResearchLocation(this->df->Techs[i]) == 209) {
             this->createCivBonus(277, e, "Gunpowder +1% attack for uni tech " + to_string(i), {i});
         }
     }
@@ -3886,7 +3887,7 @@ void Civbuilder::createCivBonuses() {
         e.EffectCommands.push_back(createEC(5, -1, buildingClasses[i], 0, 1.03));
     }
     for (int i = 0; i < this->df->Techs.size(); i++) {
-        if (this->df->Techs[i].ResearchLocation == 209) {
+        if (getResearchLocation(this->df->Techs[i]) == 209) {
             this->createCivBonus(278, e, "Building +3% armor for uni tech" + to_string(i), {i});
         }
     }
@@ -3897,7 +3898,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(7, 125, 104, 1, 0));
     e.EffectCommands.push_back(createEC(7, 125, 1806, 1, 0));
     for (int i = 0; i < this->df->Techs.size(); i++) {
-        if (this->df->Techs[i].ResearchLocation == 104) {
+        if (getResearchLocation(this->df->Techs[i]) == 104) {
             this->createCivBonus(279, e, "Monk for church tech " + to_string(i), {i});
         }
     }
