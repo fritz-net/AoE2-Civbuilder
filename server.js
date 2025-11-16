@@ -493,6 +493,20 @@ const zipModFolder = (req, res, next) => {
 	}
 };
 
+// Helper function to validate and get a color from the colours array
+// Returns the color if valid, or a default color (black) with error logging if invalid
+const getValidColor = (colorIndex, civName, colorPosition) => {
+	if (colorIndex === undefined || colorIndex === null) {
+		console.error(`ERROR: Color index is undefined for civ "${civName}" at position ${colorPosition}`);
+		return colours[0]; // Default to black
+	}
+	if (colorIndex < 0 || colorIndex >= colours.length) {
+		console.error(`ERROR: Color index ${colorIndex} is out of bounds for civ "${civName}" at position ${colorPosition}. Valid range: 0-${colours.length - 1}. Using default color.`);
+		return colours[0]; // Default to black
+	}
+	return colours[colorIndex];
+};
+
 const writeIconsJson = async (req, res, next) => {
 	console.log(`[${req.body.seed}]: Writing icons and json...`);
 	console.log(JSON.parse(req.body.modifiers));
@@ -599,8 +613,17 @@ const writeIconsJson = async (req, res, next) => {
 			await Promise.all(writePromises);
 		} else {
 			//Draw the customized flag
-			var seed = [[colours[civs[i]["flag_palette"][0]], colours[civs[i]["flag_palette"][1]], colours[civs[i]["flag_palette"][2]], colours[civs[i]["flag_palette"][3]], colours[civs[i]["flag_palette"][4]]], civs[i]["flag_palette"][5], civs[i]["flag_palette"][6]];
-			var symbol = civs[i]["flag_palette"][7] - 1;
+			// Validate color indices and construct seed with safe color lookups
+			const flagPalette = civs[i]["flag_palette"];
+			const colorPalette = [
+				getValidColor(flagPalette[0], civName, 0),
+				getValidColor(flagPalette[1], civName, 1),
+				getValidColor(flagPalette[2], civName, 2),
+				getValidColor(flagPalette[3], civName, 3),
+				getValidColor(flagPalette[4], civName, 4)
+			];
+			var seed = [colorPalette, flagPalette[5], flagPalette[6]];
+			var symbol = flagPalette[7] - 1;
 
 			if (civName == "berber" || civName == "inca") {
 				icons.drawFlag(
@@ -988,8 +1011,17 @@ function draftIO(io) {
 					//Create Civ Icons
 					for (var i = 0; i < numPlayers; i++) {
 						var civName = nameArr[i];
-						var seed = [[colours[draft["players"][i]["flag_palette"][0]], colours[draft["players"][i]["flag_palette"][1]], colours[draft["players"][i]["flag_palette"][2]], colours[draft["players"][i]["flag_palette"][3]], colours[draft["players"][i]["flag_palette"][4]]], draft["players"][i]["flag_palette"][5], draft["players"][i]["flag_palette"][6]];
-						var symbol = draft["players"][i]["flag_palette"][7] - 1;
+						// Validate color indices and construct seed with safe color lookups
+						const flagPalette = draft["players"][i]["flag_palette"];
+						const colorPalette = [
+							getValidColor(flagPalette[0], civName, 0),
+							getValidColor(flagPalette[1], civName, 1),
+							getValidColor(flagPalette[2], civName, 2),
+							getValidColor(flagPalette[3], civName, 3),
+							getValidColor(flagPalette[4], civName, 4)
+						];
+						var seed = [colorPalette, flagPalette[5], flagPalette[6]];
+						var symbol = flagPalette[7] - 1;
 						if (civName == "berber" || civName == "inca") { // TODO why do we have this here? both branches have exactly the same code
 							icons.drawFlag(
 								seed,
