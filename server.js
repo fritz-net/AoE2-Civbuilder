@@ -599,8 +599,30 @@ const writeIconsJson = async (req, res, next) => {
 			await Promise.all(writePromises);
 		} else {
 			//Draw the customized flag
-			var seed = [[colours[civs[i]["flag_palette"][0]], colours[civs[i]["flag_palette"][1]], colours[civs[i]["flag_palette"][2]], colours[civs[i]["flag_palette"][3]], colours[civs[i]["flag_palette"][4]]], civs[i]["flag_palette"][5], civs[i]["flag_palette"][6]];
-			var symbol = civs[i]["flag_palette"][7] - 1;
+			// Validate that all required flag_palette entries exist and are within valid range
+			const flagPalette = civs[i]["flag_palette"];
+			if (!flagPalette || !Array.isArray(flagPalette) || flagPalette.length < 8) {
+				console.error(`Invalid flag_palette for civ ${i} (${civName}):`, flagPalette);
+				throw new Error(`flag_palette must be an array with at least 8 entries for civ ${civName}`);
+			}
+
+			// Validate color indices (0-4) are within the colours array bounds (0-14)
+			for (let j = 0; j < 5; j++) {
+				const colorIndex = flagPalette[j];
+				if (colorIndex === undefined || colorIndex === null || colorIndex < 0 || colorIndex >= colours.length) {
+					console.error(`Invalid color index at flag_palette[${j}] for civ ${i} (${civName}):`, colorIndex);
+					console.error("Available colours array length:", colours.length);
+					console.error("Full flag_palette:", flagPalette);
+					throw new Error(`flag_palette[${j}] must be between 0 and ${colours.length - 1}, got: ${colorIndex}`);
+				}
+				if (!colours[colorIndex] || !Array.isArray(colours[colorIndex]) || colours[colorIndex].length < 3) {
+					console.error(`colours[${colorIndex}] is invalid:`, colours[colorIndex]);
+					throw new Error(`colours[${colorIndex}] must be a valid RGB array`);
+				}
+			}
+
+			var seed = [[colours[flagPalette[0]], colours[flagPalette[1]], colours[flagPalette[2]], colours[flagPalette[3]], colours[flagPalette[4]]], flagPalette[5], flagPalette[6]];
+			var symbol = flagPalette[7] - 1;
 
 			if (civName == "berber" || civName == "inca") {
 				icons.drawFlag(
