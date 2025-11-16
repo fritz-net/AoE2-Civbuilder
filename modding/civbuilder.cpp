@@ -758,6 +758,7 @@ void Civbuilder::createCivBonus(int civbuilderID, Effect e, string name, vector<
     t.RequiredTechCount = requirements.size();
     t.Civ = 99;
     t.EffectID = (this->df->Effects.size() - 1);
+    setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
     if (this->civBonuses.find(civbuilderID) == this->civBonuses.end()) {
         this->civBonuses[civbuilderID] = {(int)(this->df->Techs.size() - 1)};
@@ -1077,6 +1078,7 @@ void Civbuilder::setupData() {
     donjonUnitTech.RequiredTechCount = 1;
     donjonUnitTech.Civ = 99;
     donjonUnitTech.EffectID = (df->Effects.size() - 1);
+    setResearchLocation(donjonUnitTech, -1, 0, 0);
     df->Techs.push_back(donjonUnitTech);
     this->civBonuses[109].push_back((int)(df->Techs.size() - 1));
 
@@ -1087,6 +1089,7 @@ void Civbuilder::setupData() {
     stable_armor_castle.RequiredTechCount = 1;
     stable_armor_castle.Civ = 99;
     stable_armor_castle.EffectID = 640;
+    setResearchLocation(stable_armor_castle, -1, 0, 0);
     df->Techs[338] = stable_armor_castle;
 
     Tech stable_armor_imp = Tech();
@@ -1095,12 +1098,14 @@ void Civbuilder::setupData() {
     stable_armor_imp.RequiredTechCount = 1;
     stable_armor_imp.Civ = 99;
     stable_armor_imp.EffectID = 584;
+    setResearchLocation(stable_armor_imp, -1, 0, 0);
     df->Techs[552] = stable_armor_imp;
 
     Tech fishermen = Tech();
     fishermen.Name = "Fishermen work 10% faster";
     fishermen.Civ = 99;
     fishermen.EffectID = 641;
+    setResearchLocation(fishermen, -1, 0, 0);
     df->Techs[469] = fishermen;
     df->Effects[641].EffectCommands.push_back(createEC(5, 56, -1, 13, 1.1));
     df->Effects[641].EffectCommands.push_back(createEC(5, 57, -1, 13, 1.1));
