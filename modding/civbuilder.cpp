@@ -109,6 +109,7 @@ void Civbuilder::initialize() {
     this->unitClasses["shock"] = {751, 752, 753, 1974, 1976, 1901, 1903};
     this->unitClasses["ram"] = {35, 1258, 422, 548};
     this->unitClasses["footArcher"] = {4, 8, 24, 73, 185, 492, 530, 559, 763, 765, 866, 868, 1129, 1131, 1800, 1802, 1968, 1970};
+    this->unitClasses["archerLine"] = {4, 8, 492};
     this->unitClasses["spear"] = {93, 358, 359, 1786, 1787, 1788};
     this->unitClasses["skirmisher"] = {6, 7, 1155, 583, 596, 1010, 1012};
     this->unitClasses["lightCav"] = {448, 546, 441, 1707};
@@ -2571,8 +2572,8 @@ void Civbuilder::createUniqueTechs() {
     e.Name = "Obsidian Arrows";
     //e.EffectCommands.push_back(createEC(4, -1, 0, 9, amountTypetoD(6, 21))); // this does it for all archer lines including skirmishers
     // just set foot archers
-    for (int i = 0; i < this->unitClasses["footArcher"].size(); i++) {
-        e.EffectCommands.push_back(createEC(4, this->unitClasses["footArcher"][i], -1, 9, amountTypetoD(6, 21)));
+    for (int i = 0; i < this->unitClasses["push_back"].size(); i++) {
+        e.EffectCommands.push_back(createEC(4, this->unitClasses["push_back"][i], -1, 9, amountTypetoD(6, 21)));
     }
     createUT(40, 0, e, "Obsidian Arrows", {300, 0, 0, 300}, 40, 7501);
 
