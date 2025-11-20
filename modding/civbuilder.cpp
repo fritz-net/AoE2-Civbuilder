@@ -2572,8 +2572,8 @@ void Civbuilder::createUniqueTechs() {
     e.Name = "Obsidian Arrows";
     //e.EffectCommands.push_back(createEC(4, -1, 0, 9, amountTypetoD(6, 21))); // this does it for all archer lines including skirmishers
     // just set foot archers
-    for (int i = 0; i < this->unitClasses["push_back"].size(); i++) {
-        e.EffectCommands.push_back(createEC(4, this->unitClasses["push_back"][i], -1, 9, amountTypetoD(6, 21)));
+    for (int i = 0; i < this->unitClasses["archerLine"].size(); i++) {
+        e.EffectCommands.push_back(createEC(4, this->unitClasses["archerLine"][i], -1, 9, amountTypetoD(6, 21)));
     }
     createUT(40, 0, e, "Obsidian Arrows", {300, 0, 0, 300}, 40, 7501);
 
