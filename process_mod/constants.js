@@ -233,6 +233,9 @@ const iconids = [
 const blanks = ["040", "079", "107", "116", "134", "143", "185", "198", "201", "229", "270", "354", "371", "372", "387", "385", "391", "392", "409", "410", "433", "435", "437", "462", "464", "465", "466", "467", "178"];
 
 //Maps website techtree indices to data.json techtree indices
+//Array 0: Units
+//Array 1: Buildings
+//Array 2: Technologies
 const indexDictionary = [
 	{
 		4: 18,
