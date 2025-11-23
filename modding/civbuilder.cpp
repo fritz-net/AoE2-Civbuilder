@@ -219,10 +219,10 @@ void Civbuilder::initialize() {
     this->civBonuses[100] = {697};
     this->civBonuses[101] = {710};
     this->civBonuses[102] = {699, 700, 701, 702};
-    this->civBonuses[103] = {768};
-    this->civBonuses[104] = {769};
-    this->civBonuses[105] = {758, 759, 760, 761, 762, 763, 764, 765, 766, 767};
-    this->civBonuses[106] = {770};
+    this->civBonuses[103] = {768}; // Cavalier upgrade available in Castle Age
+    this->civBonuses[104] = {769}; // Gunpowder units +25% attack
+    this->civBonuses[105] = {758, 759, 760, 761, 762, 763, 764, 765, 766, 767}; // Economic upgrades cost -33% food and available one age earlier
+    this->civBonuses[106] = {770}; 
     this->civBonuses[107] = {771};
     this->civBonuses[108] = {772, 773, 774, 815, 816, 817};
     this->civBonuses[109] = {775};
@@ -2803,7 +2803,17 @@ void Civbuilder::createCivBonuses() {
 
     // Create civ bonuses that are just a list of free techs
     const vector<vector<int>> freeTechs = {
-        {12, 13, 14, 1012, 1013, 1014}, {67, 68, 75}, {602, 875}, {8, 280}, {322, 441}, {47}, {254, 428, 786}, {213, 249}, {140, 63, 64}, {315}};
+        {12, 13, 14, 1012, 1013, 1014}, // Pasture  & Farm upgrades free (require Mill)
+        {67, 68, 75},
+        {602, 875},
+        {8, 280},
+        {322, 441},
+        {47},
+        {254, 428, 786},
+        {213, 249},
+        {140, 63, 64},
+        {315}
+    };
     for (int i = 0; i < freeTechs.size(); i++) {
         e.EffectCommands.clear();
         for (int j = 0; j < freeTechs[i].size(); j++) {
@@ -3378,6 +3388,7 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechCount = 2;
     this->df->Techs.push_back(t);
     this->df->Techs[1013].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
+    // TODO research location is missing
     this->civBonuses[105].push_back((int)(this->df->Techs.size() - 1));
 
     t = Tech();
@@ -3388,6 +3399,7 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechCount = 2;
     this->df->Techs.push_back(t);
     this->df->Techs[1012].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
+    // TODO research location is missing
     this->civBonuses[105].push_back((int)(this->df->Techs.size() - 1));
 
     // Barracks upgrades earlier
@@ -3401,6 +3413,7 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechCount = 2;
     this->df->Techs.push_back(t);
     this->df->Techs[384].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
+    // TODO research location is missing
     techIDs.push_back((int)(this->df->Techs.size() - 1));
 
     t = Tech();
@@ -3411,6 +3424,7 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechCount = 2;
     this->df->Techs.push_back(t);
     this->df->Techs[434].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
+    // TODO research location is missing
     techIDs.push_back((int)(this->df->Techs.size() - 1));
 
     this->civBonuses[221] = techIDs;
@@ -3452,7 +3466,7 @@ void Civbuilder::createCivBonuses() {
     this->createCivBonus(228, e, "C-Bonus, Warships +attack vs vils");
 
     // Rams generate stone when fighting
-    this->civBonuses[229] = {};
+    this->civBonuses[229] = {}; // empty because its done in `assignCivBonuses` special handling
 
     // TCs +50% work rate in Imperial
     e.EffectCommands.clear();
@@ -3950,7 +3964,7 @@ void Civbuilder::createCivBonuses() {
     // Houfnice
     this->civBonuses[286] = {787};
 
-    // Caravanseri
+    // Caravanserai
     this->civBonuses[287] = {518};
 
     // Gunpowder units +1/+1P
@@ -4087,7 +4101,7 @@ void Civbuilder::createCivBonuses() {
     }
     this->createCivBonus(323, e, "C-Bonus, Buildings rebate stone");
 
-    // Villagers cooperate
+    // Villagers cooperate - "Villagers work faster when nearby other villagers"
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(0, -1, 4, 63, 96));
     this->createCivBonus(324, e, "C-Bonus, Villagers cooperate");
