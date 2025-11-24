@@ -59,8 +59,9 @@ int main(int argc, char **argv) {
     for (size_t i = 0; i < df->Civs[0].Units.size(); i++) {
       Unit &unit = df->Civs[0].Units[i];
       
-      // Skip units with invalid IDs or empty names
-      // Most invalid/unused units have ID < 0 or empty names
+      // Skip invalid/placeholder units
+      // Negative IDs indicate unused unit slots in the DAT file structure
+      // Empty names indicate units that haven't been properly initialized
       if (unit.ID < 0 || unit.Name.empty()) continue;
       
       Value unitObj;
@@ -119,6 +120,7 @@ int main(int argc, char **argv) {
   ofstream outputFile(argv[2]);
   if (!outputFile.is_open()) {
     cerr << "Error: Could not open output file: " << argv[2] << endl;
+    cerr << "Possible causes: file path doesn't exist, insufficient permissions, or disk full" << endl;
     return 1;
   }
 
