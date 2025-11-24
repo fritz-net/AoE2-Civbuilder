@@ -1,0 +1,326 @@
+{
+  "metadata": {
+    "generated": "2025-11-24T03:25:29.662Z",
+    "source": "/home/runner/work/AoE2-Civbuilder/AoE2-Civbuilder/modding/generated/extracted_data.json"
+  },
+  "mappings": [
+    {
+      "id": 8,
+      "internal_name": "LNGBW",
+      "display_name": "Longbowmen",
+      "class": 0
+    },
+    {
+      "id": 11,
+      "internal_name": "MOSUN",
+      "display_name": "Mangudai",
+      "class": 36
+    },
+    {
+      "id": 25,
+      "internal_name": "TKNIT",
+      "display_name": "Teutonic Knights",
+      "class": 6
+    },
+    {
+      "id": 40,
+      "internal_name": "CATAP",
+      "display_name": "Cataphracts",
+      "class": 12
+    },
+    {
+      "id": 41,
+      "internal_name": "GBRSK",
+      "display_name": "Huskarls",
+      "class": 6
+    },
+    {
+      "id": 46,
+      "internal_name": "JANNI",
+      "display_name": "Janissaries",
+      "class": 44
+    },
+    {
+      "id": 73,
+      "internal_name": "CHUKN",
+      "display_name": "Chu Ko Nu",
+      "class": 0
+    },
+    {
+      "id": 94,
+      "internal_name": "BRSRK",
+      "display_name": "Berserks",
+      "class": 6
+    },
+    {
+      "id": 128,
+      "internal_name": "TCART",
+      "display_name": null,
+      "class": 19
+    },
+    {
+      "id": 188,
+      "internal_name": "MPCAV",
+      "display_name": "Mamelukes",
+      "class": 13
+    },
+    {
+      "id": 204,
+      "internal_name": "TCARTF",
+      "display_name": null,
+      "class": 19
+    },
+    {
+      "id": 232,
+      "internal_name": "WBRSK",
+      "display_name": "Woad Raiders",
+      "class": 6
+    },
+    {
+      "id": 239,
+      "internal_name": "MPCAV",
+      "display_name": "Mamelukes",
+      "class": 12
+    },
+    {
+      "id": 281,
+      "internal_name": "TAXEM",
+      "display_name": "Throwing Axemen",
+      "class": 6
+    },
+    {
+      "id": 725,
+      "internal_name": "JAGUAR",
+      "display_name": "Jaguar Warriors",
+      "class": 6
+    },
+    {
+      "id": 755,
+      "internal_name": "TARKAN",
+      "display_name": "Tarkans",
+      "class": 12
+    },
+    {
+      "id": 763,
+      "internal_name": "PLUME",
+      "display_name": "Plumed Archers",
+      "class": 0
+    },
+    {
+      "id": 771,
+      "internal_name": "CONQI",
+      "display_name": "Conquistadors",
+      "class": 23
+    },
+    {
+      "id": 827,
+      "internal_name": "WAGON",
+      "display_name": "War Wagons",
+      "class": 36
+    },
+    {
+      "id": 846,
+      "internal_name": "TDONK",
+      "display_name": null,
+      "class": 19
+    },
+    {
+      "id": 866,
+      "internal_name": "GENOE",
+      "display_name": "Genoese Crossbowmen",
+      "class": 0
+    },
+    {
+      "id": 869,
+      "internal_name": "UMAGYX",
+      "display_name": "Ghulam",
+      "class": 12
+    },
+    {
+      "id": 871,
+      "internal_name": "UMAGYX",
+      "display_name": "Ghulam",
+      "class": 12
+    },
+    {
+      "id": 876,
+      "internal_name": "BOYAR",
+      "display_name": "Boyars",
+      "class": 12
+    },
+    {
+      "id": 879,
+      "internal_name": "KAMAY",
+      "display_name": "Kamayuks",
+      "class": 6
+    },
+    {
+      "id": 886,
+      "internal_name": "TARKAN",
+      "display_name": "Tarkans",
+      "class": 12
+    },
+    {
+      "id": 1001,
+      "internal_name": "ORGAN",
+      "display_name": "Organ Guns",
+      "class": 13
+    },
+    {
+      "id": 1007,
+      "internal_name": "CAMAR",
+      "display_name": "Camel Archers",
+      "class": 36
+    },
+    {
+      "id": 1013,
+      "internal_name": "GBETO",
+      "display_name": "Gbetos",
+      "class": 6
+    },
+    {
+      "id": 1016,
+      "internal_name": "SHOTEL",
+      "display_name": "Shotel Warriors",
+      "class": 6
+    },
+    {
+      "id": 1120,
+      "internal_name": "ELEBALI",
+      "display_name": "Ballista Elephants",
+      "class": 12
+    },
+    {
+      "id": 1123,
+      "internal_name": "KARAM",
+      "display_name": "Karambit Warriors",
+      "class": 6
+    },
+    {
+      "id": 1126,
+      "internal_name": "ARAMBAI",
+      "display_name": "Arambai",
+      "class": 23
+    },
+    {
+      "id": 1129,
+      "internal_name": "RATAN",
+      "display_name": "Rattan Archers",
+      "class": 0
+    },
+    {
+      "id": 1225,
+      "internal_name": "KONNIK",
+      "display_name": "Konniks",
+      "class": 12
+    },
+    {
+      "id": 1228,
+      "internal_name": "KESHIK",
+      "display_name": "Keshiks",
+      "class": 12
+    },
+    {
+      "id": 1231,
+      "internal_name": "KIPCHAK",
+      "display_name": "Kipchaks",
+      "class": 36
+    },
+    {
+      "id": 1234,
+      "internal_name": "LEITIS",
+      "display_name": "Leitis",
+      "class": 12
+    },
+    {
+      "id": 1254,
+      "internal_name": "KONNIK",
+      "display_name": "Konniks",
+      "class": 12
+    },
+    {
+      "id": 1655,
+      "internal_name": "COUSTILLIER",
+      "display_name": "Coustilliers",
+      "class": 12
+    },
+    {
+      "id": 1658,
+      "internal_name": "SERJEANT",
+      "display_name": "Serjeants",
+      "class": 6
+    },
+    {
+      "id": 1701,
+      "internal_name": "OBUCH",
+      "display_name": "Obuch",
+      "class": 6
+    },
+    {
+      "id": 1735,
+      "internal_name": "URUMI",
+      "display_name": "Urumi Swordsmen",
+      "class": 6
+    },
+    {
+      "id": 1738,
+      "internal_name": "RATHA",
+      "display_name": "Rathas",
+      "class": 12
+    },
+    {
+      "id": 1741,
+      "internal_name": "CHAKRAM",
+      "display_name": "Chakram Throwers",
+      "class": 6
+    },
+    {
+      "id": 1747,
+      "internal_name": "GHULAM",
+      "display_name": "Ghulam",
+      "class": 6
+    },
+    {
+      "id": 1800,
+      "internal_name": "COMPBOW",
+      "display_name": "Composite Bowmen",
+      "class": 0
+    },
+    {
+      "id": 1803,
+      "internal_name": "MONASPA",
+      "display_name": "Monaspas",
+      "class": 12
+    },
+    {
+      "id": 1908,
+      "internal_name": "IRONPAG",
+      "display_name": "Iron Pagoda",
+      "class": 12
+    },
+    {
+      "id": 1920,
+      "internal_name": "LIAODAO",
+      "display_name": "Liao Dao",
+      "class": 6
+    },
+    {
+      "id": 1949,
+      "internal_name": "TIGERCAV",
+      "display_name": "Tiger Cavalry",
+      "class": 12
+    },
+    {
+      "id": 1959,
+      "internal_name": "WHTFTHRG",
+      "display_name": "White Feather Guard",
+      "class": 6
+    },
+    {
+      "id": 1968,
+      "internal_name": "FIREARCHER",
+      "display_name": "Fire Archers",
+      "class": 0
+    }
+  ]
+}
