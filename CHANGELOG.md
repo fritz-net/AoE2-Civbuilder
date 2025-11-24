@@ -5,6 +5,96 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.0 (2025-11-24)
+
+
+### Features
+
+* Add DAT file extraction tool with enum generator and refactor civbuilder to use generated enums ([#39](https://github.com/fritz-net/AoE2-Civbuilder/issues/39)) ([465e114](https://github.com/fritz-net/AoE2-Civbuilder/commit/465e1143e733c91fad4fe8fda9ab924146d6e6b3))
+* add enum for civBonuses array indices ([#33](https://github.com/fritz-net/AoE2-Civbuilder/issues/33)) ([6620269](https://github.com/fritz-net/AoE2-Civbuilder/commit/6620269049cd7cd5ea690742258c11c2b4260348))
+* add release-please automation and convert update log to dynamic changelog ([#66](https://github.com/fritz-net/AoE2-Civbuilder/issues/66)) ([124d8ee](https://github.com/fritz-net/AoE2-Civbuilder/commit/124d8ee1614a88568387f5c376426b7fe6015618))
+* added github actions ([35e30b7](https://github.com/fritz-net/AoE2-Civbuilder/commit/35e30b7912d4dfdca36a35ef906b9d42be02563f))
+* added older dat files ([34837d5](https://github.com/fritz-net/AoE2-Civbuilder/commit/34837d5ea4339428501266acf64cf93894c1415d))
+* better docker layer caching ([7984d00](https://github.com/fritz-net/AoE2-Civbuilder/commit/7984d003d1fdccc2a52afff916d43f5dbf29fc24))
+* better layering ([890d6db](https://github.com/fritz-net/AoE2-Civbuilder/commit/890d6db54222722541ea0ee23af1488b4c275664))
+* configurable paths ([6d98d1b](https://github.com/fritz-net/AoE2-Civbuilder/commit/6d98d1bceb8da3f61a04402e260406fdba7c74a7))
+* gdb added ([dd98edd](https://github.com/fritz-net/AoE2-Civbuilder/commit/dd98edd2308e0d2701fde2e8a7be292eeb4f92a0))
+* github_actions and some other small changes ([c4a5264](https://github.com/fritz-net/AoE2-Civbuilder/commit/c4a5264cde87b23f40157c2d3e238c6c1d8e9645))
+* gundpower units +1 damage per uni tech ([c3c3af1](https://github.com/fritz-net/AoE2-Civbuilder/commit/c3c3af1ff6e57ca602299f3a446a1cca92fda606))
+* initial dockerfiles ([6c686bf](https://github.com/fritz-net/AoE2-Civbuilder/commit/6c686bff11463584bd5e59b742cad71d1e2f3d43))
+* route subdir via hostname ([bc4c560](https://github.com/fritz-net/AoE2-Civbuilder/commit/bc4c56069f5a670099bc7245b7804e025c90db79))
+
+
+### Bug Fixes
+
+* add missing research location initialization for Tech instances ([#26](https://github.com/fritz-net/AoE2-Civbuilder/issues/26)) ([6d16c0b](https://github.com/fritz-net/AoE2-Civbuilder/commit/6d16c0bbc65a214eb4df8226bf1c48d9bc60a9b8))
+* added missing json lib ([dd4926a](https://github.com/fritz-net/AoE2-Civbuilder/commit/dd4926ad20e65bd9f4d8497c821ea6e843959b1d))
+* added missing shutdown handler ([c8cb64b](https://github.com/fritz-net/AoE2-Civbuilder/commit/c8cb64b3e2c3acb09f3f4ca9ade76c7d31fcc8cb))
+* also clone submodule in CICD ([27fb238](https://github.com/fritz-net/AoE2-Civbuilder/commit/27fb238629a4606dcbc3c74599749c48e673319d))
+* another path fix ([81bb4f6](https://github.com/fritz-net/AoE2-Civbuilder/commit/81bb4f6b005ed31ef6d00533faa8c36d6c3d5e24))
+* calling of `./process_mod/createModFolder.sh` ([65c3f82](https://github.com/fritz-net/AoE2-Civbuilder/commit/65c3f8221a59ef5ff92b536046b811ad4757a201))
+* change app dir ([5491a87](https://github.com/fritz-net/AoE2-Civbuilder/commit/5491a873cc416edb21695da3b549cf0236170628))
+* cleanup, removed gdb ([9fd08ad](https://github.com/fritz-net/AoE2-Civbuilder/commit/9fd08ad9cd6888e8a317ce8440cb1737f406576c))
+* compiler issue with gunpowder boni ([2a3af53](https://github.com/fritz-net/AoE2-Civbuilder/commit/2a3af53cfdab4874f6e2e88ec3821fcf22aba3f7))
+* copy all from modding dir so cpp build works for more then genie utils ([5c21b7c](https://github.com/fritz-net/AoE2-Civbuilder/commit/5c21b7c840889bd3735fb8691acb8292fefbcdb1))
+* correct images for draft ([af4a982](https://github.com/fritz-net/AoE2-Civbuilder/commit/af4a982f2c723855df41e2c1299931304d4d6259))
+* cpp copy path ([013f520](https://github.com/fritz-net/AoE2-Civbuilder/commit/013f52012031b1d393ae02985e9943879c404e55))
+* crash on creation of mod ([133c91f](https://github.com/fritz-net/AoE2-Civbuilder/commit/133c91f65a6c6fce9b77cc6a5fcea2b4754180aa))
+* crash on creation of mod ([133c91f](https://github.com/fritz-net/AoE2-Civbuilder/commit/133c91f65a6c6fce9b77cc6a5fcea2b4754180aa))
+* crash on creation of mod ([816ad3e](https://github.com/fritz-net/AoE2-Civbuilder/commit/816ad3ebeed1ddbd1b67c6e0b449293c412dc821))
+* creat missing temp dir ([c898d58](https://github.com/fritz-net/AoE2-Civbuilder/commit/c898d5867eba085ee997e846fce225c869e2a8b9))
+* docker build ([2a71aa1](https://github.com/fritz-net/AoE2-Civbuilder/commit/2a71aa123dab77102c8bf16d8503ebf6b01a7a91))
+* docker build without cpp ([b1c1ea6](https://github.com/fritz-net/AoE2-Civbuilder/commit/b1c1ea6407d132b02af781e795be5a78ba3a12d7))
+* dockerfile copy order ([a270f55](https://github.com/fritz-net/AoE2-Civbuilder/commit/a270f5576e474b410b7fbb14cba78754b8be551e))
+* draft bonus images ([20c7cd4](https://github.com/fritz-net/AoE2-Civbuilder/commit/20c7cd44b284e6ca80b0241568ea82bc7136eb79))
+* draft bonus images ([c4f2313](https://github.com/fritz-net/AoE2-Civbuilder/commit/c4f231325f4b6520258b3c1a15a325217c396451))
+* draft path creation ([de8a8d3](https://github.com/fritz-net/AoE2-Civbuilder/commit/de8a8d340c21b4ffb934e6f88d0ac547ef644222))
+* enabling server to listen ([73497b5](https://github.com/fritz-net/AoE2-Civbuilder/commit/73497b5bbcca9fa04d2ea7aace837c1b88f86b4e))
+* folwark cow, all for 10gold ([5858c12](https://github.com/fritz-net/AoE2-Civbuilder/commit/5858c12e38929e1b0512d966f3a9e1b7eb62907c))
+* fronted path ([2031519](https://github.com/fritz-net/AoE2-Civbuilder/commit/20315190d141de8d4f6cec583688c874626ea92d))
+* frontend routing ([c748e5c](https://github.com/fritz-net/AoE2-Civbuilder/commit/c748e5c282ad3e340c56172c7fd05832f70fccc6))
+* frontend url redirects ([5e9eac1](https://github.com/fritz-net/AoE2-Civbuilder/commit/5e9eac1c23b0e4b5f0acae827638e097107a2cae))
+* gunpowder +1 attach per uni tech ([91091e5](https://github.com/fritz-net/AoE2-Civbuilder/commit/91091e58d3a26dd58551cb8ca5a0a4952c6be6e0))
+* gunpowder uni tech boni blanced ([4760fbb](https://github.com/fritz-net/AoE2-Civbuilder/commit/4760fbb32ce11aee28424bd1641cfd7a732a91f2))
+* gunpower uni civ boni ([41ec8d5](https://github.com/fritz-net/AoE2-Civbuilder/commit/41ec8d5a7d7295a7454a1b317f17b5045b31e999))
+* hostname env var docs ([48885d1](https://github.com/fritz-net/AoE2-Civbuilder/commit/48885d16f527b5f1b228e31243754bf01aba41a4))
+* initialize jsoncpp submodule and update includes for new genieutils API ([308ea7f](https://github.com/fritz-net/AoE2-Civbuilder/commit/308ea7ffa36074d7d9d13188e959a51562780b0b))
+* json runtime deps added ([4ff6bcf](https://github.com/fritz-net/AoE2-Civbuilder/commit/4ff6bcfaa80583c2c1d6e41e4af4fab33ef29bd8))
+* lang string for UinqueUnits ([4adb770](https://github.com/fritz-net/AoE2-Civbuilder/commit/4adb77093cd0593c01a7913fe47a2c5e4eb2f7c3))
+* line ending issue ([528be0c](https://github.com/fritz-net/AoE2-Civbuilder/commit/528be0c282cbaaafb9d0a882d9733d4da97682f1))
+* merge conflicts `osUtil.execCommand` ([0678f92](https://github.com/fritz-net/AoE2-Civbuilder/commit/0678f923bfba5ce1a632c52ae30227fbca9829b8))
+* missing zip ([f31f127](https://github.com/fritz-net/AoE2-Civbuilder/commit/f31f1271cfb8889a6072aed615d88ef3126f42d7))
+* mod folder creation ([d9ffb26](https://github.com/fritz-net/AoE2-Civbuilder/commit/d9ffb26eab872c5aae7cf0dc89597ca823a025b9))
+* more dos2unix fixes ([70deab0](https://github.com/fritz-net/AoE2-Civbuilder/commit/70deab02395b979fd0c62b051e8d678125794957))
+* more dos2unix fixes ([fcca59c](https://github.com/fritz-net/AoE2-Civbuilder/commit/fcca59ceea5588a0d0549d8b771bda37ea874cfe))
+* names of imperial units ([982aef3](https://github.com/fritz-net/AoE2-Civbuilder/commit/982aef301ed0a499d88174f0cbcaabdbef2b5916))
+* obsidian arrows just for archer line not all footarchers ([#30](https://github.com/fritz-net/AoE2-Civbuilder/issues/30)) ([1d93179](https://github.com/fritz-net/AoE2-Civbuilder/commit/1d93179fce8430d144b39acd1e6497f927d8ce47))
+* obsidian arrows just for foot archers ([5bab581](https://github.com/fritz-net/AoE2-Civbuilder/commit/5bab58109b7c4c5f78aa34c01fa72339baca3d6d))
+* only push docker on main ([07e6ec2](https://github.com/fritz-net/AoE2-Civbuilder/commit/07e6ec241cf005d39666b0f3e25faa7fcfe6a083))
+* order of vars so path gets properly inited ([d2b36c2](https://github.com/fritz-net/AoE2-Civbuilder/commit/d2b36c2e1c8f45a928ea0666c7407d274839dace))
+* os functions overlap ([41a0a26](https://github.com/fritz-net/AoE2-Civbuilder/commit/41a0a26b2a93040a63fd4b9c9f9dd2b36d4f4459))
+* pasture and early eagle research location ([#40](https://github.com/fritz-net/AoE2-Civbuilder/issues/40)) ([74a1e5f](https://github.com/fritz-net/AoE2-Civbuilder/commit/74a1e5f0afbd6030a00e7698b987942c56fcf69b))
+* path for mod folder creation sources ([fc81f3e](https://github.com/fritz-net/AoE2-Civbuilder/commit/fc81f3e4d0aae2ff8cb1253d43ad144b7662ace7))
+* removed folwark cows since they already worked ([986f3b8](https://github.com/fritz-net/AoE2-Civbuilder/commit/986f3b8f3bca62055c5e7597195075d85504cc2c))
+* removed patching of submodule ([70489c3](https://github.com/fritz-net/AoE2-Civbuilder/commit/70489c35eb158739e72ea6631aad006afdf72883))
+* run cicd on all PRs ([f2ab4ff](https://github.com/fritz-net/AoE2-Civbuilder/commit/f2ab4ff943d507f2628edba0fd5d56d31a344278))
+* sprites for royal battle elephant ([bf6a509](https://github.com/fritz-net/AoE2-Civbuilder/commit/bf6a509ac32f8beb2b809d641063817122f1fae0))
+* squire affects archer tech ([fc5e568](https://github.com/fritz-net/AoE2-Civbuilder/commit/fc5e5688f5a9ea4fa6b0f25c91f6273b1aa52bff))
+* train/research location API for latest game version and remove redundant code ([#19](https://github.com/fritz-net/AoE2-Civbuilder/issues/19)) ([2c21d2a](https://github.com/fritz-net/AoE2-Civbuilder/commit/2c21d2aee048c8f2b547fbce6333cb4454ae3be7))
+* ui mod path in createModFolder.sh ([1f2c3d7](https://github.com/fritz-net/AoE2-Civbuilder/commit/1f2c3d76bdd093d2312aa0075881240f05ff6907))
+* update code to work with genieutils API changes for dat v8.5 ([f801aae](https://github.com/fritz-net/AoE2-Civbuilder/commit/f801aae9ffda4c9986cda99289caf1bf5b45cdd2))
+* update genieutils submodule to commit 43bdc0c with CMakeLists.txt fix ([f35970d](https://github.com/fritz-net/AoE2-Civbuilder/commit/f35970dc6658ba55e3b16ea63955c1f5dc318ea4))
+* update techtree UU id mappings ([14a3883](https://github.com/fritz-net/AoE2-Civbuilder/commit/14a38834874a8bac0878eff93258fb462198bad3))
+* updated submodule ([46d6d69](https://github.com/fritz-net/AoE2-Civbuilder/commit/46d6d69bf504dfa1286eeb3d886cd0e35b192f9e))
+* UU fixes for hotkeys, make avail research location ([#21](https://github.com/fritz-net/AoE2-Civbuilder/issues/21)) ([2da8e2d](https://github.com/fritz-net/AoE2-Civbuilder/commit/2da8e2dfe686465c761e7c47f90f84cfb829a1f5))
+* voice file copy ([63db379](https://github.com/fritz-net/AoE2-Civbuilder/commit/63db3799fe4b40947cea2a0d6000a1a9aa3551e1))
+* wrong cost display for Sosso Guard ([#49](https://github.com/fritz-net/AoE2-Civbuilder/issues/49)) ([109495e](https://github.com/fritz-net/AoE2-Civbuilder/commit/109495e9306459b6451d5f77d139c4097f7ea121))
+
+
+### Reverts
+
+* remove unnecessary jsoncpp-related changes ([d9d9890](https://github.com/fritz-net/AoE2-Civbuilder/commit/d9d98907a4901bf52f0ff92643d8d037489323ee))
+
 ## [Unreleased]
 
 ## [0.1.0] - 2025-05-02
