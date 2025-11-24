@@ -3582,7 +3582,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.clear();
     e.Name = "City Walls";
     const vector<vector<int>> wallUpgrades = {
-        {UNIT_STONE_WALL, TECH_FORTIFIED_WALL, UNIT_CWAL},
+        {UNIT_STONE_WALL, UNIT_FORTIFIED_WALL, UNIT_CWAL},
         {UNIT_GTAA2, UNIT_GTAA3, UNIT_CGTAA},
         {UNIT_GATE, UNIT_GTAB3, UNIT_CGTAB},
         {UNIT_GATE_1, UNIT_GTAC3, UNIT_CGTAC},
