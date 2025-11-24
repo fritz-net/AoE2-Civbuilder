@@ -48,7 +48,8 @@ int main(int argc, char **argv) {
   Value root;
   root["metadata"]["source_file"] = argv[1];
   root["metadata"]["game_version"] = "LatestDE2";
-  root["metadata"]["extraction_date"] = __DATE__;
+  // Note: This is the compilation date, not the extraction date
+  root["metadata"]["compilation_date"] = __DATE__;
 
   // Extract units from Civ[0] (Gaia/template civ)
   // This contains all available units in the game
@@ -58,8 +59,9 @@ int main(int argc, char **argv) {
     for (size_t i = 0; i < df->Civs[0].Units.size(); i++) {
       Unit &unit = df->Civs[0].Units[i];
       
-      // Skip units with invalid IDs or no name
-      if (unit.ID < 0) continue;
+      // Skip units with invalid IDs or empty names
+      // Most invalid/unused units have ID < 0 or empty names
+      if (unit.ID < 0 || unit.Name.empty()) continue;
       
       Value unitObj;
       unitObj["id"] = unit.ID;

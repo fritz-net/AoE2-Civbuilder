@@ -53,10 +53,12 @@ The output JSON file contains three main sections:
   "metadata": {
     "source_file": "../public/vanillaFiles/empires2_x2_p1.dat",
     "game_version": "LatestDE2",
-    "extraction_date": "Dec 24 2025"
+    "compilation_date": "Nov 24 2025"
   }
 }
 ```
+
+Note: `compilation_date` represents when the tool was compiled, not when the extraction was performed.
 
 ### Units
 

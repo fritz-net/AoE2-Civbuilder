@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "extraction_date": "Nov 24 2025",
+    "compilation_date": "Nov 24 2025",
     "game_version": "LatestDE2",
     "source_file": "../public/vanillaFiles/empires2_x2_p1.dat"
   },
@@ -75,6 +75,6 @@
       "name": "Hindustanis Team Bonus",
       "num_commands": 20
     }
-  ],
-  "note": "This is an excerpt. Full output contains 2479 units, 1510 techs, and 1277 effects."
+  ]
 }
+
