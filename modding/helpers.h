@@ -22,27 +22,30 @@ using namespace genie;
 typedef ResourceUsage<int16_t, int16_t, int16_t> ResourceCost;
 typedef ResourceUsage<int16_t, int16_t, uint8_t> ResearchResourceCost;
 
-const int tcSpearman = 1182;
-const int tcPikeman = 1183;
-const int tcHalberdier = 1184;
-const int tcSiegeTower = 885;
-const int royalLancer = 1181;
-const int royalElephant = 1180;
-const int impScorpion = 1179;
-const int impScorpionProjectile = 1113;
-const int impScorpionProjectileFire = 1114;
-const int millCow = 646;
-const int pastureCow = 650;
-const int feudalMonk = 648;
-const int smallFarm = 845;
-const int smallDeadFarm = 847;
-const int smallRiceFarm = 849;
-const int smallDeadRiceFarm = 929;
-const int smallFarmDrop = 930;
-const int smallFarmStack = 1037;
-const int smallRiceFarmDrop = 1038;
-const int feudalKnight = 1262;
-const int cityWall = 370;
+// Custom unit IDs for modding purposes
+enum CustomUnitID {
+    cityWall = 370,
+    feudalMonk = 648,
+    millCow = 646,
+    pastureCow = 650,
+    smallFarm = 845,
+    smallDeadFarm = 847,
+    smallRiceFarm = 849,
+    tcSiegeTower = 885,
+    smallDeadRiceFarm = 929,
+    smallFarmDrop = 930,
+    smallFarmStack = 1037,
+    smallRiceFarmDrop = 1038,
+    impScorpionProjectile = 1113,
+    impScorpionProjectileFire = 1114,
+    impScorpion = 1179,
+    royalElephant = 1180,
+    royalLancer = 1181,
+    tcSpearman = 1182,
+    tcPikeman = 1183,
+    tcHalberdier = 1184,
+    feudalKnight = 1262
+};
 
 const vector<int> disableIDs = {74, 13, 545, 45, 70, 72};
 const vector<int> palisadeGates = {789, 790, 791, 792, 793, 794, 795, 796, 797, 798, 799, 800, 801, 802, 803, 804};
