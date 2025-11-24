@@ -1355,7 +1355,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.BreakOffCombat = 1;
     }
     // Flamethrower
-    createUU(43, 188, "Flamethrower", {0, 1000, 0, 1000}, 75, 7608);
+    createUU(UU_FLAMETHROWER, 188, "Flamethrower", {0, 1000, 0, 1000}, 75, 7608);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {

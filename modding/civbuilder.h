@@ -16,6 +16,7 @@
 #include "genie/dat/DatFile.h"
 #include "helpers.h"
 #include "enums/unit_ids.h"
+#include "enums/uu_ids.h"
 #include "CivBonusEnum.h"
 
 using namespace std;
