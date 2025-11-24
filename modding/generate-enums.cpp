@@ -114,7 +114,8 @@ int main(int argc, char** argv) {
     outFile << " */\n\n";
     outFile << "#ifndef UNIT_IDS_H\n";
     outFile << "#define UNIT_IDS_H\n\n";
-    outFile << "enum UnitID {\n";
+    outFile << "namespace UnitID {\n";
+    outFile << "  enum Enum {\n";
     
     const Value& units = root["units"];
     for (unsigned int i = 0; i < units.size(); i++) {
@@ -127,7 +128,7 @@ int main(int argc, char** argv) {
         name = unit["display_name"].asString();
       }
       
-      string enumName = makeUnique(name, usedNames, id, "UNIT_");
+      string enumName = makeUnique(name, usedNames, id, "");
       outFile << "    " << enumName << " = " << id;
       
       if (i < units.size() - 1) {
@@ -143,7 +144,8 @@ int main(int argc, char** argv) {
       outFile << "\n";
     }
     
-    outFile << "};\n\n";
+    outFile << "  };\n";
+    outFile << "}\n\n";
     outFile << "#endif // UNIT_IDS_H\n";
     outFile.close();
     
@@ -169,7 +171,8 @@ int main(int argc, char** argv) {
     outFile << " */\n\n";
     outFile << "#ifndef TECH_IDS_H\n";
     outFile << "#define TECH_IDS_H\n\n";
-    outFile << "enum TechID {\n";
+    outFile << "namespace TechID {\n";
+    outFile << "  enum Enum {\n";
     
     const Value& techs = root["techs"];
     for (unsigned int i = 0; i < techs.size(); i++) {
@@ -182,7 +185,7 @@ int main(int argc, char** argv) {
         name = tech["display_name"].asString();
       }
       
-      string enumName = makeUnique(name, usedNames, id, "TECH_");
+      string enumName = makeUnique(name, usedNames, id, "");
       outFile << "    " << enumName << " = " << id;
       
       if (i < techs.size() - 1) {
@@ -198,7 +201,8 @@ int main(int argc, char** argv) {
       outFile << "\n";
     }
     
-    outFile << "};\n\n";
+    outFile << "  };\n";
+    outFile << "}\n\n";
     outFile << "#endif // TECH_IDS_H\n";
     outFile.close();
     
@@ -224,7 +228,8 @@ int main(int argc, char** argv) {
     outFile << " */\n\n";
     outFile << "#ifndef EFFECT_IDS_H\n";
     outFile << "#define EFFECT_IDS_H\n\n";
-    outFile << "enum EffectID {\n";
+    outFile << "namespace EffectID {\n";
+    outFile << "  enum Enum {\n";
     
     const Value& effects = root["effects"];
     for (unsigned int i = 0; i < effects.size(); i++) {
@@ -232,7 +237,7 @@ int main(int argc, char** argv) {
       int id = effect["id"].asInt();
       string name = effect["name"].asString();
       
-      string enumName = makeUnique(name, usedNames, id, "EFFECT_");
+      string enumName = makeUnique(name, usedNames, id, "");
       outFile << "    " << enumName << " = " << id;
       
       if (i < effects.size() - 1) {
@@ -242,7 +247,8 @@ int main(int argc, char** argv) {
       outFile << "\n";
     }
     
-    outFile << "};\n\n";
+    outFile << "  };\n";
+    outFile << "}\n\n";
     outFile << "#endif // EFFECT_IDS_H\n";
     outFile.close();
     

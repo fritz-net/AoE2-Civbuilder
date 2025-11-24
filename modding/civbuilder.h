@@ -22,6 +22,7 @@
 using namespace std;
 using namespace genie;
 using namespace Json;
+using namespace UnitID;
 
 class Civbuilder {
    private:

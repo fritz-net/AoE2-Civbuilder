@@ -10,7 +10,8 @@
 #ifndef UNIT_IDS_H
 #define UNIT_IDS_H
 
-enum UnitID {
+namespace UnitID {
+  enum Enum {
     OLD_ACADEMY = 0,
     LEGION = 1,
     LEGION_D = 2,
@@ -2425,6 +2426,7 @@ enum UnitID {
     WATER_LILY = 2536,
     PEACOCK = 2537,
     PEACOCK_DEAD = 2538
-};
+  };
+}
 
 #endif // UNIT_IDS_H
