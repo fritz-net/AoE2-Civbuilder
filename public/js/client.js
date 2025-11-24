@@ -1,5 +1,95 @@
 /*This code is really really really bad. But it was literally my first website page so I'm keeping it out of charm (definitely not laziness!)*/
 
+// Helper function to parse changelog markdown and convert to HTML
+function parseChangelogMarkdown(markdown) {
+	// Regex patterns for changelog parsing
+	const VERSION_PATTERN = /^## \[([^\]]+)\] - (\d{4}-\d{2}-\d{2})/;
+	const SECTION_PATTERN = /^### /;
+	const BULLET_PATTERN = /^- /;
+	const SKIP_PATTERNS = [
+		/^# Changelog/,
+		/^All notable changes/,
+		/^The format is based on/
+	];
+	
+	const lines = markdown.split('\n');
+	let html = '';
+	let inList = false;
+	
+	for (let i = 0; i < lines.length; i++) {
+		const line = lines[i].trim();
+		
+		// Skip empty lines
+		if (line === '') {
+			continue;
+		}
+		
+		// Skip header and preamble lines
+		if (SKIP_PATTERNS.some(pattern => pattern.test(line))) {
+			continue;
+		}
+		
+		// Match version headers: ## [version] - YYYY-MM-DD
+		const versionMatch = line.match(VERSION_PATTERN);
+		if (versionMatch) {
+			if (inList) {
+				html += '<br>';
+				inList = false;
+			}
+			const version = versionMatch[1];
+			const date = versionMatch[2];
+			
+			// Skip "Unreleased" versions
+			if (version.toLowerCase() === 'unreleased') {
+				continue;
+			}
+			
+			// Compare version to 0.1.0 to determine if we should add a GitHub release link
+			const shouldLink = compareVersion(version, '0.1.0') > 0;
+			
+			if (shouldLink) {
+				// Add version with link to GitHub release
+				html += `<b>${date} - <a href="https://github.com/fritz-net/AoE2-Civbuilder/releases/tag/v${version}" target="_blank" rel="noopener noreferrer">v${version}</a></b><br>`;
+			} else {
+				// Add version without link
+				html += `<b>${date} - v${version}</b><br>`;
+			}
+			continue;
+		}
+		
+		// Skip section headers like ### Added, ### Fixed
+		if (SECTION_PATTERN.test(line)) {
+			continue;
+		}
+		
+		// Match bullet points: - item
+		if (BULLET_PATTERN.test(line)) {
+			const content = line.substring(2);
+			html += `&emsp;&emsp;• ${content}<br>`;
+			inList = true;
+			continue;
+		}
+	}
+	
+	return html;
+}
+
+// Helper function to compare semantic versions
+function compareVersion(v1, v2) {
+	const parts1 = v1.split('.').map(p => parseInt(p, 10));
+	const parts2 = v2.split('.').map(p => parseInt(p, 10));
+	
+	for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+		const p1 = parts1[i] || 0;
+		const p2 = parts2[i] || 0;
+		
+		if (p1 > p2) return 1;
+		if (p1 < p2) return -1;
+	}
+	
+	return 0;
+}
+
 let donateRoll = Math.floor(4 * Math.random());
 if (donateRoll == 0) {
 	playAd("donateAd", 5000);
@@ -1170,219 +1260,30 @@ if (btn7) {
 
 		var instructionstext = document.createElement("p");
 		instructionstext.id = "instructionstext";
-		instructionstext.innerHTML = `
-			<b>05-02-2025</b><br>
-			&emsp;&emsp;• Updated website with 3K DLC content and April update changes<br>
-			&emsp;&emsp;• Added advanced options to creation -- civilization description, custom wonder, and custom castle selection<br>
-			&emsp;&emsp;• Enabled filtering by civ name for base edition bonuses<br>
-			&emsp;&emsp;• Bonuses initially sorted by edition<br>
-			&emsp;&emsp;• Regional units are colored differently in the technology tree<br><br>
-			<b>02-25-2025</b><br>
-			&emsp;&emsp;• Gave bonuses editions to distinguish vanilla bonuses from custom bonuses (and potentially future bonuses)<br>
-			&emsp;&emsp;• Added image caching to improve loading times<br><br>
-			<b>05-22-2024</b><br>
-			&emsp;&emsp;• Added a rarity system to bonuses/cards to serve as a guideline in power level<br><br>
-			<b>05-19-2024</b><br>
-			&emsp;&emsp;• Added modifiers which can be applied on top of generated civilization mods<br><br>
-			<b>05-18-2024</b><br>
-			&emsp;&emsp;• Devotion now appropriately gives +5 HP with the Aztec bonus<br>
-			&emsp;&emsp;• Husbandry gives attack speed gives the correct bonus now<br>
-			&emsp;&emsp;• Added free relics to data mod incompatibilities<br>
-			&emsp;&emsp;• Rewrote Inca villager bonus to reflect gameplay<br>
-			&emsp;&emsp;• Moved missionary train location to not overlap with warrior priests<br>
-			&emsp;&emsp;• Fixed missionaries being free with Hussite Reforms<br><br>
-			<b>05-14-2024</b><br>
-			&emsp;&emsp;• Draft mode works again<br>
-			&emsp;&emsp;• Resolved a bug where spearmen from TCs or villagers wouldn't upgrade<br>
-			&emsp;&emsp;• Photonmen are now classified as gunpowder units for the purposes of bonuses and technologies<br>
-			&emsp;&emsp;• Corvinian Army now works on Warrior Monks and Headhunters<br>
-			&emsp;&emsp;• Hussite Reforms now works on Warrior Priests and Missionaries<br>
-			&emsp;&emsp;• Resolved a bug causing melee Rathas to have infinite armor<br>
-			&emsp;&emsp;• Fixed Bloodlines not included in "fill" feature<br>
-			&emsp;&emsp;• Fixed vanilla civilization icons showing up in selection menu<br>
-			&emsp;&emsp;• Re-fixed civilization descriptions displaying the wrong unique unit<br>
-			&emsp;&emsp;• Fixed blacksmith bonus damage not working on ranged units<br><br>
-			<b>05-10-2024</b><br>
-			&emsp;&emsp;• Added a button to enable all techs while editing tech trees<br><br>
-			<b>05-03-2024</b><br>
-			&emsp;&emsp;• Fixed Crusader Knights being convertible<br>
-			&emsp;&emsp;• Allowed Eupsong to affect Donjons<br>
-			&emsp;&emsp;• Fixed various civilization descriptions displaying the wrong unique unit image<br>
-			&emsp;&emsp;• Allowed Ahosi to be affected by blacksmith attack upgrades<br>
-			&emsp;&emsp;• Fixed side effect of gunpowder university attack bonus giving City Walls<br>
-			&emsp;&emsp;• Moved Shrivamsha train location to not coincide with Knights<br><br>
-			<b>04-26-2024</b><br>
-			&emsp;&emsp;• Extended bonus stacking to unique technologies as well<br><br>
-			<b>04-18-2024</b><br>
-			&emsp;&emsp;• Added the ability to stack the same bonus multiple times<br><br>
-			<b>04-17-2024</b><br>
-			&emsp;&emsp;• Fixed a bug where feudal knights were un-upgradable<br><br>
-			<b>04-14-2024</b><br>
-			&emsp;&emsp;• Implemented more community suggested bonuses and techs<br><br>
-			<b>04-13-2024</b><br>
-			&emsp;&emsp;• Added Khmer farm bonus and 2x2 farms<br><br>
-			<b>04-07-2024</b><br>
-			&emsp;&emsp;• Added the ability to upload your own images as flags<br><br>
-			<b>03-31-2024</b><br>
-			&emsp;&emsp;• Implemented several community suggested bonuses and techs<br><br>
-			<b>03-17-2024</b><br>
-			&emsp;&emsp;• Updated website for compatibility with AoE2 Update 107882<br><br>
-			<b>03-10-2024</b><br>
-			&emsp;&emsp;• Updated website to work with The Mountain Royals<br><br>
-			<b>05-31-2023</b><br>
-			&emsp;&emsp;• Updated website to work with Return of Rome<br><br>
-			<b>11-26-2022</b><br>
-			&emsp;&emsp;• Fixed a bug where free eagle upgrades would give extra stats<br><br>
-			<b>09-02-2022</b><br>
-			&emsp;&emsp;• Updated website to conform to AoE2 Update 66694<br><br>
-			<b>05-15-2022</b><br>
-			&emsp;&emsp;• Fixed a few minor text and graphics inconsistencies<br>
-			&emsp;&emsp;• Updated mod generation to be compatible with Dynasties of India update<br><br>
-			<b>04-06-2022</b><br>
-			&emsp;&emsp;• Currently selected bonuses display at the top of the page (credit to Steven Jackson for the code!)<br><br>
-			<b>03-26-2022</b><br>
-			&emsp;&emsp;• Added 3 new flag symbols<br><br>
-			<b>03-22-2022</b><br>
-			&emsp;&emsp;• Updated default mod thumbnail (thanks to TWest!)<br><br>
-			<b>03-21-2022</b><br>
-			&emsp;&emsp;• Fixed an issue causing vanilla civ files to become corrupted after editing them<br>
-			&emsp;&emsp;• Updated vanilla civ files to include languages<br>
-			&emsp;&emsp;• Corrected a few rare cases where villager sounds would be from their original civilizations<br><br>
-			<b>03-18-2022</b><br>
-			&emsp;&emsp;• Removed data incompatibility restriction for Kreposts, Donjons, Anarchy, Marauders, and First Crusade<br>
-			&emsp;&emsp;• Removed all UI incompatibility restrictions<br>
-			&emsp;&emsp;• Fixed some civilizations being able to recruit their unique unit from castles in Dark Age in Regicide<br><br>
-			<b>03-17-2022</b><br>
-			&emsp;&emsp;• Added functionality to language selection<br><br>
-			<b>03-14-2022</b><br>
-			&emsp;&emsp;• Villager's Revenge unique technology no longer crashes the game and works as intended<br><br>
-			<b>03-12-2022</b><br>
-			&emsp;&emsp;• Corrected a typo in Korean discount bonus<br>
-			&emsp;&emsp;• Changed flamethrowers cost to 150w 25g instead of 150f 25g<br>
-			&emsp;&emsp;• Fixed bug in university gunpowder attack bonus causing it to fail for units with melee attack<br>
-			&emsp;&emsp;• Fixed that new unique techs didn't show up while editing civilizations<br>
-			&emsp;&emsp;• Fixed bug where monks would change regional graphic while converting and galleon graphics didn't align<br>
-			&emsp;&emsp;• Resolved an issue with integrating language selection into draft mode<br><br>
-			<b>03-09-2022</b><br>
-			&emsp;&emsp;• Fixed an issue with hovering over cards in parts of the screen<br><br>
-			<b>03-08-2022</b><br>
-			&emsp;&emsp;• Added 10 new unique technologies<br><br>
-			<b>02-15-2022</b><br>
-			&emsp;&emsp;• Added events page for all events related to civbuilder<br><br>
-			<b>01-25-2022</b><br>
-			&emsp;&emsp;• Added icon and reflective tab titles<br><br>
-			<b>01-16-2022</b><br>
-			&emsp;&emsp;• Warrior monks now also benefit from monk bonuses unique to civbuilder, Inquisition increases their attack rate<br><br>
-			<b>01-15-2022</b><br>
-			&emsp;&emsp;• Fixed the filter input location while editing civilizations<br><br>
-			<b>01-13-2022</b><br>
-			&emsp;&emsp;• Bonuses, units, and techs can be filtered/searched for<br><br>
-			<b>01-12-2022</b><br>
-			&emsp;&emsp;• Fixed a bug causing some civilization links to become corrupted<br>
-			&emsp;&emsp;• Allowed civilization viewer and editor to read in .json files with empty values<br><br>
-			<b>01-11-2022</b><br>
-			&emsp;&emsp;• Civilizations can now be shared and viewed with direct links rather than .json files<br>
-			&emsp;&emsp;• Added the ability to edit civilization .json files<br><br>
-			<b>01-10-2022</b><br>
-			&emsp;&emsp;• Allowed most 0-cost techs to affect mod generation (techs that cannot affect generation are now untoggleable)<br><br>
-			<b>01-08-2022</b><br>
-			&emsp;&emsp;• Adjusted galley attack bonus to begin in Castle Age<br><br>
-			<b>01-07-2022</b><br>
-			&emsp;&emsp;• Fixed a bug causing the game to crash if the UI mod is enabled while playing with the 15th modded civilization<br><br>
-			<b>01-05-2022</b><br>
-			&emsp;&emsp;• Updated base data file to reflect changes in Update 56005<br>
-			&emsp;&emsp;• Fixed the cost of Varangian Guard<br>
-			&emsp;&emsp;• Updated Vanilla .json files to correspond to patch notes<br>
-			&emsp;&emsp;• Matched regional trade carts to civilization architecture set<br><br>
-			<b>11-14-2021</b><br>
-			&emsp;&emsp;• Added 35 new unique units<br><br>
-			<b>10-18-2021</b><br>
-			&emsp;&emsp;• Adjusted statistics of various custom unique units<br>
-			&emsp;&emsp;• Changed Flamethrower costs to require the gold payment shown in the description<br><br>
-			<b>10-17-2021</b><br>
-			&emsp;&emsp;• Fixed various typos<br>
-			&emsp;&emsp;• Fixed Serjeants getting auto-upgraded doubly upon hitting Castle Age<br>
-			&emsp;&emsp;• Fixed villagers being unable to garrison in houses despite having the bonus<br>
-			&emsp;&emsp;• Connected empty trade cart graphics to civilization architecture<br>
-			&emsp;&emsp;• Fixed a bug allowing players to recruit dismounted Konniks for free when researching Anarchy or Marauders<br><br>
-			<b>10-16-2021</b><br>
-			&emsp;&emsp;• Updated base data file to reflect changes in Update 54480<br><br>
-			<b>09-10-2021</b><br>
-			&emsp;&emsp;• Added Xolotl Warriors, Saboteurs, Ninjas, and Flamethrowers as unique units<br><br>
-			<b>09-09-2021</b><br>
-			&emsp;&emsp;• Added Crusader Knights as a unique unit<br>
-			&emsp;&emsp;• Adjusted Farimba to give only +3 attack<br>
-			&emsp;&emsp;• Fixed free archer-line upgrades bonus so that it works on crossbows<br><br>
-			<b>09-05-2021</b><br>
-			&emsp;&emsp;• Made Korean stone mining civ bonus affect Polish stone mining gold generation<br><br>
-			<b>09-03-2021</b><br>
-			&emsp;&emsp;• Added more symbols to the flag creator<br><br>
-			<b>08-22-2021</b><br>
-			&emsp;&emsp;• Increased trade units' work rates along with their speed<br><br>
-			<b>08-14-2021</b><br>
-			&emsp;&emsp;• Fixed a bug causing units in a couple of bonuses to not get the bonus damage they deserved<br><br>
-			<b>08-12-2021</b><br>
-			&emsp;&emsp;• Updated to include and integrate Dawn of the Dukes update<br>
-			&emsp;&emsp;• Reverted ballista elephants back to cavalry class so that cavalry blacksmith upgrades affect them<br>
-			&emsp;&emsp;• Fixed an issue causing unique units recruited from Donjons to get extra stats in Castle Age<br>
-			&emsp;&emsp;• Increased the upper range of how many resources stone and gold piles can generate with (in random costs)<br><br>
-			<b>07-01-2021</b><br>
-			&emsp;&emsp;• Architecture choice now affects king and monk graphics, as well as garrison building flag positioning<br><br>
-			<b>06-30-2021</b><br>
-			&emsp;&emsp;• Added an option to give civilizations multiple unique techs for manually customized .json files (multiple entries in 3rd and 4th "bonuses" array)<br><br>
-			<b>06-29-2021</b><br>
-			&emsp;&emsp;• Added an option to give civilizations multiple team bonuses for manually customized .json files (multiple entries in the final "bonuses" array)<br><br>
-			<b>06-27-2021</b><br>
-			&emsp;&emsp;• Starting with an Eagle scout can be enabled by fully disabling the Stable in the tech tree (otherwise civs will start with a normal scout)<br>
-			&emsp;&emsp;• Fixed Imperial Scorpions so that they can be affected by Rocketry<br>
-			&emsp;&emsp;• Fixed a bug causing unique units not to get Logistica's bonus vs. infantry in some cases<br>
-			&emsp;&emsp;• Fixed a bug causing Royal Lancers, Royal Battle Elephants, and Imperial Skirmishers to enable in some cases despite the team bonus not being active<br><br>
-			<b>06-25-2021</b><br>
-			&emsp;&emsp;• Resolved an issue causing civs with War Elephants to get a Mameluke icon in the selection screen and vice versa<br>
-			&emsp;&emsp;• Fixed a bug causing Forced Levy and Kamandaran to give players gold if those units were also discounted<br><br>
-			<b>06-24-2021</b><br>
-			&emsp;&emsp;• Decreased mod ID collisions by a factor of 300,000,000<br>
-			&emsp;&emsp;• Added support for games running in different languages (only English descriptions available still but now they will always be displayed)<br>
-			&emsp;&emsp;• Shatagni can apply to Janissaries now<br>
-			&emsp;&emsp;• Fixed a bug that gave Royal Lancers 13 bonus damage vs. siege instead of 13 attack<br><br>
-			<b>06-23-2021</b><br>
-			&emsp;&emsp;• Changed mod ID generation to avoid collisions<br><br>
-			<b>06-22-2021</b><br>
-			&emsp;&emsp;• Thanks to this wonderful community's generosity, the server is greatly improved!<br>
-			&emsp;&emsp;• Added better maintenance to avoid killing ongoing drafts<br>
-			&emsp;&emsp;• Fixed a fatal bug when new bonuses were disabled during drafting<br><br>
-			<b>06-21-2021</b><br>
-			&emsp;&emsp;• Added very rare Easter eggs to random cost generation<br><br>
-			<b>06-17-2021</b><br>
-			&emsp;&emsp;• Randomizing unit costs will now also randomize how much resources trees, stones, boars, etc. hold (stones and golds abundance usually increased)<br><br>
-			<b>06-13-2021</b><br>
-			&emsp;&emsp;• Added 40 new team bonuses<br>
-			&emsp;&emsp;• Reworked tech discount bonuses so that they depend on the techs' costs rather than fixed values (only matters in random cost generation)<br><br>
-			<b>06-10-2021</b><br>
-			&emsp;&emsp;• Added an option to randomize both civilizations and costs (generation is less varied than [SE] Random Costs mod i.e. nothing costs 1 wood; 
-			costs of the same unit/building do not change between ages and upgrades)<br><br>
-			<b>06-08-2021</b><br>
-			&emsp;&emsp;• Fixed a bug causing Elite Steppe Lancers not to be considered "mounted units"<br>
-			&emsp;&emsp;• Fixed a bug that caused Eagle Scouts to be enabled for all civs<br><br>
-			<b>06-07-2021</b><br>
-			&emsp;&emsp;• Added 50 new civilization bonuses<br>
-			&emsp;&emsp;• Added option to include vanilla civilizations in created mods (thank you to TheRevanReborn for recreating every civ in the builder!)<br><br>
-			<b>06-06-2021</b><br>
-			&emsp;&emsp;• Fixed a bug in Ironclad tech allocation<br>
-			&emsp;&emsp;• Fixed an issue that was causing the 8th and 9th combined civilizations to swap tech trees and unique unit icons<br><br>
-			<b>06-05-2021</b><br>
-			&emsp;&emsp;• Architecture selection now actually affects in-game graphics<br><br>
-			<b>06-03-2021</b><br>
-			&emsp;&emsp;• Added architecture selection<br>
-			&emsp;&emsp;• Fixed a bug in reshuffling cards during drafting<br>
-			&emsp;&emsp;• Fixed a bug in Teuton armor bonus<br>
-			&emsp;&emsp;• Reverted bonus changes to keep everything except blacksmith vils in-line with DE<br>
-			&emsp;&emsp;• Added name checking to civilization names<br>`;
+		instructionstext.innerHTML = "Loading changelog...";
 
 		instructionsbox.appendChild(instructionstitle);
 		instructionsbox.appendChild(instructionstext);
 
 		page.appendChild(instructionsbox);
+
+		// Fetch and display changelog dynamically
+		fetch(route + "/CHANGELOG.md")
+			.then(response => {
+				if (!response.ok) {
+					throw new Error('Failed to load changelog');
+				}
+				return response.text();
+			})
+			.then(markdownText => {
+				// Parse markdown and convert to HTML
+				const htmlContent = parseChangelogMarkdown(markdownText);
+				instructionstext.innerHTML = htmlContent;
+			})
+			.catch(error => {
+				console.error('Error loading changelog:', error);
+				instructionstext.innerHTML = "Failed to load changelog. Please try again later.";
+			});
 	});
 }
 

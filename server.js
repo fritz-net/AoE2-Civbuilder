@@ -78,6 +78,19 @@ app.get(path.join(routeSubdir, "js/common.js"), (req, res) => {
 		res.type("application/javascript").send(lines.join("\n"));
 	});
 });
+
+// Serve changelog
+app.get(path.join(routeSubdir, "CHANGELOG.md"), (req, res) => {
+	const changelogPath = path.join(__dirname, "CHANGELOG.md");
+	fs.readFile(changelogPath, "utf8", (err, data) => {
+		if (err) {
+			console.error("Error reading CHANGELOG.md:", err);
+			return res.status(500).send("Error loading changelog: " + err.message);
+		}
+		res.type("text/plain").send(data);
+	});
+});
+
 app.use(
 	routeSubdir,
 	express.static(path.join(__dirname, "/public"), {
