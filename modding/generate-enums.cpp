@@ -23,6 +23,7 @@ using namespace std;
 using namespace Json;
 
 // Convert name to valid C++ enum identifier
+// Note: prefix should be provided in uppercase (e.g., "UNIT_", "TECH_", "EFFECT_")
 string toEnumName(const string& name, int id, const string& prefix = "") {
   string result = name;
   
@@ -41,13 +42,13 @@ string toEnumName(const string& name, int id, const string& prefix = "") {
     result.pop_back();
   }
   
-  // If empty or starts with digit, add prefix
-  if (result.empty() || isdigit(result[0])) {
-    result = prefix + result;
-  }
-  
   // Convert to uppercase
   transform(result.begin(), result.end(), result.begin(), ::toupper);
+  
+  // Always prepend the prefix if provided
+  if (!prefix.empty()) {
+    result = prefix + result;
+  }
   
   return result;
 }
