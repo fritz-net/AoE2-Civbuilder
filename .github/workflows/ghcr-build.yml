@@ -1,7 +1,7 @@
 name: Build and publish Docker image
 on:
-  push:
-    branches: [main]
+  release:
+    types: [published]
   pull_request:
     
 permissions:
@@ -34,7 +34,7 @@ jobs:
           context: .
           file: Dockerfile.build-cpp
           platforms: linux/amd64
-          push: ${{ github.event_name == 'push' }}
-          tags: ghcr.io/fritz-net/aoe2-civbuilder:latest,ghcr.io/fritz-net/aoe2-civbuilder:${{ github.sha }}
+          push: ${{ github.event_name == 'release' }}
+          tags: ghcr.io/fritz-net/aoe2-civbuilder:latest,ghcr.io/fritz-net/aoe2-civbuilder:${{ github.event.release.tag_name || github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
