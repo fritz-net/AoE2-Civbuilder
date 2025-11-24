@@ -223,7 +223,7 @@ enum CivBonusIndex {
     CIV_BONUS_247_PARTHIAN_TACTICS_AVAILABLE_IN_CASTLE_AGE = 247, // Parthian Tactics available in Castle Age
     CIV_BONUS_248_CASTLE_AGE_COST_25 = 248, // C-Bonus, Castle Age cost -25%
     CIV_BONUS_249_CAVALRY_1_ATTACK = 249, // C-Bonus, Cavalry +1 attack
-    CIV_BONUS_250_COST_REDUCTION = 250, // C-Bonus, Cost reduction
+    CIV_BONUS_250_ATTACK_AGAINST_BUILDINGS = 250, // C-Bonus, Forging, Iron Casting, Blast Furnace add +1 damage vs. buildings
     CIV_BONUS_251_BUILDINGS_3_PIERCE_ARMOR = 251, // C-Bonus, buildings +3 pierce armor
     CIV_BONUS_252_TRAINING_SPEED_BONUS = 252, // C-Bonus, Training speed bonus
     CIV_BONUS_253_FOOT_ARCHERS_1_VS_VILS = 253, // C-Bonus, foot archers +1 vs vils

@@ -2826,7 +2826,8 @@ void Civbuilder::createCivBonuses() {
 
     // Create civ bonuses that are just a list of free techs
     const vector<vector<int>> freeTechs = {
-        {12, 13, 14, 1012, 1013, 1014}, // Pasture  & Farm upgrades free (require Mill)
+        // TODO use proper tech enums
+        {12, 13, 14, 1012, 1013, 1014}, // Pasture & Farm upgrades free (require Mill)
         {67, 68, 75},
         {602, 875},
         {8, 280},
@@ -3039,6 +3040,7 @@ void Civbuilder::createCivBonuses() {
 
     // More free techs
     const vector<vector<int>> freeTechs2 = {
+        // TODO use proper tech enums; break down into more lines for readability
         {100, 237}, {98, 655, 599}, {236, 521}, {74, 76, 77}, {80, 81, 82},  {199, 200, 201},     {316},     {215}, {384, 434}, {631, royalElephantTech},
         {231, 252}, {319, 233},     {438, 230}, {379, 194},   {50, 51},      {55, 182, 278, 279}, {321, 54}, {35},  {374, 375}, {246, dragonShipTech},
         {244},      {65},           {34},       {218},        {96, 255, 838}};
@@ -3558,6 +3560,7 @@ void Civbuilder::createCivBonuses() {
     // City Walls
     e.EffectCommands.clear();
     e.Name = "City Walls";
+    // TODO use unit enum and split into multiple lines for readability
     const vector<vector<int>> wallUpgrades = {{117, 155, 370},  {64, 63, 1579},   {78, 67, 1580},   {81, 80, 1581},   {487, 488, 1582}, {88, 85, 1583},
                                               {91, 90, 1584},   {95, 92, 1585},   {490, 491, 1586}, {659, 660, 1587}, {661, 662, 1588}, {663, 664, 1589},
                                               {665, 666, 1590}, {667, 668, 1591}, {669, 670, 1592}, {671, 672, 1593}, {673, 674, 1594}};
@@ -3678,13 +3681,13 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(4, -1, 6, 9, amountTypetoD(1, 21)));
     e.EffectCommands.push_back(createEC(4, -1, 12, 9, amountTypetoD(1, 21)));
     e.EffectCommands.push_back(createEC(4, -1, 47, 9, amountTypetoD(1, 21)));
-    this->createCivBonus(CIV_BONUS_250_COST_REDUCTION, e, "C-Bonus, +1 building attack age 101", {101});
-    this->createCivBonus(CIV_BONUS_250_COST_REDUCTION, e, "C-Bonus, +1 building attack age 102", {102});
+    this->createCivBonus(CIV_BONUS_250_ATTACK_AGAINST_BUILDINGS, e, "C-Bonus, +1 building attack age 101", {101});
+    this->createCivBonus(CIV_BONUS_250_ATTACK_AGAINST_BUILDINGS, e, "C-Bonus, +1 building attack age 102", {102});
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 6, 9, amountTypetoD(2, 21)));
     e.EffectCommands.push_back(createEC(4, -1, 12, 9, amountTypetoD(2, 21)));
     e.EffectCommands.push_back(createEC(4, -1, 47, 9, amountTypetoD(2, 21)));
-    this->createCivBonus(CIV_BONUS_250_COST_REDUCTION, e, "C-Bonus, +2 building attack age 103", {103});
+    this->createCivBonus(CIV_BONUS_250_ATTACK_AGAINST_BUILDINGS, e, "C-Bonus, +2 building attack age 103", {103});
 
     // All buildings +3 pierce armor
     e.EffectCommands.clear();
