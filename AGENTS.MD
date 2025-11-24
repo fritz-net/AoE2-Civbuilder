@@ -3,7 +3,7 @@
 keep changes minimal
 
 use enums where available
-use namespaces for enum usage
+use scoped enums like `TechID::` or `UnitID::`
 
 ## PR instructions
 Title format: <type>(<scope>): <description>
