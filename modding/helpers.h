@@ -59,7 +59,7 @@ const vector<int> militias = {74, 75, 77, 473, 567, 1793};
 const vector<int> townCenters = {71, 109, 141, 142};
 const vector<int> docks = {45, 47, 51, 133, 805, 806, 807, 808};
 const vector<int> markets = {84, 116, 137, 1646};
-const vector<int> siegeTowers = {1105, tcSiegeTower};
+const vector<int> siegeTowers = {1105, UNIT_TC_SIEGE_TOWER};
 
 const vector<int> relicBonuses = {736, 737, 738, 739};
 
