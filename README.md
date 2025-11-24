@@ -25,6 +25,17 @@ For drafts, information is passed between clients and server via socket.io. Each
 &emsp;&emsp;4. Give each civilization its unique unit, tech tree, unique techs, civilization bonuses, and team bonus.<br>
 &emsp;&emsp;5. Randomize the costs of all units if the data.json requested it.
 
+# CI/CD
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+- **Test Workflow** (`.github/workflows/test.yml`): Runs on every push to main and on pull requests. Builds the C++ components and runs the test suite.
+
+- **Release Please** (`.github/workflows/release-please.yml`): Runs on every push to main. Uses [Release Please](https://github.com/googleapis/release-please) to automatically manage releases and changelog based on [Conventional Commits](https://www.conventionalcommits.org/). When a release is created, it automatically builds and publishes Docker images to GitHub Container Registry (GHCR) with both `latest` and version-specific tags.
+
+- **PR Docker Build** (`.github/workflows/ghcr-build.yml`): Validates that Docker images can be built successfully on pull requests without publishing them.
+
+To trigger a release, merge pull requests with properly formatted commit messages (e.g., `feat:`, `fix:`, `docs:`). Release Please will create a release PR that, when merged, publishes the release and Docker images.
 
 # run with Docker
 ```bash
