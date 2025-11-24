@@ -16,6 +16,7 @@ enum UUCivbuilderID {
     UU_NINJA = 42,
     UU_FLAMETHROWER = 43,
     UU_PHOTONMAN = 44,
+    // Note: ID 45 is not used
     UU_APUKISPAY = 46,
     UU_MONKEY_BOY = 47,
     UU_AMAZON_WARRIOR = 48,
@@ -40,14 +41,14 @@ enum UUCivbuilderID {
     UU_HIGHLANDER = 67,
     UU_STRADIOT = 68,
     UU_AHOSI = 69,
-    UU_MORTUARY_GUARD = 70,
-    UU_MARAUDER = 71,
-    UU_BOYUNA = 72,
-    UU_CUMAN = 73,
-    UU_GHAZI_RAIDER = 74,
-    UU_SAKA_HORSE_ARCHER = 75,
-    UU_HARAMBEE_SPEARMAN = 76,
-    UU_HORSE_RAIDER = 77
+    UU_LANDSKNECHT = 70,
+    UU_CLIBINARII = 71,
+    UU_SILAHTAR = 72,
+    UU_JARIDAH = 73,
+    UU_WOLF_WARRIOR = 74,
+    UU_WARRIOR_MONK = 75,
+    UU_CASTELLAN = 76,
+    UU_WIND_WARRIOR = 77
 };
 
 #endif // UU_IDS_H
