@@ -15,7 +15,8 @@
 
 body {
   font-family: 'Cinzel', serif;
-  background-image: url('/img/aoe2background.jpg');
+  background-color: #1a0f0a;
+  background-image: url('/v2/img/aoe2background.jpg');
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-size: 100% 100%;

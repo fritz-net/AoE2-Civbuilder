@@ -41,14 +41,14 @@ function previous() {
 
 <style scoped>
 .language-selector {
-  background: rgba(139, 69, 19, 0.3);
-  border: 2px solid #d4af37;
+  background: rgba(139, 69, 19, 0.5);
+  border: 2px solid hsl(52, 100%, 50%);
   padding: 1rem;
   border-radius: 8px;
 }
 
 .section-title {
-  color: #d4af37;
+  color: hsl(52, 100%, 50%);
   font-size: 1.2rem;
   margin-bottom: 0.75rem;
   text-align: center;
@@ -65,8 +65,8 @@ function previous() {
   width: 40px;
   height: 40px;
   background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
-  color: #d4af37;
-  border: 2px solid #d4af37;
+  color: hsl(52, 100%, 50%);
+  border: 2px solid hsl(52, 100%, 50%);
   border-radius: 4px;
   cursor: pointer;
   font-size: 1.2rem;
@@ -87,7 +87,7 @@ function previous() {
 }
 
 .language-name {
-  color: #d4af37;
+  color: hsl(52, 100%, 50%);
   font-size: 1rem;
 }
 </style>

@@ -196,7 +196,7 @@ defineExpose({
 
 .civ-builder-title {
   font-size: 2.5rem;
-  color: #d4af37;
+  color: hsl(52, 100%, 50%);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
@@ -214,15 +214,15 @@ defineExpose({
 
 .civ-name-section,
 .civ-description-section {
-  background: rgba(139, 69, 19, 0.3);
-  border: 2px solid #d4af37;
+  background: rgba(139, 69, 19, 0.5);
+  border: 2px solid hsl(52, 100%, 50%);
   padding: 1rem;
   border-radius: 8px;
 }
 
 .input-label {
   display: block;
-  color: #d4af37;
+  color: hsl(52, 100%, 50%);
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
   text-align: center;
@@ -234,24 +234,24 @@ defineExpose({
   padding: 0.75rem;
   font-size: 1.1rem;
   font-family: 'Cinzel', serif;
-  background: rgba(0, 0, 0, 0.4);
-  border: 2px solid #d4af37;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid hsl(52, 100%, 50%);
   border-radius: 4px;
-  color: #d4af37;
+  color: hsl(52, 100%, 50%);
   text-align: center;
   box-sizing: border-box;
 }
 
 .civ-name-input::placeholder,
 .civ-description-input::placeholder {
-  color: rgba(212, 175, 55, 0.5);
+  color: hsla(52, 100%, 50%, 0.5);
 }
 
 .civ-name-input:focus,
 .civ-description-input:focus {
   outline: none;
-  border-color: #f4cf47;
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 8px hsla(52, 100%, 50%, 0.5);
 }
 
 .advanced-toggle {
@@ -261,8 +261,8 @@ defineExpose({
 .toggle-btn {
   padding: 0.5rem 1.5rem;
   background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
-  color: #d4af37;
-  border: 2px solid #d4af37;
+  color: hsl(52, 100%, 50%);
+  border: 2px solid hsl(52, 100%, 50%);
   border-radius: 4px;
   cursor: pointer;
   font-family: 'Cinzel', serif;
@@ -296,12 +296,12 @@ defineExpose({
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 2px solid #d4af37;
+  border: 2px solid hsl(52, 100%, 50%);
 }
 
 .primary-btn {
   background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
-  color: #d4af37;
+  color: hsl(52, 100%, 50%);
   min-width: 200px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
@@ -318,8 +318,8 @@ defineExpose({
 }
 
 .secondary-btn {
-  background: rgba(0, 0, 0, 0.4);
-  color: #d4af37;
+  background: rgba(0, 0, 0, 0.5);
+  color: hsl(52, 100%, 50%);
   font-size: 1rem;
   padding: 0.75rem 1.5rem;
 }

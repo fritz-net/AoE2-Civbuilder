@@ -1,16 +1,13 @@
 <template>
   <div class="build-page">
     <CivBuilder
+      ref="civBuilderRef"
       :initial-config="initialConfig"
       next-button-text="Continue to Bonuses"
       @next="handleNext"
       @download="handleDownload"
       @reset="handleReset"
     />
-    
-    <div class="back-navigation">
-      <NuxtLink to="/" class="back-button">Back to Home</NuxtLink>
-    </div>
   </div>
 </template>
 
@@ -18,8 +15,28 @@
 import type { CivConfig } from '~/composables/useCivData'
 
 const router = useRouter()
+const civBuilderRef = ref<{ civConfig: CivConfig } | null>(null)
 
 const initialConfig = ref<Partial<CivConfig>>({})
+
+// Track if user has made changes
+const hasUnsavedChanges = computed(() => {
+  if (!civBuilderRef.value) return false
+  const config = civBuilderRef.value.civConfig
+  return config.alias !== '' || config.description !== ''
+})
+
+// Prevent accidental navigation when user has unsaved changes
+onBeforeRouteLeave((to, from, next) => {
+  if (hasUnsavedChanges.value) {
+    const answer = window.confirm('You have unsaved changes. Are you sure you want to leave?')
+    if (!answer) {
+      next(false)
+      return
+    }
+  }
+  next()
+})
 
 function handleNext(config: CivConfig) {
   // Store config and navigate to bonus selection (placeholder for future implementation)
@@ -38,37 +55,18 @@ function handleReset() {
 
 <style scoped>
 .build-page {
-  padding: 2rem;
-  max-width: 1400px;
+  padding: 6rem 2rem 2rem;
+  padding-left: max(2rem, 14vw);
+  padding-right: max(2rem, 10vw);
+  max-width: 1600px;
   margin: 0 auto;
   min-height: 80vh;
-}
-
-.back-navigation {
-  margin-top: 2rem;
-  text-align: center;
-}
-
-.back-button {
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
-  color: #d4af37;
-  border: 2px solid #d4af37;
-  text-decoration: none;
-  font-size: 1rem;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  display: inline-block;
-}
-
-.back-button:hover {
-  background: linear-gradient(to bottom, rgba(160, 82, 45, 0.95), rgba(139, 69, 19, 0.95));
-  transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
   .build-page {
     padding: 1rem;
+    padding-top: 4rem;
   }
 }
 </style>

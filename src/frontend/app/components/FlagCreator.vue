@@ -421,14 +421,14 @@ onMounted(() => {
 
 <style scoped>
 .flag-creator {
-  background: rgba(139, 69, 19, 0.3);
-  border: 2px solid #d4af37;
+  background: rgba(139, 69, 19, 0.5);
+  border: 2px solid hsl(52, 100%, 50%);
   padding: 1.5rem;
   border-radius: 8px;
 }
 
 .section-title {
-  color: #d4af37;
+  color: hsl(52, 100%, 50%);
   font-size: 1.5rem;
   margin-bottom: 1rem;
   text-align: center;
@@ -456,8 +456,8 @@ onMounted(() => {
   width: 30px;
   height: 30px;
   background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
-  color: #d4af37;
-  border: 2px solid #d4af37;
+  color: hsl(52, 100%, 50%);
+  border: 2px solid hsl(52, 100%, 50%);
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
@@ -475,7 +475,7 @@ onMounted(() => {
 .category-label {
   width: 100px;
   text-align: center;
-  color: #d4af37;
+  color: hsl(52, 100%, 50%);
   font-size: 0.9rem;
 }
 
@@ -502,7 +502,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #d4af37;
+  color: hsl(52, 100%, 50%);
   cursor: pointer;
 }
 
@@ -516,8 +516,8 @@ onMounted(() => {
   display: block;
   padding: 0.5rem 1rem;
   background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
-  color: #d4af37;
-  border: 2px solid #d4af37;
+  color: hsl(52, 100%, 50%);
+  border: 2px solid hsl(52, 100%, 50%);
   border-radius: 4px;
   cursor: pointer;
   text-align: center;

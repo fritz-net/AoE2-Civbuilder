@@ -7,9 +7,10 @@
       
       <div class="architecture-display">
         <img 
-          :src="`/img/architectures/tc_${modelValue}.png`" 
+          :src="architectureImageSrc" 
           :alt="currentArchitectureName"
           class="architecture-image"
+          @error="handleImageError"
         />
         <span class="architecture-name">{{ currentArchitectureName }}</span>
       </div>
@@ -31,8 +32,18 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void
 }>()
 
+const config = useRuntimeConfig()
+const baseURL = config.app.baseURL || '/v2/'
+
 // Architecture values are 1-indexed (1-11)
 const currentArchitectureName = computed(() => architectures[props.modelValue - 1] || architectures[0])
+
+const architectureImageSrc = computed(() => `${baseURL}img/architectures/tc_${props.modelValue}.png`)
+
+function handleImageError(e: Event) {
+  const img = e.target as HTMLImageElement
+  img.style.display = 'none'
+}
 
 function next() {
   // Architecture is 1-indexed, cycles through 1-11
@@ -49,14 +60,14 @@ function previous() {
 
 <style scoped>
 .architecture-selector {
-  background: rgba(139, 69, 19, 0.3);
-  border: 2px solid #d4af37;
+  background: rgba(139, 69, 19, 0.5);
+  border: 2px solid hsl(52, 100%, 50%);
   padding: 1rem;
   border-radius: 8px;
 }
 
 .section-title {
-  color: #d4af37;
+  color: hsl(52, 100%, 50%);
   font-size: 1.2rem;
   margin-bottom: 0.75rem;
   text-align: center;
@@ -73,8 +84,8 @@ function previous() {
   width: 40px;
   height: 40px;
   background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
-  color: #d4af37;
-  border: 2px solid #d4af37;
+  color: hsl(52, 100%, 50%);
+  border: 2px solid hsl(52, 100%, 50%);
   border-radius: 4px;
   cursor: pointer;
   font-size: 1.2rem;
@@ -102,12 +113,12 @@ function previous() {
   max-width: 171px;
   max-height: 127px;
   object-fit: contain;
-  border: 2px solid #d4af37;
+  border: 2px solid hsl(52, 100%, 50%);
   border-radius: 4px;
 }
 
 .architecture-name {
-  color: #d4af37;
+  color: hsl(52, 100%, 50%);
   font-size: 0.9rem;
   text-align: center;
 }

@@ -11,7 +11,7 @@
     <div class="top-right-links" v-if="showNavigation">
       <a href="https://discord.gg/vQxck6JDwf" target="_blank" rel="noopener noreferrer">
         <img 
-          src="/img/kraken_invite.png" 
+          :src="discordImageSrc" 
           alt="Krakenmeister's Maelstrom" 
           class="discord-invite"
         />
@@ -27,6 +27,10 @@
 
 <script setup lang="ts">
 const route = useRoute()
+const config = useRuntimeConfig()
+const baseURL = config.app.baseURL || '/v2/'
+
+const discordImageSrc = computed(() => `${baseURL}img/kraken_invite.png`)
 
 // Hide navigation on certain pages (e.g., draft pages)
 const showNavigation = computed(() => {
