@@ -181,6 +181,8 @@ enum CivBonusIndex {
     CIV_BONUS_320_UNITS_AND_BUILDINGS_RECEIVE_15_DAMAGE_WHEN = 320, // Units and buildings receive -15% damage when fighting from higher elevation
     CIV_BONUS_321_MOUNTED_UNITS_REGENERATE_2_8_14_HP = 321, // Mounted units regenerate 2/8/14 HP per minute, in the Feudal, Castle, Imperial Age
     CIV_BONUS_322_FLAMING_CAMELS_AVAILABLE_IN_SIEGE_WORKSHOPS_IN = 322, // Flaming Camels available in Siege Workshops in Imperial Age
+    CIV_BONUS_323_BUILDINGS_REBATE_STONE = 323, // C-Bonus, Buildings rebate stone
+    CIV_BONUS_324_VILLAGERS_COOPERATE = 324, // C-Bonus, Villagers cooperate
     CIV_BONUS_325_HUSBANDRY_AFFECTS_ATTACK_SPEED = 325, // Husbandry affects attack speed
     CIV_BONUS_327_BLACKSMITH_UPGRADES_AFFECT_BONUS_DAMAGE = 327, // Blacksmith upgrades affect bonus damage
     CIV_BONUS_329_FARMERS_DON_T_REQUIRE_MILLS_TOWN_CENTERS = 329, // Farmers don't require Mills/Town Centers to drop off food
