@@ -1,5 +1,5 @@
 #include "civbuilder.h"
-#include "enums/tech_ids.h"
+#include "tech_constants.h"
 
 Civbuilder::Civbuilder(DatFile *df, Value config, string logpath, string aipath) {
     this->df = df;
@@ -251,199 +251,199 @@ void Civbuilder::initialize() {
     this->civBonuses[CIV_BONUS_108_FARM_UPGRADES_PROVIDE_125_ADDITIONAL_FOOD] = {772, 773, 774, 815, 816, 817};
     this->civBonuses[CIV_BONUS_109_CAN_BUILD_DONJON] = {775};
 
-    this->teamBonuses[0] = KAMANDARAN;
-    this->teamBonuses[1] = C_BONUS___5_MONK_HP_6;
-    this->teamBonuses[2] = BERSERK;
-    this->teamBonuses[3] = CUMAN_MERC_PART2;
-    this->teamBonuses[4] = LECHITIC_LEGACY;
-    this->teamBonuses[5] = MALAY;
-    this->teamBonuses[6] = C_BONUS__FREE_HAND_CART;
-    this->teamBonuses[7] = C_BONUS___15__FARMERS;
-    this->teamBonuses[8] = C_BONUS__HUNTING_BONUSES;
-    this->teamBonuses[9] = C_BONUS__CAVALRY__5__SPEED_AGE2;
-    this->teamBonuses[10] = BOGSVEIGAR;
-    this->teamBonuses[11] = C_BONUS__ARCHER_RANGE__1;
-    this->teamBonuses[12] = C_BONUS__DOMINANT_LOS;
-    this->teamBonuses[13] = YASAMA;
-    this->teamBonuses[14] = EL_DORADO;
-    this->teamBonuses[15] = ELITE_TARKAN;
-    this->teamBonuses[16] = CRENELLATIONS;
-    this->teamBonuses[17] = C_BONUS___10_POP;
-    this->teamBonuses[18] = C_BONUS__INF__1_ATTACK_CASTLE;
-    this->teamBonuses[19] = C_BONUS__CAMEL_RIDER_ATTACK_SPEED;
-    this->teamBonuses[20] = RENAME_UNITS;
-    this->teamBonuses[21] = DRILL;
-    this->teamBonuses[22] = C_BONUS__MONASTERY_TECHS__50__COST;
-    this->teamBonuses[23] = C_BONUS___1_INF_ATTK_1;
-    this->teamBonuses[24] = IRONCLAD;
-    this->teamBonuses[25] = MONK_RANGED_HEAL;
-    this->teamBonuses[26] = SPIES_TREASON;
-    this->teamBonuses[27] = C_BONUS___5_MONK_HP_3;
-    this->teamBonuses[28] = C_BONUS__TC_AND_DOCK_WORK_RATE;
-    this->teamBonuses[29] = HUSSITE_REFORMS;
-    this->teamBonuses[30] = SARACEN_ZEALOTRY;
-    this->teamBonuses[31] = SARACENS_UT;
-    this->teamBonuses[32] = C_BONUS__FEUDAL_TC;
-    this->teamBonuses[33] = C_BONUS__GALLEY__20__FIRE;
-    this->teamBonuses[34] = C_BONUS__TC__15;
-    this->teamBonuses[35] = VIETNAMESE;
-    this->teamBonuses[36] = C_BONUS__TC__20;
+    this->teamBonuses[0] = TechConstants::KAMANDARAN;
+    this->teamBonuses[1] = TechConstants::C_BONUS___5_MONK_HP_6;
+    this->teamBonuses[2] = TechConstants::BERSERK__MAKE_AVAIL;
+    this->teamBonuses[3] = TechConstants::CUMAN_MERC_PART2;
+    this->teamBonuses[4] = TechConstants::LECHITIC_LEGACY_IMP;
+    this->teamBonuses[5] = TechConstants::MALAY;
+    this->teamBonuses[6] = TechConstants::C_BONUS__FREE_HAND_CART;
+    this->teamBonuses[7] = TechConstants::C_BONUS___15__FARMERS;
+    this->teamBonuses[8] = TechConstants::C_BONUS__HUNTING_BONUSES;
+    this->teamBonuses[9] = TechConstants::C_BONUS__CAVALRY__5__SPEED_AGE2;
+    this->teamBonuses[10] = TechConstants::BOGSVEIGAR;
+    this->teamBonuses[11] = TechConstants::C_BONUS__ARCHER_RANGE__1;
+    this->teamBonuses[12] = TechConstants::C_BONUS__DOMINANT_LOS;
+    this->teamBonuses[13] = TechConstants::YASAMA;
+    this->teamBonuses[14] = TechConstants::EL_DORADO_IMP;
+    this->teamBonuses[15] = TechConstants::TECH_ELITE_TARKAN;
+    this->teamBonuses[16] = TechConstants::CRENELLATIONS_IMP;
+    this->teamBonuses[17] = TechConstants::C_BONUS___10_POP;
+    this->teamBonuses[18] = TechConstants::C_BONUS__INF__1_ATTACK_CASTLE;
+    this->teamBonuses[19] = TechConstants::C_BONUS__CAMEL_RIDER_ATTACK_SPEED;
+    this->teamBonuses[20] = TechConstants::RENAME_UNITS;
+    this->teamBonuses[21] = TechConstants::DRILL_IMP;
+    this->teamBonuses[22] = TechConstants::C_BONUS__MONASTERY_TECHS__50__COST;
+    this->teamBonuses[23] = TechConstants::C_BONUS___1_INF_ATTK_1;
+    this->teamBonuses[24] = TechConstants::IRONCLAD;
+    this->teamBonuses[25] = TechConstants::MONK_RANGED_HEAL;
+    this->teamBonuses[26] = TechConstants::SPIES_TREASON;
+    this->teamBonuses[27] = TechConstants::C_BONUS___5_MONK_HP_3;
+    this->teamBonuses[28] = TechConstants::C_BONUS__TC_AND_DOCK_WORK_RATE;
+    this->teamBonuses[29] = TechConstants::HUSSITE_REFORMS_IMP;
+    this->teamBonuses[30] = TechConstants::SARACEN_ZEALOTRY;
+    this->teamBonuses[31] = TechConstants::SARACENS_UT;
+    this->teamBonuses[32] = TechConstants::C_BONUS__FEUDAL_TC;
+    this->teamBonuses[33] = TechConstants::C_BONUS__GALLEY__20__FIRE;
+    this->teamBonuses[34] = TechConstants::C_BONUS__TC__15;
+    this->teamBonuses[35] = TechConstants::VIETNAMESE;
+    this->teamBonuses[36] = TechConstants::C_BONUS__TC__20;
 
-    this->castleUniqueTechIDs[0] = ATLATL;
-    this->castleUniqueTechIDs[1] = KASBAH;
-    this->castleUniqueTechIDs[2] = YEOMEN;
-    this->castleUniqueTechIDs[3] = STIRRUPS;
-    this->castleUniqueTechIDs[4] = BURGUNDIAN_VINEYARDS;
-    this->castleUniqueTechIDs[5] = MANIPUR_CAVALRY;
-    this->castleUniqueTechIDs[6] = GREEK_FIRE;
-    this->castleUniqueTechIDs[7] = STRONGHOLD;
-    this->castleUniqueTechIDs[8] = GREAT_WALL;
-    this->castleUniqueTechIDs[9] = STEPPE_HUSBANDRY;
-    this->castleUniqueTechIDs[10] = ROYAL_HEIRS;
-    this->castleUniqueTechIDs[11] = BEARDED_AXE;
-    this->castleUniqueTechIDs[12] = ANARCHY;
-    this->castleUniqueTechIDs[13] = MARAUDERS;
-    this->castleUniqueTechIDs[14] = ANDEAN_SLING;
-    this->castleUniqueTechIDs[15] = GRAND_TRUNK_ROAD;
-    this->castleUniqueTechIDs[16] = PAVISE;
-    this->castleUniqueTechIDs[17] = YASAMA;
-    this->castleUniqueTechIDs[18] = TUSK_SWORDS;
-    this->castleUniqueTechIDs[19] = EUPSEONG;
-    this->castleUniqueTechIDs[20] = HILL_FORTS;
-    this->castleUniqueTechIDs[21] = CORVINIAN_ARMY;
-    this->castleUniqueTechIDs[22] = THALASSOCRACY;
-    this->castleUniqueTechIDs[23] = TIGUI;
-    this->castleUniqueTechIDs[24] = HUL_CHE_JAVELINEERS;
-    this->castleUniqueTechIDs[25] = NOMADS;
-    this->castleUniqueTechIDs[26] = KAMANDARAN;
-    this->castleUniqueTechIDs[27] = CARRACK;
-    this->castleUniqueTechIDs[28] = SARACENS_UT;
-    this->castleUniqueTechIDs[29] = FIRST_CRUSADE;
-    this->castleUniqueTechIDs[30] = SLAVS_UT;
-    this->castleUniqueTechIDs[31] = INQUISITION;
-    this->castleUniqueTechIDs[32] = SILK_ARMOR;
-    this->castleUniqueTechIDs[33] = IRONCLAD;
-    this->castleUniqueTechIDs[34] = SIPAHI;
-    this->castleUniqueTechIDs[35] = CHATRAS;
-    this->castleUniqueTechIDs[36] = CHIEFTAINS;
-    this->castleUniqueTechIDs[37] = SZLACHTA_PRIVILEGES;
-    this->castleUniqueTechIDs[38] = WAGENBURG_TACTICS;
-    this->castleUniqueTechIDs[44] = MEDICAL_CORPS;
-    this->castleUniqueTechIDs[45] = PAIKS;
-    this->castleUniqueTechIDs[46] = KSHATRIYAS;
-    this->castleUniqueTechIDs[47] = DETINETS;
-    this->castleUniqueTechIDs[48] = SARACEN_ZEALOTRY;
-    this->castleUniqueTechIDs[49] = BALLISTAS;
-    this->castleUniqueTechIDs[50] = BIMARISTAN;
-    this->castleUniqueTechIDs[51] = CILICIAN_FLEET;
-    this->castleUniqueTechIDs[52] = SVAN_TOWERS;
-    this->castleUniqueTechIDs[54] = SILK_ROAD;
-    this->castleUniqueTechIDs[55] = COILED_SERPENT_ARRAY;
-    this->castleUniqueTechIDs[56] = RED_CLIFFS_TACTICS;
-    this->castleUniqueTechIDs[57] = TUNTIAN;
-    this->castleUniqueTechIDs[58] = FORTIFIED_BASTIONS;
-    this->castleUniqueTechIDs[59] = LAMELLAR_ARMOR;
+    this->castleUniqueTechIDs[0] = TechConstants::ATLATL;
+    this->castleUniqueTechIDs[1] = TechConstants::KASBAH;
+    this->castleUniqueTechIDs[2] = TechConstants::YEOMEN;
+    this->castleUniqueTechIDs[3] = TechConstants::STIRRUPS;
+    this->castleUniqueTechIDs[4] = TechConstants::BURGUNDIAN_VINEYARDS;
+    this->castleUniqueTechIDs[5] = TechConstants::MANIPUR_CAVALRY;
+    this->castleUniqueTechIDs[6] = TechConstants::GREEK_FIRE;
+    this->castleUniqueTechIDs[7] = TechConstants::STRONGHOLD;
+    this->castleUniqueTechIDs[8] = TechConstants::GREAT_WALL;
+    this->castleUniqueTechIDs[9] = TechConstants::STEPPE_HUSBANDRY;
+    this->castleUniqueTechIDs[10] = TechConstants::ROYAL_HEIRS;
+    this->castleUniqueTechIDs[11] = TechConstants::BEARDED_AXE;
+    this->castleUniqueTechIDs[12] = TechConstants::ANARCHY;
+    this->castleUniqueTechIDs[13] = TechConstants::MARAUDERS;
+    this->castleUniqueTechIDs[14] = TechConstants::ANDEAN_SLING;
+    this->castleUniqueTechIDs[15] = TechConstants::GRAND_TRUNK_ROAD;
+    this->castleUniqueTechIDs[16] = TechConstants::PAVISE;
+    this->castleUniqueTechIDs[17] = TechConstants::YASAMA;
+    this->castleUniqueTechIDs[18] = TechConstants::TUSK_SWORDS;
+    this->castleUniqueTechIDs[19] = TechConstants::EUPSEONG;
+    this->castleUniqueTechIDs[20] = TechConstants::HILL_FORTS;
+    this->castleUniqueTechIDs[21] = TechConstants::CORVINIAN_ARMY;
+    this->castleUniqueTechIDs[22] = TechConstants::THALASSOCRACY;
+    this->castleUniqueTechIDs[23] = TechConstants::TIGUI;
+    this->castleUniqueTechIDs[24] = TechConstants::HUL_CHE_JAVELINEERS;
+    this->castleUniqueTechIDs[25] = TechConstants::NOMADS;
+    this->castleUniqueTechIDs[26] = TechConstants::KAMANDARAN;
+    this->castleUniqueTechIDs[27] = TechConstants::CARRACK;
+    this->castleUniqueTechIDs[28] = TechConstants::SARACENS_UT;
+    this->castleUniqueTechIDs[29] = TechConstants::FIRST_CRUSADE;
+    this->castleUniqueTechIDs[30] = TechConstants::SLAVS_UT;
+    this->castleUniqueTechIDs[31] = TechConstants::INQUISITION;
+    this->castleUniqueTechIDs[32] = TechConstants::SILK_ARMOR;
+    this->castleUniqueTechIDs[33] = TechConstants::IRONCLAD;
+    this->castleUniqueTechIDs[34] = 491;
+    this->castleUniqueTechIDs[35] = TechConstants::CHATRAS;
+    this->castleUniqueTechIDs[36] = TechConstants::CHIEFTAINS;
+    this->castleUniqueTechIDs[37] = 782;
+    this->castleUniqueTechIDs[38] = 784;
+    this->castleUniqueTechIDs[44] = TechConstants::MEDICAL_CORPS;
+    this->castleUniqueTechIDs[45] = TechConstants::PAIKS;
+    this->castleUniqueTechIDs[46] = TechConstants::KSHATRIYAS;
+    this->castleUniqueTechIDs[47] = TechConstants::DETINETS;
+    this->castleUniqueTechIDs[48] = TechConstants::SARACEN_ZEALOTRY;
+    this->castleUniqueTechIDs[49] = TechConstants::BALLISTAS;
+    this->castleUniqueTechIDs[50] = TechConstants::BIMARISTAN;
+    this->castleUniqueTechIDs[51] = TechConstants::CILICIAN_FLEET;
+    this->castleUniqueTechIDs[52] = TechConstants::SVAN_TOWERS;
+    this->castleUniqueTechIDs[54] = TechConstants::SILK_ROAD;
+    this->castleUniqueTechIDs[55] = TechConstants::COILED_SERPENT_ARRAY;
+    this->castleUniqueTechIDs[56] = TechConstants::RED_CLIFFS_TACTICS;
+    this->castleUniqueTechIDs[57] = TechConstants::TUNTIAN;
+    this->castleUniqueTechIDs[58] = TechConstants::FORTIFIED_BASTIONS;
+    this->castleUniqueTechIDs[59] = TechConstants::LAMELLAR_ARMOR;
 
-    this->impUniqueTechIDs[0] = GARLAND_WARS;
-    this->impUniqueTechIDs[1] = MAGHREBI_CAMELS;
-    this->impUniqueTechIDs[2] = WARWOLF;
-    this->impUniqueTechIDs[3] = BAGAINS;
-    this->impUniqueTechIDs[4] = FLEMISH_REVOLUTION;
-    this->impUniqueTechIDs[5] = HOWDAH;
-    this->impUniqueTechIDs[6] = LOGISTICA;
-    this->impUniqueTechIDs[7] = FUROR_CELTICA;
-    this->impUniqueTechIDs[8] = ROCKETRY;
-    this->impUniqueTechIDs[9] = CUMAN_MERCENARIES;
-    this->impUniqueTechIDs[10] = TORSION_ENGINES;
-    this->impUniqueTechIDs[11] = CHIVALRY;
-    this->impUniqueTechIDs[12] = PERFUSION;
-    this->impUniqueTechIDs[13] = ATHEISM;
-    this->impUniqueTechIDs[14] = FABRIC_SHIELDS;
-    this->impUniqueTechIDs[15] = SHATAGNI;
-    this->impUniqueTechIDs[16] = PIROTECHNIA;
-    this->impUniqueTechIDs[17] = KATAPARUTO;
-    this->impUniqueTechIDs[18] = DOUBLE_CROSSBOW;
-    this->impUniqueTechIDs[19] = SHINKICHON;
-    this->impUniqueTechIDs[20] = TOWER_SHIELDS;
-    this->impUniqueTechIDs[21] = RECURVE_BOW;
-    this->impUniqueTechIDs[22] = FORCED_LEVY;
-    this->impUniqueTechIDs[23] = FARIMBA;
-    this->impUniqueTechIDs[24] = EL_DORADO;
-    this->impUniqueTechIDs[25] = DRILL;
-    this->impUniqueTechIDs[26] = CITADELS;
-    this->impUniqueTechIDs[27] = ARQUEBUS;
-    this->impUniqueTechIDs[28] = COUNTERWEIGHTS;
-    this->impUniqueTechIDs[29] = HAUBERK;
-    this->impUniqueTechIDs[30] = DRUZHINA;
-    this->impUniqueTechIDs[31] = SUPREMACY;
-    this->impUniqueTechIDs[32] = TIMURID_SIEGECRAFT;
-    this->impUniqueTechIDs[33] = CRENELLATIONS;
-    this->impUniqueTechIDs[34] = ARTILLERY;
-    this->impUniqueTechIDs[35] = PAPER_MONEY;
-    this->impUniqueTechIDs[36] = BOGSVEIGAR;
-    this->impUniqueTechIDs[37] = LECHITIC_LEGACY;
-    this->impUniqueTechIDs[38] = HUSSITE_REFORMS;
-    this->impUniqueTechIDs[44] = WOOTZ_STEEL;
-    this->impUniqueTechIDs[45] = MAHAYANA;
-    this->impUniqueTechIDs[46] = FRONTIER_GUARDS;
-    this->impUniqueTechIDs[47] = COMITATENSES;
-    this->impUniqueTechIDs[48] = FERETERS;
-    this->impUniqueTechIDs[49] = AZNAURI_CAVALRY;
-    this->impUniqueTechIDs[54] = BOLT_MAGAZINE;
-    this->impUniqueTechIDs[55] = SITTING_TIGER;
-    this->impUniqueTechIDs[56] = MING_GUANG_ARMOR;
-    this->impUniqueTechIDs[57] = THUNDERCLAP_BOMBS;
-    this->impUniqueTechIDs[58] = ORDO_CAVALRY;
+    this->impUniqueTechIDs[0] = TechConstants::GARLAND_WARS;
+    this->impUniqueTechIDs[1] = TechConstants::MAGHREBI_CAMELS;
+    this->impUniqueTechIDs[2] = TechConstants::WARWOLF;
+    this->impUniqueTechIDs[3] = TechConstants::BAGAINS;
+    this->impUniqueTechIDs[4] = TechConstants::FLEMISH_REVOLUTION;
+    this->impUniqueTechIDs[5] = TechConstants::HOWDAH;
+    this->impUniqueTechIDs[6] = TechConstants::LOGISTICA;
+    this->impUniqueTechIDs[7] = TechConstants::FUROR_CELTICA;
+    this->impUniqueTechIDs[8] = TechConstants::ROCKETRY;
+    this->impUniqueTechIDs[9] = TechConstants::CUMAN_MERCENARIES;
+    this->impUniqueTechIDs[10] = TechConstants::TORSION_ENGINES;
+    this->impUniqueTechIDs[11] = TechConstants::CHIVALRY;
+    this->impUniqueTechIDs[12] = TechConstants::PERFUSION;
+    this->impUniqueTechIDs[13] = TechConstants::ATHEISM;
+    this->impUniqueTechIDs[14] = TechConstants::FABRIC_SHIELDS;
+    this->impUniqueTechIDs[15] = TechConstants::SHATAGNI;
+    this->impUniqueTechIDs[16] = TechConstants::PIROTECHNIA;
+    this->impUniqueTechIDs[17] = TechConstants::KATAPARUTO;
+    this->impUniqueTechIDs[18] = TechConstants::DOUBLE_CROSSBOW;
+    this->impUniqueTechIDs[19] = TechConstants::SHINKICHON;
+    this->impUniqueTechIDs[20] = TechConstants::TOWER_SHIELDS;
+    this->impUniqueTechIDs[21] = TechConstants::RECURVE_BOW;
+    this->impUniqueTechIDs[22] = TechConstants::FORCED_LEVY;
+    this->impUniqueTechIDs[23] = TechConstants::FARIMBA;
+    this->impUniqueTechIDs[24] = TechConstants::EL_DORADO_IMP;
+    this->impUniqueTechIDs[25] = TechConstants::DRILL_IMP;
+    this->impUniqueTechIDs[26] = TechConstants::CITADELS;
+    this->impUniqueTechIDs[27] = TechConstants::ARQUEBUS;
+    this->impUniqueTechIDs[28] = TechConstants::COUNTERWEIGHTS;
+    this->impUniqueTechIDs[29] = TechConstants::HAUBERK;
+    this->impUniqueTechIDs[30] = TechConstants::DRUZHINA;
+    this->impUniqueTechIDs[31] = TechConstants::SUPREMACY;
+    this->impUniqueTechIDs[32] = TechConstants::TIMURID_SIEGECRAFT;
+    this->impUniqueTechIDs[33] = TechConstants::CRENELLATIONS_IMP;
+    this->impUniqueTechIDs[34] = TechConstants::ARTILLERY;
+    this->impUniqueTechIDs[35] = 629;
+    this->impUniqueTechIDs[36] = TechConstants::BOGSVEIGAR;
+    this->impUniqueTechIDs[37] = TechConstants::LECHITIC_LEGACY_IMP;
+    this->impUniqueTechIDs[38] = TechConstants::HUSSITE_REFORMS_IMP;
+    this->impUniqueTechIDs[44] = TechConstants::WOOTZ_STEEL;
+    this->impUniqueTechIDs[45] = TechConstants::MAHAYANA;
+    this->impUniqueTechIDs[46] = TechConstants::FRONTIER_GUARDS;
+    this->impUniqueTechIDs[47] = TechConstants::COMITATENSES;
+    this->impUniqueTechIDs[48] = TechConstants::FERETERS;
+    this->impUniqueTechIDs[49] = TechConstants::AZNAURI_CAVALRY;
+    this->impUniqueTechIDs[54] = TechConstants::BOLT_MAGAZINE;
+    this->impUniqueTechIDs[55] = TechConstants::SITTING_TIGER;
+    this->impUniqueTechIDs[56] = TechConstants::MING_GUANG_ARMOR;
+    this->impUniqueTechIDs[57] = TechConstants::THUNDERCLAP_BOMBS;
+    this->impUniqueTechIDs[58] = TechConstants::ORDO_CAVALRY;
 
-    this->uuTechIDs[0] = {LONGBOW__MAKE_AVAIL, ELITE_LONGBOW};
-    this->uuTechIDs[1] = {THROWING_AXEMEN__MAKE_AVAIL, ELITE_THROWING_AXEMEN};
-    this->uuTechIDs[2] = {HUSKARL__MAKE_AVAIL, ELITE_HUSKARL};
-    this->uuTechIDs[3] = {TEUTONIC_KNIGHT__MAKE_AVAIL, ELITE_TEUTONIC_KNIGHT};
-    this->uuTechIDs[4] = {SAMURAI__MAKE_AVAIL, ELITE_SAMURAI};
-    this->uuTechIDs[5] = {CHU_KO_NU__MAKE_AVAIL, ELITE_CHU_KO_NU};
-    this->uuTechIDs[6] = {CATAPHRACT__MAKE_AVAIL, ELITE_CATAPHRACT};
-    this->uuTechIDs[7] = {MAMELUKE__MAKE_AVAIL, ELITE_MAMELUKE};
-    this->uuTechIDs[8] = {WAR_ELEPHANT__MAKE_AVAIL, ELITE_WAR_ELEPHANT};
-    this->uuTechIDs[9] = {JANNISARY__MAKE_AVAIL, ELITE_JANNISARY};
-    this->uuTechIDs[10] = {BERSERK, ELITE_BERSERK};
-    this->uuTechIDs[11] = {MOBILE_SIEGE_UNIT__MAKE_AVAIL, ELITE_MANGUDAI};
-    this->uuTechIDs[12] = {WOAD_BERSERKER__MAKE_AVAIL, ELITE_WOAD_RAIDER};
-    this->uuTechIDs[13] = {CONQUISTADOR__MAKE_AVAIL, ELITE_CONQUISTADOR};
-    this->uuTechIDs[14] = {JAGUAR_MAN, ELITE_JAGUAR_MAN};
-    this->uuTechIDs[15] = {PLUMED_ARCHER__MAKE_AVAIL, ELITE_PLUMED_ARCHER};
-    this->uuTechIDs[16] = {TARKAN__MAKE_AVAIL, ELITE_TARKAN};
-    this->uuTechIDs[17] = {WAR_WAGON, ELITE_WAR_WAGON};
-    this->uuTechIDs[18] = {GENOESE_BOW__MAKE_AVAIL, ELITE_GENOESE_BOW};
-    this->uuTechIDs[19] = {GHULAM__MAKE_AVAIL, ELITE_GHULAM};
-    this->uuTechIDs[20] = {KAMAYUK__MAKE_AVAIL, ELITE_KAMAYUK};
-    this->uuTechIDs[21] = {MAGYAR_HUSZAR__MAKE_AVAIL, ELITE_MAGYAR_HUSZAR};
-    this->uuTechIDs[22] = {BOYAR__MAKE_AVAIL, ELITE_SIEGE_TOWER};
-    this->uuTechIDs[23] = {ORGAN_GUN__MAKE_AVAIL, ELITE_ORGAN_GUN};
-    this->uuTechIDs[24] = {SHOTEL_WARRIOR__MAKE_AVAIL, ELITE_ETHIOPIA_UNIT};
-    this->uuTechIDs[25] = {GBETO__MAKE_AVAIL, ELITE_MALI_UNIT};
-    this->uuTechIDs[26] = {CAMEL_ARCHER__MAKE_AVAIL, ELITE_CAMEL_ARCHER};
-    this->uuTechIDs[27] = {BALLISTA_ELEPHANT__MAKE_AVAIL, ELITE_BALLISTA_ELEPHANT};
-    this->uuTechIDs[28] = {KARAMBIT_WARRIOR__MAKE_AVAIL, ELITE_KARAMBIT_WARRIOR};
-    this->uuTechIDs[29] = {ARAMBAI__MAKE_AVAIL, ELITE_ARAMBAI};
-    this->uuTechIDs[30] = {RATTAN_ARCHER__MAKE_AVAIL, ELITE_RATTAN_ARCHER};
-    this->uuTechIDs[31] = {KONNIK__MAKE_AVAIL, ELITE_KONNIK};
-    this->uuTechIDs[32] = {KESHIK__MAKE_AVAIL, ELITE_KESHIK};
-    this->uuTechIDs[33] = {KIPCHAK__MAKE_AVAIL, ELITE_KIPCHAK};
-    this->uuTechIDs[34] = {LEITIS__MAKE_AVAIL, ELITE_LEITIS};
-    this->uuTechIDs[35] = {COUSTILLIER__MAKE_AVAIL, ELITE_COUSTILLIER};
-    this->uuTechIDs[36] = {SERJEANT__MAKE_AVAIL, ELITE_SERJEANT};
-    this->uuTechIDs[37] = {OBUCH__MAKE_AVAIL, ELITE_OBUCH};
-    this->uuTechIDs[38] = {HUSSITE_WAGON__MAKE_AVAIL, ELITE_HUSSITE_WAGON};
-    this->uuTechIDs[78] = {CHAKRAM_THROWER__MAKE_AVAIL, ELITE_CHAKRAM_THROWER};
-    this->uuTechIDs[79] = {URUMI_SWORDSMAN__MAKE_AVAIL, ELITE_URUMI_SWORDSMAN};
-    this->uuTechIDs[80] = {RATHA__MAKE_AVAIL, ELITE_RATHA};
-    this->uuTechIDs[81] = {COMPOSITE_BOWMAN__MAKE_AVAIL, ELITE_COMPOSITE_BOWMAN};
-    this->uuTechIDs[82] = {MONASPA__MAKE_AVAIL, ELITE_MONASPA};
-    this->uuTechIDs[83] = {WHITE_FEATHER_GUARD__MAKE_AVAIL, ELITE_WHITE_FEATHER_GUARD};
-    this->uuTechIDs[84] = {FIRE_ARCHER__MAKE_AVAIL, ELITE_FIRE_ARCHER};
-    this->uuTechIDs[85] = {TIGER_CAVALRY__MAKE_AVAIL, ELITE_TIGER_CAVALRY};
-    this->uuTechIDs[86] = {IRON_PAGODA__MAKE_AVAIL, ELITE_IRON_PAGODA};
-    this->uuTechIDs[87] = {LIAO_DAO__MAKE_AVAIL, ELITE_LIAO_DAO};
+    this->uuTechIDs[0] = {TechConstants::LONGBOW__MAKE_AVAIL, TechConstants::TECH_ELITE_LONGBOW};
+    this->uuTechIDs[1] = {TechConstants::THROWING_AXEMEN__MAKE_AVAIL, TechConstants::ELITE_THROWING_AXEMEN};
+    this->uuTechIDs[2] = {TechConstants::HUSKARL__MAKE_AVAIL, TechConstants::TECH_ELITE_HUSKARL};
+    this->uuTechIDs[3] = {TechConstants::TEUTONIC_KNIGHT__MAKE_AVAIL, TechConstants::TECH_ELITE_TEUTONIC_KNIGHT};
+    this->uuTechIDs[4] = {TechConstants::SAMURAI__MAKE_AVAIL, TechConstants::TECH_ELITE_SAMURAI};
+    this->uuTechIDs[5] = {TechConstants::CHU_KO_NU__MAKE_AVAIL, TechConstants::TECH_ELITE_CHU_KO_NU};
+    this->uuTechIDs[6] = {TechConstants::CATAPHRACT__MAKE_AVAIL, TechConstants::TECH_ELITE_CATAPHRACT};
+    this->uuTechIDs[7] = {TechConstants::MAMELUKE__MAKE_AVAIL, TechConstants::TECH_ELITE_MAMELUKE};
+    this->uuTechIDs[8] = {TechConstants::WAR_ELEPHANT__MAKE_AVAIL, TechConstants::TECH_ELITE_WAR_ELEPHANT};
+    this->uuTechIDs[9] = {TechConstants::JANNISARY__MAKE_AVAIL, TechConstants::ELITE_JANNISARY};
+    this->uuTechIDs[10] = {TechConstants::BERSERK__MAKE_AVAIL, TechConstants::TECH_ELITE_BERSERK};
+    this->uuTechIDs[11] = {TechConstants::MOBILE_SIEGE_UNIT__MAKE_AVAIL, TechConstants::TECH_ELITE_MANGUDAI};
+    this->uuTechIDs[12] = {TechConstants::WOAD_BERSERKER__MAKE_AVAIL, TechConstants::TECH_ELITE_WOAD_RAIDER};
+    this->uuTechIDs[13] = {TechConstants::CONQUISTADOR__MAKE_AVAIL, TechConstants::TECH_ELITE_CONQUISTADOR};
+    this->uuTechIDs[14] = {TechConstants::JAGUAR_MAN, TechConstants::ELITE_JAGUAR_MAN};
+    this->uuTechIDs[15] = {TechConstants::PLUMED_ARCHER__MAKE_AVAIL, TechConstants::TECH_ELITE_PLUMED_ARCHER};
+    this->uuTechIDs[16] = {TechConstants::TARKAN__MAKE_AVAIL, TechConstants::TECH_ELITE_TARKAN};
+    this->uuTechIDs[17] = {TechConstants::TECH_WAR_WAGON, TechConstants::TECH_ELITE_WAR_WAGON};
+    this->uuTechIDs[18] = {TechConstants::GENOESE_BOW__MAKE_AVAIL, TechConstants::TECH_ELITE_GENOESE_BOW};
+    this->uuTechIDs[19] = {TechConstants::GHULAM__MAKE_AVAIL, TechConstants::TECH_ELITE_GHULAM};
+    this->uuTechIDs[20] = {TechConstants::KAMAYUK__MAKE_AVAIL, TechConstants::TECH_ELITE_KAMAYUK};
+    this->uuTechIDs[21] = {TechConstants::MAGYAR_HUSZAR__MAKE_AVAIL, TechConstants::TECH_ELITE_MAGYAR_HUSZAR};
+    this->uuTechIDs[22] = {TechConstants::BOYAR__MAKE_AVAIL, TechConstants::ELITE_BOYAR};
+    this->uuTechIDs[23] = {TechConstants::ORGAN_GUN__MAKE_AVAIL, TechConstants::TECH_ELITE_ORGAN_GUN};
+    this->uuTechIDs[24] = {TechConstants::SHOTEL_WARRIOR__MAKE_AVAIL, TechConstants::ELITE_SHOTEL_WARRIOR};
+    this->uuTechIDs[25] = {TechConstants::GBETO__MAKE_AVAIL, TechConstants::ELITE_GBETO};
+    this->uuTechIDs[26] = {TechConstants::CAMEL_ARCHER__MAKE_AVAIL, TechConstants::TECH_ELITE_CAMEL_ARCHER};
+    this->uuTechIDs[27] = {TechConstants::BALLISTA_ELEPHANT__MAKE_AVAIL, TechConstants::TECH_ELITE_BALLISTA_ELEPHANT};
+    this->uuTechIDs[28] = {TechConstants::KARAMBIT_WARRIOR__MAKE_AVAIL, TechConstants::TECH_ELITE_KARAMBIT_WARRIOR};
+    this->uuTechIDs[29] = {TechConstants::ARAMBAI__MAKE_AVAIL, TechConstants::TECH_ELITE_ARAMBAI};
+    this->uuTechIDs[30] = {TechConstants::RATTAN_ARCHER__MAKE_AVAIL, TechConstants::TECH_ELITE_RATTAN_ARCHER};
+    this->uuTechIDs[31] = {TechConstants::KONNIK__MAKE_AVAIL, TechConstants::TECH_ELITE_KONNIK};
+    this->uuTechIDs[32] = {TechConstants::KESHIK__MAKE_AVAIL, TechConstants::TECH_ELITE_KESHIK};
+    this->uuTechIDs[33] = {TechConstants::KIPCHAK__MAKE_AVAIL, TechConstants::TECH_ELITE_KIPCHAK};
+    this->uuTechIDs[34] = {TechConstants::LEITIS__MAKE_AVAIL, TechConstants::TECH_ELITE_LEITIS};
+    this->uuTechIDs[35] = {TechConstants::COUSTILLIER__MAKE_AVAIL, TechConstants::TECH_ELITE_COUSTILLIER};
+    this->uuTechIDs[36] = {TechConstants::SERJEANT__MAKE_AVAIL, TechConstants::TECH_ELITE_SERJEANT};
+    this->uuTechIDs[37] = {TechConstants::OBUCH__MAKE_AVAIL, TechConstants::TECH_ELITE_OBUCH};
+    this->uuTechIDs[38] = {TechConstants::HUSSITE_WAGON__MAKE_AVAIL, TechConstants::TECH_ELITE_HUSSITE_WAGON};
+    this->uuTechIDs[78] = {TechConstants::CHAKRAM_THROWER__MAKE_AVAIL, TechConstants::TECH_ELITE_CHAKRAM_THROWER};
+    this->uuTechIDs[79] = {TechConstants::URUMI_SWORDSMAN__MAKE_AVAIL, TechConstants::TECH_ELITE_URUMI_SWORDSMAN};
+    this->uuTechIDs[80] = {TechConstants::RATHA__MAKE_AVAIL, TechConstants::TECH_ELITE_RATHA};
+    this->uuTechIDs[81] = {TechConstants::COMPOSITE_BOWMAN__MAKE_AVAIL, TechConstants::TECH_ELITE_COMPOSITE_BOWMAN};
+    this->uuTechIDs[82] = {TechConstants::MONASPA__MAKE_AVAIL, TechConstants::TECH_ELITE_MONASPA};
+    this->uuTechIDs[83] = {TechConstants::WHITE_FEATHER_GUARD__MAKE_AVAIL, TechConstants::TECH_ELITE_WHITE_FEATHER_GUARD};
+    this->uuTechIDs[84] = {TechConstants::FIRE_ARCHER__MAKE_AVAIL, TechConstants::TECH_ELITE_FIRE_ARCHER};
+    this->uuTechIDs[85] = {TechConstants::TIGER_CAVALRY__MAKE_AVAIL, TechConstants::TECH_ELITE_TIGER_CAVALRY};
+    this->uuTechIDs[86] = {TechConstants::IRON_PAGODA__MAKE_AVAIL, TechConstants::TECH_ELITE_IRON_PAGODA};
+    this->uuTechIDs[87] = {TechConstants::LIAO_DAO__MAKE_AVAIL, TechConstants::TECH_ELITE_LIAO_DAO};
 }
 
 void Civbuilder::configure() {
@@ -1232,7 +1232,7 @@ void Civbuilder::setupData() {
 
 void Civbuilder::createNewUnits() {
     // Crusader Knights
-    this->createUU(UU_CRUSADER_KNIGHT, 1723, "Crusader Knight", {600, 0, 0, 1200}, 45, 7604);
+    this->createUU(39, 1723, "Crusader Knight", {600, 0, 0, 1200}, 45, 7604);
     int uuID = (int)(this->df->Civs[0].Units.size() - 2);
     int eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1254,7 +1254,7 @@ void Civbuilder::createNewUnits() {
     }
 
     // Xolotl Warriors
-    createUU(UU_XOLOTL_WARRIOR, 1570, "Xolotl Warrior", {800, 0, 0, 800}, 60, 7605);
+    createUU(40, 1570, "Xolotl Warrior", {800, 0, 0, 800}, 60, 7605);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1286,7 +1286,7 @@ void Civbuilder::createNewUnits() {
     }
 
     // Saboteur
-    createUU(UU_SABOTEUR, 706, "Saboteur", {0, 600, 600, 0}, 40, 7606);
+    createUU(41, 706, "Saboteur", {0, 600, 600, 0}, 40, 7606);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     this->unitClasses["explosive"].push_back(uuID);
@@ -1326,7 +1326,7 @@ void Civbuilder::createNewUnits() {
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 0, 50, 50});
     // Ninja
-    createUU(UU_NINJA, 1145, "Ninja", {0, 500, 0, 600}, 100, 7607);
+    createUU(42, 1145, "Ninja", {0, 500, 0, 600}, 100, 7607);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     int ninjaID = uuID;
@@ -1356,7 +1356,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.BreakOffCombat = 1;
     }
     // Flamethrower
-    createUU(UU_FLAMETHROWER, 188, "Flamethrower", {0, 1000, 0, 1000}, 75, 7608);
+    createUU(43, 188, "Flamethrower", {0, 1000, 0, 1000}, 75, 7608);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1385,7 +1385,7 @@ void Civbuilder::createNewUnits() {
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 125, 0, 50});
     // Photonman
-    createUU(UU_PHOTONMAN, 1577, "Photonman", {1000, 0, 0, 1000}, 120, 7609);
+    createUU(44, 1577, "Photonman", {1000, 0, 0, 1000}, 120, 7609);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1438,7 +1438,7 @@ void Civbuilder::createNewUnits() {
         shockPowerUpTask.WorkRange = 2;
         shockPowerUpTasks.push_back(shockPowerUpTask);
     }
-    createUU(UU_APUKISPAY, 1074, "Apukispay", {800, 0, 0, 900}, 70, 7643);
+    createUU(46, 1074, "Apukispay", {800, 0, 0, 900}, 70, 7643);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1464,7 +1464,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}}, {{4, 1}, {3, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}}, {{4, 2}, {3, 0}, {19, 0}});
     // Monkey Boy
-    createUU(UU_MONKEY_BOY, 860, "Monkey Boy", {2000, 0, 0, 0}, 60, 7612);
+    createUU(47, 860, "Monkey Boy", {2000, 0, 0, 0}, 60, 7612);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1500,7 +1500,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Bird.TaskList.push_back(civ.Units[1723].Bird.TaskList[4]);
     }
     // Amazon Warrior
-    createUU(UU_AMAZON_WARRIOR, 825, "Amazon Warrior", {600, 0, 0, 1000}, 70, 7613);
+    createUU(48, 825, "Amazon Warrior", {600, 0, 0, 1000}, 70, 7613);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1531,7 +1531,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Speed = 1.2;
     }
     // Amazon Archer
-    createUU(UU_AMAZON_ARCHER, 850, "Amazon Archer", {600, 0, 0, 400}, 60, 7614);
+    createUU(49, 850, "Amazon Archer", {600, 0, 0, 400}, 60, 7614);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     this->unitClasses["footArcher"].push_back(uuID);
@@ -1566,7 +1566,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.ResourceCosts[1].Amount = 35;
     }
     // Iroquois Warrior
-    createUU(UU_IROQUOIS_WARRIOR, 1374, "Iroquois Warrior", {800, 0, 0, 700}, 70, 7615);
+    createUU(50, 1374, "Iroquois Warrior", {800, 0, 0, 700}, 70, 7615);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1599,7 +1599,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].HitPoints = 80;
     }
     // Varangian Guard
-    createUU(UU_VARANGIAN_GUARD, 1681, "Varangian Guard", {900, 0, 0, 900}, 90, 7616);
+    createUU(51, 1681, "Varangian Guard", {900, 0, 0, 900}, 90, 7616);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1637,7 +1637,7 @@ void Civbuilder::createNewUnits() {
     }
     setUnitCosts(this->df, {uuID, eID}, {70, 0, 0, 45});
     // Gendarme
-    createUU(UU_GENDARME, 1281, "Gendarme", {1000, 0, 0, 850}, 110, 7617);
+    createUU(52, 1281, "Gendarme", {1000, 0, 0, 850}, 110, 7617);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1657,7 +1657,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 10}}, {{3, 5}, {4, 5}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}}, {{3, 7}, {4, 7}, {8, 0}, {19, 0}});
     // Cuahchiqueh
-    createUU(UU_CUAHCHIQUEH, 1067, "Cuahchiqueh", {600, 0, 0, 900}, 60, 7618);
+    createUU(53, 1067, "Cuahchiqueh", {600, 0, 0, 900}, 60, 7618);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1681,7 +1681,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{29, 5}, {21, 1}, {1, 5}, {4, 6}, {8, 0}, {32, 5}}, {{4, 1}, {3, -1}, {19, 0}});
     setCombatStats(this->df, eID, {{29, 7}, {21, 1}, {1, 5}, {4, 8}, {8, 0}, {32, 5}}, {{4, 1}, {3, -1}, {19, 0}});
     // Ritterbruder
-    createUU(UU_RITTERBRUDER, 1727, "Ritterbruder", {850, 0, 0, 850}, 60, 7619);
+    createUU(54, 1727, "Ritterbruder", {850, 0, 0, 850}, 60, 7619);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1701,7 +1701,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 11}}, {{3, 1}, {4, 6}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}}, {{3, 2}, {4, 11}, {8, 0}, {19, 0}});
     // Kazak
-    createUU(UU_KAZAK, 1269, "Kazak", {0, 1100, 0, 500}, 70, 7620);
+    createUU(55, 1269, "Kazak", {0, 1100, 0, 500}, 70, 7620);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1739,7 +1739,7 @@ void Civbuilder::createNewUnits() {
     monkPowerUpTask.ClassID = -1;
     monkPowerUpTask.UnitID = 1811;
     monkPowerUpTasks.push_back(monkPowerUpTask);
-    createUU(UU_SZLACHCIC, 1721, "Szlachcic", {750, 0, 0, 650}, 60, 7621);
+    createUU(56, 1721, "Szlachcic", {750, 0, 0, 650}, 60, 7621);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1763,7 +1763,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 10}}, {{4, 4}, {3, 1}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}}, {{4, 5}, {3, 2}, {8, 0}, {19, 0}});
     // Cuirassier
-    createUU(UU_CUIRASSIER, 1186, "Cuirassier", {650, 0, 0, 800}, 60, 7622);
+    createUU(57, 1186, "Cuirassier", {650, 0, 0, 800}, 60, 7622);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1794,7 +1794,7 @@ void Civbuilder::createNewUnits() {
         camelPowerUpTask.WorkRange = 3;
         camelPowerUpTasks.push_back(camelPowerUpTask);
     }
-    createUU(UU_RAJPUT, 1184, "Rajput", {750, 0, 0, 750}, 55, 7623);
+    createUU(58, 1184, "Rajput", {750, 0, 0, 750}, 55, 7623);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1820,7 +1820,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}}, {{4, 0}, {3, 1}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 11}}, {{4, 0}, {3, 2}, {8, 0}, {19, 0}});
     // Seljuk Archer
-    createUU(UU_SELJUK_ARCHER, 943, "Seljuk Archer", {0, 800, 0, 700}, 65, 7624);
+    createUU(59, 943, "Seljuk Archer", {0, 800, 0, 700}, 65, 7624);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1844,7 +1844,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{3, 7}}, {{28, 0}, {4, -2}, {3, 0}, {15, 0}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{3, 9}}, {{28, 0}, {4, -2}, {3, 1}, {15, 0}, {8, 0}, {19, 0}});
     // Numidian Javelinman
-    createUU(UU_NUMIDIAN_JAVELINMAN, 1036, "Numidian Javelinman", {0, 600, 0, 400}, 45, 7625);
+    createUU(60, 1036, "Numidian Javelinman", {0, 600, 0, 400}, 45, 7625);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1867,7 +1867,7 @@ void Civbuilder::createNewUnits() {
     this->unitClasses["skirmisher"].push_back(uuID);
     this->unitClasses["skirmisher"].push_back(eID);
     // Sosso Guard
-    createUU(UU_SOSSO_GUARD, 1574, "Sosso Guard", {1000, 0, 0, 700}, 65, 7626);
+    createUU(61, 1574, "Sosso Guard", {1000, 0, 0, 700}, 65, 7626);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1889,7 +1889,7 @@ void Civbuilder::createNewUnits() {
     this->unitClasses["spear"].push_back(uuID);
     this->unitClasses["spear"].push_back(eID);
     // Swiss Pikeman
-    createUU(UU_SWISS_PIKEMAN, 892, "Swiss Pikeman", {600, 0, 0, 1200}, 45, 7627);
+    createUU(62, 892, "Swiss Pikeman", {600, 0, 0, 1200}, 45, 7627);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1915,7 +1915,7 @@ void Civbuilder::createNewUnits() {
     this->unitClasses["spear"].push_back(uuID);
     this->unitClasses["spear"].push_back(eID);
     // Headhunter
-    createUU(UU_HEADHUNTER, 1673, "Headhunter", {400, 0, 0, 300}, 50, 7628);
+    createUU(63, 1673, "Headhunter", {400, 0, 0, 300}, 50, 7628);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1947,7 +1947,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.ResourceCosts[1].Flag = 1;
     }
     // Teulu
-    createUU(UU_TEULU, 1683, "Teulu", {600, 0, 0, 550}, 45, 7629);
+    createUU(64, 1683, "Teulu", {600, 0, 0, 550}, 45, 7629);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1971,7 +1971,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 10}}, {{1, 0}, {4, 0}, {3, 1}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}}, {{1, 0}, {4, 0}, {3, 1}, {19, 0}});
     // Maillotins
-    createUU(UU_MAILLOTINS, 1685, "Maillotins", {950, 0, 0, 250}, 35, 7630);
+    createUU(65, 1685, "Maillotins", {950, 0, 0, 250}, 35, 7630);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1993,7 +1993,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 20}}, {{1, 0}, {4, 0}, {3, 3}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 27}}, {{1, 0}, {4, 0}, {3, 5}, {19, 0}});
     // Hashashin
-    createUU(UU_HASHASHIN, 1035, "Hashashin", {500, 0, 0, 1250}, 60, 7631);
+    createUU(66, 1035, "Hashashin", {500, 0, 0, 1250}, 60, 7631);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2013,7 +2013,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 12}, {19, 8}, {36, 25}}, {{4, 1}, {3, 1}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 14}, {19, 12}, {36, 50}}, {{4, 1}, {3, 1}, {8, 0}, {19, 0}});
     // Highlander
-    createUU(UU_HIGHLANDER, 453, "Highlander", {850, 0, 0, 700}, 65, 7632);
+    createUU(67, 453, "Highlander", {850, 0, 0, 700}, 65, 7632);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2033,7 +2033,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}, {1, 5}, {8, 5}, {32, 5}}, {{4, 1}, {3, 1}, {1, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}, {1, 6}, {8, 6}, {32, 6}}, {{4, 1}, {3, 1}, {1, 0}, {19, 0}});
     // Stradiot
-    createUU(UU_STRADIOT, 1677, "Stradiot", {800, 0, 0, 850}, 65, 7633);
+    createUU(68, 1677, "Stradiot", {800, 0, 0, 850}, 65, 7633);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2057,7 +2057,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}, {8, 4}}, {{8, 0}, {4, 0}, {3, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}, {8, 6}}, {{8, 0}, {4, 1}, {3, 1}, {19, 0}});
     // Ahosi
-    createUU(UU_AHOSI, 1066, "Ahosi", {450, 0, 0, 350}, 40, 7634);
+    createUU(69, 1066, "Ahosi", {450, 0, 0, 350}, 40, 7634);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2117,7 +2117,7 @@ void Civbuilder::createNewUnits() {
     landsknechtPowerUpTask.WorkRange = 5;
     landsknechtPowerUpTask.TargetDiplomacy = 4;
     landsknechtPowerUpTasks.push_back(landsknechtPowerUpTask);
-    createUU(UU_LANDSKNECHT, 439, "Landsknecht", {850, 0, 0, 650}, 60, 7635);
+    createUU(70, 439, "Landsknecht", {850, 0, 0, 650}, 60, 7635);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2144,7 +2144,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 12}, {21, 2}}, {{1, 3}, {4, 1}, {3, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 14}, {21, 2}}, {{1, 3}, {4, 1}, {3, 0}, {19, 0}});
     // Clibinarii
-    createUU(UU_CLIBINARII, 932, "Clibinarii", {950, 0, 0, 850}, 65, 7636);
+    createUU(71, 932, "Clibinarii", {950, 0, 0, 850}, 65, 7636);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2166,7 +2166,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 15}}, {{8, 0}, {3, 2}, {4, 2}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 19}}, {{8, 0}, {3, 3}, {4, 3}, {19, 0}});
     // Silahtar
-    createUU(UU_SILAHTAR, 1267, "Silahtar", {0, 1100, 0, 650}, 75, 7637);
+    createUU(72, 1267, "Silahtar", {0, 1100, 0, 650}, 75, 7637);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2188,7 +2188,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{3, 6}, {1, 3}, {32, 3}}, {{28, 0}, {15, 0}, {8, 0}, {19, 2}, {4, 1}, {3, 0}});
     setCombatStats(this->df, eID, {{3, 8}, {1, 6}, {32, 6}}, {{28, 0}, {15, 0}, {8, 0}, {19, 2}, {4, 2}, {3, 1}});
     // Jaridah
-    createUU(UU_JARIDAH, 777, "Jaridah", {900, 0, 0, 450}, 60, 7638);
+    createUU(73, 777, "Jaridah", {900, 0, 0, 450}, 60, 7638);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2208,7 +2208,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 11}, {30, 8}, {5, 25}}, {{4, 1}, {3, 0}, {8, 12}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}, {30, 14}, {5, 45}}, {{4, 1}, {3, 0}, {8, 16}, {19, 0}});
     // Wolf Warrior
-    createUU(UU_WOLF_WARRIOR, 702, "Wolf Warrior", {800, 0, 0, 700}, 65, 7639);
+    createUU(74, 702, "Wolf Warrior", {800, 0, 0, 700}, 65, 7639);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2228,7 +2228,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 13}}, {{4, 3}, {3, 0}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 15}}, {{4, 5}, {3, 0}, {8, 0}, {19, 0}});
     // Warrior Monk
-    createUU(UU_WARRIOR_MONK, 1178, "Warrior Monk", {800, 0, 0, 750}, 80, 7640);
+    createUU(75, 1178, "Warrior Monk", {800, 0, 0, 750}, 80, 7640);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2266,7 +2266,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.ResourceCosts[1].Flag = 1;
     }
     // Castellan
-    createUU(UU_CASTELLAN, 1718, "Castellan", {700, 0, 0, 900}, 75, 7641);
+    createUU(76, 1718, "Castellan", {700, 0, 0, 900}, 75, 7641);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     setUnitCosts(this->df, {uuID, eID}, {65, 0, 0, 90});
@@ -2298,7 +2298,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.BreakOffCombat = 96;
     }
     // Wind Warrior
-    createUU(UU_WIND_WARRIOR, 749, "Wind Warrior", {600, 0, 0, 900}, 65, 7642);
+    createUU(77, 749, "Wind Warrior", {600, 0, 0, 900}, 65, 7642);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
