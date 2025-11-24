@@ -1,0 +1,6 @@
+# Ignore large extracted JSON files
+extracted_data.json
+
+# Keep reference files and documentation
+!*.txt
+!*.md

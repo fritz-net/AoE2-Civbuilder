@@ -1,0 +1,57 @@
+Unique Unit IDs and Names (Base Form)
+=====================================
+
+Format: [Unit ID] Unit Name (Internal Name)
+
+[8] LNGBW
+[11] MOSUN
+[25] TKNIT
+[40] CATAP
+[41] GBRSK
+[46] JANNI
+[73] CHUKN
+[94] BRSRK
+[232] WBRSK
+[239] MPCAV
+[281] TAXEM
+[725] JAGUAR
+[755] TARKAN
+[763] PLUME
+[771] CONQI
+[827] WAGON
+[866] GENOE
+[869] UMAGYX
+[876] BOYAR
+[879] KAMAY
+[1001] ORGAN
+[1007] CAMAR
+[1013] GBETO
+[1016] SHOTEL
+[1120] ELEBALI
+[1123] KARAM
+[1126] ARAMBAI
+[1129] RATAN
+[1225] KONNIK
+[1228] KESHIK
+[1231] KIPCHAK
+[1234] LEITIS
+[1252] KONNIK_INF
+[1655] COUSTILLIER
+[1658] SERJEANT
+[1701] OBUCH
+[1735] URUMI
+[1738] RATHA
+[1741] CHAKRAM
+[1747] GHULAM
+[1759] RATHA2
+[1800] COMPBOW
+[1803] MONASPA
+[1908] IRONPAG
+[1920] LIAODAO
+[1949] TIGERCAV
+[1959] WHTFTHRG
+[1968] FIREARCHER
+
+
+Note: These are base form unique units. Elite versions have different IDs.
+The uniqueNames array in modStrings.js should use plural forms of the unit names.

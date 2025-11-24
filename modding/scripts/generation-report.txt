@@ -1,0 +1,41 @@
+
+DAT File Magic Files Generation Report
+=======================================
+
+Generated on: 2025-11-24T03:21:24.425Z
+Source file: /tmp/extracted_data.json
+Source metadata: {
+  "compilation_date": "Nov 24 2025",
+  "game_version": "LatestDE2",
+  "has_display_names": false,
+  "source_file": "../public/vanillaFiles/empires2_x2_p1_october2025.dat"
+}
+
+Summary:
+--------
+- Unique Unit Names: 24 items
+- Civ Bonus Strings: 560 items  
+- Civilization Names: 54 items
+
+Files to update:
+----------------
+1. process_mod/modStrings.js
+   - uniqueNames array (24 items)
+   - civBonusStrings array (560 items)
+
+2. public/js/common.js
+   - civNames array (54 items)
+
+3. misc/strings.txt
+   - Already up to date (used as source)
+
+Next steps:
+-----------
+The arrays have been extracted but not automatically updated in the source files.
+To complete the update:
+
+1. Review the arrays above to ensure they look correct
+2. Manually update the arrays in the respective files, or
+3. Run the update script: node modding/scripts/update-magic-files.js
+
+Note: Manual review is recommended to ensure backward compatibility.
