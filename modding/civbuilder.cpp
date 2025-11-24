@@ -116,116 +116,116 @@ void Civbuilder::initialize() {
     this->unitClasses["uniqueShip"] = {250, 533, 1004, 1006, 1750, 831, 832, 778, 938, 1302};
     this->unitClasses["trebuchet"] = {42, 331, 1690, 1691, 1923, 1942, 683, 729, 1948};
 
-    this->civBonuses[0] = {381};
-    this->civBonuses[1] = {382, 403};
-    this->civBonuses[2] = {383};
-    this->civBonuses[3] = {325, 330};
-    this->civBonuses[4] = {290};
-    this->civBonuses[5] = {524};
-    this->civBonuses[6] = {343};
-    this->civBonuses[7] = {402};
-    this->civBonuses[8] = {406};
-    this->civBonuses[9] = {327, 328, 329};
-    this->civBonuses[10] = {344, 731, 732, 733};
-    this->civBonuses[11] = {347};
-    this->civBonuses[12] = {336, 353};
-    this->civBonuses[13] = {314};
-    this->civBonuses[14] = {334, 335};
-    this->civBonuses[15] = {340};
-    this->civBonuses[16] = {306, 422, 423, 424};
-    this->civBonuses[17] = {341};
-    this->civBonuses[18] = {302, 226, 425};
-    this->civBonuses[19] = {396};
-    this->civBonuses[20] = {304, 350, 351, 352};
-    this->civBonuses[21] = {283, 417, 418, 419};
-    this->civBonuses[22] = {397};
-    this->civBonuses[23] = {284};
-    this->civBonuses[24] = {223};
-    this->civBonuses[25] = {342};
-    this->civBonuses[26] = {409, 412};
-    this->civBonuses[27] = {355};
-    this->civBonuses[28] = {337};
-    this->civBonuses[29] = {404};
-    this->civBonuses[30] = {312};
-    this->civBonuses[31] = {301};
-    this->civBonuses[32] = {300};
-    this->civBonuses[33] = {452};
-    this->civBonuses[34] = {395, 501, 502};
-    this->civBonuses[35] = {416, 415, 391};
-    this->civBonuses[36] = {394};
-    this->civBonuses[37] = {389};
-    this->civBonuses[38] = {286, 287, 288, 388};
-    this->civBonuses[39] = {393, 898, 899, 900};
-    this->civBonuses[40] = {385};
-    this->civBonuses[41] = {386};
-    this->civBonuses[42] = {405};
-    this->civBonuses[43] = {84};
-    this->civBonuses[44] = {224};
-    this->civBonuses[45] = {29, 30, 31, 32, 33, 36, 38, 40, 41, 66, 456};
-    this->civBonuses[46] = {554, 227};
-    this->civBonuses[47] = {458, 459};
-    this->civBonuses[48] = {390};
-    this->civBonuses[49] = {451};
-    this->civBonuses[50] = {447, 448};
-    this->civBonuses[51] = {272, 372};
-    this->civBonuses[52] = {500};
-    this->civBonuses[53] = {521};
-    this->civBonuses[54] = {469};
-    this->civBonuses[55] = {338, 552};
-    this->civBonuses[56] = {496, 497, 498, 553};
-    this->civBonuses[57] = {152, 153, 154, 155};
-    this->civBonuses[58] = {519};
-    this->civBonuses[59] = {495};
-    this->civBonuses[60] = {474, 475, 476, 477, 478, 479};
-    this->civBonuses[61] = {528};
-    this->civBonuses[62] = {69};
-    this->civBonuses[63] = {473};
-    this->civBonuses[64] = {511};
-    this->civBonuses[65] = {559};
-    this->civBonuses[66] = {453};
-    this->civBonuses[67] = {560};
-    this->civBonuses[68] = {570};
-    this->civBonuses[69] = {596, 597};
-    this->civBonuses[70] = {607};
-    this->civBonuses[71] = {587, 588, 589};
-    this->civBonuses[72] = {590};
-    this->civBonuses[73] = {595};
-    this->civBonuses[74] = {591, 592, 593};
-    this->civBonuses[75] = {594};
-    this->civBonuses[76] = {584};
-    this->civBonuses[77] = {585};
-    this->civBonuses[78] = {586, 613};
-    this->civBonuses[79] = {672};
-    this->civBonuses[80] = {657};
-    this->civBonuses[81] = {638};
-    this->civBonuses[82] = {634};
-    this->civBonuses[83] = {662, 663};
-    this->civBonuses[84] = {635, 637};
-    this->civBonuses[85] = {901};
-    this->civBonuses[86] = {645};
-    this->civBonuses[87] = {646, 647, 648};
-    this->civBonuses[88] = {649};
-    this->civBonuses[89] = {665};
-    this->civBonuses[90] = {632};
-    this->civBonuses[91] = {693};
-    this->civBonuses[92] = {694};
-    this->civBonuses[93] = {695};
-    this->civBonuses[94] = {704};
-    this->civBonuses[95] = {696};
-    this->civBonuses[96] = {698};
-    this->civBonuses[97] = {711, 727, 728};
-    this->civBonuses[98] = {709, 723, 724};
-    this->civBonuses[99] = {295, 705, 706};
-    this->civBonuses[100] = {697};
-    this->civBonuses[101] = {710};
-    this->civBonuses[102] = {699, 700, 701, 702};
-    this->civBonuses[103] = {768}; // Cavalier upgrade available in Castle Age
-    this->civBonuses[104] = {769}; // Gunpowder units +25% attack
-    this->civBonuses[105] = {758, 759, 760, 761, 762, 763, 764, 765, 766, 767}; // Economic upgrades cost -33% food and available one age earlier
-    this->civBonuses[106] = {770}; 
-    this->civBonuses[107] = {771};
-    this->civBonuses[108] = {772, 773, 774, 815, 816, 817};
-    this->civBonuses[109] = {775};
+    this->civBonuses[CIV_BONUS_0_TOWN_CENTERS_COST_50_WOOD_STARTING_IN] = {381};
+    this->civBonuses[CIV_BONUS_1_FOOT_ARCHERS_EXCEPT_SKIRMISHERS_1_RANGE_IN] = {382, 403};
+    this->civBonuses[CIV_BONUS_2_SHEPHERDS_WORK_25_FASTER] = {383};
+    this->civBonuses[CIV_BONUS_3_CASTLES_COST_15_IN_CASTLE_25_IN_IMPERIAL_AGE] = {325, 330};
+    this->civBonuses[CIV_BONUS_4_MOUNTED_UNITS_20_HIT_POINTS_STARTING_IN_FEUDAL_AGE] = {290};
+    this->civBonuses[CIV_BONUS_5_FORAGERS_WORK_10_FASTER] = {524};
+    this->civBonuses[CIV_BONUS_6_LOOM_CAN_BE_RESEARCHED_INSTANTLY] = {343};
+    this->civBonuses[CIV_BONUS_7_VILLAGERS_5_ATTACK_VS_WILD_BOAR_HUNTERS] = {402};
+    this->civBonuses[CIV_BONUS_8_10_POPULATION_IN_IMPERIAL_AGE] = {406};
+    this->civBonuses[CIV_BONUS_9_INFANTRY_1_ATTACK_VS_BUILDINGS_PER_AGE] = {327, 328, 329};
+    this->civBonuses[CIV_BONUS_10_INFANTRY_COST_15_IN_DARK_20_IN] = {344, 731, 732, 733};
+    this->civBonuses[CIV_BONUS_11_MONKS_DOUBLE_HEALING_RANGE] = {347};
+    this->civBonuses[CIV_BONUS_12_TOWERS_GARRISON_2X_UNITS_TOWN_CENTERS_GARRISON_10] = {336, 353};
+    this->civBonuses[CIV_BONUS_13_FARMS_COST_40] = {314};
+    this->civBonuses[CIV_BONUS_14_BARRACKS_AND_STABLE_UNITS_1_ARMOR_IN] = {334, 335};
+    this->civBonuses[CIV_BONUS_15_ECONOMIC_DROP_OFF_BUILDINGS_COST_50] = {340};
+    this->civBonuses[CIV_BONUS_16_FISHING_SHIPS_2X_HIT_POINTS_2P_ARMOR] = {306, 422, 423, 424};
+    this->civBonuses[CIV_BONUS_17_INFANTRY_ATTACK_33_FASTER_STARTING_IN_FEUDAL_AGE] = {341};
+    this->civBonuses[CIV_BONUS_18_START_WITH_3_VILLAGERS_50_WOOD_200] = {302, 226, 425};
+    this->civBonuses[CIV_BONUS_19_DEMOLITION_SHIPS_50_HIT_POINTS] = {396};
+    this->civBonuses[CIV_BONUS_20_TECHNOLOGIES_COST_5_FEUDAL_10_CASTLE_15] = {304, 350, 351, 352};
+    this->civBonuses[CIV_BONUS_21_BUILDINGS_10_HP_DARK_20_FEUDAL_30] = {283, 417, 418, 419};
+    this->civBonuses[CIV_BONUS_22_FIRE_SHIPS_ATTACK_25_FASTER] = {397};
+    this->civBonuses[CIV_BONUS_23_CAMEL_RIDERS_SKIRMISHERS_PIKEMEN_HALBERDIERS_COST_25] = {284};
+    this->civBonuses[CIV_BONUS_24_START_WITH_50_WOOD_FOOD] = {223};
+    this->civBonuses[CIV_BONUS_25_TOWN_CENTER_DOCK_2X_HIT_POINTS] = {342};
+    this->civBonuses[CIV_BONUS_26_TOWN_CENTER_DOCK_WORK_RATE_5_DARK] = {409, 412};
+    this->civBonuses[CIV_BONUS_27_MARKET_COSTS_100_WOOD_MARKET_TRADE_COST_ONLY_5] = {355};
+    this->civBonuses[CIV_BONUS_28_TRANSPORT_SHIPS_2X_HIT_POINTS_20_CARRY_CAPACITY] = {337};
+    this->civBonuses[CIV_BONUS_29_GALLEYS_ATTACK_25_FASTER] = {404};
+    this->civBonuses[CIV_BONUS_30_CAMEL_UNITS_25_HIT_POINTS] = {312};
+    this->civBonuses[CIV_BONUS_31_GUNPOWDER_UNITS_25_HIT_POINTS] = {301};
+    this->civBonuses[CIV_BONUS_32_GOLD_MINERS_WORK_20_FASTER] = {300};
+    this->civBonuses[CIV_BONUS_33_SCOUT_CAVALRY_LIGHT_CAVALRY_HUSSAR_1_PIERCE_ARMOR] = {452};
+    this->civBonuses[CIV_BONUS_34_WARSHIPS_COST_15_FEUDAL_AGE_15_CASTLE] = {395, 501, 502};
+    this->civBonuses[CIV_BONUS_35_INFANTRY_20_HIT_POINTS_STARTING_IN_FEUDAL_AGE] = {416, 415, 391};
+    this->civBonuses[CIV_BONUS_36_CAVALRY_ARCHERS_FIRE_25_FASTER] = {394};
+    this->civBonuses[CIV_BONUS_37_HUNTERS_WORK_40_FASTER] = {389};
+    this->civBonuses[CIV_BONUS_38_LIGHT_CAVALRY_HUSSARS_STEPPE_LANCERS_20_30] = {286, 287, 288, 388};
+    this->civBonuses[CIV_BONUS_39_INFANTRY_MOVES_5_10_15_20_FASTER] = {393, 898, 899, 900};
+    this->civBonuses[CIV_BONUS_40_LUMBERJACKS_WORK_15_FASTER] = {385};
+    this->civBonuses[CIV_BONUS_41_SIEGE_UNITS_FIRE_25_FASTER] = {386};
+    this->civBonuses[CIV_BONUS_42_CAN_STEAL_SHEEP_AND_SHEEP_WITHIN_ONE] = {405};
+    this->civBonuses[CIV_BONUS_43_MISSIONARIES_CAN_BE_TRAINED_IN_MONASTERIES] = {84};
+    this->civBonuses[CIV_BONUS_44_START_WITH_50_GOLD] = {224};
+    this->civBonuses[CIV_BONUS_45_5_MONK_HIT_POINTS_FOR_EACH_MONASTERY_TECHNOLOGY] = {29, 30, 31, 32, 33, 36, 38, 40, 41, 66, 456};
+    this->civBonuses[CIV_BONUS_46_START_WITH_1_VILLAGER_BUT_50_FOOD] = {554, 227};
+    this->civBonuses[CIV_BONUS_47_CAVALRY_ARCHERS_COST_10_CASTLE_20_IMPERIAL_AGE] = {458, 459};
+    this->civBonuses[CIV_BONUS_48_RANGED_SOLDIERS_AND_INFANTRY_COST_50_WOOD] = {390};
+    this->civBonuses[CIV_BONUS_49_ARCHER_ARMOR_UPGRADES_FREE] = {451};
+    this->civBonuses[CIV_BONUS_50_CAN_TRAIN_TURTLE_SHIPS_IN_DOCKS] = {447, 448};
+    this->civBonuses[CIV_BONUS_51_CAN_RECRUIT_LONGBOATS_FROM_DOCKS] = {272, 372};
+    this->civBonuses[CIV_BONUS_52_GUNPOWDER_UNITS_COST_20] = {500};
+    this->civBonuses[CIV_BONUS_53_CAN_UPGRADE_HEAVY_CAMEL_RIDERS_TO_IMPERIAL] = {521};
+    this->civBonuses[CIV_BONUS_54_FISHERMEN_WORK_10_FASTER] = {469};
+    this->civBonuses[CIV_BONUS_55_STABLE_UNITS_1P_ARMOR_IN_CASTLE_AND] = {338, 552};
+    this->civBonuses[CIV_BONUS_56_VILLAGERS_COST_8_DARK_13_FEUDAL_18] = {496, 497, 498, 553};
+    this->civBonuses[CIV_BONUS_57_MILITARY_UNITS_COST_10_15_20_25] = {152, 153, 154, 155};
+    this->civBonuses[CIV_BONUS_58_BUILDINGS_COST_15_STONE] = {519};
+    this->civBonuses[CIV_BONUS_59_HOUSES_SUPPORT_10_POPULATION] = {495};
+    this->civBonuses[CIV_BONUS_60_VILLAGERS_AFFECTED_BY_BLACKSMITH_UPGRADES_STARTING_IN] = {474, 475, 476, 477, 478, 479};
+    this->civBonuses[CIV_BONUS_61_CAN_RECRUIT_SLINGERS_FROM_ARCHERY_RANGES] = {528};
+    this->civBonuses[CIV_BONUS_62_VILLAGERS_KILL_WOLVES_WITH_1_STRIKE] = {69};
+    this->civBonuses[CIV_BONUS_63_SCOUT_CAVALRY_LIGHT_CAVALRY_HUSSAR_COST_15] = {473};
+    this->civBonuses[CIV_BONUS_64_SIEGE_WORKSHOP_UNITS_15_CHEAPER] = {511};
+    this->civBonuses[CIV_BONUS_65_ALL_UNITS_COST_20_GOLD] = {559};
+    this->civBonuses[CIV_BONUS_66_FORAGERS_GENERATE_A_TRICKLE_OF_WOOD_33] = {453};
+    this->civBonuses[CIV_BONUS_67_SHIPS_10_HP] = {560};
+    this->civBonuses[CIV_BONUS_68_CAN_BUILD_FEITORIA_IN_IMPERIAL_AGE] = {570};
+    this->civBonuses[CIV_BONUS_69_CAN_BUILD_CARAVELS_IN_DOCKS] = {596, 597};
+    this->civBonuses[CIV_BONUS_70_FOOT_ARCHERS_FIRE_18_FASTER] = {607};
+    this->civBonuses[CIV_BONUS_71_RECEIVE_100_GOLD_100_FOOD_WHEN_ADVANCING] = {587, 588, 589};
+    this->civBonuses[CIV_BONUS_72_PIKEMAN_UPGRADE_FREE] = {590};
+    this->civBonuses[CIV_BONUS_73_BUILDINGS_COST_15_WOOD] = {595};
+    this->civBonuses[CIV_BONUS_74_BARRACKS_UNITS_1_PIERCE_ARMOR_PER_AGE] = {591, 592, 593};
+    this->civBonuses[CIV_BONUS_75_VILLAGERS_DROP_OFF_10_MORE_GOLD] = {594};
+    this->civBonuses[CIV_BONUS_76_VILLAGERS_MOVE_5_FASTER_IN_DARK_AGE] = {584};
+    this->civBonuses[CIV_BONUS_77_SHIPS_MOVE_10_FASTER] = {585};
+    this->civBonuses[CIV_BONUS_78_STABLE_UNITS_COST_15_IN_CASTLE_20_IN_IMPERIAL_AGE] = {586, 613};
+    this->civBonuses[CIV_BONUS_79_MELEE_ELEPHANT_UNITS_MOVE_10_FASTER] = {672};
+    this->civBonuses[CIV_BONUS_80_VILLAGERS_CAN_GARRISON_IN_HOUSES] = {657};
+    this->civBonuses[CIV_BONUS_81_NO_BUILDINGS_REQUIRED_TO_ADVANCE_TO_THE] = {638};
+    this->civBonuses[CIV_BONUS_82_ADVANCE_TO_THE_NEXT_AGE_66_FASTER] = {634};
+    this->civBonuses[CIV_BONUS_83_ELEPHANT_UNITS_COST_25_CASTLE_35_IN_IMPERIAL_AGE] = {662, 663};
+    this->civBonuses[CIV_BONUS_84_FISH_TRAPS_COST_33_AND_PROVIDE_200_FOOD] = {635, 637};
+    this->civBonuses[CIV_BONUS_85_FOOT_ARCHERS_AND_CONDOTTIERI_1_MELEE_1] = {901};
+    this->civBonuses[CIV_BONUS_86_LUMBER_CAMP_UPGRADES_FREE] = {645};
+    this->civBonuses[CIV_BONUS_87_INFANTRY_1_ATTACK_PER_AGE_STARTING_IN] = {646, 647, 648};
+    this->civBonuses[CIV_BONUS_88_MONASTERY_TECHNOLOGIES_COST_50] = {649};
+    this->civBonuses[CIV_BONUS_89_ENEMY_POSITIONS_ARE_REVEALED_AT_THE_START] = {665};
+    this->civBonuses[CIV_BONUS_90_ARCHERY_RANGE_UNITS_AND_FIRE_LANCERS_20_HP] = {632};
+    this->civBonuses[CIV_BONUS_91_MILITIA_LINE_UPGRADES_FREE] = {693};
+    this->civBonuses[CIV_BONUS_92_TOWN_CENTERS_COST_50_STONE_STARTING_IN] = {694};
+    this->civBonuses[CIV_BONUS_93_CAN_BUILD_KREPOST] = {695};
+    this->civBonuses[CIV_BONUS_94_LIVESTOCK_ANIMALS_LAST_50_LONGER] = {704};
+    this->civBonuses[CIV_BONUS_95_UNITS_DEAL_25_DAMAGE_WHEN_FIGHTING_FROM] = {696};
+    this->civBonuses[CIV_BONUS_96_THUMB_RING_PARTHIAN_TACTICS_FREE] = {698};
+    this->civBonuses[CIV_BONUS_97_MOUNTED_UNITS_5_FASTER_EACH_AGE_STARTING] = {711, 727, 728};
+    this->civBonuses[CIV_BONUS_98_ADDITIONAL_TOWN_CENTER_CAN_BE_BUILT_IN] = {709, 723, 724};
+    this->civBonuses[CIV_BONUS_99_SIEGE_WORKSHOP_AND_BATTERING_RAM_AVAILABLE_IN] = {295, 705, 706};
+    this->civBonuses[CIV_BONUS_100_RECEIVE_100_FOOD_PER_TOWN_CENTER] = {697};
+    this->civBonuses[CIV_BONUS_101_SPEARMEN_AND_SKIRMISHERS_MOVE_10_FASTER] = {710};
+    this->civBonuses[CIV_BONUS_102_EACH_GARRISONED_RELIC_GIVES_1_ATTACK_TO] = {699, 700, 701, 702};
+    this->civBonuses[CIV_BONUS_103_CAVALIER_UPGRADE_AVAILABLE_IN_CASTLE_AGE] = {768};
+    this->civBonuses[CIV_BONUS_104_GUNPOWDER_UNITS_25_ATTACK] = {769};
+    this->civBonuses[CIV_BONUS_105_ECONOMIC_UPGRADES_COST_33_FOOD_AND_AVAILABLE] = {758, 759, 760, 761, 762, 763, 764, 765, 766, 767};
+    this->civBonuses[CIV_BONUS_106_FORTIFICATIONS_BUILT_50_TOWN_CENTERS_BUILT_100] = {770};
+    this->civBonuses[CIV_BONUS_107_SOLDIERS_RECEIVE_33_LESS_BONUS_DAMAGE] = {771};
+    this->civBonuses[CIV_BONUS_108_FARM_UPGRADES_PROVIDE_125_ADDITIONAL_FOOD] = {772, 773, 774, 815, 816, 817};
+    this->civBonuses[CIV_BONUS_109_CAN_BUILD_DONJON] = {775};
 
     this->teamBonuses[0] = 488;
     this->teamBonuses[1] = 38;
@@ -1081,7 +1081,7 @@ void Civbuilder::setupData() {
     donjonUnitTech.EffectID = (df->Effects.size() - 1);
     setResearchLocation(donjonUnitTech, -1, 0, 0);
     df->Techs.push_back(donjonUnitTech);
-    this->civBonuses[109].push_back((int)(df->Techs.size() - 1));
+    this->civBonuses[CIV_BONUS_109_CAN_BUILD_DONJON].push_back((int)(df->Techs.size() - 1));
 
     // Recreate old Indian bonus
     Tech stable_armor_castle = Tech();
@@ -2741,7 +2741,7 @@ void Civbuilder::createCivBonuses() {
     t.Civ = 99;
     t.EffectID = (this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
-    this->civBonuses[308] = {(int)(this->df->Techs.size() - 1)};
+    this->civBonuses[CIV_BONUS_308_CAN_UPGRADE_HEAVY_SCORPIONS_TO_IMPERIAL_SCORPIONS] = {(int)(this->df->Techs.size() - 1)};
 
     // Royal Battle Elephant
     e.EffectCommands.clear();
@@ -2769,7 +2769,7 @@ void Civbuilder::createCivBonuses() {
     setResearchLocation(t, 101, 200, 9);
     t.EffectID = (this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
-    this->civBonuses[309] = {(int)(this->df->Techs.size() - 1)};
+    this->civBonuses[CIV_BONUS_309_CAN_UPGRADE_ELITE_BATTLE_ELEPHANTS_TO_ROYAL] = {(int)(this->df->Techs.size() - 1)};
     int royalElephantTech = (int)(this->df->Techs.size() - 1);
 
     // Royal Lancer
@@ -2798,7 +2798,7 @@ void Civbuilder::createCivBonuses() {
     t.Civ = 99;
     t.EffectID = (this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
-    this->civBonuses[310] = {(int)(this->df->Techs.size() - 1)};
+    this->civBonuses[CIV_BONUS_310_CAN_UPGRADE_ELITE_STEPPE_LANCERS_TO_ROYAL_LANCERS] = {(int)(this->df->Techs.size() - 1)};
     int royalLancerTech = (int)(this->df->Techs.size() - 1);
 
     // Create civ bonuses that are just a list of free techs
@@ -2935,10 +2935,10 @@ void Civbuilder::createCivBonuses() {
     t.Civ = 99;
     t.EffectID = (this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
-    this->civBonuses[133] = {(int)(this->df->Techs.size() - 1), 53, 56};
+    this->civBonuses[CIV_BONUS_133_FOOT_ARCHERS_AND_SKIRMISHERS_COST_10_FEUDAL] = {(int)(this->df->Techs.size() - 1), 53, 56};
 
     // Lumberjack food trickle
-    this->civBonuses[134] = {1071};
+    this->civBonuses[CIV_BONUS_134_LUMBERJACKS_GENERATE_FOOD_IN_ADDITION_TO_WOOD] = {1071};
 
     // Fast stoners
     e.EffectCommands.clear();
@@ -2963,10 +2963,10 @@ void Civbuilder::createCivBonuses() {
     this->createCivBonus(138, e, "C-Bonus, -50% cost stable techs");
 
     // Spawn sheep from TCs
-    this->civBonuses[139] = {299, 303, 305, 310};
+    this->civBonuses[CIV_BONUS_139_NEW_TOWN_CENTERS_SPAWN_2_SHEEP_STARTING] = {299, 303, 305, 310};
 
     // Wonders provide +50 bonus pop space
-    this->civBonuses[140] = {};
+    this->civBonuses[CIV_BONUS_140_WONDERS_DON_T_COST_WOOD_AND_PROVIDE] = {};
 
     //+3 HP on villagers per economic tech
     e.EffectCommands.clear();
@@ -2976,7 +2976,7 @@ void Civbuilder::createCivBonuses() {
     }
 
     // Villagers regenerate slowly
-    this->civBonuses[142] = {792, 809, 810, 811};
+    this->civBonuses[CIV_BONUS_142_VILLAGERS_REGENERATE_10_HP_MIN_IN_FEUDAL] = {792, 809, 810, 811};
 
     // Military buildings build 100% faster
     e.EffectCommands.clear();
@@ -3012,7 +3012,7 @@ void Civbuilder::createCivBonuses() {
 
     int dragonShipTech = (int)(this->df->Techs.size() - 1);
 
-    this->civBonuses[362] = {dragonShipTech, 1010};
+    this->civBonuses[CIV_BONUS_362_BONUS_362] = {dragonShipTech, 1010};
 
     // More free techs
     const vector<vector<int>> freeTechs2 = {
@@ -3081,7 +3081,7 @@ void Civbuilder::createCivBonuses() {
     this->createCivBonus(174, e, "C-Bonus, +150 wood", {639, 307});
 
     // Start with +100 stone
-    this->civBonuses[175] = {228};
+    this->civBonuses[CIV_BONUS_175_START_WITH_100_STONE] = {228};
 
     // Start with +50 wood, +50 stone
     e.EffectCommands.clear();
@@ -3183,10 +3183,10 @@ void Civbuilder::createCivBonuses() {
     this->createCivBonus(191, e, "C-Bonus, Explosive units 2x HP");
 
     // Town Center spawns a married couple every age
-    this->civBonuses[192] = {847, 848, 849};
+    this->civBonuses[CIV_BONUS_192_TOWN_CENTERS_SPAWN_2_VILLAGERS_WHEN_THE] = {847, 848, 849};
 
     // Can recruit warrior priests
-    this->civBonuses[193] = {948};
+    this->civBonuses[CIV_BONUS_193_CAN_RECRUIT_WARRIOR_PRIESTS] = {948};
 
     // Castles and Kreposts +2000 HP
     e.EffectCommands.clear();
@@ -3276,7 +3276,7 @@ void Civbuilder::createCivBonuses() {
     }
 
     // Fishermen and fishing ships carry +15 food
-    this->civBonuses[204] = {844};
+    this->civBonuses[CIV_BONUS_204_FISHERMEN_AND_FISHING_SHIPS_CARRY_15] = {844};
 
     // Galleys +1 attack
     e.EffectCommands.clear();
@@ -3312,7 +3312,7 @@ void Civbuilder::createCivBonuses() {
     t.Civ = 99;
     df->Techs.push_back(t);
     df->Techs[189].RequiredTechs[1] = (int)(df->Techs.size() - 1);
-    this->civBonuses[209] = {(int)(df->Techs.size() - 1)};
+    this->civBonuses[CIV_BONUS_209_STONE_WALLS_AVAILABLE_IN_DARK_AGE] = {(int)(df->Techs.size() - 1)};
 
     //+50 every resource per advance
     e.EffectCommands.clear();
@@ -3324,7 +3324,7 @@ void Civbuilder::createCivBonuses() {
     }
 
     // Villagers return 25 food upon death
-    this->civBonuses[211] = {};
+    this->civBonuses[CIV_BONUS_211_VILLAGERS_RETURN_25_FOOD_ON_DEATH] = {};
 
     // Camel units attack 20% faster
     e.EffectCommands.clear();
@@ -3365,7 +3365,7 @@ void Civbuilder::createCivBonuses() {
     this->createCivBonus(217, e, "C-Bonus, Gunpowder +20% speed");
 
     // Castles refund 350 stone
-    this->civBonuses[218] = {};
+    this->civBonuses[CIV_BONUS_218_COMPLETED_CASTLES_PROVIDE_400_GOLD_AS_LONG] = {};
 
     // Monk units 20% faster
     e.EffectCommands.clear();
@@ -3375,7 +3375,7 @@ void Civbuilder::createCivBonuses() {
     this->createCivBonus(219, e, "C-Bonus, Monks +20% speed");
 
     // Melee cavalry +2 vs skirmishers
-    this->civBonuses[220] = {877};
+    this->civBonuses[CIV_BONUS_220_MELEE_CAVALRY_GAIN_2_BONUS_DAMAGE_VS_SKIRMISHERS] = {877};
 
     // Pasture upgrades earlier
     this->df->Techs[1014].RequiredTechs.push_back(758);
@@ -3389,7 +3389,7 @@ void Civbuilder::createCivBonuses() {
     setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
     this->df->Techs[1013].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
-    this->civBonuses[105].push_back((int)(this->df->Techs.size() - 1));
+    this->civBonuses[CIV_BONUS_105_ECONOMIC_UPGRADES_COST_33_FOOD_AND_AVAILABLE].push_back((int)(this->df->Techs.size() - 1));
 
     t = Tech();
     t.Name = "Transhumance requirement";
@@ -3400,7 +3400,7 @@ void Civbuilder::createCivBonuses() {
     setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
     this->df->Techs[1012].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
-    this->civBonuses[105].push_back((int)(this->df->Techs.size() - 1));
+    this->civBonuses[CIV_BONUS_105_ECONOMIC_UPGRADES_COST_33_FOOD_AND_AVAILABLE].push_back((int)(this->df->Techs.size() - 1));
 
     // Barracks upgrades earlier
     vector<int> techIDs = {950, 951, 952, 953, 954, 955, 956};
@@ -3427,7 +3427,7 @@ void Civbuilder::createCivBonuses() {
     this->df->Techs[434].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
     techIDs.push_back((int)(this->df->Techs.size() - 1));
 
-    this->civBonuses[221] = techIDs;
+    this->civBonuses[CIV_BONUS_221_SPEARMAN_AND_MILITIA_LINE_UPGRADES_EXCEPT_MAN] = techIDs;
 
     // Cows from mills
     e.EffectCommands.clear();
@@ -3452,7 +3452,7 @@ void Civbuilder::createCivBonuses() {
     this->createCivBonus(225, e, "C-Bonus, Siege Towers train 100% faster");
 
     // Siege units cost -33% wood
-    this->civBonuses[226] = {876};
+    this->civBonuses[CIV_BONUS_226_SIEGE_UNITS_COST_33_WOOD] = {876};
 
     // Cannon galleons get ballistics
     e.EffectCommands.clear();
@@ -3466,7 +3466,7 @@ void Civbuilder::createCivBonuses() {
     this->createCivBonus(228, e, "C-Bonus, Warships +attack vs vils");
 
     // Rams generate stone when fighting
-    this->civBonuses[229] = {}; // empty because its done in `assignCivBonuses` special handling
+    this->civBonuses[CIV_BONUS_229_RAMS_GENERATE_STONE_BY_RAMMING] = {}; // empty because its done in `assignCivBonuses` special handling
 
     // TCs +50% work rate in Imperial
     e.EffectCommands.clear();
@@ -3548,7 +3548,7 @@ void Civbuilder::createCivBonuses() {
     t.Name = "City Walls Requirement";
     t.Civ = 99;
     this->df->Techs.push_back(t);
-    this->civBonuses[239] = {(int)(df->Techs.size() - 1)};
+    this->civBonuses[CIV_BONUS_239_CAN_UPGRADE_FORTIFIED_WALLS_TO_CITY_WALLS] = {(int)(df->Techs.size() - 1)};
 
     t = Tech();
     t.Name = "City Walls";
@@ -3636,7 +3636,7 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechCount = 1;
     df->Techs.push_back(t);
     df->Techs[436].RequiredTechs[1] = (int)(df->Techs.size() - 1);
-    this->civBonuses[247] = {(int)(df->Techs.size() - 1)};
+    this->civBonuses[CIV_BONUS_247_PARTHIAN_TACTICS_AVAILABLE_IN_CASTLE_AGE] = {(int)(df->Techs.size() - 1)};
 
     // Castle Age cost -25%
     e.EffectCommands.clear();
@@ -3722,7 +3722,7 @@ void Civbuilder::createCivBonuses() {
     this->createCivBonus(256, e, "C-Bonus, scouts bonus vs stone");
 
     // Villagers work 5% faster
-    this->civBonuses[257] = {887};
+    this->civBonuses[CIV_BONUS_257_ALL_VILLAGERS_WORK_5_FASTER] = {887};
 
     // Villagers +1 carry capacity per TC tech
     e.EffectCommands.clear();
@@ -3849,7 +3849,7 @@ void Civbuilder::createCivBonuses() {
     df->Techs.push_back(t);
     df->Techs[135].RequiredTechs[5] = (int)(df->Techs.size() - 1);
     techIDs.push_back((int)(df->Techs.size() - 1));
-    this->civBonuses[270] = techIDs;
+    this->civBonuses[CIV_BONUS_270_CAN_BUILD_MONASTERY_IN_FEUDAL_AGE_MONKS] = techIDs;
 
     // Scorpions and ballistas produced 50% faster
     e.EffectCommands.clear();
@@ -3944,34 +3944,34 @@ void Civbuilder::createCivBonuses() {
 
     // Folwark replaces Mill
     // Note: Sicilian farm bonus doesn't compound with Folwark
-    this->civBonuses[280] = {793, 794, 795, 796, 797, 798, 799, 818, 819, 820, 821};
+    this->civBonuses[CIV_BONUS_280_FOLWARK_REPLACES_MILL] = {793, 794, 795, 796, 797, 798, 799, 818, 819, 820, 821};
 
     // Stone miners generate gold
-    this->civBonuses[281] = {805, 806, 807};
+    this->civBonuses[CIV_BONUS_281_STONE_MINERS_GENERATE_GOLD_IN_ADDITION_TO_STONE] = {805, 806, 807};
 
     // Winged Hussar replaces Hussar
-    this->civBonuses[282] = {789, 791};
+    this->civBonuses[CIV_BONUS_282_WINGED_HUSSAR_REPLACES_HUSSAR] = {789, 791};
 
     // Chemistry in Castle Age
-    this->civBonuses[283] = {800, 801};
+    this->civBonuses[CIV_BONUS_283_CHEMISTRY_AND_HAND_CANNONEER_AVAILABLE_IN_CASTLE] = {800, 801};
 
     // Spearman-line deals +25% bonus damage
-    this->civBonuses[284] = {802};
+    this->civBonuses[CIV_BONUS_284_SPEARMEN_DEALS_25_BONUS_DAMAGE] = {802};
 
     // Fervor and Sanctity affects villagers
-    this->civBonuses[285] = {803, 804};
+    this->civBonuses[CIV_BONUS_285_FERVOR_AND_SANCTITY_AFFECTS_VILLAGERS] = {803, 804};
 
     // Houfnice
-    this->civBonuses[286] = {787};
+    this->civBonuses[CIV_BONUS_286_CAN_UPGRADE_BOMBARD_CANNONS_TO_HOUFNICE] = {787};
 
     // Caravanserai
-    this->civBonuses[287] = {518};
+    this->civBonuses[CIV_BONUS_287_CAN_BUILD_CARAVANSERI_IN_IMPERIAL_AGE] = {518};
 
     // Gunpowder units +1/+1P
-    this->civBonuses[288] = {520};
+    this->civBonuses[CIV_BONUS_288_GUNPOWDER_UNITS_1_1P_ARMOR] = {520};
 
     //+200w per age
-    this->civBonuses[289] = {851, 852, 853};
+    this->civBonuses[CIV_BONUS_289_RECEIVE_200_WOOD_WHEN_ADVANCING_TO_THE_NEXT_AGE] = {851, 852, 853};
 
     // Barracks techs cost -50%
     e.EffectCommands.clear();
@@ -3983,40 +3983,40 @@ void Civbuilder::createCivBonuses() {
     t.EffectID = (this->df->Effects.size() - 1);
     t.Civ = 99;
     this->df->Techs.push_back(t);
-    this->civBonuses[290] = {(int)(this->df->Techs.size() - 1)};
+    this->civBonuses[CIV_BONUS_290_BARRACKS_TECHNOLOGIES_COST_50] = {(int)(this->df->Techs.size() - 1)};
 
     // Skirmishers and elephant archers attack 25% faster
-    this->civBonuses[291] = {845};
+    this->civBonuses[CIV_BONUS_291_SKIRMISHERS_AND_ELEPHANT_ARCHERS_ATTACK_25_FASTER] = {845};
 
     // Elephant units -25% bonus damage and conversion resist
-    this->civBonuses[292] = {846};
+    this->civBonuses[CIV_BONUS_292_ELEPHANT_UNITS_RECEIVE_25_LESS_BONUS_DAMAGE] = {846};
 
     // Ships regenerate
-    this->civBonuses[293] = {850};
+    this->civBonuses[CIV_BONUS_293_SHIPS_REGENERATE_15_HP_PER_MINUTE] = {850};
 
     // Start with 2 forage bushes
-    this->civBonuses[294] = {857};
+    this->civBonuses[CIV_BONUS_294_START_WITH_2_FORAGE_BUSHES] = {857};
 
     // Livestock garrison mills
-    this->civBonuses[295] = {856};
+    this->civBonuses[CIV_BONUS_295_CAN_GARRISON_MILLS_WITH_LIVESTOCK_TO_PRODUCE_FOOD] = {856};
 
     // Mounted units +20/30/40% damage
-    this->civBonuses[296] = {854, 859, 874};
+    this->civBonuses[CIV_BONUS_296_MOUNTED_UNITS_DEAL_20_BONUS_DAMAGE_FEUDAL] = {854, 859, 874};
 
     // Garrison fishing ships
-    this->civBonuses[297] = {855};
+    this->civBonuses[CIV_BONUS_297_CAN_GARRISON_DOCKS_WITH_FISHING_SHIPS] = {855};
 
     // Thirisadai
-    this->civBonuses[298] = {841};
+    this->civBonuses[CIV_BONUS_298_CAN_TRAIN_THIRISADAI_IN_DOCKS] = {841};
 
     // Shrivamsha
-    this->civBonuses[299] = {842, 843};
+    this->civBonuses[CIV_BONUS_299_CAN_RECRUIT_SHRIVAMSHA_RIDERS] = {842, 843};
 
     // Camel Scouts
-    this->civBonuses[300] = {235, 860, 858};
+    this->civBonuses[CIV_BONUS_300_CAN_RECRUIT_CAMEL_SCOUTS_IN_FEUDAL_AGE] = {235, 860, 858};
 
     //+20g per tech
-    this->civBonuses[301] = {186, 323, 324, 326};
+    this->civBonuses[CIV_BONUS_301_GAIN_20_GOLD_FOR_EACH_TECHNOLOGY_RESEARCHED] = {186, 323, 324, 326};
 
     // Galleys and Dromons armor
     e.EffectCommands.clear();
@@ -4029,59 +4029,59 @@ void Civbuilder::createCivBonuses() {
     this->createCivBonus(302, e, "C-Bonus, Navy armor");
 
     // Battle Elephants +1/+1P armor
-    this->civBonuses[303] = {640};
+    this->civBonuses[CIV_BONUS_303_ELEPHANT_UNITS_1_1P_ARMOR] = {640};
 
     // Monks +3/+3P armor
-    this->civBonuses[304] = {870};
+    this->civBonuses[CIV_BONUS_304_MONK_UNITS_3_3P_ARMOR] = {870};
 
     // Blacksmith double effect
-    this->civBonuses[305] = {889, 890, 891};
+    this->civBonuses[CIV_BONUS_305_INFANTRY_RECEIVES_DOUBLE_EFFECT_FROM_BLACKSMITH_ARMOR] = {889, 890, 891};
 
     // Scorpions cheap and ballistics
-    this->civBonuses[306] = {892, 893};
+    this->civBonuses[CIV_BONUS_306_SCORPIONS_COST_60_GOLD_AND_BENEFIT_FROM] = {892, 893};
 
     // Legionary
-    this->civBonuses[307] = {885, 895};
+    this->civBonuses[CIV_BONUS_307_LEGIONARY_REPLACES_TWO_HANDED_SWORDSMAN_CHAMPION] = {885, 895};
 
     // Cavalry Archers +2 attack vs archers
-    this->civBonuses[311] = {190};
+    this->civBonuses[CIV_BONUS_311_CAVALRY_ARCHERS_2_ATTACK_VS_ARCHERS_EXCEPT] = {190};
 
     // Eco buildings cheaper + effectiveness
-    this->civBonuses[312] = {958, 960, 961, 962, 963, 964, 965, 966};
+    this->civBonuses[CIV_BONUS_312_WOOD_AND_MINING_UPGRADES_ARE_40_MORE] = {958, 960, 961, 962, 963, 964, 965, 966};
     this->df->Effects[953].EffectCommands.clear();
     for (int i = 0; i < ecoBuildings.size(); i++) {
         this->df->Effects[953].EffectCommands.push_back(createEC(5, ecoBuildings[i], -1, 100, 0.75));
     }
 
     // Free relic
-    this->civBonuses[313] = {949, 957};
+    this->civBonuses[CIV_BONUS_313_FIRST_RELIGIOUS_BUILDING_RECEIVES_A_FREE_RELIC] = {949, 957};
 
     // Savar
-    this->civBonuses[314] = {526, 527};
+    this->civBonuses[CIV_BONUS_314_SAVAR_REPLACES_PALADIN] = {526, 527};
 
     // Extra warship missile
-    this->civBonuses[315] = {959};
+    this->civBonuses[CIV_BONUS_315_GALLEY_LINE_AND_DROMONS_FIRE_AN_ADDITIONAL] = {959};
 
     // Fortified church
-    this->civBonuses[316] = {930};
+    this->civBonuses[CIV_BONUS_316_FORTIFIED_CHURCH_REPLACES_MONASTERY] = {930};
 
     // Mule carts
-    this->civBonuses[317] = {932};
+    this->civBonuses[CIV_BONUS_317_MULE_CARTS_REPLACE_LUMBER_CAMPS_AND_MINING_CAMPS] = {932};
 
     // Start with mule cart
-    this->civBonuses[318] = {229, 925};
+    this->civBonuses[CIV_BONUS_318_START_WITH_A_MULE_CART] = {229, 925};
 
     // Church work bonus area
-    this->civBonuses[319] = {934};
+    this->civBonuses[CIV_BONUS_319_RELIGIOUS_BUILDINGS_PROVIDE_VILLAGERS_IN_AN_8] = {934};
 
     // Less bonus damage from higher elevation
-    this->civBonuses[320] = {926};
+    this->civBonuses[CIV_BONUS_320_UNITS_AND_BUILDINGS_RECEIVE_15_DAMAGE_WHEN] = {926};
 
     // Cavalry regen
-    this->civBonuses[321] = {937, 938, 939};
+    this->civBonuses[CIV_BONUS_321_MOUNTED_UNITS_REGENERATE_2_8_14_HP] = {937, 938, 939};
 
     // Flaming camel bonus
-    this->civBonuses[322] = {703};
+    this->civBonuses[CIV_BONUS_322_FLAMING_CAMELS_AVAILABLE_IN_SIEGE_WORKSHOPS_IN] = {703};
 
     // Refund stone
     e.EffectCommands.clear();
@@ -4124,7 +4124,7 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechs.push_back(39);
     t.EffectID = (int)(this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
-    this->civBonuses[325] = {(int)(this->df->Techs.size() - 1)};
+    this->civBonuses[CIV_BONUS_325_HUSBANDRY_AFFECTS_ATTACK_SPEED] = {(int)(this->df->Techs.size() - 1)};
 
     // Trade yields stone
     e.EffectCommands.clear();
@@ -4381,7 +4381,7 @@ void Civbuilder::createCivBonuses() {
     this->df->Techs.push_back(t);
     techIDs.push_back((int)(this->df->Techs.size() - 1));
 
-    this->civBonuses[327] = techIDs;
+    this->civBonuses[CIV_BONUS_327_BLACKSMITH_UPGRADES_AFFECT_BONUS_DAMAGE] = techIDs;
 
     // Cav archers dodge
     e.EffectCommands.clear();
@@ -4401,7 +4401,7 @@ void Civbuilder::createCivBonuses() {
     this->df->Techs[216].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
     techIDs.push_back((int)(this->df->Techs.size() - 1));
 
-    this->civBonuses[329] = techIDs;
+    this->civBonuses[CIV_BONUS_329_FARMERS_DON_T_REQUIRE_MILLS_TOWN_CENTERS] = techIDs;
 
     // 2x2 farms
     e.EffectCommands.clear();
@@ -4424,7 +4424,7 @@ void Civbuilder::createCivBonuses() {
     t.EffectID = (this->df->Effects.size() - 1);
     t.Civ = 99;
     this->df->Techs.push_back(t);
-    this->civBonuses[290] = {(int)(this->df->Techs.size() - 1)};
+    this->civBonuses[CIV_BONUS_290_BARRACKS_TECHNOLOGIES_COST_50] = {(int)(this->df->Techs.size() - 1)};
 
     // Feudal Knights
     techIDs.clear();
@@ -4458,7 +4458,7 @@ void Civbuilder::createCivBonuses() {
     df->Techs.push_back(t);
     techIDs.push_back((int)(df->Techs.size() - 1));
 
-    this->civBonuses[332] = techIDs;
+    this->civBonuses[CIV_BONUS_332_KNIGHTS_AVAILABLE_IN_FEUDAL_AGE_WITH_30HP] = techIDs;
 
     // Siege Towers shoot bullets
     e.EffectCommands.clear();
@@ -4469,89 +4469,89 @@ void Civbuilder::createCivBonuses() {
     this->createCivBonus(333, e, "C-Bonus, siege towers fire arrows");
 
     // Fire lancers/ships move faster
-    this->civBonuses[334] = {983, 984};
+    this->civBonuses[CIV_BONUS_334_FIRE_LANCERS_AND_FIRE_SHIPS_MOVE_5] = {983, 984};
 
     // Archery Unit technologies at the Archery Range and Blacksmith cost -25%
-    this->civBonuses[335] = {1067};
+    this->civBonuses[CIV_BONUS_335_ARCHERY_UNIT_TECHNOLOGIES_AT_THE_ARCHERY_RANGE] = {1067};
 
     // Siege Weapons and Siege Warships move +10/15% faster in Castle/Imperial Age
-    this->civBonuses[336] = {1068, 1072};
+    this->civBonuses[CIV_BONUS_336_SIEGE_WEAPONS_AND_SIEGE_WARSHIPS_MOVE_10] = {1068, 1072};
 
     // War Chariots
-    this->civBonuses[337] = {1065};
+    this->civBonuses[CIV_BONUS_337_CAN_RECRUIT_WAR_CHARIOTS] = {1065};
 
     // Liu Bei
-    this->civBonuses[338] = {1066};
+    this->civBonuses[CIV_BONUS_338_GAIN_ACCESS_TO_LIU_BEI] = {1066};
 
     // Military production buildings and Docks provide +65 food
-    this->civBonuses[339] = {1084};
+    this->civBonuses[CIV_BONUS_339_MILITARY_PRODUCTION_BUILDINGS_AND_DOCKS_PROVIDE_65] = {1084};
 
     // Infantry regenerates 10/20/30 HP per minute in Feudal/Castle/Imperial Age
-    this->civBonuses[340] = {1085, 1086, 1087};
+    this->civBonuses[CIV_BONUS_340_INFANTRY_REGENERATES_10_20_30_HP_PER] = {1085, 1086, 1087};
 
     // Jian Swordsmen and Hei Guang Cavalry +2 attack in Imperial Age
-    this->civBonuses[341] = {1076};
+    this->civBonuses[CIV_BONUS_341_JIAN_SWORDSMEN_AND_HEI_GUANG_CAVALRY_2] = {1076};
 
     // Careening, Dry Dock available one age earlier, cost and research time -75%
-    this->civBonuses[342] = {1077, 1078, 1079};
+    this->civBonuses[CIV_BONUS_342_CAREENING_DRY_DOCK_AVAILABLE_ONE_AGE_EARLIER] = {1077, 1078, 1079};
 
     // Jian Swordsmen
-    this->civBonuses[343] = {1075};
+    this->civBonuses[CIV_BONUS_343_CAN_RECRUIT_JIAN_SWORDSMEN] = {1075};
 
     // Sun Jian
-    this->civBonuses[344] = {1083};
+    this->civBonuses[CIV_BONUS_344_GAIN_ACCESS_TO_SUN_JIAN] = {1083};
 
     // Receive one free Villager for each Mill, Lumber- and Mining Camp technology researched
-    this->civBonuses[345] = {1039, 1040, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048};
+    this->civBonuses[CIV_BONUS_345_RECEIVE_ONE_FREE_VILLAGER_FOR_EACH_MILL] = {1039, 1040, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048};
 
     // Hei Guang Cavalry and Xianbei Raider +15/30% HP in Castle/Imperial Age
-    this->civBonuses[346] = {1056, 1057, 1058, 1059};
+    this->civBonuses[CIV_BONUS_346_HEI_GUANG_CAVALRY_AND_XIANBEI_RAIDER_15] = {1056, 1057, 1058, 1059};
 
     // Trebuchet units cost -25%
-    this->civBonuses[347] = {1060};
+    this->civBonuses[CIV_BONUS_347_TRACTION_TREBUCHETS_AND_LOU_CHUANS_COST_25] = {1060};
 
     // Xianbei Raiders
-    this->civBonuses[348] = {1037};
+    this->civBonuses[CIV_BONUS_348_CAN_RECRUIT_XIANBEI_RAIDERS] = {1037};
 
     // Cao Cao
-    this->civBonuses[349] = {1038};
+    this->civBonuses[CIV_BONUS_349_GAIN_ACCESS_TO_CAO_CAO] = {1038};
 
     // Meat of hunted and livestock animals doesn't decay
-    this->civBonuses[350] = {993};
+    this->civBonuses[CIV_BONUS_350_MEAT_OF_HUNTED_AND_LIVESTOCK_ANIMALS_DOESN_T_DECAY] = {993};
 
     // Mounted units and Fire Lancers attack +20% faster starting in Feudal Age
-    this->civBonuses[351] = {994};
+    this->civBonuses[CIV_BONUS_351_MOUNTED_UNITS_AND_FIRE_LANCERS_ATTACK_20] = {994};
 
     // Siege Engineers available in Castle Age
-    this->civBonuses[352] = {978};
+    this->civBonuses[CIV_BONUS_352_SIEGE_ENGINEERS_AVAILABLE_IN_CASTLE_AGE] = {978};
 
     // Siege and Fortification upgrades cost -75% wood and research +100% faster
-    this->civBonuses[353] = {995};
+    this->civBonuses[CIV_BONUS_353_SIEGE_AND_FORTIFICATION_UPGRADES_COST_75_WOOD] = {995};
 
     // Units receive -50% friendly fire damage
-    this->civBonuses[354] = {1009};
+    this->civBonuses[CIV_BONUS_354_UNITS_RECEIVE_50_FRIENDLY_FIRE_DAMAGE] = {1009};
 
     // Grenadiers
-    this->civBonuses[355] = {992};
+    this->civBonuses[CIV_BONUS_355_CAN_RECRUIT_GRENADIERS] = {992};
 
     // Pastures
     this->df->Effects[1008].EffectCommands.push_back(createEC(102, -1, -1, -1, 216));
-    this->civBonuses[356] = {1008, 1012, 1013, 1014};
+    this->civBonuses[CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES] = {1008, 1012, 1013, 1014};
 
     // Shepherds and Herders generate +10% additional food
-    this->civBonuses[357] = {1003};
+    this->civBonuses[CIV_BONUS_357_SHEPHERDS_AND_HERDERS_GENERATE_10_ADDITIONAL_FOOD] = {1003};
 
     // Melee attack upgrade effects are doubled
-    this->civBonuses[358] = {998, 999, 1000};
+    this->civBonuses[CIV_BONUS_358_MELEE_ATTACK_UPGRADE_EFFECTS_ARE_DOUBLED] = {998, 999, 1000};
 
     // Skirmishers, Spearman- and Scout Cavalry-line train and upgrade +25% faster
-    this->civBonuses[359] = {1011};
+    this->civBonuses[CIV_BONUS_359_SKIRMISHERS_SPEARMAN_AND_SCOUT_CAVALRY_LINE_TRAIN] = {1011};
 
     // Heavy Cavalry Archer upgrade available in Castle Age and costs -50%
-    this->civBonuses[360] = {1004};
+    this->civBonuses[CIV_BONUS_360_HEAVY_CAVALRY_ARCHER_UPGRADE_AVAILABLE_IN_CASTLE] = {1004};
 
     // Mounted Trebuchets
-    this->civBonuses[361] = {1005};
+    this->civBonuses[CIV_BONUS_361_CAN_TRAIN_MOUNTED_TREBUCHETS] = {1005};
 
     // Make all the trickle bonuses work with each other
     // Stone to gold + roman villagers
@@ -4608,7 +4608,7 @@ void Civbuilder::createCivBonuses() {
     t = Tech();
     t.Name = "Stone mining C-Bonus gold generation increase";
     t.RequiredTechs.push_back(805);
-    t.RequiredTechs.push_back(this->civBonuses[135][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_135_STONE_MINERS_WORK_20_FASTER][0]);
     t.RequiredTechCount = 2;
     t.EffectID = (this->df->Effects.size() - 1);
     t.Civ = -1;
@@ -4760,7 +4760,7 @@ void Civbuilder::createCivBonuses() {
     t = Tech();
     t.Name = "Farming bonus gold generation increase";
     t.RequiredTechs.push_back(754);
-    t.RequiredTechs.push_back(this->civBonuses[120][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_120_FARMERS_WORK_15_FASTER][0]);
     t.RequiredTechCount = 2;
     t.EffectID = (this->df->Effects.size() - 1);
     t.Civ = -1;
@@ -4782,7 +4782,7 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Siege tower attack + fletching";
     t.Civ = -1;
     t.RequiredTechCount = 2;
-    t.RequiredTechs.push_back(this->civBonuses[333][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_333_SIEGE_TOWERS_CAN_FIRE_ARROWS][0]);
     t.RequiredTechs.push_back(199);
     t.EffectID = (int)(this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
@@ -4791,7 +4791,7 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Siege tower attack + bodkin arrow";
     t.Civ = -1;
     t.RequiredTechCount = 2;
-    t.RequiredTechs.push_back(this->civBonuses[333][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_333_SIEGE_TOWERS_CAN_FIRE_ARROWS][0]);
     t.RequiredTechs.push_back(200);
     t.EffectID = (int)(this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
@@ -4800,7 +4800,7 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Siege tower attack + bracer";
     t.Civ = -1;
     t.RequiredTechCount = 2;
-    t.RequiredTechs.push_back(this->civBonuses[333][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_333_SIEGE_TOWERS_CAN_FIRE_ARROWS][0]);
     t.RequiredTechs.push_back(201);
     t.EffectID = (int)(this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
@@ -4817,7 +4817,7 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Siege tower attack + chemistry";
     t.Civ = -1;
     t.RequiredTechCount = 2;
-    t.RequiredTechs.push_back(this->civBonuses[333][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_333_SIEGE_TOWERS_CAN_FIRE_ARROWS][0]);
     t.RequiredTechs.push_back(47);
     t.EffectID = (int)(this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
@@ -4833,8 +4833,8 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Siege tower attack + bonus damage vs cav";
     t.Civ = -1;
     t.RequiredTechCount = 2;
-    t.RequiredTechs.push_back(this->civBonuses[333][0]);
-    t.RequiredTechs.push_back(this->civBonuses[269][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_333_SIEGE_TOWERS_CAN_FIRE_ARROWS][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_269_TOWERS_DEAL_EXTRA_DAMAGE_TO_CAVALRY][0]);
     t.EffectID = (int)(this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
 
@@ -4850,7 +4850,7 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Siege tower attack + yasama";
     t.Civ = -1;
     t.RequiredTechCount = 2;
-    t.RequiredTechs.push_back(this->civBonuses[333][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_333_SIEGE_TOWERS_CAN_FIRE_ARROWS][0]);
     t.RequiredTechs.push_back(484);
     t.EffectID = (int)(this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
@@ -4867,7 +4867,7 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Siege tower attack + yeomen";
     t.Civ = -1;
     t.RequiredTechCount = 2;
-    t.RequiredTechs.push_back(this->civBonuses[333][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_333_SIEGE_TOWERS_CAN_FIRE_ARROWS][0]);
     t.RequiredTechs.push_back(3);
     t.EffectID = (int)(this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
@@ -4876,7 +4876,7 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Siege tower attack + svan towers";
     t.Civ = -1;
     t.RequiredTechCount = 2;
-    t.RequiredTechs.push_back(this->civBonuses[333][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_333_SIEGE_TOWERS_CAN_FIRE_ARROWS][0]);
     t.RequiredTechs.push_back(923);
     t.EffectID = (int)(this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);
@@ -4892,7 +4892,7 @@ void Civbuilder::createCivBonuses() {
     t.Name = "Siege tower attack + stronghold";
     t.Civ = -1;
     t.RequiredTechCount = 2;
-    t.RequiredTechs.push_back(this->civBonuses[333][0]);
+    t.RequiredTechs.push_back(this->civBonuses[CIV_BONUS_333_SIEGE_TOWERS_CAN_FIRE_ARROWS][0]);
     t.RequiredTechs.push_back(482);
     t.EffectID = (int)(this->df->Effects.size() - 1);
     this->df->Techs.push_back(t);

@@ -15,6 +15,7 @@
 
 #include "genie/dat/DatFile.h"
 #include "helpers.h"
+#include "CivBonusEnum.h"
 
 using namespace std;
 using namespace genie;
