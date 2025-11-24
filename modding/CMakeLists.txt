@@ -21,3 +21,10 @@ add_executable(
 )
 set_property(TARGET extract-dat-info PROPERTY CXX_STANDARD 17)
 target_link_libraries(extract-dat-info genieutils jsoncpp)
+
+add_executable(
+    generate-enums
+    generate-enums.cpp
+)
+set_property(TARGET generate-enums PROPERTY CXX_STANDARD 17)
+target_link_libraries(generate-enums jsoncpp)

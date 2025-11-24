@@ -15,6 +15,7 @@
 
 #include "genie/dat/DatFile.h"
 #include "helpers.h"
+#include "enums/unit_ids.h"
 
 using namespace std;
 using namespace genie;
