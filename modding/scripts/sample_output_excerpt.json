@@ -1,0 +1,80 @@
+{
+  "metadata": {
+    "extraction_date": "Nov 24 2025",
+    "game_version": "LatestDE2",
+    "source_file": "../public/vanillaFiles/empires2_x2_p1.dat"
+  },
+  "units": [
+    {
+      "class": 11,
+      "id": 0,
+      "language_dll_creation": 6000,
+      "language_dll_name": 21090,
+      "name": "OLD-ACADEMY",
+      "type": 70
+    },
+    {
+      "class": 6,
+      "id": 1,
+      "language_dll_creation": 6670,
+      "language_dll_name": 5670,
+      "name": "LEGION",
+      "type": 70
+    },
+    {
+      "class": 11,
+      "id": 2,
+      "language_dll_creation": 6668,
+      "language_dll_name": 0,
+      "name": "LEGION_D",
+      "type": 30
+    }
+  ],
+  "techs": [
+    {
+      "civ": 0,
+      "id": 0,
+      "language_dll_description": 0,
+      "language_dll_name": 0,
+      "name": "New Research",
+      "research_location": -1,
+      "research_time": 0
+    },
+    {
+      "civ": 17,
+      "id": 1,
+      "language_dll_description": 8000,
+      "language_dll_name": 7000,
+      "name": "Tarkan (make avail)",
+      "research_location": -1,
+      "research_time": 0
+    },
+    {
+      "civ": 17,
+      "id": 2,
+      "language_dll_description": 8418,
+      "language_dll_name": 7418,
+      "name": "Elite Tarkan",
+      "research_location": -1,
+      "research_time": 0
+    }
+  ],
+  "effects": [
+    {
+      "id": 0,
+      "name": "New Effect",
+      "num_commands": 0
+    },
+    {
+      "id": 1,
+      "name": "Hindustanis Tech Tree",
+      "num_commands": 51
+    },
+    {
+      "id": 2,
+      "name": "Hindustanis Team Bonus",
+      "num_commands": 20
+    }
+  ],
+  "note": "This is an excerpt. Full output contains 2479 units, 1510 techs, and 1277 effects."
+}

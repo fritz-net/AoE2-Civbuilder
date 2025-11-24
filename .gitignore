@@ -12,3 +12,4 @@ drafts/*.json
 process_mod/randomName.js
 modding/_codeql_build_dir/
 _codeql_detected_source_root
+modding/scripts/sample_output.json
