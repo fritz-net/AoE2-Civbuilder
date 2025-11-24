@@ -3386,9 +3386,9 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechs.push_back(101);
     t.RequiredTechs.push_back(1014);
     t.RequiredTechCount = 2;
+    setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
     this->df->Techs[1013].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
-    // TODO research location is missing
     this->civBonuses[105].push_back((int)(this->df->Techs.size() - 1));
 
     t = Tech();
@@ -3397,9 +3397,9 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechs.push_back(102);
     t.RequiredTechs.push_back(1013);
     t.RequiredTechCount = 2;
+    setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
     this->df->Techs[1012].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
-    // TODO research location is missing
     this->civBonuses[105].push_back((int)(this->df->Techs.size() - 1));
 
     // Barracks upgrades earlier
@@ -3411,9 +3411,9 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechs.push_back(101);
     t.RequiredTechs.push_back(433);
     t.RequiredTechCount = 2;
+    setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
     this->df->Techs[384].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
-    // TODO research location is missing
     techIDs.push_back((int)(this->df->Techs.size() - 1));
 
     t = Tech();
@@ -3422,9 +3422,9 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechs.push_back(102);
     t.RequiredTechs.push_back(384);
     t.RequiredTechCount = 2;
+    setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
     this->df->Techs[434].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
-    // TODO research location is missing
     techIDs.push_back((int)(this->df->Techs.size() - 1));
 
     this->civBonuses[221] = techIDs;
