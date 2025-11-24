@@ -16,7 +16,7 @@ enum UUCivbuilderID {
     UU_NINJA = 42,
     UU_FLAMETHROWER = 43,
     UU_PHOTONMAN = 44,
-    // Note: ID 45 is not used
+    UU_CENTURION = 45,
     UU_APUKISPAY = 46,
     UU_MONKEY_BOY = 47,
     UU_AMAZON_WARRIOR = 48,
