@@ -2,6 +2,7 @@
   "metadata": {
     "compilation_date": "Nov 24 2025",
     "game_version": "LatestDE2",
+    "has_display_names": true,
     "source_file": "../public/vanillaFiles/empires2_x2_p1.dat"
   },
   "units": [
@@ -11,6 +12,14 @@
       "language_dll_creation": 6000,
       "language_dll_name": 21090,
       "name": "OLD-ACADEMY",
+      "train_locations": [
+        {
+          "button_id": 0,
+          "hotkey_id": 16000,
+          "train_time": 0,
+          "unit_id": -1
+        }
+      ],
       "type": 70
     },
     {
@@ -19,6 +28,14 @@
       "language_dll_creation": 6670,
       "language_dll_name": 5670,
       "name": "LEGION",
+      "train_locations": [
+        {
+          "button_id": 1,
+          "hotkey_id": 16669,
+          "train_time": 20,
+          "unit_id": -1
+        }
+      ],
       "type": 70
     },
     {
@@ -38,6 +55,13 @@
       "language_dll_name": 0,
       "name": "New Research",
       "research_location": -1,
+      "research_locations": [
+        {
+          "button_id": 0,
+          "location_id": 0,
+          "research_time": 0
+        }
+      ],
       "research_time": 0
     },
     {
@@ -47,6 +71,13 @@
       "language_dll_name": 7000,
       "name": "Tarkan (make avail)",
       "research_location": -1,
+      "research_locations": [
+        {
+          "button_id": 0,
+          "location_id": -1,
+          "research_time": 0
+        }
+      ],
       "research_time": 0
     },
     {
@@ -56,6 +87,13 @@
       "language_dll_name": 7418,
       "name": "Elite Tarkan",
       "research_location": -1,
+      "research_locations": [
+        {
+          "button_id": 6,
+          "location_id": 82,
+          "research_time": 45
+        }
+      ],
       "research_time": 0
     }
   ],
@@ -77,4 +115,3 @@
     }
   ]
 }
-

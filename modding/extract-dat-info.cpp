@@ -4,16 +4,18 @@
  * Helper program to extract unit names, tech names, and effect names from
  * Age of Empires 2 DAT files. Outputs machine and human-readable JSON format.
  * 
- * Usage: ./extract-dat-info <input_dat_file> <output_json_file>
+ * Usage: ./extract-dat-info <input_dat_file> <output_json_file> [strings_json_file]
  * 
  * Example:
  *   ./extract-dat-info ../public/vanillaFiles/empires2_x2_p1.dat units.json
+ *   ./extract-dat-info ../public/vanillaFiles/empires2_x2_p1.dat units.json ../public/aoe2techtree/data/locales/en/strings.json
  */
 
 #include "genie/dat/DatFile.h"
 #include <fstream>
 #include <iostream>
 #include <jsoncpp/json/json.h>
+#include <map>
 #include <memory>
 #include <string>
 
@@ -21,12 +23,47 @@ using namespace std;
 using namespace Json;
 using namespace genie;
 
+// Helper function to load strings from strings.json
+map<int, string> loadStrings(const string& stringsPath) {
+  map<int, string> strings;
+  
+  ifstream stringsFile(stringsPath);
+  if (!stringsFile.is_open()) {
+    cerr << "Warning: Could not open strings file: " << stringsPath << endl;
+    cerr << "Display names will not be available." << endl;
+    return strings;
+  }
+  
+  Value stringsRoot;
+  stringsFile >> stringsRoot;
+  stringsFile.close();
+  
+  for (auto const& key : stringsRoot.getMemberNames()) {
+    try {
+      int id = stoi(key);
+      strings[id] = stringsRoot[key].asString();
+    } catch (...) {
+      // Skip invalid keys
+    }
+  }
+  
+  cout << "Loaded " << strings.size() << " string translations" << endl;
+  return strings;
+}
+
 int main(int argc, char **argv) {
   // Check arguments
-  if (argc != 3) {
-    cerr << "Usage: " << argv[0] << " <input_dat_file> <output_json_file>" << endl;
+  if (argc < 3 || argc > 4) {
+    cerr << "Usage: " << argv[0] << " <input_dat_file> <output_json_file> [strings_json_file]" << endl;
     cerr << "Example: " << argv[0] << " ../public/vanillaFiles/empires2_x2_p1.dat output.json" << endl;
+    cerr << "Example: " << argv[0] << " ../public/vanillaFiles/empires2_x2_p1.dat output.json ../public/aoe2techtree/data/locales/en/strings.json" << endl;
     return 1;
+  }
+
+  // Load strings if provided
+  map<int, string> strings;
+  if (argc == 4) {
+    strings = loadStrings(argv[3]);
   }
 
   // Load DAT file using smart pointer for automatic memory management
@@ -50,6 +87,7 @@ int main(int argc, char **argv) {
   root["metadata"]["game_version"] = "LatestDE2";
   // Note: This is the compilation date, not the extraction date
   root["metadata"]["compilation_date"] = __DATE__;
+  root["metadata"]["has_display_names"] = !strings.empty();
 
   // Extract units from Civ[0] (Gaia/template civ)
   // This contains all available units in the game
@@ -72,6 +110,29 @@ int main(int argc, char **argv) {
       unitObj["type"] = (int)unit.Type;
       unitObj["class"] = unit.Class;
       
+      // Add display name if available
+      if (!strings.empty() && strings.count(unit.LanguageDLLName) > 0) {
+        unitObj["display_name"] = strings[unit.LanguageDLLName];
+      }
+      
+      // Add train locations array for creatable units (type 70, 80)
+      if (unit.Type == UT_Creatable || unit.Type == UT_Building) {
+        Value trainLocationsArray(Json::arrayValue);
+        
+        for (const auto& trainLoc : unit.Creatable.TrainLocations) {
+          Value trainLocObj;
+          trainLocObj["unit_id"] = trainLoc.UnitID;
+          trainLocObj["button_id"] = trainLoc.ButtonID;
+          trainLocObj["train_time"] = trainLoc.TrainTime;
+          trainLocObj["hotkey_id"] = trainLoc.HotKeyID;
+          trainLocationsArray.append(trainLocObj);
+        }
+        
+        if (!trainLocationsArray.empty()) {
+          unitObj["train_locations"] = trainLocationsArray;
+        }
+      }
+      
       unitsArray.append(unitObj);
     }
     
@@ -92,6 +153,25 @@ int main(int argc, char **argv) {
     techObj["civ"] = tech.Civ;
     techObj["research_time"] = tech.ResearchTime;
     techObj["research_location"] = tech.ResearchLocation;
+    
+    // Add display name if available
+    if (!strings.empty() && strings.count(tech.LanguageDLLName) > 0) {
+      techObj["display_name"] = strings[tech.LanguageDLLName];
+    }
+    
+    // Add research locations array (new structure)
+    Value researchLocationsArray(Json::arrayValue);
+    for (const auto& resLoc : tech.ResearchLocations) {
+      Value resLocObj;
+      resLocObj["location_id"] = resLoc.LocationID;
+      resLocObj["button_id"] = resLoc.ButtonID;
+      resLocObj["research_time"] = resLoc.ResearchTime;
+      researchLocationsArray.append(resLocObj);
+    }
+    
+    if (!researchLocationsArray.empty()) {
+      techObj["research_locations"] = researchLocationsArray;
+    }
     
     techsArray.append(techObj);
   }

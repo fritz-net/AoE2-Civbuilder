@@ -24,16 +24,23 @@ This will create the `extract-dat-info` executable in the `modding/build/` direc
 ## Usage
 
 ```bash
-./extract-dat-info <input_dat_file> <output_json_file>
+./extract-dat-info <input_dat_file> <output_json_file> [strings_json_file]
 ```
 
-### Example
+### Examples
 
-Extract data from the vanilla DAT file:
+Extract data from the vanilla DAT file (without display names):
 
 ```bash
 cd modding
 ./build/extract-dat-info ../public/vanillaFiles/empires2_x2_p1.dat unit_data.json
+```
+
+Extract data with display names from strings.json:
+
+```bash
+cd modding
+./build/extract-dat-info ../public/vanillaFiles/empires2_x2_p1.dat unit_data.json ../public/aoe2techtree/data/locales/en/strings.json
 ```
 
 Extract data from a different DAT version:
@@ -53,32 +60,44 @@ The output JSON file contains three main sections:
   "metadata": {
     "source_file": "../public/vanillaFiles/empires2_x2_p1.dat",
     "game_version": "LatestDE2",
-    "compilation_date": "Nov 24 2025"
+    "compilation_date": "Nov 24 2025",
+    "has_display_names": true
   }
 }
 ```
 
-Note: `compilation_date` represents when the tool was compiled, not when the extraction was performed.
+Note: `compilation_date` represents when the tool was compiled, not when the extraction was performed. The `has_display_names` field indicates whether a strings.json file was provided.
 
 ### Units
 
 Each unit entry contains:
 - `id`: Unit ID (used in code)
 - `name`: Internal unit name (e.g., "ARCHR", "SPRMN")
+- `display_name`: Human-readable name (e.g., "Archer", "Militia") - only if strings.json was provided
 - `language_dll_name`: DLL string ID for the unit name
 - `language_dll_creation`: DLL string ID for creation text
 - `type`: Unit type (see UnitType enum in Unit.h)
 - `class`: Unit class
+- `train_locations`: Array of buildings where this unit can be trained (for creatable units)
 
 Example:
 ```json
 {
-  "id": 4,
-  "name": "ARCHR",
-  "language_dll_name": 5083,
-  "language_dll_creation": 6083,
+  "id": 74,
+  "name": "SPRMN",
+  "display_name": "Militia",
+  "language_dll_name": 5079,
+  "language_dll_creation": 6079,
   "type": 70,
-  "class": 0
+  "class": 6,
+  "train_locations": [
+    {
+      "unit_id": 12,
+      "button_id": 1,
+      "train_time": 21,
+      "hotkey_id": 16079
+    }
+  ]
 }
 ```
 
@@ -87,22 +106,32 @@ Example:
 Each tech entry contains:
 - `id`: Tech ID
 - `name`: Internal tech name
+- `display_name`: Human-readable name (e.g., "Town Watch") - only if strings.json was provided
 - `language_dll_name`: DLL string ID for tech name
 - `language_dll_description`: DLL string ID for description
 - `civ`: Civilization ID (-1 for all civs)
-- `research_time`: Time to research
-- `research_location`: Building ID where it's researched
+- `research_time`: Time to research (legacy field)
+- `research_location`: Building ID where it's researched (legacy field)
+- `research_locations`: Array of buildings where this tech can be researched (new structure)
 
 Example:
 ```json
 {
   "id": 8,
   "name": "Town Watch",
+  "display_name": "Town Watch",
   "language_dll_name": 7008,
   "language_dll_description": 8008,
   "civ": -1,
   "research_location": -1,
-  "research_time": 0
+  "research_time": 0,
+  "research_locations": [
+    {
+      "location_id": 109,
+      "button_id": 8,
+      "research_time": 25
+    }
+  ]
 }
 ```
 
@@ -132,7 +161,7 @@ You can use the output to create C++ enums or constants. For example:
 // Extract unit IDs from JSON and create:
 enum UnitID {
     ARCHER = 4,
-    SPEARMAN = 74,
+    MILITIA = 74,
     SCOUT = 448,
     BATTERING_RAM = 35,
     // ... etc
