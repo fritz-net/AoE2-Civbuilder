@@ -23,7 +23,7 @@ const initialConfig = ref<Partial<CivConfig>>({})
 const hasUnsavedChanges = computed(() => {
   if (!civBuilderRef.value) return false
   const config = civBuilderRef.value.civConfig
-  return config.alias !== '' || config.description !== ''
+  return config?.alias !== '' || config?.description !== ''
 })
 
 // Prevent accidental navigation when user has unsaved changes
