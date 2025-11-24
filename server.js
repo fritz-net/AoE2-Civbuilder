@@ -83,7 +83,10 @@ app.get(path.join(routeSubdir, "js/common.js"), (req, res) => {
 app.get(path.join(routeSubdir, "CHANGELOG.md"), (req, res) => {
 	const changelogPath = path.join(__dirname, "CHANGELOG.md");
 	fs.readFile(changelogPath, "utf8", (err, data) => {
-		if (err) return res.status(500).send("Error loading changelog");
+		if (err) {
+			console.error("Error reading CHANGELOG.md:", err);
+			return res.status(500).send("Error loading changelog: " + err.message);
+		}
 		res.type("text/plain").send(data);
 	});
 });

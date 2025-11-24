@@ -2,6 +2,16 @@
 
 // Helper function to parse changelog markdown and convert to HTML
 function parseChangelogMarkdown(markdown) {
+	// Regex patterns for changelog parsing
+	const VERSION_PATTERN = /^## \[([^\]]+)\] - (\d{4}-\d{2}-\d{2})/;
+	const SECTION_PATTERN = /^### /;
+	const BULLET_PATTERN = /^- /;
+	const SKIP_PATTERNS = [
+		/^# Changelog/,
+		/^All notable changes/,
+		/^The format is based on/
+	];
+	
 	const lines = markdown.split('\n');
 	let html = '';
 	let inList = false;
@@ -9,16 +19,18 @@ function parseChangelogMarkdown(markdown) {
 	for (let i = 0; i < lines.length; i++) {
 		const line = lines[i].trim();
 		
-		// Skip header and preamble
-		if (line.startsWith('# Changelog') || 
-		    line.startsWith('All notable changes') ||
-		    line.startsWith('The format is based on') ||
-		    line === '') {
+		// Skip empty lines
+		if (line === '') {
+			continue;
+		}
+		
+		// Skip header and preamble lines
+		if (SKIP_PATTERNS.some(pattern => pattern.test(line))) {
 			continue;
 		}
 		
 		// Match version headers: ## [version] - YYYY-MM-DD
-		const versionMatch = line.match(/^## \[([^\]]+)\] - (\d{4}-\d{2}-\d{2})/);
+		const versionMatch = line.match(VERSION_PATTERN);
 		if (versionMatch) {
 			if (inList) {
 				html += '<br>';
@@ -29,13 +41,13 @@ function parseChangelogMarkdown(markdown) {
 			continue;
 		}
 		
-		// Match section headers like ### Added, ### Fixed
-		if (line.startsWith('### ')) {
-			continue; // Skip section headers as they're not in the original format
+		// Skip section headers like ### Added, ### Fixed
+		if (SECTION_PATTERN.test(line)) {
+			continue;
 		}
 		
 		// Match bullet points: - item
-		if (line.startsWith('- ')) {
+		if (BULLET_PATTERN.test(line)) {
 			const content = line.substring(2);
 			html += `&emsp;&emsp;• ${content}<br>`;
 			inList = true;
