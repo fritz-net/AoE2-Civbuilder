@@ -25,14 +25,45 @@ using namespace Json;
 // Convert name to valid C++ enum identifier
 // Note: prefix should be provided in uppercase (e.g., "UNIT_", "TECH_", "EFFECT_")
 string toEnumName(const string& name, int id, const string& prefix = "") {
-  string result = name;
+  string result;
   
-  // Replace non-alphanumeric characters with underscores
-  for (char& c : result) {
-    if (!isalnum(c) && c != '_') {
-      c = '_';
+  // Replace special characters with meaningful words before general replacement
+  for (size_t i = 0; i < name.length(); i++) {
+    char c = name[i];
+    
+    // Handle special characters with meaningful replacements
+    if (c == '%') {
+      result += "_PERCENT";
+    } else if (c == '+') {
+      result += "_PLUS_";
+    } else if (c == '-' && i > 0 && i < name.length() - 1 && isdigit(name[i-1]) && isdigit(name[i+1])) {
+      // Keep minus sign between numbers as is, will be replaced by underscore
+      result += c;
+    } else if (c == '/') {
+      result += "_AND_";
+    } else if (isalnum(c) || c == '_') {
+      result += c;
+    } else {
+      // Replace all other non-alphanumeric characters with underscore
+      result += '_';
     }
   }
+  
+  // Collapse multiple consecutive underscores into single underscore
+  string collapsed;
+  bool prevWasUnderscore = false;
+  for (char c : result) {
+    if (c == '_') {
+      if (!prevWasUnderscore) {
+        collapsed += c;
+        prevWasUnderscore = true;
+      }
+    } else {
+      collapsed += c;
+      prevWasUnderscore = false;
+    }
+  }
+  result = collapsed;
   
   // Remove leading/trailing underscores
   while (!result.empty() && result[0] == '_') {
