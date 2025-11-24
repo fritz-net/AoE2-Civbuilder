@@ -949,7 +949,7 @@ void Civbuilder::setupData() {
 
     // Burgundian bonus also get discount
     Effect e = Effect();
-    this->createCivBonus(105, e, "C-Bonus, Eco upgrades cost -33% food");
+    this->createCivBonus(CIV_BONUS_105_ECONOMIC_UPGRADES_COST_33_FOOD_AND_AVAILABLE, e, "C-Bonus, Eco upgrades cost -33% food");
 
     // Krepost heal task incase stronghold
     for (Civ &civ : df->Civs) {
@@ -2836,7 +2836,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(5, 259, -1, 13, 1.23));
     e.EffectCommands.push_back(createEC(5, 50, -1, 13, 1.15));
     e.EffectCommands.push_back(createEC(5, 1187, -1, 13, 1.15));
-    this->createCivBonus(120, e, "C-Bonus, farmers work 15% faster");
+    this->createCivBonus(CIV_BONUS_120_FARMERS_WORK_15_FASTER, e, "C-Bonus, farmers work 15% faster");
 
     //-15% age up cost
     e.EffectCommands.clear();
@@ -2845,22 +2845,22 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(101, 102, 3, 1, -30));
     e.EffectCommands.push_back(createEC(101, 103, 0, 1, -150));
     e.EffectCommands.push_back(createEC(101, 103, 3, 1, -120));
-    this->createCivBonus(121, e, "C-Bonus, -15% age up cost");
+    this->createCivBonus(CIV_BONUS_121_15_AGE_UP_COST, e, "C-Bonus, -15% age up cost");
 
     //-15% fishing ship cost
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, 13, -1, 104, 0.85));
-    this->createCivBonus(122, e, "C-Bonus, -15% fishing ship cost");
+    this->createCivBonus(CIV_BONUS_122_15_FISHING_SHIP_COST, e, "C-Bonus, -15% fishing ship cost");
 
     // Dock and university techs cost -33%
     e.EffectCommands.clear();
-    this->createCivBonus(123, e, "C-Bonus, Dock and university techs cost -33%");
+    this->createCivBonus(CIV_BONUS_123_DOCK_UNIVERSITY_TECHS_COST_33, e, "C-Bonus, Dock and university techs cost -33%");
 
     // Advancing to Imp cost -33%
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(101, 103, 0, 1, -333));
     e.EffectCommands.push_back(createEC(101, 103, 3, 1, -264));
-    this->createCivBonus(124, e, "C-Bonus, Imperial cost -33%");
+    this->createCivBonus(CIV_BONUS_124_IMPERIAL_COST_33, e, "C-Bonus, Imperial cost -33%");
 
     // Blacksmith upgrades don't cost gold
     e.EffectCommands.clear();
@@ -2869,45 +2869,45 @@ void Civbuilder::createCivBonuses() {
             e.EffectCommands.push_back(createEC(101, i, 3, 0, 0));
         }
     }
-    this->createCivBonus(125, e, "C-Bonus, Blacksmith upgrades cost no gold");
+    this->createCivBonus(CIV_BONUS_125_BLACKSMITH_UPGRADES_COST_NO_GOLD, e, "C-Bonus, Blacksmith upgrades cost no gold");
 
     // Gunpowder units fire faster
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["gunpowder"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["gunpowder"][i], -1, 10, 0.85));
     }
-    this->createCivBonus(126, e, "C-Bonus, Gunpowder fire 18% faster");
+    this->createCivBonus(CIV_BONUS_126_GUNPOWDER_FIRE_18_FASTER, e, "C-Bonus, Gunpowder fire 18% faster");
 
     // Builders work 30% faster
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(1, 195, 0, -1, 1.3));
-    this->createCivBonus(127, e, "C-Bonus, Builders 30% faster");
+    this->createCivBonus(CIV_BONUS_127_BUILDERS_30_FASTER, e, "C-Bonus, Builders 30% faster");
 
     // Military units created 11% faster
     e.EffectCommands.clear();
     for (int i = 0; i < militaryClasses.size(); i++) {
         e.EffectCommands.push_back(createEC(5, -1, militaryClasses[i], 101, 0.9));
     }
-    this->createCivBonus(128, e, "C-Bonus, Military units created 11% faster");
+    this->createCivBonus(CIV_BONUS_128_MILITARY_UNITS_CREATED_11_FASTER, e, "C-Bonus, Military units created 11% faster");
 
     // Villagers carry +3
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 4, 14, 3));
-    this->createCivBonus(129, e, "C-Bonus, Villagers carry +3");
+    this->createCivBonus(CIV_BONUS_129_VILLAGERS_CARRY_3, e, "C-Bonus, Villagers carry +3");
 
     // Trebuchets +35% accuracy
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["trebuchet"].size(); i++) {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["trebuchet"][i], -1, 11, 35));
     }
-    this->createCivBonus(130, e, "C-Bonus, Trebuchets +35% accuracy");
+    this->createCivBonus(CIV_BONUS_130_TREBUCHETS_35_ACCURACY, e, "C-Bonus, Trebuchets +35% accuracy");
 
     // No houses, -100 wood
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(1, 4, 1, -1, 2000));
     e.EffectCommands.push_back(createEC(2, 70, 0, -1, 0));
     e.EffectCommands.push_back(createEC(1, 92, 1, -1, -100));
-    this->createCivBonus(131, e, "C-Bonus, No houses, -100 wood");
+    this->createCivBonus(CIV_BONUS_131_NO_HOUSES_100_WOOD, e, "C-Bonus, No houses, -100 wood");
 
     // Resources last 15% longer
     e.EffectCommands.clear();
@@ -2917,7 +2917,7 @@ void Civbuilder::createCivBonuses() {
     for (int i = 0; i < gatherRates.size(); i++) {
         e.EffectCommands.push_back(createEC(5, gatherRates[i], -1, 13, 0.87));
     }
-    this->createCivBonus(132, e, "C-Bonus, Resources last 15% longer");
+    this->createCivBonus(CIV_BONUS_132_RESOURCES_LAST_15_LONGER, e, "C-Bonus, Resources last 15% longer");
 
     // Archers cost -10% Feudal, -20% Castle, -30% Imperial Age
     e.EffectCommands.clear();
@@ -2944,7 +2944,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, 220, -1, 13, 1.2));
     e.EffectCommands.push_back(createEC(5, 124, -1, 13, 1.2));
-    this->createCivBonus(135, e, "C-Bonus, Stone Miners 20% faster");
+    this->createCivBonus(CIV_BONUS_135_STONE_MINERS_WORK_20_FASTER, e, "C-Bonus, Stone Miners 20% faster");
 
     // No wood eco upgrades
     e.EffectCommands.clear();
@@ -2952,15 +2952,15 @@ void Civbuilder::createCivBonuses() {
         e.EffectCommands.push_back(createEC(101, ecoUpgrades[i], 1, 0, 0));
         e.EffectCommands.push_back(createEC(103, ecoUpgrades[i], -1, 2, 0.5));
     }
-    this->createCivBonus(136, e, "C-Bonus, Eco upgrades no wood and faster");
+    this->createCivBonus(CIV_BONUS_136_ECO_UPGRADES_NO_WOOD_FASTER, e, "C-Bonus, Eco upgrades no wood and faster");
 
     //-50% food for blacksmith and siege techs
     e.EffectCommands.clear();
-    this->createCivBonus(137, e, "C-Bonus, -50% food blacksmith+siege techs");
+    this->createCivBonus(CIV_BONUS_137_50_FOOD_BLACKSMITHSIEGE_TECHS, e, "C-Bonus, -50% food blacksmith+siege techs");
 
     //-50% cost for stable techs
     e.EffectCommands.clear();
-    this->createCivBonus(138, e, "C-Bonus, -50% cost stable techs");
+    this->createCivBonus(CIV_BONUS_138_50_COST_STABLE_TECHS, e, "C-Bonus, -50% cost stable techs");
 
     // Spawn sheep from TCs
     this->civBonuses[CIV_BONUS_139_NEW_TOWN_CENTERS_SPAWN_2_SHEEP_STARTING] = {299, 303, 305, 310};
@@ -2972,7 +2972,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 4, 0, 3));
     for (int i = 0; i < ecoUpgrades.size(); i++) {
-        this->createCivBonus(141, e, "Villagers +3 HP for eco tech " + to_string(ecoUpgrades[i]), {ecoUpgrades[i]});
+        this->createCivBonus(CIV_BONUS_141_VILLAGERS_3_HP_ECO_TECH, e, "Villagers +3 HP for eco tech " + to_string(ecoUpgrades[i]), {ecoUpgrades[i]});
     }
 
     // Villagers regenerate slowly
@@ -2983,20 +2983,20 @@ void Civbuilder::createCivBonuses() {
     for (int i = 0; i < militaryBuildings.size(); i++) {
         e.EffectCommands.push_back(createEC(5, militaryBuildings[i], -1, 101, 0.5));
     }
-    this->createCivBonus(143, e, "C-Bonus, Military buildings built 100% faster");
+    this->createCivBonus(CIV_BONUS_143_MILITARY_BUILDINGS_BUILT_100_FASTER, e, "C-Bonus, Military buildings built 100% faster");
 
     // Resource drop-off buildings provide +5 population
     e.EffectCommands.clear();
     for (int i = 0; i < ecoBuildings.size(); i++) {
         e.EffectCommands.push_back(createEC(0, ecoBuildings[i], -1, 21, 5));
     }
-    this->createCivBonus(144, e, "C-Bonus, Drop site buildings provide +5 population");
+    this->createCivBonus(CIV_BONUS_144_DROP_SITE_BUILDINGS_PROVIDE_5_POPULATION, e, "C-Bonus, Drop site buildings provide +5 population");
 
     // Ballistics researched instantly
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(103, 93, -1, 0, 1));
     e.EffectCommands.push_back(createEC(101, 93, 1, 0, 0));
-    this->createCivBonus(145, e, "C-Bonus, Ballistics researched instantly");
+    this->createCivBonus(CIV_BONUS_145_BALLISTICS_RESEARCHED_INSTANTLY, e, "C-Bonus, Ballistics researched instantly");
 
     // Dragon Ships
     e.EffectCommands.clear();
@@ -3045,7 +3045,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(5, -1, 2, 13, 1.2));
     e.EffectCommands.push_back(createEC(5, -1, 19, 5, 1.2));
     e.EffectCommands.push_back(createEC(5, -1, 19, 13, 1.2));
-    this->createCivBonus(171, e, "C-Bonus, Trade 20% faster");
+    this->createCivBonus(CIV_BONUS_171_TRADE_20_FASTER, e, "C-Bonus, Trade 20% faster");
 
     // Squires affects foot archers and skirmishers
     e.EffectCommands.clear();
@@ -3055,30 +3055,30 @@ void Civbuilder::createCivBonuses() {
     for (int i = 0; i < this->unitClasses["skirmisher"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["skirmisher"][i], -1, 5, 1.1));
     }
-    this->createCivBonus(172, e, "C-Bonus, Squires affects archers", {215});
+    this->createCivBonus(CIV_BONUS_172_SQUIRES_AFFECTS_ARCHERS, e, "C-Bonus, Squires affects archers", {215});
 
     // Shock Infantry 5/10/15% speed
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["shock"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["shock"][i], -1, 5, 1.05));
     }
-    this->createCivBonus(173, e, "C-Bonus, Shock Infantry +5% speed", {101});
+    this->createCivBonus(CIV_BONUS_173_SHOCK_INFANTRY_SPEED_BONUS, e, "C-Bonus, Shock Infantry +5% speed", {101});
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["shock"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["shock"][i], -1, 5, 1.0476));
     }
-    this->createCivBonus(173, e, "C-Bonus, Shock Infantry +10% speed", {102});
+    this->createCivBonus(CIV_BONUS_173_SHOCK_INFANTRY_SPEED_BONUS, e, "C-Bonus, Shock Infantry +10% speed", {102});
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["shock"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["shock"][i], -1, 5, 1.0455));
     }
-    this->createCivBonus(173, e, "C-Bonus, Shock Infantry +15% speed", {103});
+    this->createCivBonus(CIV_BONUS_173_SHOCK_INFANTRY_SPEED_BONUS, e, "C-Bonus, Shock Infantry +15% speed", {103});
 
     // Start with +150 wood
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(1, 1, 1, -1, 150));
     e.EffectCommands.push_back(createEC(1, 92, 1, -1, 150));
-    this->createCivBonus(174, e, "C-Bonus, +150 wood", {639, 307});
+    this->createCivBonus(CIV_BONUS_174_150_WOOD, e, "C-Bonus, +150 wood", {639, 307});
 
     // Start with +100 stone
     this->civBonuses[CIV_BONUS_175_START_WITH_100_STONE] = {228};
@@ -3089,7 +3089,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(1, 2, 1, -1, 50));
     e.EffectCommands.push_back(createEC(1, 92, 1, -1, 50));
     e.EffectCommands.push_back(createEC(1, 93, 1, -1, 50));
-    this->createCivBonus(176, e, "C-Bonus, +50 wood, +50 stone", {639, 307});
+    this->createCivBonus(CIV_BONUS_176_50_WOOD_50_STONE, e, "C-Bonus, +50 wood, +50 stone", {639, 307});
 
     // Start with +30 gold, +70 food
     e.EffectCommands.clear();
@@ -3097,42 +3097,42 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(1, 3, 1, -1, 30));
     e.EffectCommands.push_back(createEC(1, 91, 1, -1, 70));
     e.EffectCommands.push_back(createEC(1, 94, 1, -1, 30));
-    this->createCivBonus(177, e, "C-Bonus, +70 food, +30 gold", {639, 307});
+    this->createCivBonus(CIV_BONUS_177_70_FOOD_30_GOLD, e, "C-Bonus, +70 food, +30 gold", {639, 307});
 
     // Monk units train 66% faster
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, -1, 18, 101, 0.6));
     e.EffectCommands.push_back(createEC(5, 1811, -1, 101, 0.6));
-    this->createCivBonus(178, e, "C-Bonus, Monks train 66% faster");
+    this->createCivBonus(CIV_BONUS_178_MONKS_TRAIN_66_FASTER, e, "C-Bonus, Monks train 66% faster");
 
     // Trebuchets train 50% faster
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["trebuchet"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["trebuchet"][i], -1, 101, 0.66));
     }
-    this->createCivBonus(179, e, "C-Bonus, Trebuchets train 50% faster");
+    this->createCivBonus(CIV_BONUS_179_TREBUCHETS_TRAIN_50_FASTER, e, "C-Bonus, Trebuchets train 50% faster");
 
     // Cavalry archers train 33% faster
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, -1, 36, 101, 0.8));
-    this->createCivBonus(180, e, "C-Bonus, Cav archers train 33% faster");
+    this->createCivBonus(CIV_BONUS_180_CAV_ARCHERS_TRAIN_33_FASTER, e, "C-Bonus, Cav archers train 33% faster");
 
     // Land explosive units train 200% faster
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, -1, 35, 101, 0.33));
-    this->createCivBonus(181, e, "C-Bonus, Petards train 200% faster");
+    this->createCivBonus(CIV_BONUS_181_PETARDS_TRAIN_200_FASTER, e, "C-Bonus, Petards train 200% faster");
 
     // Land explosive units +8 pierce armor
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 35, 8, amountTypetoD(8, 3)));
-    this->createCivBonus(182, e, "C-Bonus, Petards +8 pierce armor");
+    this->createCivBonus(CIV_BONUS_182_PETARDS_8_PIERCE_ARMOR, e, "C-Bonus, Petards +8 pierce armor");
 
     // Bloodlines free in Castle Age
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(101, 435, 0, 0, 0));
     e.EffectCommands.push_back(createEC(101, 435, 3, 0, 0));
     e.EffectCommands.push_back(createEC(103, 435, -1, 0, 0));
-    this->createCivBonus(183, e, "C-Bonus, Bloodlines free in Castle Age", {102});
+    this->createCivBonus(CIV_BONUS_183_FREE_TECH_BONUS, e, "C-Bonus, Bloodlines free in Castle Age", {102});
 
     // Galleys +1 range
     e.EffectCommands.clear();
@@ -3141,46 +3141,46 @@ void Civbuilder::createCivBonuses() {
         e.EffectCommands.push_back(createEC(4, galleys[i], -1, 1, 1));
         e.EffectCommands.push_back(createEC(4, galleys[i], -1, 23, 1));
     }
-    this->createCivBonus(184, e, "C-Bonus, Galleys +1 range");
+    this->createCivBonus(CIV_BONUS_184_GALLEYS_1_RANGE, e, "C-Bonus, Galleys +1 range");
 
     //+100 wood, +100 stone every age up
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(1, 1, 1, -1, 100));
     e.EffectCommands.push_back(createEC(1, 2, 1, -1, 100));
     for (int i = 0; i < 3; i++) {
-        this->createCivBonus(185, e, "C-Bonus, +100 wood, +100 stone in age " + to_string(i), {i + 101});
+        this->createCivBonus(CIV_BONUS_185_RESOURCE_BONUS, e, "C-Bonus, +100 wood, +100 stone in age " + to_string(i), {i + 101});
     }
 
     //+400 food upon reaching Castle Age
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(1, 0, 1, -1, 400));
-    this->createCivBonus(186, e, "C-Bonus, +400 food in Castle Age", {102});
+    this->createCivBonus(CIV_BONUS_186_UNIT_BONUS, e, "C-Bonus, +400 food in Castle Age", {102});
 
     //+350 stone upon reaching Castle Age
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(1, 2, 1, -1, 350));
-    this->createCivBonus(187, e, "C-Bonus, +350 stone in Castle Age", {102});
+    this->createCivBonus(CIV_BONUS_187_FREE_TECH_BONUS, e, "C-Bonus, +350 stone in Castle Age", {102});
 
     //+250 wood upon reaching Feudal Age
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(1, 1, 1, -1, 250));
-    this->createCivBonus(188, e, "C-Bonus, +250 wood in Feudal Age", {101});
+    this->createCivBonus(CIV_BONUS_188_BUILDING_BONUS, e, "C-Bonus, +250 wood in Feudal Age", {101});
 
     //+500 gold upon reaching Imperial Age
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(1, 3, 1, -1, 500));
-    this->createCivBonus(189, e, "C-Bonus, +500 gold in Imperial Age", {103});
+    this->createCivBonus(CIV_BONUS_189_ECONOMIC_BONUS, e, "C-Bonus, +500 gold in Imperial Age", {103});
 
     //+100 HP, 100 pierce armor for monks with relics
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 43, 0, 100));
     e.EffectCommands.push_back(createEC(4, -1, 43, 8, amountTypetoD(100, 3)));
-    this->createCivBonus(190, e, "C-Bonus, Monks with relics tank");
+    this->createCivBonus(CIV_BONUS_190_MONKS_RELICS_TANK, e, "C-Bonus, Monks with relics tank");
 
     // Land explosive units 2x HP
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, -1, 35, 0, 2));
-    this->createCivBonus(191, e, "C-Bonus, Explosive units 2x HP");
+    this->createCivBonus(CIV_BONUS_191_EXPLOSIVE_UNITS_2X_HP, e, "C-Bonus, Explosive units 2x HP");
 
     // Town Center spawns a married couple every age
     this->civBonuses[CIV_BONUS_192_TOWN_CENTERS_SPAWN_2_VILLAGERS_WHEN_THE] = {847, 848, 849};
@@ -3192,7 +3192,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, 82, -1, 0, 2000));
     e.EffectCommands.push_back(createEC(4, 1251, -1, 0, 2000));
-    this->createCivBonus(194, e, "C-Bonus, Castles and Kreposts +2000 HP");
+    this->createCivBonus(CIV_BONUS_194_CASTLES_KREPOSTS_2000_HP, e, "C-Bonus, Castles and Kreposts +2000 HP");
 
     // Blacksmith upgrades are free an age after they become available
     const vector<int> blacksmith_2_3 = {199, 200, 211, 212, 67, 68, 81, 82, 74, 76};
@@ -3210,7 +3210,7 @@ void Civbuilder::createCivBonuses() {
                     e.EffectCommands.push_back(createEC(101, i, j, 0, 0));
                 }
                 e.EffectCommands.push_back(createEC(103, i, -1, 0, 0));
-                this->createCivBonus(195, e, "C-Bonus, Blacksmith upgrade " + to_string(i) + " free in " + to_string(ageRequirement), {ageRequirement + 1});
+                this->createCivBonus(CIV_BONUS_195_RESOURCE_BONUS, e, "C-Bonus, Blacksmith upgrade " + to_string(i) + " free in " + to_string(ageRequirement), {ageRequirement + 1});
             }
         }
     }
@@ -3220,7 +3220,7 @@ void Civbuilder::createCivBonuses() {
     for (int i = 0; i < barracks.size(); i++) {
         e.EffectCommands.push_back(createEC(4, barracks[i], -1, 104, -75));
     }
-    this->createCivBonus(196, e, "C-Bonus, Barracks -75 wood");
+    this->createCivBonus(CIV_BONUS_196_BARRACKS_75_WOOD, e, "C-Bonus, Barracks -75 wood");
 
     // Stable -75 wood
     e.EffectCommands.clear();
@@ -3228,34 +3228,34 @@ void Civbuilder::createCivBonuses() {
     for (int i = 0; i < stables.size(); i++) {
         e.EffectCommands.push_back(createEC(4, stables[i], -1, 104, -75));
     }
-    this->createCivBonus(197, e, "C-Bonus, Stables -75 wood");
+    this->createCivBonus(CIV_BONUS_197_STABLES_75_WOOD, e, "C-Bonus, Stables -75 wood");
 
     // Archery Range -75 wood
     e.EffectCommands.clear();
     for (int i = 0; i < stables.size(); i++) {
         e.EffectCommands.push_back(createEC(4, ranges[i], -1, 104, -75));
     }
-    this->createCivBonus(198, e, "C-Bonus, Arrg -75 wood");
+    this->createCivBonus(CIV_BONUS_198_ARRG_75_WOOD, e, "C-Bonus, Arrg -75 wood");
 
     // Monastery -100 wood
     for (int i = 0; i < monasteries.size(); i++) {
         e.EffectCommands.push_back(createEC(4, monasteries[i], -1, 104, -100));
     }
-    this->createCivBonus(199, e, "C-Bonus, Monastery -100 wood");
+    this->createCivBonus(CIV_BONUS_199_MONASTERY_100_WOOD, e, "C-Bonus, Monastery -100 wood");
 
     // Siege Workshops -100 wood
     e.EffectCommands.clear();
     for (int i = 0; i < workshops.size(); i++) {
         e.EffectCommands.push_back(createEC(4, workshops[i], -1, 104, -100));
     }
-    this->createCivBonus(200, e, "C-Bonus, Siege workshop -100 wood");
+    this->createCivBonus(CIV_BONUS_200_SIEGE_WORKSHOP_100_WOOD, e, "C-Bonus, Siege workshop -100 wood");
 
     // Military Buildings -50 wood
     e.EffectCommands.clear();
     for (int i = 0; i < militaryBuildings.size(); i++) {
         e.EffectCommands.push_back(createEC(4, militaryBuildings[i], -1, 104, -50));
     }
-    this->createCivBonus(201, e, "C-Bonus, Military buildings -50 wood");
+    this->createCivBonus(CIV_BONUS_201_MILITARY_BUILDINGS_50_WOOD, e, "C-Bonus, Military buildings -50 wood");
 
     // Blacksmith, University cost -100 wood
     e.EffectCommands.clear();
@@ -3265,14 +3265,14 @@ void Civbuilder::createCivBonuses() {
     for (int i = 0; i < universities.size(); i++) {
         e.EffectCommands.push_back(createEC(4, universities[i], -1, 104, -100));
     }
-    this->createCivBonus(202, e, "C-Bonus, Blacksmith, University cost -100 wood");
+    this->createCivBonus(CIV_BONUS_202_BLACKSMITH_UNIVERSITY_COST_100_WOOD, e, "C-Bonus, Blacksmith, University cost -100 wood");
 
     // Infantry +1/2/3/4 attack vs villagers
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 6, 9, amountTypetoD(1, 10)));
-    this->createCivBonus(203, e, "C-Bonus, Infantry +attack vs vils in Age -1");
+    this->createCivBonus(CIV_BONUS_203_INFANTRY_ATTACK_VS_VILS_AGE, e, "C-Bonus, Infantry +attack vs vils in Age -1");
     for (int i = 0; i < 3; i++) {
-        this->createCivBonus(203, e, "C-Bonus, Infantry +attack vs vils in Age " + to_string(101 + i), {101 + i});
+        this->createCivBonus(CIV_BONUS_203_INFANTRY_ATTACK_VS_VILS_AGE, e, "C-Bonus, Infantry +attack vs vils in Age " + to_string(101 + i), {101 + i});
     }
 
     // Fishermen and fishing ships carry +15 food
@@ -3283,28 +3283,28 @@ void Civbuilder::createCivBonuses() {
     for (int i = 0; i < galleys.size(); i++) {
         e.EffectCommands.push_back(createEC(4, galleys[i], -1, 9, amountTypetoD(1, 3)));
     }
-    this->createCivBonus(205, e, "C-Bonus, Galleys +1 attack");
+    this->createCivBonus(CIV_BONUS_205_GALLEYS_1_ATTACK, e, "C-Bonus, Galleys +1 attack");
 
     // Steppe Lancers +10 attack vs. villagers
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["steppe"].size(); i++) {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["steppe"][i], -1, 9, amountTypetoD(10, 10)));
     }
-    this->createCivBonus(206, e, "C-Bonus, Steppe Lancers +attack vs vils");
+    this->createCivBonus(CIV_BONUS_206_STEPPE_LANCERS_ATTACK_VS_VILS, e, "C-Bonus, Steppe Lancers +attack vs vils");
 
     // Steppe lancers attack 33% faster
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["steppe"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["steppe"][i], -1, 10, 0.75));
     }
-    this->createCivBonus(207, e, "C-Bonus, Steppe Lancers attack +33%");
+    this->createCivBonus(CIV_BONUS_207_STEPPE_LANCERS_ATTACK_33, e, "C-Bonus, Steppe Lancers attack +33%");
 
     // Elephant units attack 25% faster
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["elephant"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["elephant"][i], -1, 10, 0.8));
     }
-    this->createCivBonus(208, e, "C-Bonus, Elephants +25% attack");
+    this->createCivBonus(CIV_BONUS_208_ELEPHANTS_25_ATTACK, e, "C-Bonus, Elephants +25% attack");
 
     // Stone walls in dark age
     t = Tech();
@@ -3320,7 +3320,7 @@ void Civbuilder::createCivBonuses() {
         e.EffectCommands.push_back(createEC(1, i, 1, -1, 50));
     }
     for (int i = 0; i < 3; i++) {
-        this->createCivBonus(210, e, "C-Bonus, +50 each res in age " + to_string(101 + i), {101 + i});
+        this->createCivBonus(CIV_BONUS_210_UNIT_BONUS, e, "C-Bonus, +50 each res in age " + to_string(101 + i), {101 + i});
     }
 
     // Villagers return 25 food upon death
@@ -3331,18 +3331,18 @@ void Civbuilder::createCivBonuses() {
     for (int i = 0; i < this->unitClasses["camel"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["camel"][i], -1, 10, 0.83333));
     }
-    this->createCivBonus(212, e, "C-Bonus, Camels +20% attack speed");
+    this->createCivBonus(CIV_BONUS_212_CAMELS_20_ATTACK_SPEED, e, "C-Bonus, Camels +20% attack speed");
 
     // Mangonels can cut trees
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, 280, -1, 9, amountTypetoD(100, 18)));
-    this->createCivBonus(213, e, "C-Bonus, Mangonels cut trees");
+    this->createCivBonus(CIV_BONUS_213_MANGONELS_CUT_TREES, e, "C-Bonus, Mangonels cut trees");
 
     // Free siege tower in Feudal Age, cost 50%
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, 1105, -1, 100, 0.5));
     e.EffectCommands.push_back(createEC(2, 885, 1, -1, 0));
-    this->createCivBonus(214, e, "C-Bonus, Free siege tower", {101});
+    this->createCivBonus(CIV_BONUS_214_BUILDING_BONUS, e, "C-Bonus, Free siege tower", {101});
 
     // Rams, Siege Towers x2 garrison space
     e.EffectCommands.clear();
@@ -3350,19 +3350,19 @@ void Civbuilder::createCivBonuses() {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["ram"][i], -1, 2, 2));
     }
     e.EffectCommands.push_back(createEC(5, 1105, -1, 2, 2));
-    this->createCivBonus(215, e, "C-Bonus, Rams, Siege Towers +garrison");
+    this->createCivBonus(CIV_BONUS_215_RAMS_SIEGE_TOWERS_GARRISON, e, "C-Bonus, Rams, Siege Towers +garrison");
 
     // Towers support 15 population
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(0, -1, 52, 21, 15));
-    this->createCivBonus(216, e, "C-Bonus, Towers provide +15 population");
+    this->createCivBonus(CIV_BONUS_216_TOWERS_PROVIDE_15_POPULATION, e, "C-Bonus, Towers provide +15 population");
 
     // Gunpowder units move 20% faster
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["gunpowder"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["gunpowder"][i], -1, 5, 1.2));
     }
-    this->createCivBonus(217, e, "C-Bonus, Gunpowder +20% speed");
+    this->createCivBonus(CIV_BONUS_217_GUNPOWDER_20_SPEED, e, "C-Bonus, Gunpowder +20% speed");
 
     // Castles refund 350 stone
     this->civBonuses[CIV_BONUS_218_COMPLETED_CASTLES_PROVIDE_400_GOLD_AS_LONG] = {};
@@ -3372,7 +3372,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(5, -1, 18, 5, 1.2));
     e.EffectCommands.push_back(createEC(5, -1, 43, 5, 1.2));
     e.EffectCommands.push_back(createEC(5, 1811, -1, 5, 1.2));
-    this->createCivBonus(219, e, "C-Bonus, Monks +20% speed");
+    this->createCivBonus(CIV_BONUS_219_MONKS_20_SPEED, e, "C-Bonus, Monks +20% speed");
 
     // Melee cavalry +2 vs skirmishers
     this->civBonuses[CIV_BONUS_220_MELEE_CAVALRY_GAIN_2_BONUS_DAMAGE_VS_SKIRMISHERS] = {877};
@@ -3433,23 +3433,23 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(2, millCow, 1, -1, 0));
     e.EffectCommands.push_back(createEC(2, pastureCow, 1, -1, 0));
-    this->createCivBonus(222, e, "C-Bonus, Cows from mills");
+    this->createCivBonus(CIV_BONUS_222_COWS_MILLS, e, "C-Bonus, Cows from mills");
 
     // Start with a horse
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(1, 234, 0, -1, 1));
     e.EffectCommands.push_back(createEC(7, 814, 619, 1, 0));
-    this->createCivBonus(223, e, "C-Bonus, start with horse", {639, 307});
+    this->createCivBonus(CIV_BONUS_223_UNIT_SPEED_BONUS, e, "C-Bonus, start with horse", {639, 307});
 
     // Siege Towers 2x HP
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, 1105, -1, 0, 2));
-    this->createCivBonus(224, e, "C-Bonus, Siege Towers x2 HP");
+    this->createCivBonus(CIV_BONUS_224_SIEGE_TOWERS_X2_HP, e, "C-Bonus, Siege Towers x2 HP");
 
     // Siege Towers train 100% faster
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, 1105, -1, 101, 0.5));
-    this->createCivBonus(225, e, "C-Bonus, Siege Towers train 100% faster");
+    this->createCivBonus(CIV_BONUS_225_SIEGE_TOWERS_TRAIN_100_FASTER, e, "C-Bonus, Siege Towers train 100% faster");
 
     // Siege units cost -33% wood
     this->civBonuses[CIV_BONUS_226_SIEGE_UNITS_COST_33_WOOD] = {876};
@@ -3458,12 +3458,12 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(0, 374, -1, 19, 1));
     e.EffectCommands.push_back(createEC(0, 374, -1, 5, 7));
-    this->createCivBonus(227, e, "C-Bonus, Cannon galleons w/ ballistics");
+    this->createCivBonus(CIV_BONUS_227_CANNON_GALLEONS_W_BALLISTICS, e, "C-Bonus, Cannon galleons w/ ballistics");
 
     // Warships +10 attack vs villagers
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 22, 9, amountTypetoD(10, 10)));
-    this->createCivBonus(228, e, "C-Bonus, Warships +attack vs vils");
+    this->createCivBonus(CIV_BONUS_228_WARSHIPS_ATTACK_VS_VILS, e, "C-Bonus, Warships +attack vs vils");
 
     // Rams generate stone when fighting
     this->civBonuses[CIV_BONUS_229_RAMS_GENERATE_STONE_BY_RAMMING] = {}; // empty because its done in `assignCivBonuses` special handling
@@ -3471,12 +3471,12 @@ void Civbuilder::createCivBonuses() {
     // TCs +50% work rate in Imperial
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, 142, -1, 13, 1.5));
-    this->createCivBonus(230, e, "C-Bonus, Town Center +50% Productivity", {103});
+    this->createCivBonus(CIV_BONUS_230_RESOURCE_BONUS, e, "C-Bonus, Town Center +50% Productivity", {103});
 
     // Feudal Age cost -25%
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(101, 101, 0, 1, -125));
-    this->createCivBonus(231, e, "C-Bonus, Feudal cost -25%");
+    this->createCivBonus(CIV_BONUS_231_FEUDAL_COST_25, e, "C-Bonus, Feudal cost -25%");
 
     // Spearmen and skirmishers train 50% faster
     e.EffectCommands.clear();
@@ -3486,14 +3486,14 @@ void Civbuilder::createCivBonuses() {
     for (int i = 0; i < this->unitClasses["skirmisher"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["skirmisher"][i], -1, 101, 0.66));
     }
-    this->createCivBonus(232, e, "C-Bonus, Spearmen and Skirms train 50% faster");
+    this->createCivBonus(CIV_BONUS_232_SPEARMEN_SKIRMS_TRAIN_50_FASTER, e, "C-Bonus, Spearmen and Skirms train 50% faster");
 
     // Spearman-line +25% HP
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["spear"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["spear"][i], -1, 0, 1.25));
     }
-    this->createCivBonus(233, e, "C-Bonus, Spearmen +25% HP");
+    this->createCivBonus(CIV_BONUS_233_SPEARMEN_25_HP, e, "C-Bonus, Spearmen +25% HP");
 
     // Market techs cost no gold
     e.EffectCommands.clear();
@@ -3502,35 +3502,35 @@ void Civbuilder::createCivBonuses() {
             e.EffectCommands.push_back(createEC(101, i, 3, 0, 0));
         }
     }
-    this->createCivBonus(234, e, "C-Bonus, Market techs cost no gold");
+    this->createCivBonus(CIV_BONUS_234_MARKET_TECHS_COST_NO_GOLD, e, "C-Bonus, Market techs cost no gold");
 
     // Trees last 100% longer
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(6, 189, -1, -1, 2));
     e.EffectCommands.push_back(createEC(5, 123, -1, 13, 0.5));
     e.EffectCommands.push_back(createEC(5, 218, -1, 13, 0.5));
-    this->createCivBonus(235, e, "C-Bonus, Trees last 100% longer");
+    this->createCivBonus(CIV_BONUS_235_TREES_LAST_100_LONGER, e, "C-Bonus, Trees last 100% longer");
 
     // Stone resources last 30% longer
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(6, 79, -1, -1, 1.3));
     e.EffectCommands.push_back(createEC(5, 124, -1, 13, 0.769231));
     e.EffectCommands.push_back(createEC(5, 220, -1, 13, 0.769231));
-    this->createCivBonus(236, e, "C-Bonus, Stone resources last 30% longer");
+    this->createCivBonus(CIV_BONUS_236_STONE_RESOURCES_LAST_30_LONGER, e, "C-Bonus, Stone resources last 30% longer");
 
     // Gold resources last 30% longer
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(6, 47, -1, -1, 1.3));
     e.EffectCommands.push_back(createEC(5, 579, -1, 13, 0.769231));
     e.EffectCommands.push_back(createEC(5, 581, -1, 13, 0.769231));
-    this->createCivBonus(237, e, "C-Bonus, Gold resources last 30% longer");
+    this->createCivBonus(CIV_BONUS_237_GOLD_RESOURCES_LAST_30_LONGER, e, "C-Bonus, Gold resources last 30% longer");
 
     // Berries +35% more food -- have to give foragers a different productivity resource (use with mayans too)
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(6, 198, -1, -1, 1.35));
     e.EffectCommands.push_back(createEC(5, 120, -1, 13, 0.741));
     e.EffectCommands.push_back(createEC(5, 354, -1, 13, 0.741));
-    this->createCivBonus(238, e, "C-Bonus, Berries contain +35% food");
+    this->createCivBonus(CIV_BONUS_238_BERRIES_CONTAIN_35_FOOD, e, "C-Bonus, Berries contain +35% food");
 
     // City Walls
     e.EffectCommands.clear();
@@ -3583,33 +3583,33 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(5, 13, -1, 13, 0.741));
     e.EffectCommands.push_back(createEC(5, 56, -1, 13, 0.741));
     e.EffectCommands.push_back(createEC(5, 57, -1, 13, 0.741));
-    this->createCivBonus(240, e, "C-Bonus, Fish contain +35% food");
+    this->createCivBonus(CIV_BONUS_240_FISH_CONTAIN_35_FOOD, e, "C-Bonus, Fish contain +35% food");
 
     // Units garrisoned in buildings heal 2x faster
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, -1, 52, 108, 2));
     e.EffectCommands.push_back(createEC(5, -1, 3, 108, 2));
-    this->createCivBonus(241, e, "C-Bonus, units heal faster");
+    this->createCivBonus(CIV_BONUS_241_UNITS_HEAL_FASTER, e, "C-Bonus, units heal faster");
 
     // Repairers work 100% faster
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, 156, -1, 13, 2));
     e.EffectCommands.push_back(createEC(5, 222, -1, 13, 2));
-    this->createCivBonus(242, e, "C-Bonus, repair 100% faster");
+    this->createCivBonus(CIV_BONUS_242_REPAIR_100_FASTER, e, "C-Bonus, repair 100% faster");
 
     // Skirmishers +1 attack vs infantry
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["skirmisher"].size(); i++) {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["skirmisher"][i], -1, 9, amountTypetoD(1, 1)));
     }
-    this->createCivBonus(243, e, "C-Bonus, Skirmishers +1 vs infantry");
+    this->createCivBonus(CIV_BONUS_243_SKIRMISHERS_1_VS_INFANTRY, e, "C-Bonus, Skirmishers +1 vs infantry");
 
     // Archery range units +1 pierce attack
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["archery"].size(); i++) {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["archery"][i], -1, 9, amountTypetoD(1, 3)));
     }
-    this->createCivBonus(244, e, "C-Bonus, ARRG units +1 attack");
+    this->createCivBonus(CIV_BONUS_244_ARRG_UNITS_1_ATTACK, e, "C-Bonus, ARRG units +1 attack");
 
     // Archery range units +1 melee armor per age (starting in Feudal)
     e.EffectCommands.clear();
@@ -3617,7 +3617,7 @@ void Civbuilder::createCivBonuses() {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["archery"][i], -1, 8, amountTypetoD(1, 4)));
     }
     for (int i = 0; i < 3; i++) {
-        this->createCivBonus(245, e, "C-Bonus, +1 arrg armor in age " + to_string(101 + i), {101 + i});
+        this->createCivBonus(CIV_BONUS_245_ATTACK_BONUS, e, "C-Bonus, +1 arrg armor in age " + to_string(101 + i), {101 + i});
     }
 
     // Siege units +1 pierce armor in Castle and Imperial (+2 total)
@@ -3625,8 +3625,8 @@ void Civbuilder::createCivBonuses() {
     for (int i = 0; i < siegeClasses.size(); i++) {
         e.EffectCommands.push_back(createEC(4, -1, siegeClasses[i], 8, amountTypetoD(1, 3)));
     }
-    this->createCivBonus(246, e, "C-Bonus, +1P armor age 102", {102});
-    this->createCivBonus(246, e, "C-Bonus, +1P armor age 103", {103});
+    this->createCivBonus(CIV_BONUS_246_ARMOR_BONUS, e, "C-Bonus, +1P armor age 102", {102});
+    this->createCivBonus(CIV_BONUS_246_ARMOR_BONUS, e, "C-Bonus, +1P armor age 103", {103});
 
     // Parthian tactics in Castle Age
     t = Tech();
@@ -3642,49 +3642,49 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(101, 102, 0, 1, -200));
     e.EffectCommands.push_back(createEC(101, 102, 3, 1, -50));
-    this->createCivBonus(248, e, "C-Bonus, Castle Age cost -25%");
+    this->createCivBonus(CIV_BONUS_248_CASTLE_AGE_COST_25, e, "C-Bonus, Castle Age cost -25%");
 
     // Cavalry +1 attack
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 12, 9, amountTypetoD(1, 4)));
     e.EffectCommands.push_back(createEC(4, -1, 47, 9, amountTypetoD(1, 4)));
-    this->createCivBonus(249, e, "C-Bonus, Cavalry +1 attack");
+    this->createCivBonus(CIV_BONUS_249_CAVALRY_1_ATTACK, e, "C-Bonus, Cavalry +1 attack");
 
     // Forging, iron casting, blast furnace add +1 damage vs buildings
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 6, 9, amountTypetoD(1, 21)));
     e.EffectCommands.push_back(createEC(4, -1, 12, 9, amountTypetoD(1, 21)));
     e.EffectCommands.push_back(createEC(4, -1, 47, 9, amountTypetoD(1, 21)));
-    this->createCivBonus(250, e, "C-Bonus, +1 building attack age 101", {101});
-    this->createCivBonus(250, e, "C-Bonus, +1 building attack age 102", {102});
+    this->createCivBonus(CIV_BONUS_250_COST_REDUCTION, e, "C-Bonus, +1 building attack age 101", {101});
+    this->createCivBonus(CIV_BONUS_250_COST_REDUCTION, e, "C-Bonus, +1 building attack age 102", {102});
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 6, 9, amountTypetoD(2, 21)));
     e.EffectCommands.push_back(createEC(4, -1, 12, 9, amountTypetoD(2, 21)));
     e.EffectCommands.push_back(createEC(4, -1, 47, 9, amountTypetoD(2, 21)));
-    this->createCivBonus(250, e, "C-Bonus, +2 building attack age 103", {103});
+    this->createCivBonus(CIV_BONUS_250_COST_REDUCTION, e, "C-Bonus, +2 building attack age 103", {103});
 
     // All buildings +3 pierce armor
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 3, 8, amountTypetoD(3, 3)));
     e.EffectCommands.push_back(createEC(4, -1, 52, 8, amountTypetoD(3, 3)));
-    this->createCivBonus(251, e, "C-Bonus, buildings +3 pierce armor");
+    this->createCivBonus(CIV_BONUS_251_BUILDINGS_3_PIERCE_ARMOR, e, "C-Bonus, buildings +3 pierce armor");
 
     // Foot archers +5% speed per age (starting in Feudal)
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["footArcher"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["footArcher"][i], -1, 5, 1.05));
     }
-    this->createCivBonus(252, e, "C-Bonus, Archers +5% speed", {101});
+    this->createCivBonus(CIV_BONUS_252_TRAINING_SPEED_BONUS, e, "C-Bonus, Archers +5% speed", {101});
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["footArcher"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["footArcher"][i], -1, 5, 1.0476));
     }
-    this->createCivBonus(252, e, "C-Bonus, Archers +10% speed", {102});
+    this->createCivBonus(CIV_BONUS_252_TRAINING_SPEED_BONUS, e, "C-Bonus, Archers +10% speed", {102});
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["footArcher"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["footArcher"][i], -1, 5, 1.0455));
     }
-    this->createCivBonus(252, e, "C-Bonus, Archers +15% speed", {103});
+    this->createCivBonus(CIV_BONUS_252_TRAINING_SPEED_BONUS, e, "C-Bonus, Archers +15% speed", {103});
 
     // Foot archers and skirms +1 vs villagers
     e.EffectCommands.clear();
@@ -3694,14 +3694,14 @@ void Civbuilder::createCivBonuses() {
     for (int i = 0; i < this->unitClasses["skirmisher"].size(); i++) {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["skirmisher"][i], -1, 9, amountTypetoD(1, 10)));
     }
-    this->createCivBonus(253, e, "C-Bonus, foot archers +1 vs vils");
+    this->createCivBonus(CIV_BONUS_253_FOOT_ARCHERS_1_VS_VILS, e, "C-Bonus, foot archers +1 vs vils");
 
     // Gunpowder +10 bonus vs camels
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["gunpowder"].size(); i++) {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(10, 30)));
     }
-    this->createCivBonus(254, e, "C-Bonus, gunpowder bonus vs camels");
+    this->createCivBonus(CIV_BONUS_254_GUNPOWDER_BONUS_VS_CAMELS, e, "C-Bonus, gunpowder bonus vs camels");
 
     // Shock Infantry +6 vs stone defenses
     e.EffectCommands.clear();
@@ -3710,7 +3710,7 @@ void Civbuilder::createCivBonuses() {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["shock"][i], -1, 9, amountTypetoD(3, 22)));
         e.EffectCommands.push_back(createEC(4, this->unitClasses["shock"][i], -1, 9, amountTypetoD(6, 26)));
     }
-    this->createCivBonus(255, e, "C-Bonus, shock infantry bonus vs stone");
+    this->createCivBonus(CIV_BONUS_255_SHOCK_INFANTRY_BONUS_VS_STONE, e, "C-Bonus, shock infantry bonus vs stone");
 
     // Scouts, Light Cavalry, Hussar +4 vs stone defenses
     e.EffectCommands.clear();
@@ -3719,7 +3719,7 @@ void Civbuilder::createCivBonuses() {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["lightCav"][i], -1, 9, amountTypetoD(2, 22)));
         e.EffectCommands.push_back(createEC(4, this->unitClasses["lightCav"][i], -1, 9, amountTypetoD(4, 26)));
     }
-    this->createCivBonus(256, e, "C-Bonus, scouts bonus vs stone");
+    this->createCivBonus(CIV_BONUS_256_SCOUTS_BONUS_VS_STONE, e, "C-Bonus, scouts bonus vs stone");
 
     // Villagers work 5% faster
     this->civBonuses[CIV_BONUS_257_ALL_VILLAGERS_WORK_5_FASTER] = {887};
@@ -3729,7 +3729,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(4, -1, 4, 14, 1));
     for (int i = 0; i < this->df->Techs.size(); i++) {
         if (getResearchLocation(this->df->Techs[i]) == 109) {
-            this->createCivBonus(258, e, "C-Bonus, +1 capacity TC tech " + to_string(i), {i});
+            this->createCivBonus(CIV_BONUS_258_RESOURCE_GENERATION, e, "C-Bonus, +1 capacity TC tech " + to_string(i), {i});
         }
     }
 
@@ -3737,7 +3737,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, 50, -1, 0, 10));
     e.EffectCommands.push_back(createEC(5, 1187, -1, 0, 10));
-    this->createCivBonus(259, e, "C-Bonus, Farms 10x HP");
+    this->createCivBonus(CIV_BONUS_259_FARMS_10X_HP, e, "C-Bonus, Farms 10x HP");
 
     // Militia-line +2 vs cavalry
     e.EffectCommands.clear();
@@ -3745,7 +3745,7 @@ void Civbuilder::createCivBonuses() {
         e.EffectCommands.push_back(createEC(4, militias[i], -1, 9, amountTypetoD(2, 8)));
         e.EffectCommands.push_back(createEC(4, militias[i], -1, 9, amountTypetoD(1, 30)));
     }
-    this->createCivBonus(260, e, "C-Bonus, Militia-line +2 vs cav");
+    this->createCivBonus(CIV_BONUS_260_MILITIALINE_2_VS_CAV, e, "C-Bonus, Militia-line +2 vs cav");
 
     // Elite steppe lancer free
     e.EffectCommands.clear();
@@ -3755,31 +3755,31 @@ void Civbuilder::createCivBonuses() {
     }
     e.EffectCommands.push_back(createEC(103, 715, -1, 0, 0));
     e.EffectCommands.push_back(createEC(103, royalLancerTech, -1, 0, 0));
-    this->createCivBonus(261, e, "C-Bonus, Elite steppe lancer free");
+    this->createCivBonus(CIV_BONUS_261_ELITE_STEPPE_LANCER_FREE, e, "C-Bonus, Elite steppe lancer free");
 
     // Steppe lancers +2 pierce armor
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["steppe"].size(); i++) {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["steppe"][i], -1, 8, amountTypetoD(2, 3)));
     }
-    this->createCivBonus(262, e, "C-Bonus, Steppe Lancers +2P armor");
+    this->createCivBonus(CIV_BONUS_262_STEPPE_LANCERS_2P_ARMOR, e, "C-Bonus, Steppe Lancers +2P armor");
 
     // Castles and kreposts bonus vs buildings
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, 82, -1, 9, amountTypetoD(100, 11)));
     e.EffectCommands.push_back(createEC(4, 1251, -1, 9, amountTypetoD(50, 11)));
-    this->createCivBonus(263, e, "C-Bonus, Castles bonus vs buildings");
+    this->createCivBonus(CIV_BONUS_263_CASTLES_BONUS_VS_BUILDINGS, e, "C-Bonus, Castles bonus vs buildings");
 
     // All villagers work 10% faster in Imperial Age
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(5, -1, 4, 13, 1.1));
-    this->createCivBonus(264, e, "C-Bonus, vils work 10% faster in Imp", {103});
+    this->createCivBonus(CIV_BONUS_264_HP_BONUS, e, "C-Bonus, vils work 10% faster in Imp", {103});
 
     // Outposts +5 garrison space
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, 598, -1, 2, 5));
     e.EffectCommands.push_back(createEC(0, 598, -1, 30, 15));
-    this->createCivBonus(265, e, "C-Bonus, Outposts garrison");
+    this->createCivBonus(CIV_BONUS_265_OUTPOSTS_GARRISON, e, "C-Bonus, Outposts garrison");
 
     // Builders/repairers +10 pierce armor
     e.EffectCommands.clear();
@@ -3787,23 +3787,23 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(4, 212, -1, 8, amountTypetoD(10, 3)));
     e.EffectCommands.push_back(createEC(4, 156, -1, 8, amountTypetoD(10, 3)));
     e.EffectCommands.push_back(createEC(4, 222, -1, 8, amountTypetoD(10, 3)));
-    this->createCivBonus(266, e, "C-Bonus, Builders/Repairers +10P armor");
+    this->createCivBonus(CIV_BONUS_266_BUILDERSREPAIRERS_10P_ARMOR, e, "C-Bonus, Builders/Repairers +10P armor");
 
     // Castles and Kreposts support 50 population
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, 82, -1, 21, 30));
     e.EffectCommands.push_back(createEC(4, 1251, -1, 21, 30));
-    this->createCivBonus(267, e, "C-Bonus, Castles and Kreposts 50 pop");
+    this->createCivBonus(CIV_BONUS_267_CASTLES_KREPOSTS_50_POP, e, "C-Bonus, Castles and Kreposts 50 pop");
 
     // Bombard towers bonus vs rams
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, 236, -1, 9, amountTypetoD(30, 17)));
-    this->createCivBonus(268, e, "C-Bonus, Bombard towers bonus vs rams");
+    this->createCivBonus(CIV_BONUS_268_BOMBARD_TOWERS_BONUS_VS_RAMS, e, "C-Bonus, Bombard towers bonus vs rams");
 
     // Towers bonus vs cavalry
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, -1, 52, 9, amountTypetoD(6, 8)));
-    this->createCivBonus(269, e, "C-Bonus, Towers bonus vs cavalry");
+    this->createCivBonus(CIV_BONUS_269_TOWERS_DEAL_EXTRA_DAMAGE_TO_CAVALRY, e, "C-Bonus, Towers bonus vs cavalry");
 
     // Feudal monks
     techIDs.clear();
@@ -3860,42 +3860,42 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(5, 1122, -1, 101, 0.66));
     e.EffectCommands.push_back(createEC(5, 827, -1, 101, 0.66));
     e.EffectCommands.push_back(createEC(5, 829, -1, 101, 0.66));
-    this->createCivBonus(271, e, "C-Bonus, Scorpions produced 50% faster");
+    this->createCivBonus(CIV_BONUS_271_SCORPIONS_PRODUCED_50_FASTER, e, "C-Bonus, Scorpions produced 50% faster");
 
     // Town Centers fire faster
     e.EffectCommands.clear();
     for (int i = 0; i < townCenters.size(); i++) {
         e.EffectCommands.push_back(createEC(5, townCenters[i], -1, 10, 0.8));
     }
-    this->createCivBonus(272, e, "C-Bonus, TCs fire 25% faster");
+    this->createCivBonus(CIV_BONUS_272_TCS_FIRE_25_FASTER, e, "C-Bonus, TCs fire 25% faster");
 
     // Trebuchets -50% gold
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["trebuchet"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["trebuchet"][i], -1, 105, 0.5));
     }
-    this->createCivBonus(273, e, "C-Bonus, Trebuchets -50% gold");
+    this->createCivBonus(CIV_BONUS_273_TREBUCHETS_50_GOLD, e, "C-Bonus, Trebuchets -50% gold");
 
     // All explosive units +blast radius
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["explosive"].size(); i++) {
         e.EffectCommands.push_back(createEC(5, this->unitClasses["explosive"][i], -1, 22, 2));
     }
-    this->createCivBonus(274, e, "C-Bonus, Explosive units +blast radius");
+    this->createCivBonus(CIV_BONUS_274_EXPLOSIVE_UNITS_BLAST_RADIUS, e, "C-Bonus, Explosive units +blast radius");
 
     // Gunpowder bonus vs buildings
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["gunpowder"].size(); i++) {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["gunpowder"][i], -1, 9, amountTypetoD(8, 11)));
     }
-    this->createCivBonus(275, e, "C-Bonus, Gunpowder bonus vs buildings");
+    this->createCivBonus(CIV_BONUS_275_GUNPOWDER_BONUS_VS_BUILDINGS, e, "C-Bonus, Gunpowder bonus vs buildings");
 
     // Shock Infantry +1 pierce armor
     e.EffectCommands.clear();
     for (int i = 0; i < this->unitClasses["shock"].size(); i++) {
         e.EffectCommands.push_back(createEC(4, this->unitClasses["shock"][i], -1, 8, amountTypetoD(1, 3)));
     }
-    this->createCivBonus(276, e, "C-Bonus, Shock Infantry +1P armor");
+    this->createCivBonus(CIV_BONUS_276_SHOCK_INFANTRY_1P_ARMOR, e, "C-Bonus, Shock Infantry +1P armor");
 
     // Gunpowder units +1 attack per university tech
     e.EffectCommands.clear();
@@ -3916,7 +3916,7 @@ void Civbuilder::createCivBonuses() {
     }
     for (int i = 0; i < this->df->Techs.size(); i++) {
         if (getResearchLocation(this->df->Techs[i]) == 209) {
-            this->createCivBonus(277, e, "Gunpowder +1% attack for uni tech " + to_string(i), {i});
+            this->createCivBonus(CIV_BONUS_277_DAMAGE_BONUS, e, "Gunpowder +1% attack for uni tech " + to_string(i), {i});
         }
     }
 
@@ -3927,7 +3927,7 @@ void Civbuilder::createCivBonuses() {
     }
     for (int i = 0; i < this->df->Techs.size(); i++) {
         if (getResearchLocation(this->df->Techs[i]) == 209) {
-            this->createCivBonus(278, e, "Building +3% armor for uni tech" + to_string(i), {i});
+            this->createCivBonus(CIV_BONUS_278_SPEED_BONUS, e, "Building +3% armor for uni tech" + to_string(i), {i});
         }
     }
 
@@ -3938,7 +3938,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(7, 125, 1806, 1, 0));
     for (int i = 0; i < this->df->Techs.size(); i++) {
         if (getResearchLocation(this->df->Techs[i]) == 104) {
-            this->createCivBonus(279, e, "Monk for church tech " + to_string(i), {i});
+            this->createCivBonus(CIV_BONUS_279_ARMOR_BONUS, e, "Monk for church tech " + to_string(i), {i});
         }
     }
 
@@ -4026,7 +4026,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(4, 442, -1, 8, amountTypetoD(2, 4)));
     e.EffectCommands.push_back(createEC(4, 1795, -1, 8, amountTypetoD(2, 3)));
     e.EffectCommands.push_back(createEC(4, 1795, -1, 8, amountTypetoD(2, 4)));
-    this->createCivBonus(302, e, "C-Bonus, Navy armor");
+    this->createCivBonus(CIV_BONUS_302_NAVY_ARMOR, e, "C-Bonus, Navy armor");
 
     // Battle Elephants +1/+1P armor
     this->civBonuses[CIV_BONUS_303_ELEPHANT_UNITS_1_1P_ARMOR] = {640};
@@ -4099,12 +4099,12 @@ void Civbuilder::createCivBonuses() {
             e.EffectCommands.push_back(createEC(0, i, -1, 27, buildingArea));
         }
     }
-    this->createCivBonus(323, e, "C-Bonus, Buildings rebate stone");
+    this->createCivBonus(CIV_BONUS_323_BUILDINGS_REBATE_STONE, e, "C-Bonus, Buildings rebate stone");
 
     // Villagers cooperate - "Villagers work faster when nearby other villagers"
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(0, -1, 4, 63, 96));
-    this->createCivBonus(324, e, "C-Bonus, Villagers cooperate");
+    this->createCivBonus(CIV_BONUS_324_VILLAGERS_COOPERATE, e, "C-Bonus, Villagers cooperate");
 
     // Husbandry affects attack speed
     e.EffectCommands.clear();
@@ -4129,7 +4129,7 @@ void Civbuilder::createCivBonuses() {
     // Trade yields stone
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(1, 253, -1, -1, 10));
-    this->createCivBonus(326, e, "C-Bonus, Trade yields stone");
+    this->createCivBonus(CIV_BONUS_326_TRADE_YIELDS_STONE, e, "C-Bonus, Trade yields stone");
 
     // Blacksmith upgrades affect bonus damage
     techIDs = {};
@@ -4389,7 +4389,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(0, -1, 36, 60, 0.05));
     e.EffectCommands.push_back(createEC(0, -1, 36, 61, 0));
     e.EffectCommands.push_back(createEC(0, -1, 36, 62, 4));
-    this->createCivBonus(328, e, "C-Bonus, cav archers dodge");
+    this->createCivBonus(CIV_BONUS_328_CAV_ARCHERS_DODGE, e, "C-Bonus, cav archers dodge");
 
     // Khmer farms
     techIDs = {654};
@@ -4412,7 +4412,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(3, 1193, smallFarmDrop, -1, 0));
     e.EffectCommands.push_back(createEC(3, 1194, smallFarmStack, -1, 0));
     e.EffectCommands.push_back(createEC(3, 1195, smallRiceFarmDrop, -1, 0));
-    this->createCivBonus(330, e, "C-Bonus, 2x2 farms");
+    this->createCivBonus(CIV_BONUS_330_2X2_FARMS, e, "C-Bonus, 2x2 farms");
 
     // Archery range techs cost -50%
     e.EffectCommands.clear();
@@ -4466,7 +4466,7 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.push_back(createEC(4, 1105, -1, 9, amountTypetoD(6, 11)));
     e.EffectCommands.push_back(createEC(4, tcSiegeTower, -1, 9, amountTypetoD(6, 3)));
     e.EffectCommands.push_back(createEC(4, tcSiegeTower, -1, 9, amountTypetoD(6, 11)));
-    this->createCivBonus(333, e, "C-Bonus, siege towers fire arrows");
+    this->createCivBonus(CIV_BONUS_333_SIEGE_TOWERS_CAN_FIRE_ARROWS, e, "C-Bonus, siege towers fire arrows");
 
     // Fire lancers/ships move faster
     this->civBonuses[CIV_BONUS_334_FIRE_LANCERS_AND_FIRE_SHIPS_MOVE_5] = {983, 984};
