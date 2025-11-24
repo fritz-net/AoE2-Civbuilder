@@ -91,53 +91,53 @@ void Civbuilder::initialize() {
 
     this->duplicationUnits = {};
 
-    this->unitClasses["barracks"] = {UNIT_MILITIA, UNIT_MAN_AT_ARMS, UNIT_LONG_SWORDSMAN, UNIT_TWO_HANDED_SWORDSMAN, UNIT_CHAMPION, UNIT_SPEARMAN, UNIT_PIKEMAN, UNIT_HALBERDIER,
-                                   UNIT_EAGLE_SCOUT, UNIT_EAGLE_WARRIOR, UNIT_ELITE_EAGLE_WARRIOR, UNIT_CONDOTTIERO_1, UNIT_LEGIONARY, UNIT_FLEMISH_MILITIA, UNIT_JIAN_SWORDSMAN, UNIT_JIAN_SWORDSMAN_1,
-                                   UNIT_FIRE_LANCER, UNIT_ELITE_FIRE_LANCER};
-    this->unitClasses["stable"] = {UNIT_SCOUT_CAVALRY, UNIT_LIGHT_CAVALRY, UNIT_HUSSAR, UNIT_WINGED_HUSSAR, UNIT_KNIGHT, UNIT_CAVALIER, UNIT_PALADIN, UNIT_CAMEL_RIDER,
-                                   UNIT_HEAVY_CAMEL_RIDER, UNIT_IMPERIAL_CAMEL_RIDER, UNIT_BATTLE_ELEPHANT, UNIT_ELITE_BATTLE_ELEPHANT, UNIT_STEPPE_LANCER, UNIT_ELITE_STEPPE_LANCER, UNIT_HLETRIEN, UNIT_CAMEL_SCOUT,
-                                   UNIT_SHRIVAMSHA_RIDER, UNIT_ELITE_SHRIVAMSHA_RIDER, UNIT_SAVAR, UNIT_HEI_GUANG_CAVALRY, UNIT_HEAVY_HEI_GUANG_CAVALRY};
-    this->unitClasses["archery"] = {UNIT_ARCHER, UNIT_CROSSBOWMAN, UNIT_ARBALESTER, UNIT_HAND_CANNONEER, UNIT_SKIRMISHER, UNIT_ELITE_SKIRMISHER, UNIT_IMPERIAL_SKIRMISHER, UNIT_CAVALRY_ARCHER,
-                                   UNIT_HEAVY_CAVALRY_ARCHER, UNIT_SLINGER, UNIT_GENITOUR, UNIT_ELITE_GENITOUR, UNIT_GRENADIER, UNIT_XIANBEI_RAIDER};
-    this->unitClasses["workshop"] = {UNIT_BATTERING_RAM, UNIT_BATTERING_RAM_1, UNIT_CAPPED_RAM, UNIT_SIEGE_RAM, UNIT_MANGONEL, UNIT_ONAGER, UNIT_SIEGE_ONAGER, UNIT_SIEGE_TOWER,
-                                   UNIT_SIEGE_TOWER_1, UNIT_BOMBARD_CANNON, UNIT_SCORPION, UNIT_HEAVY_SCORPION, UNIT_HOUFNICE, UNIT_ARMORED_ELEPHANT, UNIT_SIEGE_ELEPHANT, UNIT_WAR_CHARIOT__FOCUS_FIRE,
-                                   UNIT_WAR_CHARIOT__BARRAGE, UNIT_MOUNTED_TREBUCHET, UNIT_TRACTION_TREBUCHET, UNIT_FLAMING_CAMEL, UNIT_ROCKET_CART, UNIT_HEAVY_ROCKET_CART};
-    this->unitClasses["elephant"] = {UNIT_WAR_ELEPHANT, UNIT_ELITE_WAR_ELEPHANT, UNIT_ELEPHANT_ARCHER, UNIT_ELITE_ELEPHANT_ARCHER, UNIT_BALLISTA_ELEPHANT, UNIT_ELITE_BALLISTA_ELEPHANT, UNIT_BATTLE_ELEPHANT, UNIT_ELITE_BATTLE_ELEPHANT,
-                                   UNIT_ARMORED_ELEPHANT, UNIT_SIEGE_ELEPHANT};
-    this->unitClasses["gunpowder"] = {UNIT_HAND_CANNONEER, UNIT_BOMBARD_CANNON, UNIT_CANNON_GALLEON, UNIT_ELITE_CANNON_GALLEON, UNIT_JANISSARY, UNIT_ELITE_JANISSARY, UNIT_ORGAN_GUN, UNIT_ELITE_ORGAN_GUN,
-                                   UNIT_CONQUISTADOR, UNIT_ELITE_CONQUISTADOR, UNIT_HOUFNICE, UNIT_HUSSITE_WAGON, UNIT_ELITE_HUSSITE_WAGON, UNIT_GRENADIER, UNIT_TURTLE_SHIP, UNIT_ELITE_TURTLE_SHIP,
-                                   UNIT_ROCKET_CART, UNIT_HEAVY_ROCKET_CART};
-    this->unitClasses["camel"] = {UNIT_CAMEL_RIDER, UNIT_HEAVY_CAMEL_RIDER, UNIT_IMPERIAL_CAMEL_RIDER, UNIT_CAMEL_ARCHER, UNIT_ELITE_CAMEL_ARCHER, UNIT_FLAMING_CAMEL, UNIT_MAMELUKE, UNIT_ELITE_MAMELUKE,
-                                   UNIT_CAMEL_SCOUT, UNIT_MOUNTED_TREBUCHET};
-    this->unitClasses["explosive"] = {UNIT_DEMOLITION_SHIP, UNIT_HEAVY_DEMOLITION_SHIP, UNIT_DEMOLITION_RAFT, UNIT_PETARD, UNIT_FLAMING_CAMEL, UNIT_HDSQD, UNIT_GRENADIER};
-    this->unitClasses["scorpion"] = {UNIT_SCORPION, UNIT_PROJECTILE_SGY__FIRE};
-    this->unitClasses["unique"] = {UNIT_LONGBOWMAN, UNIT_ELITE_LONGBOWMAN, UNIT_THROWING_AXEMAN, UNIT_ELITE_THROWING_AXEMAN, UNIT_HUSKARL, UNIT_ELITE_HUSKARL, UNIT_TEUTONIC_KNIGHT, UNIT_ELITE_TEUTONIC_KNIGHT,
-                                   UNIT_SAMURAI, UNIT_ELITE_SAMURAI, UNIT_CHU_KO_NU, UNIT_ELITE_CHU_KO_NU, UNIT_CATAPHRACT, UNIT_ELITE_CATAPHRACT, UNIT_MAMELUKE, UNIT_ELITE_MAMELUKE,
-                                   UNIT_WAR_ELEPHANT, UNIT_ELITE_WAR_ELEPHANT, UNIT_JANISSARY, UNIT_ELITE_JANISSARY, UNIT_BERSERK, UNIT_ELITE_BERSERK, UNIT_MANGUDAI, UNIT_ELITE_MANGUDAI,
-                                   UNIT_WOAD_RAIDER, UNIT_ELITE_WOAD_RAIDER, UNIT_CONQUISTADOR, UNIT_ELITE_CONQUISTADOR, UNIT_JAGUAR_WARRIOR, UNIT_ELITE_JAGUAR_WARRIOR, UNIT_PLUMED_ARCHER, UNIT_ELITE_PLUMED_ARCHER,
-                                   UNIT_TARKAN, UNIT_ELITE_TARKAN, UNIT_WAR_WAGON, UNIT_ELITE_WAR_WAGON, UNIT_GENOESE_CROSSBOWMAN, UNIT_ELITE_GENOESE_CROSSBOWMAN, UNIT_GHULAM, UNIT_ELITE_GHULAM,
-                                   UNIT_KAMAYUK, UNIT_ELITE_KAMAYUK, UNIT_MAGYAR_HUSZAR, UNIT_ELITE_MAGYAR_HUSZAR, UNIT_BOYAR, UNIT_ELITE_BOYAR, UNIT_ORGAN_GUN, UNIT_ELITE_ORGAN_GUN,
-                                   UNIT_SHOTEL_WARRIOR, UNIT_ELITE_SHOTEL_WARRIOR, UNIT_GBETO, UNIT_ELITE_GBETO, UNIT_CAMEL_ARCHER, UNIT_ELITE_CAMEL_ARCHER, UNIT_BALLISTA_ELEPHANT, UNIT_ELITE_BALLISTA_ELEPHANT,
-                                   UNIT_KARAMBIT_WARRIOR, UNIT_ELITE_KARAMBIT_WARRIOR, UNIT_ARAMBAI, UNIT_ELITE_ARAMBAI, UNIT_RATTAN_ARCHER, UNIT_ELITE_RATTAN_ARCHER, UNIT_KONNIK, UNIT_ELITE_KONNIK,
-                                   UNIT_KONNIK__DISMOUNTED, UNIT_ELITE_KONNIK__DISMOUNTED, UNIT_KESHIK, UNIT_ELITE_KESHIK, UNIT_KIPCHAK, UNIT_ELITE_KIPCHAK, UNIT_LEITIS, UNIT_ELITE_LEITIS,
-                                   UNIT_COUSTILLIER, UNIT_ELITE_COUSTILLIER, UNIT_SERJEANT, UNIT_ELITE_SERJEANT, UNIT_OBUCH, UNIT_OBUCH_D, UNIT_HUSSITE_WAGON, UNIT_ELITE_HUSSITE_WAGON,
-                                   UNIT_URUMI_SWORDSMAN, UNIT_ELITE_URUMI_SWORDSMAN, UNIT_RATHA__MELEE, UNIT_ELITE_RATHA__MELEE, UNIT_CHAKRAM_THROWER, UNIT_ELITE_CHAKRAM_THROWER, UNIT_RATHA, UNIT_ELITE_RATHA,
-                                   UNIT_COMPOSITE_BOWMAN, UNIT_ELITE_COMPOSITE_BOWMAN, UNIT_MONASPA, UNIT_ELITE_MONASPA, UNIT_WHITE_FEATHER_GUARD, UNIT_ELITE_WHITE_FEATHER_GUARD, UNIT_FIRE_ARCHER, UNIT_ELITE_FIRE_ARCHER,
-                                   UNIT_TIGER_CAVALRY, UNIT_ELITE_TIGER_CAVALRY, UNIT_IRON_PAGODA, UNIT_ELITE_IRON_PAGODA, UNIT_LIAO_DAO, UNIT_ELITE_LIAO_DAO};
-    this->unitClasses["steppe"] = {UNIT_STEPPE_LANCER, UNIT_ELITE_STEPPE_LANCER};
-    this->unitClasses["shock"] = {UNIT_EAGLE_SCOUT, UNIT_ELITE_EAGLE_WARRIOR, UNIT_EAGLE_WARRIOR, UNIT_JIAN_SWORDSMAN, UNIT_JIAN_SWORDSMAN_1, UNIT_FIRE_LANCER, UNIT_ELITE_FIRE_LANCER};
-    this->unitClasses["ram"] = {UNIT_BATTERING_RAM, UNIT_BATTERING_RAM_1, UNIT_CAPPED_RAM, UNIT_SIEGE_RAM};
-    this->unitClasses["footArcher"] = {UNIT_ARCHER, UNIT_LONGBOWMAN, UNIT_CROSSBOWMAN, UNIT_CHU_KO_NU, UNIT_SLINGER, UNIT_ARBALESTER, UNIT_ELITE_LONGBOWMAN, UNIT_ELITE_CHU_KO_NU,
-                                   UNIT_PLUMED_ARCHER, UNIT_ELITE_PLUMED_ARCHER, UNIT_GENOESE_CROSSBOWMAN, UNIT_ELITE_GENOESE_CROSSBOWMAN, UNIT_RATTAN_ARCHER, UNIT_ELITE_RATTAN_ARCHER, UNIT_COMPOSITE_BOWMAN, UNIT_ELITE_COMPOSITE_BOWMAN,
-                                   UNIT_FIRE_ARCHER, UNIT_ELITE_FIRE_ARCHER};
-    this->unitClasses["archerLine"] = {UNIT_ARCHER, UNIT_LONGBOWMAN, UNIT_ARBALESTER};
-    this->unitClasses["spear"] = {UNIT_SPEARMAN, UNIT_PIKEMAN, UNIT_HALBERDIER, UNIT_SPEARMAN_1, UNIT_PIKEMAN_1, UNIT_HALBERDIER_1};
-    this->unitClasses["skirmisher"] = {UNIT_ELITE_SKIRMISHER, UNIT_SKIRMISHER, UNIT_IMPERIAL_SKIRMISHER, UNIT_GENIT, UNIT_GENITX, UNIT_GENITOUR, UNIT_ELITE_GENITOUR};
-    this->unitClasses["lightCav"] = {UNIT_SCOUT_CAVALRY, UNIT_LIGHT_CAVALRY, UNIT_HUSSAR, UNIT_WINGED_HUSSAR};
-    this->unitClasses["uniqueShip"] = {UNIT_LONGBOAT, UNIT_ELITE_LONGBOAT, UNIT_CARAVEL, UNIT_ELITE_CARAVEL, UNIT_THIRISADAI, UNIT_TURTLE_SHIP, UNIT_ELITE_TURTLE_SHIP, UNIT_CANOE,
-                                   UNIT_DRAGON_SHIP, UNIT_DRAGON_SHIP_1};
-    this->unitClasses["trebuchet"] = {UNIT_TREBUCHET, UNIT_PTREB, UNIT_TREBU, UNIT_PTREB_1, UNIT_MOUNTED_TREBUCHET, UNIT_TRACTION_TREBUCHET, UNIT_HGOS, UNIT_HGOSP,
-                                   UNIT_LOU_CHUAN};
+    this->unitClasses["barracks"] = {MILITIA, MAN_AT_ARMS, LONG_SWORDSMAN, TWO_HANDED_SWORDSMAN, CHAMPION, SPEARMAN, PIKEMAN, HALBERDIER,
+                                   EAGLE_SCOUT, EAGLE_WARRIOR, ELITE_EAGLE_WARRIOR, CONDOTTIERO_1, LEGIONARY, FLEMISH_MILITIA, JIAN_SWORDSMAN, JIAN_SWORDSMAN_1,
+                                   FIRE_LANCER, ELITE_FIRE_LANCER};
+    this->unitClasses["stable"] = {SCOUT_CAVALRY, LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR, KNIGHT, CAVALIER, PALADIN, CAMEL_RIDER,
+                                   HEAVY_CAMEL_RIDER, IMPERIAL_CAMEL_RIDER, BATTLE_ELEPHANT, ELITE_BATTLE_ELEPHANT, STEPPE_LANCER, ELITE_STEPPE_LANCER, HLETRIEN, CAMEL_SCOUT,
+                                   SHRIVAMSHA_RIDER, ELITE_SHRIVAMSHA_RIDER, SAVAR, HEI_GUANG_CAVALRY, HEAVY_HEI_GUANG_CAVALRY};
+    this->unitClasses["archery"] = {ARCHER, CROSSBOWMAN, ARBALESTER, HAND_CANNONEER, SKIRMISHER, ELITE_SKIRMISHER, IMPERIAL_SKIRMISHER, CAVALRY_ARCHER,
+                                   HEAVY_CAVALRY_ARCHER, SLINGER, GENITOUR, ELITE_GENITOUR, GRENADIER, XIANBEI_RAIDER};
+    this->unitClasses["workshop"] = {BATTERING_RAM, BATTERING_RAM_1, CAPPED_RAM, SIEGE_RAM, MANGONEL, ONAGER, SIEGE_ONAGER, SIEGE_TOWER,
+                                   SIEGE_TOWER_1, BOMBARD_CANNON, SCORPION, HEAVY_SCORPION, HOUFNICE, ARMORED_ELEPHANT, SIEGE_ELEPHANT, WAR_CHARIOT__FOCUS_FIRE,
+                                   WAR_CHARIOT__BARRAGE, MOUNTED_TREBUCHET, TRACTION_TREBUCHET, FLAMING_CAMEL, ROCKET_CART, HEAVY_ROCKET_CART};
+    this->unitClasses["elephant"] = {WAR_ELEPHANT, ELITE_WAR_ELEPHANT, ELEPHANT_ARCHER, ELITE_ELEPHANT_ARCHER, BALLISTA_ELEPHANT, ELITE_BALLISTA_ELEPHANT, BATTLE_ELEPHANT, ELITE_BATTLE_ELEPHANT,
+                                   ARMORED_ELEPHANT, SIEGE_ELEPHANT};
+    this->unitClasses["gunpowder"] = {HAND_CANNONEER, BOMBARD_CANNON, CANNON_GALLEON, ELITE_CANNON_GALLEON, JANISSARY, ELITE_JANISSARY, ORGAN_GUN, ELITE_ORGAN_GUN,
+                                   CONQUISTADOR, ELITE_CONQUISTADOR, HOUFNICE, HUSSITE_WAGON, ELITE_HUSSITE_WAGON, GRENADIER, TURTLE_SHIP, ELITE_TURTLE_SHIP,
+                                   ROCKET_CART, HEAVY_ROCKET_CART};
+    this->unitClasses["camel"] = {CAMEL_RIDER, HEAVY_CAMEL_RIDER, IMPERIAL_CAMEL_RIDER, CAMEL_ARCHER, ELITE_CAMEL_ARCHER, FLAMING_CAMEL, MAMELUKE, ELITE_MAMELUKE,
+                                   CAMEL_SCOUT, MOUNTED_TREBUCHET};
+    this->unitClasses["explosive"] = {DEMOLITION_SHIP, HEAVY_DEMOLITION_SHIP, DEMOLITION_RAFT, PETARD, FLAMING_CAMEL, HDSQD, GRENADIER};
+    this->unitClasses["scorpion"] = {SCORPION, PROJECTILE_SGY__FIRE};
+    this->unitClasses["unique"] = {LONGBOWMAN, ELITE_LONGBOWMAN, THROWING_AXEMAN, ELITE_THROWING_AXEMAN, HUSKARL, ELITE_HUSKARL, TEUTONIC_KNIGHT, ELITE_TEUTONIC_KNIGHT,
+                                   SAMURAI, ELITE_SAMURAI, CHU_KO_NU, ELITE_CHU_KO_NU, CATAPHRACT, ELITE_CATAPHRACT, MAMELUKE, ELITE_MAMELUKE,
+                                   WAR_ELEPHANT, ELITE_WAR_ELEPHANT, JANISSARY, ELITE_JANISSARY, BERSERK, ELITE_BERSERK, MANGUDAI, ELITE_MANGUDAI,
+                                   WOAD_RAIDER, ELITE_WOAD_RAIDER, CONQUISTADOR, ELITE_CONQUISTADOR, JAGUAR_WARRIOR, ELITE_JAGUAR_WARRIOR, PLUMED_ARCHER, ELITE_PLUMED_ARCHER,
+                                   TARKAN, ELITE_TARKAN, WAR_WAGON, ELITE_WAR_WAGON, GENOESE_CROSSBOWMAN, ELITE_GENOESE_CROSSBOWMAN, GHULAM, ELITE_GHULAM,
+                                   KAMAYUK, ELITE_KAMAYUK, MAGYAR_HUSZAR, ELITE_MAGYAR_HUSZAR, BOYAR, ELITE_BOYAR, ORGAN_GUN, ELITE_ORGAN_GUN,
+                                   SHOTEL_WARRIOR, ELITE_SHOTEL_WARRIOR, GBETO, ELITE_GBETO, CAMEL_ARCHER, ELITE_CAMEL_ARCHER, BALLISTA_ELEPHANT, ELITE_BALLISTA_ELEPHANT,
+                                   KARAMBIT_WARRIOR, ELITE_KARAMBIT_WARRIOR, ARAMBAI, ELITE_ARAMBAI, RATTAN_ARCHER, ELITE_RATTAN_ARCHER, KONNIK, ELITE_KONNIK,
+                                   KONNIK__DISMOUNTED, ELITE_KONNIK__DISMOUNTED, KESHIK, ELITE_KESHIK, KIPCHAK, ELITE_KIPCHAK, LEITIS, ELITE_LEITIS,
+                                   COUSTILLIER, ELITE_COUSTILLIER, SERJEANT, ELITE_SERJEANT, OBUCH, OBUCH_D, HUSSITE_WAGON, ELITE_HUSSITE_WAGON,
+                                   URUMI_SWORDSMAN, ELITE_URUMI_SWORDSMAN, RATHA__MELEE, ELITE_RATHA__MELEE, CHAKRAM_THROWER, ELITE_CHAKRAM_THROWER, RATHA, ELITE_RATHA,
+                                   COMPOSITE_BOWMAN, ELITE_COMPOSITE_BOWMAN, MONASPA, ELITE_MONASPA, WHITE_FEATHER_GUARD, ELITE_WHITE_FEATHER_GUARD, FIRE_ARCHER, ELITE_FIRE_ARCHER,
+                                   TIGER_CAVALRY, ELITE_TIGER_CAVALRY, IRON_PAGODA, ELITE_IRON_PAGODA, LIAO_DAO, ELITE_LIAO_DAO};
+    this->unitClasses["steppe"] = {STEPPE_LANCER, ELITE_STEPPE_LANCER};
+    this->unitClasses["shock"] = {EAGLE_SCOUT, ELITE_EAGLE_WARRIOR, EAGLE_WARRIOR, JIAN_SWORDSMAN, JIAN_SWORDSMAN_1, FIRE_LANCER, ELITE_FIRE_LANCER};
+    this->unitClasses["ram"] = {BATTERING_RAM, BATTERING_RAM_1, CAPPED_RAM, SIEGE_RAM};
+    this->unitClasses["footArcher"] = {ARCHER, LONGBOWMAN, CROSSBOWMAN, CHU_KO_NU, SLINGER, ARBALESTER, ELITE_LONGBOWMAN, ELITE_CHU_KO_NU,
+                                   PLUMED_ARCHER, ELITE_PLUMED_ARCHER, GENOESE_CROSSBOWMAN, ELITE_GENOESE_CROSSBOWMAN, RATTAN_ARCHER, ELITE_RATTAN_ARCHER, COMPOSITE_BOWMAN, ELITE_COMPOSITE_BOWMAN,
+                                   FIRE_ARCHER, ELITE_FIRE_ARCHER};
+    this->unitClasses["archerLine"] = {ARCHER, LONGBOWMAN, ARBALESTER};
+    this->unitClasses["spear"] = {SPEARMAN, PIKEMAN, HALBERDIER, SPEARMAN_1, PIKEMAN_1, HALBERDIER_1};
+    this->unitClasses["skirmisher"] = {ELITE_SKIRMISHER, SKIRMISHER, IMPERIAL_SKIRMISHER, GENIT, GENITX, GENITOUR, ELITE_GENITOUR};
+    this->unitClasses["lightCav"] = {SCOUT_CAVALRY, LIGHT_CAVALRY, HUSSAR, WINGED_HUSSAR};
+    this->unitClasses["uniqueShip"] = {LONGBOAT, ELITE_LONGBOAT, CARAVEL, ELITE_CARAVEL, THIRISADAI, TURTLE_SHIP, ELITE_TURTLE_SHIP, CANOE,
+                                   DRAGON_SHIP, DRAGON_SHIP_1};
+    this->unitClasses["trebuchet"] = {TREBUCHET, PTREB, TREBU, PTREB_1, MOUNTED_TREBUCHET, TRACTION_TREBUCHET, HGOS, HGOSP,
+                                   LOU_CHUAN};
 
     this->civBonuses[CIV_BONUS_0_TOWN_CENTERS_COST_50_WOOD_STARTING_IN] = {381};
     this->civBonuses[CIV_BONUS_1_FOOT_ARCHERS_EXCEPT_SKIRMISHERS_1_RANGE_IN] = {382, 403};
@@ -1231,7 +1231,7 @@ void Civbuilder::setupData() {
 
 void Civbuilder::createNewUnits() {
     // Crusader Knights
-    this->createUU(39, 1723, "Crusader Knight", {600, 0, 0, 1200}, 45, 7604);
+    this->createUU(UU_CRUSADER_KNIGHT, 1723, "Crusader Knight", {600, 0, 0, 1200}, 45, 7604);
     int uuID = (int)(this->df->Civs[0].Units.size() - 2);
     int eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1253,7 +1253,7 @@ void Civbuilder::createNewUnits() {
     }
 
     // Xolotl Warriors
-    createUU(40, 1570, "Xolotl Warrior", {800, 0, 0, 800}, 60, 7605);
+    createUU(UU_XOLOTL_WARRIOR, 1570, "Xolotl Warrior", {800, 0, 0, 800}, 60, 7605);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1285,7 +1285,7 @@ void Civbuilder::createNewUnits() {
     }
 
     // Saboteur
-    createUU(41, 706, "Saboteur", {0, 600, 600, 0}, 40, 7606);
+    createUU(UU_SABOTEUR, 706, "Saboteur", {0, 600, 600, 0}, 40, 7606);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     this->unitClasses["explosive"].push_back(uuID);
@@ -1325,7 +1325,7 @@ void Civbuilder::createNewUnits() {
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 0, 50, 50});
     // Ninja
-    createUU(42, 1145, "Ninja", {0, 500, 0, 600}, 100, 7607);
+    createUU(UU_NINJA, 1145, "Ninja", {0, 500, 0, 600}, 100, 7607);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     int ninjaID = uuID;
@@ -1355,7 +1355,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.BreakOffCombat = 1;
     }
     // Flamethrower
-    createUU(43, 188, "Flamethrower", {0, 1000, 0, 1000}, 75, 7608);
+    createUU(UU_FLAMETHROWER, 188, "Flamethrower", {0, 1000, 0, 1000}, 75, 7608);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1384,7 +1384,7 @@ void Civbuilder::createNewUnits() {
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 125, 0, 50});
     // Photonman
-    createUU(44, 1577, "Photonman", {1000, 0, 0, 1000}, 120, 7609);
+    createUU(UU_PHOTONMAN, 1577, "Photonman", {1000, 0, 0, 1000}, 120, 7609);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1437,7 +1437,7 @@ void Civbuilder::createNewUnits() {
         shockPowerUpTask.WorkRange = 2;
         shockPowerUpTasks.push_back(shockPowerUpTask);
     }
-    createUU(46, 1074, "Apukispay", {800, 0, 0, 900}, 70, 7643);
+    createUU(UU_APUKISPAY, 1074, "Apukispay", {800, 0, 0, 900}, 70, 7643);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1463,7 +1463,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}}, {{4, 1}, {3, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}}, {{4, 2}, {3, 0}, {19, 0}});
     // Monkey Boy
-    createUU(47, 860, "Monkey Boy", {2000, 0, 0, 0}, 60, 7612);
+    createUU(UU_MONKEY_BOY, 860, "Monkey Boy", {2000, 0, 0, 0}, 60, 7612);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1499,7 +1499,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Bird.TaskList.push_back(civ.Units[1723].Bird.TaskList[4]);
     }
     // Amazon Warrior
-    createUU(48, 825, "Amazon Warrior", {600, 0, 0, 1000}, 70, 7613);
+    createUU(UU_AMAZON_WARRIOR, 825, "Amazon Warrior", {600, 0, 0, 1000}, 70, 7613);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1530,7 +1530,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Speed = 1.2;
     }
     // Amazon Archer
-    createUU(49, 850, "Amazon Archer", {600, 0, 0, 400}, 60, 7614);
+    createUU(UU_AMAZON_ARCHER, 850, "Amazon Archer", {600, 0, 0, 400}, 60, 7614);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     this->unitClasses["footArcher"].push_back(uuID);
@@ -1565,7 +1565,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.ResourceCosts[1].Amount = 35;
     }
     // Iroquois Warrior
-    createUU(50, 1374, "Iroquois Warrior", {800, 0, 0, 700}, 70, 7615);
+    createUU(UU_IROQUOIS_WARRIOR, 1374, "Iroquois Warrior", {800, 0, 0, 700}, 70, 7615);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1598,7 +1598,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].HitPoints = 80;
     }
     // Varangian Guard
-    createUU(51, 1681, "Varangian Guard", {900, 0, 0, 900}, 90, 7616);
+    createUU(UU_VARANGIAN_GUARD, 1681, "Varangian Guard", {900, 0, 0, 900}, 90, 7616);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1636,7 +1636,7 @@ void Civbuilder::createNewUnits() {
     }
     setUnitCosts(this->df, {uuID, eID}, {70, 0, 0, 45});
     // Gendarme
-    createUU(52, 1281, "Gendarme", {1000, 0, 0, 850}, 110, 7617);
+    createUU(UU_GENDARME, 1281, "Gendarme", {1000, 0, 0, 850}, 110, 7617);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1656,7 +1656,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 10}}, {{3, 5}, {4, 5}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}}, {{3, 7}, {4, 7}, {8, 0}, {19, 0}});
     // Cuahchiqueh
-    createUU(53, 1067, "Cuahchiqueh", {600, 0, 0, 900}, 60, 7618);
+    createUU(UU_CUAHCHIQUEH, 1067, "Cuahchiqueh", {600, 0, 0, 900}, 60, 7618);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1680,7 +1680,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{29, 5}, {21, 1}, {1, 5}, {4, 6}, {8, 0}, {32, 5}}, {{4, 1}, {3, -1}, {19, 0}});
     setCombatStats(this->df, eID, {{29, 7}, {21, 1}, {1, 5}, {4, 8}, {8, 0}, {32, 5}}, {{4, 1}, {3, -1}, {19, 0}});
     // Ritterbruder
-    createUU(54, 1727, "Ritterbruder", {850, 0, 0, 850}, 60, 7619);
+    createUU(UU_RITTERBRUDER, 1727, "Ritterbruder", {850, 0, 0, 850}, 60, 7619);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1700,7 +1700,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 11}}, {{3, 1}, {4, 6}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}}, {{3, 2}, {4, 11}, {8, 0}, {19, 0}});
     // Kazak
-    createUU(55, 1269, "Kazak", {0, 1100, 0, 500}, 70, 7620);
+    createUU(UU_KAZAK, 1269, "Kazak", {0, 1100, 0, 500}, 70, 7620);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1738,7 +1738,7 @@ void Civbuilder::createNewUnits() {
     monkPowerUpTask.ClassID = -1;
     monkPowerUpTask.UnitID = 1811;
     monkPowerUpTasks.push_back(monkPowerUpTask);
-    createUU(56, 1721, "Szlachcic", {750, 0, 0, 650}, 60, 7621);
+    createUU(UU_SZLACHCIC, 1721, "Szlachcic", {750, 0, 0, 650}, 60, 7621);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1762,7 +1762,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 10}}, {{4, 4}, {3, 1}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}}, {{4, 5}, {3, 2}, {8, 0}, {19, 0}});
     // Cuirassier
-    createUU(57, 1186, "Cuirassier", {650, 0, 0, 800}, 60, 7622);
+    createUU(UU_CUIRASSIER, 1186, "Cuirassier", {650, 0, 0, 800}, 60, 7622);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1793,7 +1793,7 @@ void Civbuilder::createNewUnits() {
         camelPowerUpTask.WorkRange = 3;
         camelPowerUpTasks.push_back(camelPowerUpTask);
     }
-    createUU(58, 1184, "Rajput", {750, 0, 0, 750}, 55, 7623);
+    createUU(UU_RAJPUT, 1184, "Rajput", {750, 0, 0, 750}, 55, 7623);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1819,7 +1819,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}}, {{4, 0}, {3, 1}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 11}}, {{4, 0}, {3, 2}, {8, 0}, {19, 0}});
     // Seljuk Archer
-    createUU(59, 943, "Seljuk Archer", {0, 800, 0, 700}, 65, 7624);
+    createUU(UU_SELJUK_ARCHER, 943, "Seljuk Archer", {0, 800, 0, 700}, 65, 7624);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1843,7 +1843,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{3, 7}}, {{28, 0}, {4, -2}, {3, 0}, {15, 0}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{3, 9}}, {{28, 0}, {4, -2}, {3, 1}, {15, 0}, {8, 0}, {19, 0}});
     // Numidian Javelinman
-    createUU(60, 1036, "Numidian Javelinman", {0, 600, 0, 400}, 45, 7625);
+    createUU(UU_NUMIDIAN_JAVELINMAN, 1036, "Numidian Javelinman", {0, 600, 0, 400}, 45, 7625);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1866,7 +1866,7 @@ void Civbuilder::createNewUnits() {
     this->unitClasses["skirmisher"].push_back(uuID);
     this->unitClasses["skirmisher"].push_back(eID);
     // Sosso Guard
-    createUU(61, 1574, "Sosso Guard", {1000, 0, 0, 700}, 65, 7626);
+    createUU(UU_SOSSO_GUARD, 1574, "Sosso Guard", {1000, 0, 0, 700}, 65, 7626);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1888,7 +1888,7 @@ void Civbuilder::createNewUnits() {
     this->unitClasses["spear"].push_back(uuID);
     this->unitClasses["spear"].push_back(eID);
     // Swiss Pikeman
-    createUU(62, 892, "Swiss Pikeman", {600, 0, 0, 1200}, 45, 7627);
+    createUU(UU_SWISS_PIKEMAN, 892, "Swiss Pikeman", {600, 0, 0, 1200}, 45, 7627);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1914,7 +1914,7 @@ void Civbuilder::createNewUnits() {
     this->unitClasses["spear"].push_back(uuID);
     this->unitClasses["spear"].push_back(eID);
     // Headhunter
-    createUU(63, 1673, "Headhunter", {400, 0, 0, 300}, 50, 7628);
+    createUU(UU_HEADHUNTER, 1673, "Headhunter", {400, 0, 0, 300}, 50, 7628);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1946,7 +1946,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.ResourceCosts[1].Flag = 1;
     }
     // Teulu
-    createUU(64, 1683, "Teulu", {600, 0, 0, 550}, 45, 7629);
+    createUU(UU_TEULU, 1683, "Teulu", {600, 0, 0, 550}, 45, 7629);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1970,7 +1970,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 10}}, {{1, 0}, {4, 0}, {3, 1}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}}, {{1, 0}, {4, 0}, {3, 1}, {19, 0}});
     // Maillotins
-    createUU(65, 1685, "Maillotins", {950, 0, 0, 250}, 35, 7630);
+    createUU(UU_MAILLOTINS, 1685, "Maillotins", {950, 0, 0, 250}, 35, 7630);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1992,7 +1992,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 20}}, {{1, 0}, {4, 0}, {3, 3}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 27}}, {{1, 0}, {4, 0}, {3, 5}, {19, 0}});
     // Hashashin
-    createUU(66, 1035, "Hashashin", {500, 0, 0, 1250}, 60, 7631);
+    createUU(UU_HASHASHIN, 1035, "Hashashin", {500, 0, 0, 1250}, 60, 7631);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2012,7 +2012,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 12}, {19, 8}, {36, 25}}, {{4, 1}, {3, 1}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 14}, {19, 12}, {36, 50}}, {{4, 1}, {3, 1}, {8, 0}, {19, 0}});
     // Highlander
-    createUU(67, 453, "Highlander", {850, 0, 0, 700}, 65, 7632);
+    createUU(UU_HIGHLANDER, 453, "Highlander", {850, 0, 0, 700}, 65, 7632);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2032,7 +2032,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}, {1, 5}, {8, 5}, {32, 5}}, {{4, 1}, {3, 1}, {1, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}, {1, 6}, {8, 6}, {32, 6}}, {{4, 1}, {3, 1}, {1, 0}, {19, 0}});
     // Stradiot
-    createUU(68, 1677, "Stradiot", {800, 0, 0, 850}, 65, 7633);
+    createUU(UU_STRADIOT, 1677, "Stradiot", {800, 0, 0, 850}, 65, 7633);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2056,7 +2056,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}, {8, 4}}, {{8, 0}, {4, 0}, {3, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}, {8, 6}}, {{8, 0}, {4, 1}, {3, 1}, {19, 0}});
     // Ahosi
-    createUU(69, 1066, "Ahosi", {450, 0, 0, 350}, 40, 7634);
+    createUU(UU_AHOSI, 1066, "Ahosi", {450, 0, 0, 350}, 40, 7634);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2116,7 +2116,7 @@ void Civbuilder::createNewUnits() {
     landsknechtPowerUpTask.WorkRange = 5;
     landsknechtPowerUpTask.TargetDiplomacy = 4;
     landsknechtPowerUpTasks.push_back(landsknechtPowerUpTask);
-    createUU(70, 439, "Landsknecht", {850, 0, 0, 650}, 60, 7635);
+    createUU(UU_LANDSKNECHT, 439, "Landsknecht", {850, 0, 0, 650}, 60, 7635);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2143,7 +2143,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 12}, {21, 2}}, {{1, 3}, {4, 1}, {3, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 14}, {21, 2}}, {{1, 3}, {4, 1}, {3, 0}, {19, 0}});
     // Clibinarii
-    createUU(71, 932, "Clibinarii", {950, 0, 0, 850}, 65, 7636);
+    createUU(UU_CLIBINARII, 932, "Clibinarii", {950, 0, 0, 850}, 65, 7636);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2165,7 +2165,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 15}}, {{8, 0}, {3, 2}, {4, 2}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 19}}, {{8, 0}, {3, 3}, {4, 3}, {19, 0}});
     // Silahtar
-    createUU(72, 1267, "Silahtar", {0, 1100, 0, 650}, 75, 7637);
+    createUU(UU_SILAHTAR, 1267, "Silahtar", {0, 1100, 0, 650}, 75, 7637);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2187,7 +2187,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{3, 6}, {1, 3}, {32, 3}}, {{28, 0}, {15, 0}, {8, 0}, {19, 2}, {4, 1}, {3, 0}});
     setCombatStats(this->df, eID, {{3, 8}, {1, 6}, {32, 6}}, {{28, 0}, {15, 0}, {8, 0}, {19, 2}, {4, 2}, {3, 1}});
     // Jaridah
-    createUU(73, 777, "Jaridah", {900, 0, 0, 450}, 60, 7638);
+    createUU(UU_JARIDAH, 777, "Jaridah", {900, 0, 0, 450}, 60, 7638);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2207,7 +2207,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 11}, {30, 8}, {5, 25}}, {{4, 1}, {3, 0}, {8, 12}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}, {30, 14}, {5, 45}}, {{4, 1}, {3, 0}, {8, 16}, {19, 0}});
     // Wolf Warrior
-    createUU(74, 702, "Wolf Warrior", {800, 0, 0, 700}, 65, 7639);
+    createUU(UU_WOLF_WARRIOR, 702, "Wolf Warrior", {800, 0, 0, 700}, 65, 7639);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2227,7 +2227,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 13}}, {{4, 3}, {3, 0}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 15}}, {{4, 5}, {3, 0}, {8, 0}, {19, 0}});
     // Warrior Monk
-    createUU(75, 1178, "Warrior Monk", {800, 0, 0, 750}, 80, 7640);
+    createUU(UU_WARRIOR_MONK, 1178, "Warrior Monk", {800, 0, 0, 750}, 80, 7640);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2265,7 +2265,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.ResourceCosts[1].Flag = 1;
     }
     // Castellan
-    createUU(76, 1718, "Castellan", {700, 0, 0, 900}, 75, 7641);
+    createUU(UU_CASTELLAN, 1718, "Castellan", {700, 0, 0, 900}, 75, 7641);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     setUnitCosts(this->df, {uuID, eID}, {65, 0, 0, 90});
@@ -2297,7 +2297,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.BreakOffCombat = 96;
     }
     // Wind Warrior
-    createUU(77, 749, "Wind Warrior", {600, 0, 0, 900}, 65, 7642);
+    createUU(UU_WIND_WARRIOR, 749, "Wind Warrior", {600, 0, 0, 900}, 65, 7642);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
