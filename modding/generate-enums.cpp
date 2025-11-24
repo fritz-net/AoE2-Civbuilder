@@ -23,7 +23,7 @@ using namespace std;
 using namespace Json;
 
 // Convert name to valid C++ enum identifier
-string toEnumName(const string& name, int id, const string& prefix = "") {
+string toEnumName(const string& name, int id) {
   string result = name;
   
   // Replace non-alphanumeric characters with underscores
@@ -41,9 +41,9 @@ string toEnumName(const string& name, int id, const string& prefix = "") {
     result.pop_back();
   }
   
-  // If empty or starts with digit, add prefix
+  // If empty or starts with digit, use ID as name
   if (result.empty() || isdigit(result[0])) {
-    result = prefix + result;
+    result = "ID_" + to_string(id);
   }
   
   // Convert to uppercase
@@ -53,8 +53,8 @@ string toEnumName(const string& name, int id, const string& prefix = "") {
 }
 
 // Generate unique enum name by adding suffix if needed
-string makeUnique(const string& name, set<string>& usedNames, int id, const string& prefix = "") {
-  string enumName = toEnumName(name, id, prefix);
+string makeUnique(const string& name, set<string>& usedNames, int id) {
+  string enumName = toEnumName(name, id);
   string original = enumName;
   int suffix = 1;
   
@@ -128,7 +128,7 @@ int main(int argc, char** argv) {
         name = unit["display_name"].asString();
       }
       
-      string enumName = makeUnique(name, usedNames, id, "");
+      string enumName = makeUnique(name, usedNames, id);
       outFile << "    " << enumName << " = " << id;
       
       if (i < units.size() - 1) {
@@ -185,7 +185,7 @@ int main(int argc, char** argv) {
         name = tech["display_name"].asString();
       }
       
-      string enumName = makeUnique(name, usedNames, id, "");
+      string enumName = makeUnique(name, usedNames, id);
       outFile << "    " << enumName << " = " << id;
       
       if (i < techs.size() - 1) {
@@ -237,7 +237,7 @@ int main(int argc, char** argv) {
       int id = effect["id"].asInt();
       string name = effect["name"].asString();
       
-      string enumName = makeUnique(name, usedNames, id, "");
+      string enumName = makeUnique(name, usedNames, id);
       outFile << "    " << enumName << " = " << id;
       
       if (i < effects.size() - 1) {
