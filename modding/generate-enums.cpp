@@ -23,6 +23,7 @@ using namespace std;
 using namespace Json;
 
 // Convert name to valid C++ enum identifier
+// Note: prefix should be provided in uppercase (e.g., "UNIT_", "TECH_", "EFFECT_")
 string toEnumName(const string& name, int id, const string& prefix = "") {
   string result = name;
   
