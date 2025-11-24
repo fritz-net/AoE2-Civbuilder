@@ -53,7 +53,7 @@ map<int, string> loadStrings(const string& stringsPath) {
     cerr << "Warning: Failed to parse strings file: " << e.what() << endl;
     cerr << "Display names will not be available." << endl;
     stringsFile.close();
-    return map<int, string>(); // Return empty map
+    return {}; // Return empty map
   }
   
   return strings;
@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
       unitObj["class"] = unit.Class;
       
       // Add display name if available
-      if (!strings.empty() && strings.count(unit.LanguageDLLName) > 0) {
+      if (!strings.empty() && strings.find(unit.LanguageDLLName) != strings.end()) {
         unitObj["display_name"] = strings[unit.LanguageDLLName];
       }
       
@@ -164,7 +164,7 @@ int main(int argc, char **argv) {
     techObj["research_location"] = tech.ResearchLocation;
     
     // Add display name if available
-    if (!strings.empty() && strings.count(tech.LanguageDLLName) > 0) {
+    if (!strings.empty() && strings.find(tech.LanguageDLLName) != strings.end()) {
       techObj["display_name"] = strings[tech.LanguageDLLName];
     }
     
