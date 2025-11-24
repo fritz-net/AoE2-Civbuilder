@@ -14,6 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include <jsoncpp/json/json.h>
+#include <memory>
 #include <string>
 
 using namespace std;
@@ -28,8 +29,8 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // Load DAT file
-  auto *df = new DatFile();
+  // Load DAT file using smart pointer for automatic memory management
+  auto df = make_unique<DatFile>();
   df->setGameVersion(GV_LatestDE2);
 
   cout << "Loading DAT file: " << argv[1] << endl;
@@ -116,7 +117,6 @@ int main(int argc, char **argv) {
   ofstream outputFile(argv[2]);
   if (!outputFile.is_open()) {
     cerr << "Error: Could not open output file: " << argv[2] << endl;
-    delete df;
     return 1;
   }
 
@@ -132,6 +132,6 @@ int main(int argc, char **argv) {
   cout << "Data extraction complete!" << endl;
   cout << "Output written to: " << argv[2] << endl;
 
-  delete df;
+  // Smart pointer df will be automatically cleaned up
   return 0;
 }
