@@ -23,30 +23,6 @@ using namespace genie;
 typedef ResourceUsage<int16_t, int16_t, int16_t> ResourceCost;
 typedef ResourceUsage<int16_t, int16_t, uint8_t> ResearchResourceCost;
 
-// Civbuilder-specific unit constants using existing enum values
-// These provide more descriptive names for units used in modding/civbuilder.cpp
-constexpr int tcSpearman = UNIT_HLUUNHANCHU;
-constexpr int tcPikeman = UNIT_HBUIBI;
-constexpr int tcHalberdier = UNIT_HDINHLE;
-constexpr int tcSiegeTower = UNIT_SIEGE_TOWER;
-constexpr int royalLancer = UNIT_HLETRIEN;
-constexpr int royalElephant = UNIT_HLELAI;
-constexpr int impScorpion = UNIT_HLELAIDISGUISED;
-constexpr int impScorpionProjectile = UNIT_PROJECTILE_HEAVY_SCORPION_1;
-constexpr int impScorpionProjectileFire = UNIT_PROJECTILE_HEAVY_SCORPION__FIRE_1;
-constexpr int millCow = UNIT_HRICH;
-constexpr int pastureCow = UNIT_HBURE;
-constexpr int feudalMonk = UNIT_HJOSS;
-constexpr int smallFarm = UNIT_HNOB;
-constexpr int smallDeadFarm = UNIT_HENRY;
-constexpr int smallRiceFarm = UNIT_HWIL;
-constexpr int smallDeadRiceFarm = UNIT_HSALAD;
-constexpr int smallFarmDrop = UNIT_HKOSHRAU;
-constexpr int smallFarmStack = UNIT_HRDCLARE;
-constexpr int smallRiceFarmDrop = UNIT_HTRISTAN;
-constexpr int feudalKnight = UNIT_EKESHIK;
-constexpr int cityWall = UNIT_CWAL;
-
 const vector<int> disableIDs = {74, 13, 545, 45, 70, 72};
 const vector<int> palisadeGates = {789, 790, 791, 792, 793, 794, 795, 796, 797, 798, 799, 800, 801, 802, 803, 804};
 const vector<int> enablingTechs = {414, 339, 391, 410, 411, 413};

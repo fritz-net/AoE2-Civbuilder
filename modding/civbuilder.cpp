@@ -2320,48 +2320,48 @@ void Civbuilder::createNewUnits() {
 
     // Create TC spearmen
     for (Civ &civ : this->df->Civs) {
-        civ.Units[tcSpearman] = civ.Units[93];
-        civ.Units[tcPikeman] = civ.Units[358];
-        civ.Units[tcHalberdier] = civ.Units[359];
-        civ.Units[tcSpearman].Name = "TCPKEMN";
-        civ.Units[tcPikeman].Name = "TCPKM";
-        civ.Units[tcHalberdier].Name = "TCHLBDM";
-        setTrainLocationID(civ.Units[tcSpearman].Creatable, 109);
-        setTrainLocationID(civ.Units[tcPikeman].Creatable, 109);
-        setTrainLocationID(civ.Units[tcHalberdier].Creatable, 109);
+        civ.Units[UNIT_TC_SPEARMAN] = civ.Units[93];
+        civ.Units[UNIT_TC_PIKEMAN] = civ.Units[358];
+        civ.Units[UNIT_TC_HALBERDIER] = civ.Units[359];
+        civ.Units[UNIT_TC_SPEARMAN].Name = "TCPKEMN";
+        civ.Units[UNIT_TC_PIKEMAN].Name = "TCPKM";
+        civ.Units[UNIT_TC_HALBERDIER].Name = "TCHLBDM";
+        setTrainLocationID(civ.Units[UNIT_TC_SPEARMAN].Creatable, 109);
+        setTrainLocationID(civ.Units[UNIT_TC_PIKEMAN].Creatable, 109);
+        setTrainLocationID(civ.Units[UNIT_TC_HALBERDIER].Creatable, 109);
     }
-    this->df->Effects[189].EffectCommands.push_back(createEC(3, tcSpearman, tcHalberdier, -1, 0));
-    this->duplicationUnits.push_back({93, tcSpearman, tcPikeman});
-    this->duplicationUnits.push_back({358, tcPikeman, tcHalberdier});
-    this->duplicationUnits.push_back({359, tcHalberdier, -1});
+    this->df->Effects[189].EffectCommands.push_back(createEC(3, UNIT_TC_SPEARMAN, UNIT_TC_HALBERDIER, -1, 0));
+    this->duplicationUnits.push_back({93, UNIT_TC_SPEARMAN, UNIT_TC_PIKEMAN});
+    this->duplicationUnits.push_back({358, UNIT_TC_PIKEMAN, UNIT_TC_HALBERDIER});
+    this->duplicationUnits.push_back({359, UNIT_TC_HALBERDIER, -1});
 
     // Create the TC siege tower
     for (Civ &civ : this->df->Civs) {
         civ.Resources[29] = 1;
-        civ.Units[tcSiegeTower] = civ.Units[1105];
-        civ.Units[tcSiegeTower].Name = "SIEGTWR_F";
-        setTrainLocation(civ.Units[tcSiegeTower].Creatable, 109, 9);
-        civ.Units[tcSiegeTower].Creatable.ResourceCosts[0].Type = 29;
-        civ.Units[tcSiegeTower].Creatable.ResourceCosts[0].Amount = 1;
-        civ.Units[tcSiegeTower].Creatable.ResourceCosts[0].Flag = 1;
-        civ.Units[tcSiegeTower].Creatable.ResourceCosts[1] = civ.Units[tcSiegeTower].Creatable.ResourceCosts[2];
-        civ.Units[tcSiegeTower].Creatable.ResourceCosts[2].Type = -1;
-        civ.Units[tcSiegeTower].Creatable.ResourceCosts[2].Amount = 0;
-        civ.Units[tcSiegeTower].Creatable.ResourceCosts[2].Flag = 0;
+        civ.Units[UNIT_TC_SIEGE_TOWER] = civ.Units[1105];
+        civ.Units[UNIT_TC_SIEGE_TOWER].Name = "SIEGTWR_F";
+        setTrainLocation(civ.Units[UNIT_TC_SIEGE_TOWER].Creatable, 109, 9);
+        civ.Units[UNIT_TC_SIEGE_TOWER].Creatable.ResourceCosts[0].Type = 29;
+        civ.Units[UNIT_TC_SIEGE_TOWER].Creatable.ResourceCosts[0].Amount = 1;
+        civ.Units[UNIT_TC_SIEGE_TOWER].Creatable.ResourceCosts[0].Flag = 1;
+        civ.Units[UNIT_TC_SIEGE_TOWER].Creatable.ResourceCosts[1] = civ.Units[UNIT_TC_SIEGE_TOWER].Creatable.ResourceCosts[2];
+        civ.Units[UNIT_TC_SIEGE_TOWER].Creatable.ResourceCosts[2].Type = -1;
+        civ.Units[UNIT_TC_SIEGE_TOWER].Creatable.ResourceCosts[2].Amount = 0;
+        civ.Units[UNIT_TC_SIEGE_TOWER].Creatable.ResourceCosts[2].Flag = 0;
     }
-    this->duplicationUnits.push_back({1105, tcSiegeTower, -1});
+    this->duplicationUnits.push_back({1105, UNIT_TC_SIEGE_TOWER, -1});
 
     // Create small farms
     for (Civ &civ : this->df->Civs) {
-        civ.Units[smallFarm] = civ.Units[50];
-        civ.Units[smallDeadFarm] = civ.Units[357];
-        civ.Units[smallRiceFarm] = civ.Units[1187];
-        civ.Units[smallDeadRiceFarm] = civ.Units[1188];
-        civ.Units[smallFarmDrop] = civ.Units[1193];
-        civ.Units[smallFarmStack] = civ.Units[1194];
-        civ.Units[smallRiceFarmDrop] = civ.Units[1195];
+        civ.Units[UNIT_SMALL_FARM] = civ.Units[50];
+        civ.Units[UNIT_SMALL_DEAD_FARM] = civ.Units[357];
+        civ.Units[UNIT_SMALL_RICE_FARM] = civ.Units[1187];
+        civ.Units[UNIT_SMALL_DEAD_RICE_FARM] = civ.Units[1188];
+        civ.Units[UNIT_SMALL_FARM_DROP] = civ.Units[1193];
+        civ.Units[UNIT_SMALL_FARM_STACK] = civ.Units[1194];
+        civ.Units[UNIT_SMALL_RICE_FARM_DROP] = civ.Units[1195];
 
-        vector<int> newFarms = {smallFarm, smallDeadFarm, smallRiceFarm, smallDeadRiceFarm, smallFarmDrop, smallFarmStack, smallRiceFarmDrop};
+        vector<int> newFarms = {UNIT_SMALL_FARM, UNIT_SMALL_DEAD_FARM, UNIT_SMALL_RICE_FARM, UNIT_SMALL_DEAD_RICE_FARM, UNIT_SMALL_FARM_DROP, UNIT_SMALL_FARM_STACK, UNIT_SMALL_RICE_FARM_DROP};
         for (int i = 0; i < newFarms.size(); i++) {
             if (civ.Units[newFarms[i]].CollisionSize.x == 1.5) {
                 civ.Units[newFarms[i]].CollisionSize.x = 1;
@@ -2377,109 +2377,109 @@ void Civbuilder::createNewUnits() {
             }
         }
     }
-    this->duplicationUnits.push_back({50, smallFarm, -1});
-    this->duplicationUnits.push_back({357, smallDeadFarm, -1});
-    this->duplicationUnits.push_back({1187, smallRiceFarm, -1});
-    this->duplicationUnits.push_back({1188, smallDeadRiceFarm, -1});
-    this->duplicationUnits.push_back({1193, smallFarmDrop, -1});
-    this->duplicationUnits.push_back({1194, smallFarmStack, -1});
-    this->duplicationUnits.push_back({1195, smallRiceFarmDrop, -1});
+    this->duplicationUnits.push_back({50, UNIT_SMALL_FARM, -1});
+    this->duplicationUnits.push_back({357, UNIT_SMALL_DEAD_FARM, -1});
+    this->duplicationUnits.push_back({1187, UNIT_SMALL_RICE_FARM, -1});
+    this->duplicationUnits.push_back({1188, UNIT_SMALL_DEAD_RICE_FARM, -1});
+    this->duplicationUnits.push_back({1193, UNIT_SMALL_FARM_DROP, -1});
+    this->duplicationUnits.push_back({1194, UNIT_SMALL_FARM_STACK, -1});
+    this->duplicationUnits.push_back({1195, UNIT_SMALL_RICE_FARM_DROP, -1});
 
     // Create Royal Lancer Cavalry
     for (Civ &civ : this->df->Civs) {
-        civ.Units[royalLancer] = civ.Units[1372];
-        civ.Units[royalLancer].Name = "RSLANCER";
-        civ.Units[royalLancer].LanguageDLLName = 5242;
-        civ.Units[royalLancer].LanguageDLLCreation = 6242;
-        civ.Units[royalLancer].LanguageDLLHelp = 26242;
-        civ.Units[royalLancer].StandingGraphic = {10510, 10511};
-        civ.Units[royalLancer].Type50.AttackGraphic = 10508;
-        civ.Units[royalLancer].DyingGraphic = 10509;
-        civ.Units[royalLancer].DeadFish.WalkingGraphic = 10513;
-        civ.Units[royalLancer].HitPoints = 100;
-        civ.Units[royalLancer].Type50.DisplayedAttack = 13;
-        civ.Units[royalLancer].Type50.Attacks[0].Amount = 13;
+        civ.Units[UNIT_ROYAL_LANCER] = civ.Units[1372];
+        civ.Units[UNIT_ROYAL_LANCER].Name = "RSLANCER";
+        civ.Units[UNIT_ROYAL_LANCER].LanguageDLLName = 5242;
+        civ.Units[UNIT_ROYAL_LANCER].LanguageDLLCreation = 6242;
+        civ.Units[UNIT_ROYAL_LANCER].LanguageDLLHelp = 26242;
+        civ.Units[UNIT_ROYAL_LANCER].StandingGraphic = {10510, 10511};
+        civ.Units[UNIT_ROYAL_LANCER].Type50.AttackGraphic = 10508;
+        civ.Units[UNIT_ROYAL_LANCER].DyingGraphic = 10509;
+        civ.Units[UNIT_ROYAL_LANCER].DeadFish.WalkingGraphic = 10513;
+        civ.Units[UNIT_ROYAL_LANCER].HitPoints = 100;
+        civ.Units[UNIT_ROYAL_LANCER].Type50.DisplayedAttack = 13;
+        civ.Units[UNIT_ROYAL_LANCER].Type50.Attacks[0].Amount = 13;
     }
-    this->unitClasses["steppe"].push_back(royalLancer);
+    this->unitClasses["steppe"].push_back(UNIT_ROYAL_LANCER);
 
     // Create Royal Battle Elephant
     for (Civ &civ : this->df->Civs) {
-        civ.Units[royalElephant] = civ.Units[1134];
-        civ.Units[royalElephant].Name = "RBATELE";
-        civ.Units[royalElephant].LanguageDLLName = 5241;
-        civ.Units[royalElephant].LanguageDLLCreation = 6241;
-        civ.Units[royalElephant].LanguageDLLHelp = 26241;
+        civ.Units[UNIT_ROYAL_ELEPHANT] = civ.Units[1134];
+        civ.Units[UNIT_ROYAL_ELEPHANT].Name = "RBATELE";
+        civ.Units[UNIT_ROYAL_ELEPHANT].LanguageDLLName = 5241;
+        civ.Units[UNIT_ROYAL_ELEPHANT].LanguageDLLCreation = 6241;
+        civ.Units[UNIT_ROYAL_ELEPHANT].LanguageDLLHelp = 26241;
 
         // TODO: seem wrong Shrivamsha_Rider and Genitour 
-        //civ.Units[royalElephant].StandingGraphic = {2926, -1};
-        //civ.Units[royalElephant].Type50.AttackGraphic = 2924;
-        //civ.Units[royalElephant].DyingGraphic = 2925;
-        //civ.Units[royalElephant].DeadFish.WalkingGraphic = 2927;
-        civ.Units[royalElephant].HitPoints = 330;
-        civ.Units[royalElephant].Type50.DisplayedAttack = 15;
-        civ.Units[royalElephant].Type50.Attacks[1].Amount = 15;
-        civ.Units[royalElephant].Creatable.DisplayedPierceArmour = 4;
-        civ.Units[royalElephant].Type50.Armours[3].Amount = 4;
+        //civ.Units[UNIT_ROYAL_ELEPHANT].StandingGraphic = {2926, -1};
+        //civ.Units[UNIT_ROYAL_ELEPHANT].Type50.AttackGraphic = 2924;
+        //civ.Units[UNIT_ROYAL_ELEPHANT].DyingGraphic = 2925;
+        //civ.Units[UNIT_ROYAL_ELEPHANT].DeadFish.WalkingGraphic = 2927;
+        civ.Units[UNIT_ROYAL_ELEPHANT].HitPoints = 330;
+        civ.Units[UNIT_ROYAL_ELEPHANT].Type50.DisplayedAttack = 15;
+        civ.Units[UNIT_ROYAL_ELEPHANT].Type50.Attacks[1].Amount = 15;
+        civ.Units[UNIT_ROYAL_ELEPHANT].Creatable.DisplayedPierceArmour = 4;
+        civ.Units[UNIT_ROYAL_ELEPHANT].Type50.Armours[3].Amount = 4;
     }
-    this->unitClasses["elephant"].push_back(royalElephant);
-    this->unitClasses["stable"].push_back(royalElephant);
+    this->unitClasses["elephant"].push_back(UNIT_ROYAL_ELEPHANT);
+    this->unitClasses["stable"].push_back(UNIT_ROYAL_ELEPHANT);
 
     // Create Imperial Scorpion
     for (Civ &civ : this->df->Civs) {
-        civ.Units[impScorpion] = civ.Units[542];
-        civ.Units[impScorpion].Name = "IMPBAL";
-        civ.Units[impScorpion].LanguageDLLName = 5240;
-        civ.Units[impScorpion].LanguageDLLCreation = 6240;
-        civ.Units[impScorpion].LanguageDLLHelp = 26240;
-        civ.Units[impScorpion].HitPoints = 60;
-        civ.Units[impScorpion].Type50.DisplayedAttack = 18;
-        civ.Units[impScorpion].Type50.Attacks[3].Amount = 18;
-        civ.Units[impScorpion].Type50.ProjectileUnitID = impScorpionProjectile;
-        civ.Units[impScorpion].Creatable.SecondaryProjectileUnit = impScorpionProjectile;
-        civ.Units[impScorpionProjectile].Name = "Projectile Imperial Scorpion";
-        civ.Units[impScorpionProjectileFire].Name = "Projectile Imperial Scorpion (Fire)";
-        civ.Units[impScorpionProjectile].Type50.DisplayedAttack = 14;
-        civ.Units[impScorpionProjectile].Type50.Attacks[2].Amount = 14;
-        civ.Units[impScorpionProjectileFire].Type50.DisplayedAttack = 14;
-        civ.Units[impScorpionProjectileFire].Type50.Attacks[2].Amount = 14;
+        civ.Units[UNIT_IMP_SCORPION] = civ.Units[542];
+        civ.Units[UNIT_IMP_SCORPION].Name = "IMPBAL";
+        civ.Units[UNIT_IMP_SCORPION].LanguageDLLName = 5240;
+        civ.Units[UNIT_IMP_SCORPION].LanguageDLLCreation = 6240;
+        civ.Units[UNIT_IMP_SCORPION].LanguageDLLHelp = 26240;
+        civ.Units[UNIT_IMP_SCORPION].HitPoints = 60;
+        civ.Units[UNIT_IMP_SCORPION].Type50.DisplayedAttack = 18;
+        civ.Units[UNIT_IMP_SCORPION].Type50.Attacks[3].Amount = 18;
+        civ.Units[UNIT_IMP_SCORPION].Type50.ProjectileUnitID = UNIT_IMP_SCORPION_PROJECTILE;
+        civ.Units[UNIT_IMP_SCORPION].Creatable.SecondaryProjectileUnit = UNIT_IMP_SCORPION_PROJECTILE;
+        civ.Units[UNIT_IMP_SCORPION_PROJECTILE].Name = "Projectile Imperial Scorpion";
+        civ.Units[UNIT_IMP_SCORPION_PROJECTILE_FIRE].Name = "Projectile Imperial Scorpion (Fire)";
+        civ.Units[UNIT_IMP_SCORPION_PROJECTILE].Type50.DisplayedAttack = 14;
+        civ.Units[UNIT_IMP_SCORPION_PROJECTILE].Type50.Attacks[2].Amount = 14;
+        civ.Units[UNIT_IMP_SCORPION_PROJECTILE_FIRE].Type50.DisplayedAttack = 14;
+        civ.Units[UNIT_IMP_SCORPION_PROJECTILE_FIRE].Type50.Attacks[2].Amount = 14;
     }
-    df->Effects[47].EffectCommands.push_back(createEC(3, impScorpionProjectile, impScorpionProjectileFire, -1, 0));
-    df->Effects[47].EffectCommands.push_back(createEC(4, impScorpion, -1, 9, amountTypetoD(1, 3)));
-    this->unitClasses["scorpion"].push_back(impScorpion);
-    this->unitClasses["workshop"].push_back(impScorpion);
+    df->Effects[47].EffectCommands.push_back(createEC(3, UNIT_IMP_SCORPION_PROJECTILE, UNIT_IMP_SCORPION_PROJECTILE_FIRE, -1, 0));
+    df->Effects[47].EffectCommands.push_back(createEC(4, UNIT_IMP_SCORPION, -1, 9, amountTypetoD(1, 3)));
+    this->unitClasses["scorpion"].push_back(UNIT_IMP_SCORPION);
+    this->unitClasses["workshop"].push_back(UNIT_IMP_SCORPION);
 
     // Create the mill cow
     for (Civ &civ : this->df->Civs) {
-        civ.Units[millCow] = civ.Units[705];
-        civ.Units[millCow].Name = "BABY";
-        setTrainLocation(civ.Units[millCow].Creatable, 68, 2);
-        civ.Units[millCow].Creatable.ResourceCosts[0].Type = 3;
-        civ.Units[millCow].Creatable.ResourceCosts[0].Amount = 10;
+        civ.Units[UNIT_MILL_COW] = civ.Units[705];
+        civ.Units[UNIT_MILL_COW].Name = "BABY";
+        setTrainLocation(civ.Units[UNIT_MILL_COW].Creatable, 68, 2);
+        civ.Units[UNIT_MILL_COW].Creatable.ResourceCosts[0].Type = 3;
+        civ.Units[UNIT_MILL_COW].Creatable.ResourceCosts[0].Amount = 10;
 
-        civ.Units[pastureCow] = civ.Units[705];
-        civ.Units[pastureCow].Name = "BIGBABY";
-        setTrainLocation(civ.Units[pastureCow].Creatable, 1889, 2);
-        civ.Units[pastureCow].Creatable.ResourceCosts[0].Type = 3;
-        civ.Units[pastureCow].Creatable.ResourceCosts[0].Amount = 10;
+        civ.Units[UNIT_PASTURE_COW] = civ.Units[705];
+        civ.Units[UNIT_PASTURE_COW].Name = "BIGBABY";
+        setTrainLocation(civ.Units[UNIT_PASTURE_COW].Creatable, 1889, 2);
+        civ.Units[UNIT_PASTURE_COW].Creatable.ResourceCosts[0].Type = 3;
+        civ.Units[UNIT_PASTURE_COW].Creatable.ResourceCosts[0].Amount = 10;
     }
 
     // Create feudal monk
     for (Civ &civ : this->df->Civs) {
-        civ.Units[feudalMonk] = civ.Units[125];
-        civ.Units[feudalMonk].Name = "MONK_F";
-        for (int i = 0; i < civ.Units[feudalMonk].Bird.TaskList.size(); i++) {
-            if (civ.Units[feudalMonk].Bird.TaskList[i].ActionType == 132) {
+        civ.Units[UNIT_FEUDAL_MONK] = civ.Units[125];
+        civ.Units[UNIT_FEUDAL_MONK].Name = "MONK_F";
+        for (int i = 0; i < civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList.size(); i++) {
+            if (civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList[i].ActionType == 132) {
                 // Remove the ability to pick up relics
-                civ.Units[feudalMonk].Bird.TaskList.erase(civ.Units[feudalMonk].Bird.TaskList.begin() + i);
+                civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList.erase(civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList.begin() + i);
                 i--;
-            } else if (civ.Units[feudalMonk].Bird.TaskList[i].ActionType == 104) {
+            } else if (civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList[i].ActionType == 104) {
                 // Increase conversion times
-                if (civ.Units[feudalMonk].Bird.TaskList[i].WorkValue1 == 4 && civ.Units[feudalMonk].Bird.TaskList[i].WorkValue2 == 10) {
-                    civ.Units[feudalMonk].Bird.TaskList[i].WorkValue1 = 5;
-                    civ.Units[feudalMonk].Bird.TaskList[i].WorkValue2 = 12;
-                } else if (civ.Units[feudalMonk].Bird.TaskList[i].WorkValue1 == 15 && civ.Units[feudalMonk].Bird.TaskList[i].WorkValue2 == 25) {
-                    civ.Units[feudalMonk].Bird.TaskList[i].WorkValue1 = 20;
-                    civ.Units[feudalMonk].Bird.TaskList[i].WorkValue2 = 30;
+                if (civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList[i].WorkValue1 == 4 && civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList[i].WorkValue2 == 10) {
+                    civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList[i].WorkValue1 = 5;
+                    civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList[i].WorkValue2 = 12;
+                } else if (civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList[i].WorkValue1 == 15 && civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList[i].WorkValue2 == 25) {
+                    civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList[i].WorkValue1 = 20;
+                    civ.Units[UNIT_FEUDAL_MONK].Bird.TaskList[i].WorkValue2 = 30;
                 }
             }
         }
@@ -2487,30 +2487,30 @@ void Civbuilder::createNewUnits() {
 
     // Create feudal knight
     for (Civ &civ : this->df->Civs) {
-        civ.Units[feudalKnight] = civ.Units[38];
-        civ.Units[feudalKnight].Name = "KNIGHT_F";
-        civ.Units[feudalKnight].HitPoints = 30;
-        civ.Units[feudalKnight].Speed = 1.25;
-        civ.Units[feudalKnight].LineOfSight = 3;
-        civ.Units[feudalKnight].Bird.SearchRadius = 3;
-        setTrainTime(civ.Units[feudalKnight].Creatable, 45);
+        civ.Units[UNIT_FEUDAL_KNIGHT] = civ.Units[38];
+        civ.Units[UNIT_FEUDAL_KNIGHT].Name = "KNIGHT_F";
+        civ.Units[UNIT_FEUDAL_KNIGHT].HitPoints = 30;
+        civ.Units[UNIT_FEUDAL_KNIGHT].Speed = 1.25;
+        civ.Units[UNIT_FEUDAL_KNIGHT].LineOfSight = 3;
+        civ.Units[UNIT_FEUDAL_KNIGHT].Bird.SearchRadius = 3;
+        setTrainTime(civ.Units[UNIT_FEUDAL_KNIGHT].Creatable, 45);
     }
-    // this->df->Effects[175].EffectCommands.push_back(createEC(3, feudalKnight, 283, -1, 0));
-    // this->df->Effects[253].EffectCommands.push_back(createEC(3, feudalKnight, 569, -1, 0));
-    this->duplicationUnits.push_back({38, feudalKnight, 38});
+    // this->df->Effects[175].EffectCommands.push_back(createEC(3, UNIT_FEUDAL_KNIGHT, 283, -1, 0));
+    // this->df->Effects[253].EffectCommands.push_back(createEC(3, UNIT_FEUDAL_KNIGHT, 569, -1, 0));
+    this->duplicationUnits.push_back({38, UNIT_FEUDAL_KNIGHT, 38});
 
     // Create City Walls
     for (Civ &civ : this->df->Civs) {
-        setTrainLocation(civ.Units[cityWall].Creatable, 118, 8);
-        civ.Units[cityWall].HitPoints = 4800;
-        civ.Units[cityWall].Creatable.DisplayedPierceArmour = 16;
-        civ.Units[cityWall].Type50.DisplayedMeleeArmour = 16;
-        civ.Units[cityWall].Type50.Armours = civ.Units[155].Type50.Armours;
-        civ.Units[cityWall].Type50.Armours[2].Amount = 16;
-        civ.Units[cityWall].Type50.Armours[3].Amount = 16;
-        civ.Units[cityWall].Type50.Armours[6].Amount = 16;
-        civ.Units[cityWall].Creatable.ResourceCosts[0].Amount = 5;
-        civ.Units[cityWall].BlastDefenseLevel = 2;
+        setTrainLocation(civ.Units[UNIT_CITY_WALL].Creatable, 118, 8);
+        civ.Units[UNIT_CITY_WALL].HitPoints = 4800;
+        civ.Units[UNIT_CITY_WALL].Creatable.DisplayedPierceArmour = 16;
+        civ.Units[UNIT_CITY_WALL].Type50.DisplayedMeleeArmour = 16;
+        civ.Units[UNIT_CITY_WALL].Type50.Armours = civ.Units[155].Type50.Armours;
+        civ.Units[UNIT_CITY_WALL].Type50.Armours[2].Amount = 16;
+        civ.Units[UNIT_CITY_WALL].Type50.Armours[3].Amount = 16;
+        civ.Units[UNIT_CITY_WALL].Type50.Armours[6].Amount = 16;
+        civ.Units[UNIT_CITY_WALL].Creatable.ResourceCosts[0].Amount = 5;
+        civ.Units[UNIT_CITY_WALL].BlastDefenseLevel = 2;
         for (int i = 0; i < 16; i++) {
             civ.Units[i + 1579].Type50.Armours[1].Amount = 30;
             civ.Units[i + 1579].Creatable.ResourceCosts[0].Amount = 30;
@@ -2741,8 +2741,8 @@ void Civbuilder::createCivBonuses() {
     // Imperial Scorpion
     e.EffectCommands.clear();
     e.Name = "Imperial Scorpion";
-    e.EffectCommands.push_back(createEC(3, 279, impScorpion, -1, 0));
-    e.EffectCommands.push_back(createEC(3, 542, impScorpion, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 279, UNIT_IMP_SCORPION, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 542, UNIT_IMP_SCORPION, -1, 0));
     this->df->Effects.push_back(e);
 
     Tech t = Tech();
@@ -2769,8 +2769,8 @@ void Civbuilder::createCivBonuses() {
     // Royal Battle Elephant
     e.EffectCommands.clear();
     e.Name = "Royal Battle Elephant";
-    e.EffectCommands.push_back(createEC(3, 1132, royalElephant, -1, 0));
-    e.EffectCommands.push_back(createEC(3, 1134, royalElephant, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 1132, UNIT_ROYAL_ELEPHANT, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 1134, UNIT_ROYAL_ELEPHANT, -1, 0));
     this->df->Effects.push_back(e);
 
     t = Tech();
@@ -2798,8 +2798,8 @@ void Civbuilder::createCivBonuses() {
     // Royal Lancer
     e.EffectCommands.clear();
     e.Name = "Royal Lancer";
-    e.EffectCommands.push_back(createEC(3, 1370, royalLancer, -1, 0));
-    e.EffectCommands.push_back(createEC(3, 1372, royalLancer, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 1370, UNIT_ROYAL_LANCER, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 1372, UNIT_ROYAL_LANCER, -1, 0));
     this->df->Effects.push_back(e);
 
     t = Tech();
@@ -3477,8 +3477,8 @@ void Civbuilder::createCivBonuses() {
 
     // Cows from mills
     e.EffectCommands.clear();
-    e.EffectCommands.push_back(createEC(2, millCow, 1, -1, 0));
-    e.EffectCommands.push_back(createEC(2, pastureCow, 1, -1, 0));
+    e.EffectCommands.push_back(createEC(2, UNIT_MILL_COW, 1, -1, 0));
+    e.EffectCommands.push_back(createEC(2, UNIT_PASTURE_COW, 1, -1, 0));
     this->createCivBonus(CIV_BONUS_222_COWS_MILLS, e, "C-Bonus, Cows from mills");
 
     // Start with a horse
@@ -3870,7 +3870,7 @@ void Civbuilder::createCivBonuses() {
     // Feudal monks
     techIDs.clear();
     e.EffectCommands.clear();
-    e.EffectCommands.push_back(createEC(2, feudalMonk, 1, -1, 0));
+    e.EffectCommands.push_back(createEC(2, UNIT_FEUDAL_MONK, 1, -1, 0));
     e.Name = "Feudal Monk (make avail)";
     df->Effects.push_back(e);
     t = Tech();
@@ -3890,7 +3890,7 @@ void Civbuilder::createCivBonuses() {
     df->Techs.push_back(t);
     techIDs.push_back((int)(df->Techs.size() - 1));
     e.EffectCommands.clear();
-    e.EffectCommands.push_back(createEC(3, feudalMonk, 125, -1, 0));
+    e.EffectCommands.push_back(createEC(3, UNIT_FEUDAL_MONK, 125, -1, 0));
     e.Name = "Upgrade monks Castle";
     df->Effects.push_back(e);
     t = Tech();
@@ -4536,13 +4536,13 @@ void Civbuilder::createCivBonuses() {
 
     // 2x2 farms
     e.EffectCommands.clear();
-    e.EffectCommands.push_back(createEC(3, 50, smallFarm, -1, 0));
-    e.EffectCommands.push_back(createEC(3, 357, smallDeadFarm, -1, 0));
-    e.EffectCommands.push_back(createEC(3, 1187, smallRiceFarm, -1, 0));
-    e.EffectCommands.push_back(createEC(3, 1188, smallDeadRiceFarm, -1, 0));
-    e.EffectCommands.push_back(createEC(3, 1193, smallFarmDrop, -1, 0));
-    e.EffectCommands.push_back(createEC(3, 1194, smallFarmStack, -1, 0));
-    e.EffectCommands.push_back(createEC(3, 1195, smallRiceFarmDrop, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 50, UNIT_SMALL_FARM, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 357, UNIT_SMALL_DEAD_FARM, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 1187, UNIT_SMALL_RICE_FARM, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 1188, UNIT_SMALL_DEAD_RICE_FARM, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 1193, UNIT_SMALL_FARM_DROP, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 1194, UNIT_SMALL_FARM_STACK, -1, 0));
+    e.EffectCommands.push_back(createEC(3, 1195, UNIT_SMALL_RICE_FARM_DROP, -1, 0));
     this->createCivBonus(CIV_BONUS_330_2X2_FARMS, e, "C-Bonus, 2x2 farms");
 
     // Archery range techs cost -50%
@@ -4560,7 +4560,7 @@ void Civbuilder::createCivBonuses() {
     // Feudal Knights
     techIDs.clear();
     e.EffectCommands.clear();
-    e.EffectCommands.push_back(createEC(2, feudalKnight, 1, -1, 0));
+    e.EffectCommands.push_back(createEC(2, UNIT_FEUDAL_KNIGHT, 1, -1, 0));
     e.Name = "Feudal Knight (make avail)";
     df->Effects.push_back(e);
 
@@ -4574,7 +4574,7 @@ void Civbuilder::createCivBonuses() {
     techIDs.push_back((int)(df->Techs.size() - 1));
 
     e.EffectCommands.clear();
-    e.EffectCommands.push_back(createEC(3, feudalKnight, 38, -1, 0));
+    e.EffectCommands.push_back(createEC(3, UNIT_FEUDAL_KNIGHT, 38, -1, 0));
     e.Name = "Upgrade knights Feudal";
     df->Effects.push_back(e);
 
@@ -4595,8 +4595,8 @@ void Civbuilder::createCivBonuses() {
     e.EffectCommands.clear();
     e.EffectCommands.push_back(createEC(4, 1105, -1, 9, amountTypetoD(6, 3)));
     e.EffectCommands.push_back(createEC(4, 1105, -1, 9, amountTypetoD(6, 11)));
-    e.EffectCommands.push_back(createEC(4, tcSiegeTower, -1, 9, amountTypetoD(6, 3)));
-    e.EffectCommands.push_back(createEC(4, tcSiegeTower, -1, 9, amountTypetoD(6, 11)));
+    e.EffectCommands.push_back(createEC(4, UNIT_TC_SIEGE_TOWER, -1, 9, amountTypetoD(6, 3)));
+    e.EffectCommands.push_back(createEC(4, UNIT_TC_SIEGE_TOWER, -1, 9, amountTypetoD(6, 11)));
     this->createCivBonus(CIV_BONUS_333_SIEGE_TOWERS_CAN_FIRE_ARROWS, e, "C-Bonus, siege towers fire arrows");
 
     // Fire lancers/ships move faster
@@ -5480,7 +5480,7 @@ void Civbuilder::createTeamBonuses() {
     // TC spearmen
     e.EffectCommands.clear();
     e.Name = "TC Spearman (make available)";
-    e.EffectCommands.push_back(createEC(2, tcSpearman, 1, -1, 0));
+    e.EffectCommands.push_back(createEC(2, UNIT_TC_SPEARMAN, 1, -1, 0));
     this->df->Effects.push_back(e);
     Tech t = this->df->Techs[113];
     t.Name = "Dupl. Feudal Age";
@@ -5869,8 +5869,8 @@ void Civbuilder::reconfigureEffects() {
     }
 
     // Battle elephants +1/+1p affects royal
-    this->df->Effects[679].EffectCommands.push_back(createEC(4, royalElephant, -1, 8, amountTypetoD(1, 3)));
-    this->df->Effects[679].EffectCommands.push_back(createEC(4, royalElephant, -1, 8, amountTypetoD(1, 4)));
+    this->df->Effects[679].EffectCommands.push_back(createEC(4, UNIT_ROYAL_ELEPHANT, -1, 8, amountTypetoD(1, 3)));
+    this->df->Effects[679].EffectCommands.push_back(createEC(4, UNIT_ROYAL_ELEPHANT, -1, 8, amountTypetoD(1, 4)));
 
     // Foot archer bonuses
     this->df->Effects[612].EffectCommands.clear();
@@ -5906,28 +5906,28 @@ void Civbuilder::reconfigureEffects() {
     }
 
     // Steppe lancer effects
-    this->df->Effects[387].EffectCommands.push_back(createEC(5, royalLancer, -1, 0, 1.3));
-    this->df->Effects[724].EffectCommands.push_back(createEC(4, royalLancer, -1, 8, amountTypetoD(1, 3)));
-    this->df->Effects[724].EffectCommands.push_back(createEC(4, royalLancer, -1, 8, amountTypetoD(1, 4)));
-    this->df->Effects[726].EffectCommands.push_back(createEC(5, royalLancer, -1, 101, 0.5));
+    this->df->Effects[387].EffectCommands.push_back(createEC(5, UNIT_ROYAL_LANCER, -1, 0, 1.3));
+    this->df->Effects[724].EffectCommands.push_back(createEC(4, UNIT_ROYAL_LANCER, -1, 8, amountTypetoD(1, 3)));
+    this->df->Effects[724].EffectCommands.push_back(createEC(4, UNIT_ROYAL_LANCER, -1, 8, amountTypetoD(1, 4)));
+    this->df->Effects[726].EffectCommands.push_back(createEC(5, UNIT_ROYAL_LANCER, -1, 101, 0.5));
 
     // Make scorpion effects apply to imp scorp
-    this->df->Effects[647].EffectCommands.push_back(createEC(4, impScorpion, -1, 1, 1));
-    this->df->Effects[647].EffectCommands.push_back(createEC(4, impScorpion, -1, 12, 1));
-    this->df->Effects[647].EffectCommands.push_back(createEC(4, impScorpion, -1, 23, 1));
-    this->df->Effects[663].EffectCommands.push_back(createEC(4, impScorpion, -1, 102, 1));
-    this->df->Effects[663].EffectCommands.push_back(createEC(4, impScorpion, -1, 107, 1));
-    this->df->Effects[900].EffectCommands.push_back(createEC(5, impScorpion, -1, 105, 0.4));
-    this->df->Effects[901].EffectCommands.push_back(createEC(0, impScorpionProjectile, -1, 19, 1));
-    this->df->Effects[901].EffectCommands.push_back(createEC(0, impScorpionProjectileFire, -1, 19, 1));
+    this->df->Effects[647].EffectCommands.push_back(createEC(4, UNIT_IMP_SCORPION, -1, 1, 1));
+    this->df->Effects[647].EffectCommands.push_back(createEC(4, UNIT_IMP_SCORPION, -1, 12, 1));
+    this->df->Effects[647].EffectCommands.push_back(createEC(4, UNIT_IMP_SCORPION, -1, 23, 1));
+    this->df->Effects[663].EffectCommands.push_back(createEC(4, UNIT_IMP_SCORPION, -1, 102, 1));
+    this->df->Effects[663].EffectCommands.push_back(createEC(4, UNIT_IMP_SCORPION, -1, 107, 1));
+    this->df->Effects[900].EffectCommands.push_back(createEC(5, UNIT_IMP_SCORPION, -1, 105, 0.4));
+    this->df->Effects[901].EffectCommands.push_back(createEC(0, UNIT_IMP_SCORPION_PROJECTILE, -1, 19, 1));
+    this->df->Effects[901].EffectCommands.push_back(createEC(0, UNIT_IMP_SCORPION_PROJECTILE_FIRE, -1, 19, 1));
     this->df->Effects[483].EffectCommands.clear();
     this->df->Effects[483].EffectCommands.push_back(createEC(4, 279, -1, 9, amountTypetoD(4, 3)));
     this->df->Effects[483].EffectCommands.push_back(createEC(4, 542, -1, 9, amountTypetoD(4, 3)));
-    this->df->Effects[483].EffectCommands.push_back(createEC(4, impScorpion, -1, 9, amountTypetoD(4, 3)));
+    this->df->Effects[483].EffectCommands.push_back(createEC(4, UNIT_IMP_SCORPION, -1, 9, amountTypetoD(4, 3)));
     this->df->Effects[483].EffectCommands.push_back(createEC(4, 1120, -1, 9, amountTypetoD(2, 3)));
     this->df->Effects[483].EffectCommands.push_back(createEC(4, 1122, -1, 9, amountTypetoD(2, 3)));
-    this->df->Effects[894].EffectCommands.push_back(createEC(5, impScorpion, -1, 10, 0.75));
-    this->df->Effects[891].EffectCommands.push_back(createEC(0, impScorpion, -1, 20, 1));
+    this->df->Effects[894].EffectCommands.push_back(createEC(5, UNIT_IMP_SCORPION, -1, 10, 0.75));
+    this->df->Effects[891].EffectCommands.push_back(createEC(0, UNIT_IMP_SCORPION, -1, 20, 1));
 
     // Make monk techs affect monk units
     for (Civ &civ : this->df->Civs) {
@@ -6273,9 +6273,9 @@ void Civbuilder::cleanup() {
     // Apply random costs modifier
     bool randomCosts = this->config["modifiers"]["randomCosts"].asBool();
     if (randomCosts) {
-        unitSets[40].push_back(royalElephant);
-        unitSets[41].push_back(royalLancer);
-        unitSets[44].push_back(impScorpion);
+        unitSets[40].push_back(UNIT_ROYAL_ELEPHANT);
+        unitSets[41].push_back(UNIT_ROYAL_LANCER);
+        unitSets[44].push_back(UNIT_IMP_SCORPION);
         uniqueUnits = this->unitClasses["unique"];
         randomizeCosts(this->df);
     }
