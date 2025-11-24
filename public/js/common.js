@@ -3299,7 +3299,7 @@ const unitStats = [
 				[30, 32],
 			],
 		},
-		cost: [55, 0, 0, 5],
+		cost: [55, 0, 0, 50],
 		hp: [60, 75],
 		range: [0],
 		reload: [2],
