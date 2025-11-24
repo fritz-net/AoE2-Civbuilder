@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
         unitObj["display_name"] = strings[unit.LanguageDLLName];
       }
       
-      // Add train locations array for creatable units (type 70, 80)
+      // Add train locations array for creatable units (UT_Creatable=70, UT_Building=80)
       if (unit.Type == UT_Creatable || unit.Type == UT_Building) {
         Value trainLocationsArray(Json::arrayValue);
         
@@ -128,6 +128,7 @@ int main(int argc, char **argv) {
           trainLocationsArray.append(trainLocObj);
         }
         
+        // Only include the array if it has training locations
         if (!trainLocationsArray.empty()) {
           unitObj["train_locations"] = trainLocationsArray;
         }
@@ -169,6 +170,7 @@ int main(int argc, char **argv) {
       researchLocationsArray.append(resLocObj);
     }
     
+    // Only include the array if it has research locations
     if (!researchLocationsArray.empty()) {
       techObj["research_locations"] = researchLocationsArray;
     }
