@@ -22,6 +22,24 @@ AoE2-Civbuilder provides two Dockerfiles for different use cases:
 
 ---
 
+## Using Pre-built Docker Images
+
+Pre-built Docker images are automatically published to GitHub Container Registry (ghcr.io) with each release.
+
+**Pull and run the latest release:**
+```sh
+docker pull ghcr.io/fritz-net/aoe2-civbuilder:latest
+docker run -p 4000:4000 ghcr.io/fritz-net/aoe2-civbuilder:latest
+```
+
+**Pull and run a specific version:**
+```sh
+docker pull ghcr.io/fritz-net/aoe2-civbuilder:v1.0.0
+docker run -p 4000:4000 ghcr.io/fritz-net/aoe2-civbuilder:v1.0.0
+```
+
+---
+
 ## Building and Running
 
 ### 1. Using `Dockerfile.build-cpp`

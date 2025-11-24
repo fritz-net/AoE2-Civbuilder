@@ -21,6 +21,7 @@ jobs:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.tag_name || github.ref }}
           submodules: 'recursive'
           fetch-depth: 0
 
