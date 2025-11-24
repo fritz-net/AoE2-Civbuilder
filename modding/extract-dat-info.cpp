@@ -34,20 +34,28 @@ map<int, string> loadStrings(const string& stringsPath) {
     return strings;
   }
   
-  Value stringsRoot;
-  stringsFile >> stringsRoot;
-  stringsFile.close();
-  
-  for (auto const& key : stringsRoot.getMemberNames()) {
-    try {
-      int id = stoi(key);
-      strings[id] = stringsRoot[key].asString();
-    } catch (...) {
-      // Skip invalid keys
+  try {
+    Value stringsRoot;
+    stringsFile >> stringsRoot;
+    stringsFile.close();
+    
+    for (auto const& key : stringsRoot.getMemberNames()) {
+      try {
+        int id = stoi(key);
+        strings[id] = stringsRoot[key].asString();
+      } catch (...) {
+        // Skip invalid keys
+      }
     }
+    
+    cout << "Loaded " << strings.size() << " string translations" << endl;
+  } catch (const exception& e) {
+    cerr << "Warning: Failed to parse strings file: " << e.what() << endl;
+    cerr << "Display names will not be available." << endl;
+    stringsFile.close();
+    return map<int, string>(); // Return empty map
   }
   
-  cout << "Loaded " << strings.size() << " string translations" << endl;
   return strings;
 }
 
@@ -129,7 +137,7 @@ int main(int argc, char **argv) {
         }
         
         // Only include the array if it has training locations
-        if (!trainLocationsArray.empty()) {
+        if (trainLocationsArray.size() > 0) {
           unitObj["train_locations"] = trainLocationsArray;
         }
       }
@@ -171,7 +179,7 @@ int main(int argc, char **argv) {
     }
     
     // Only include the array if it has research locations
-    if (!researchLocationsArray.empty()) {
+    if (researchLocationsArray.size() > 0) {
       techObj["research_locations"] = researchLocationsArray;
     }
     
