@@ -36,8 +36,24 @@ function parseChangelogMarkdown(markdown) {
 				html += '<br>';
 				inList = false;
 			}
+			const version = versionMatch[1];
 			const date = versionMatch[2];
-			html += `<b>${date}</b><br>`;
+			
+			// Skip "Unreleased" versions
+			if (version.toLowerCase() === 'unreleased') {
+				continue;
+			}
+			
+			// Compare version to 0.1.0 to determine if we should add a GitHub release link
+			const shouldLink = compareVersion(version, '0.1.0') > 0;
+			
+			if (shouldLink) {
+				// Add version with link to GitHub release
+				html += `<b>${date} - <a href="https://github.com/fritz-net/AoE2-Civbuilder/releases/tag/v${version}" target="_blank" rel="noopener noreferrer">v${version}</a></b><br>`;
+			} else {
+				// Add version without link
+				html += `<b>${date} - v${version}</b><br>`;
+			}
 			continue;
 		}
 		
@@ -56,6 +72,22 @@ function parseChangelogMarkdown(markdown) {
 	}
 	
 	return html;
+}
+
+// Helper function to compare semantic versions
+function compareVersion(v1, v2) {
+	const parts1 = v1.split('.').map(p => parseInt(p, 10));
+	const parts2 = v2.split('.').map(p => parseInt(p, 10));
+	
+	for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+		const p1 = parts1[i] || 0;
+		const p2 = parts2[i] || 0;
+		
+		if (p1 > p2) return 1;
+		if (p1 < p2) return -1;
+	}
+	
+	return 0;
 }
 
 let donateRoll = Math.floor(4 * Math.random());
