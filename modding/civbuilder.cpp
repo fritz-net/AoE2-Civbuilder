@@ -1231,7 +1231,7 @@ void Civbuilder::setupData() {
 
 void Civbuilder::createNewUnits() {
     // Crusader Knights
-    this->createUU(39, 1723, "Crusader Knight", {600, 0, 0, 1200}, 45, 7604);
+    this->createUU(UU_CRUSADER_KNIGHT, 1723, "Crusader Knight", {600, 0, 0, 1200}, 45, 7604);
     int uuID = (int)(this->df->Civs[0].Units.size() - 2);
     int eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1253,7 +1253,7 @@ void Civbuilder::createNewUnits() {
     }
 
     // Xolotl Warriors
-    createUU(40, 1570, "Xolotl Warrior", {800, 0, 0, 800}, 60, 7605);
+    createUU(UU_XOLOTL_WARRIOR, 1570, "Xolotl Warrior", {800, 0, 0, 800}, 60, 7605);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1285,7 +1285,7 @@ void Civbuilder::createNewUnits() {
     }
 
     // Saboteur
-    createUU(41, 706, "Saboteur", {0, 600, 600, 0}, 40, 7606);
+    createUU(UU_SABOTEUR, 706, "Saboteur", {0, 600, 600, 0}, 40, 7606);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     this->unitClasses["explosive"].push_back(uuID);
@@ -1325,7 +1325,7 @@ void Civbuilder::createNewUnits() {
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 0, 50, 50});
     // Ninja
-    createUU(42, 1145, "Ninja", {0, 500, 0, 600}, 100, 7607);
+    createUU(UU_NINJA, 1145, "Ninja", {0, 500, 0, 600}, 100, 7607);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     int ninjaID = uuID;
@@ -1355,7 +1355,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.BreakOffCombat = 1;
     }
     // Flamethrower
-    createUU(43, 188, "Flamethrower", {0, 1000, 0, 1000}, 75, 7608);
+    createUU(UU_FLAMETHROWER, 188, "Flamethrower", {0, 1000, 0, 1000}, 75, 7608);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1384,7 +1384,7 @@ void Civbuilder::createNewUnits() {
     }
     setUnitCosts(this->df, {uuID, eID}, {0, 125, 0, 50});
     // Photonman
-    createUU(44, 1577, "Photonman", {1000, 0, 0, 1000}, 120, 7609);
+    createUU(UU_PHOTONMAN, 1577, "Photonman", {1000, 0, 0, 1000}, 120, 7609);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1437,7 +1437,7 @@ void Civbuilder::createNewUnits() {
         shockPowerUpTask.WorkRange = 2;
         shockPowerUpTasks.push_back(shockPowerUpTask);
     }
-    createUU(46, 1074, "Apukispay", {800, 0, 0, 900}, 70, 7643);
+    createUU(UU_APUKISPAY, 1074, "Apukispay", {800, 0, 0, 900}, 70, 7643);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1463,7 +1463,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}}, {{4, 1}, {3, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}}, {{4, 2}, {3, 0}, {19, 0}});
     // Monkey Boy
-    createUU(47, 860, "Monkey Boy", {2000, 0, 0, 0}, 60, 7612);
+    createUU(UU_MONKEY_BOY, 860, "Monkey Boy", {2000, 0, 0, 0}, 60, 7612);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1499,7 +1499,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Bird.TaskList.push_back(civ.Units[1723].Bird.TaskList[4]);
     }
     // Amazon Warrior
-    createUU(48, 825, "Amazon Warrior", {600, 0, 0, 1000}, 70, 7613);
+    createUU(UU_AMAZON_WARRIOR, 825, "Amazon Warrior", {600, 0, 0, 1000}, 70, 7613);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1530,7 +1530,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Speed = 1.2;
     }
     // Amazon Archer
-    createUU(49, 850, "Amazon Archer", {600, 0, 0, 400}, 60, 7614);
+    createUU(UU_AMAZON_ARCHER, 850, "Amazon Archer", {600, 0, 0, 400}, 60, 7614);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     this->unitClasses["footArcher"].push_back(uuID);
@@ -1565,7 +1565,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.ResourceCosts[1].Amount = 35;
     }
     // Iroquois Warrior
-    createUU(50, 1374, "Iroquois Warrior", {800, 0, 0, 700}, 70, 7615);
+    createUU(UU_IROQUOIS_WARRIOR, 1374, "Iroquois Warrior", {800, 0, 0, 700}, 70, 7615);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1598,7 +1598,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].HitPoints = 80;
     }
     // Varangian Guard
-    createUU(51, 1681, "Varangian Guard", {900, 0, 0, 900}, 90, 7616);
+    createUU(UU_VARANGIAN_GUARD, 1681, "Varangian Guard", {900, 0, 0, 900}, 90, 7616);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1636,7 +1636,7 @@ void Civbuilder::createNewUnits() {
     }
     setUnitCosts(this->df, {uuID, eID}, {70, 0, 0, 45});
     // Gendarme
-    createUU(52, 1281, "Gendarme", {1000, 0, 0, 850}, 110, 7617);
+    createUU(UU_GENDARME, 1281, "Gendarme", {1000, 0, 0, 850}, 110, 7617);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1656,7 +1656,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 10}}, {{3, 5}, {4, 5}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}}, {{3, 7}, {4, 7}, {8, 0}, {19, 0}});
     // Cuahchiqueh
-    createUU(53, 1067, "Cuahchiqueh", {600, 0, 0, 900}, 60, 7618);
+    createUU(UU_CUAHCHIQUEH, 1067, "Cuahchiqueh", {600, 0, 0, 900}, 60, 7618);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1680,7 +1680,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{29, 5}, {21, 1}, {1, 5}, {4, 6}, {8, 0}, {32, 5}}, {{4, 1}, {3, -1}, {19, 0}});
     setCombatStats(this->df, eID, {{29, 7}, {21, 1}, {1, 5}, {4, 8}, {8, 0}, {32, 5}}, {{4, 1}, {3, -1}, {19, 0}});
     // Ritterbruder
-    createUU(54, 1727, "Ritterbruder", {850, 0, 0, 850}, 60, 7619);
+    createUU(UU_RITTERBRUDER, 1727, "Ritterbruder", {850, 0, 0, 850}, 60, 7619);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1700,7 +1700,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 11}}, {{3, 1}, {4, 6}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}}, {{3, 2}, {4, 11}, {8, 0}, {19, 0}});
     // Kazak
-    createUU(55, 1269, "Kazak", {0, 1100, 0, 500}, 70, 7620);
+    createUU(UU_KAZAK, 1269, "Kazak", {0, 1100, 0, 500}, 70, 7620);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1738,7 +1738,7 @@ void Civbuilder::createNewUnits() {
     monkPowerUpTask.ClassID = -1;
     monkPowerUpTask.UnitID = 1811;
     monkPowerUpTasks.push_back(monkPowerUpTask);
-    createUU(56, 1721, "Szlachcic", {750, 0, 0, 650}, 60, 7621);
+    createUU(UU_SZLACHCIC, 1721, "Szlachcic", {750, 0, 0, 650}, 60, 7621);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1762,7 +1762,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 10}}, {{4, 4}, {3, 1}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}}, {{4, 5}, {3, 2}, {8, 0}, {19, 0}});
     // Cuirassier
-    createUU(57, 1186, "Cuirassier", {650, 0, 0, 800}, 60, 7622);
+    createUU(UU_CUIRASSIER, 1186, "Cuirassier", {650, 0, 0, 800}, 60, 7622);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1793,7 +1793,7 @@ void Civbuilder::createNewUnits() {
         camelPowerUpTask.WorkRange = 3;
         camelPowerUpTasks.push_back(camelPowerUpTask);
     }
-    createUU(58, 1184, "Rajput", {750, 0, 0, 750}, 55, 7623);
+    createUU(UU_RAJPUT, 1184, "Rajput", {750, 0, 0, 750}, 55, 7623);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1819,7 +1819,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}}, {{4, 0}, {3, 1}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 11}}, {{4, 0}, {3, 2}, {8, 0}, {19, 0}});
     // Seljuk Archer
-    createUU(59, 943, "Seljuk Archer", {0, 800, 0, 700}, 65, 7624);
+    createUU(UU_SELJUK_ARCHER, 943, "Seljuk Archer", {0, 800, 0, 700}, 65, 7624);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1843,7 +1843,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{3, 7}}, {{28, 0}, {4, -2}, {3, 0}, {15, 0}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{3, 9}}, {{28, 0}, {4, -2}, {3, 1}, {15, 0}, {8, 0}, {19, 0}});
     // Numidian Javelinman
-    createUU(60, 1036, "Numidian Javelinman", {0, 600, 0, 400}, 45, 7625);
+    createUU(UU_NUMIDIAN_JAVELINMAN, 1036, "Numidian Javelinman", {0, 600, 0, 400}, 45, 7625);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1866,7 +1866,7 @@ void Civbuilder::createNewUnits() {
     this->unitClasses["skirmisher"].push_back(uuID);
     this->unitClasses["skirmisher"].push_back(eID);
     // Sosso Guard
-    createUU(61, 1574, "Sosso Guard", {1000, 0, 0, 700}, 65, 7626);
+    createUU(UU_SOSSO_GUARD, 1574, "Sosso Guard", {1000, 0, 0, 700}, 65, 7626);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1888,7 +1888,7 @@ void Civbuilder::createNewUnits() {
     this->unitClasses["spear"].push_back(uuID);
     this->unitClasses["spear"].push_back(eID);
     // Swiss Pikeman
-    createUU(62, 892, "Swiss Pikeman", {600, 0, 0, 1200}, 45, 7627);
+    createUU(UU_SWISS_PIKEMAN, 892, "Swiss Pikeman", {600, 0, 0, 1200}, 45, 7627);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1914,7 +1914,7 @@ void Civbuilder::createNewUnits() {
     this->unitClasses["spear"].push_back(uuID);
     this->unitClasses["spear"].push_back(eID);
     // Headhunter
-    createUU(63, 1673, "Headhunter", {400, 0, 0, 300}, 50, 7628);
+    createUU(UU_HEADHUNTER, 1673, "Headhunter", {400, 0, 0, 300}, 50, 7628);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1946,7 +1946,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.ResourceCosts[1].Flag = 1;
     }
     // Teulu
-    createUU(64, 1683, "Teulu", {600, 0, 0, 550}, 45, 7629);
+    createUU(UU_TEULU, 1683, "Teulu", {600, 0, 0, 550}, 45, 7629);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1970,7 +1970,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 10}}, {{1, 0}, {4, 0}, {3, 1}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}}, {{1, 0}, {4, 0}, {3, 1}, {19, 0}});
     // Maillotins
-    createUU(65, 1685, "Maillotins", {950, 0, 0, 250}, 35, 7630);
+    createUU(UU_MAILLOTINS, 1685, "Maillotins", {950, 0, 0, 250}, 35, 7630);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -1992,7 +1992,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 20}}, {{1, 0}, {4, 0}, {3, 3}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 27}}, {{1, 0}, {4, 0}, {3, 5}, {19, 0}});
     // Hashashin
-    createUU(66, 1035, "Hashashin", {500, 0, 0, 1250}, 60, 7631);
+    createUU(UU_HASHASHIN, 1035, "Hashashin", {500, 0, 0, 1250}, 60, 7631);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2012,7 +2012,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 12}, {19, 8}, {36, 25}}, {{4, 1}, {3, 1}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 14}, {19, 12}, {36, 50}}, {{4, 1}, {3, 1}, {8, 0}, {19, 0}});
     // Highlander
-    createUU(67, 453, "Highlander", {850, 0, 0, 700}, 65, 7632);
+    createUU(UU_HIGHLANDER, 453, "Highlander", {850, 0, 0, 700}, 65, 7632);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2032,7 +2032,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}, {1, 5}, {8, 5}, {32, 5}}, {{4, 1}, {3, 1}, {1, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}, {1, 6}, {8, 6}, {32, 6}}, {{4, 1}, {3, 1}, {1, 0}, {19, 0}});
     // Stradiot
-    createUU(68, 1677, "Stradiot", {800, 0, 0, 850}, 65, 7633);
+    createUU(UU_STRADIOT, 1677, "Stradiot", {800, 0, 0, 850}, 65, 7633);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2056,7 +2056,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 9}, {8, 4}}, {{8, 0}, {4, 0}, {3, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 12}, {8, 6}}, {{8, 0}, {4, 1}, {3, 1}, {19, 0}});
     // Ahosi
-    createUU(69, 1066, "Ahosi", {450, 0, 0, 350}, 40, 7634);
+    createUU(UU_AHOSI, 1066, "Ahosi", {450, 0, 0, 350}, 40, 7634);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2116,7 +2116,7 @@ void Civbuilder::createNewUnits() {
     landsknechtPowerUpTask.WorkRange = 5;
     landsknechtPowerUpTask.TargetDiplomacy = 4;
     landsknechtPowerUpTasks.push_back(landsknechtPowerUpTask);
-    createUU(70, 439, "Landsknecht", {850, 0, 0, 650}, 60, 7635);
+    createUU(UU_LANDSKNECHT, 439, "Landsknecht", {850, 0, 0, 650}, 60, 7635);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2143,7 +2143,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 12}, {21, 2}}, {{1, 3}, {4, 1}, {3, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 14}, {21, 2}}, {{1, 3}, {4, 1}, {3, 0}, {19, 0}});
     // Clibinarii
-    createUU(71, 932, "Clibinarii", {950, 0, 0, 850}, 65, 7636);
+    createUU(UU_CLIBINARII, 932, "Clibinarii", {950, 0, 0, 850}, 65, 7636);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2165,7 +2165,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 15}}, {{8, 0}, {3, 2}, {4, 2}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 19}}, {{8, 0}, {3, 3}, {4, 3}, {19, 0}});
     // Silahtar
-    createUU(72, 1267, "Silahtar", {0, 1100, 0, 650}, 75, 7637);
+    createUU(UU_SILAHTAR, 1267, "Silahtar", {0, 1100, 0, 650}, 75, 7637);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2187,7 +2187,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{3, 6}, {1, 3}, {32, 3}}, {{28, 0}, {15, 0}, {8, 0}, {19, 2}, {4, 1}, {3, 0}});
     setCombatStats(this->df, eID, {{3, 8}, {1, 6}, {32, 6}}, {{28, 0}, {15, 0}, {8, 0}, {19, 2}, {4, 2}, {3, 1}});
     // Jaridah
-    createUU(73, 777, "Jaridah", {900, 0, 0, 450}, 60, 7638);
+    createUU(UU_JARIDAH, 777, "Jaridah", {900, 0, 0, 450}, 60, 7638);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2207,7 +2207,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 11}, {30, 8}, {5, 25}}, {{4, 1}, {3, 0}, {8, 12}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 13}, {30, 14}, {5, 45}}, {{4, 1}, {3, 0}, {8, 16}, {19, 0}});
     // Wolf Warrior
-    createUU(74, 702, "Wolf Warrior", {800, 0, 0, 700}, 65, 7639);
+    createUU(UU_WOLF_WARRIOR, 702, "Wolf Warrior", {800, 0, 0, 700}, 65, 7639);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2227,7 +2227,7 @@ void Civbuilder::createNewUnits() {
     setCombatStats(this->df, uuID, {{4, 13}}, {{4, 3}, {3, 0}, {8, 0}, {19, 0}});
     setCombatStats(this->df, eID, {{4, 15}}, {{4, 5}, {3, 0}, {8, 0}, {19, 0}});
     // Warrior Monk
-    createUU(75, 1178, "Warrior Monk", {800, 0, 0, 750}, 80, 7640);
+    createUU(UU_WARRIOR_MONK, 1178, "Warrior Monk", {800, 0, 0, 750}, 80, 7640);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
@@ -2265,7 +2265,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Creatable.ResourceCosts[1].Flag = 1;
     }
     // Castellan
-    createUU(76, 1718, "Castellan", {700, 0, 0, 900}, 75, 7641);
+    createUU(UU_CASTELLAN, 1718, "Castellan", {700, 0, 0, 900}, 75, 7641);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     setUnitCosts(this->df, {uuID, eID}, {65, 0, 0, 90});
@@ -2297,7 +2297,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[eID].Type50.BreakOffCombat = 96;
     }
     // Wind Warrior
-    createUU(77, 749, "Wind Warrior", {600, 0, 0, 900}, 65, 7642);
+    createUU(UU_WIND_WARRIOR, 749, "Wind Warrior", {600, 0, 0, 900}, 65, 7642);
     uuID = (int)(this->df->Civs[0].Units.size() - 2);
     eID = (int)(this->df->Civs[0].Units.size() - 1);
     for (Civ &civ : this->df->Civs) {
