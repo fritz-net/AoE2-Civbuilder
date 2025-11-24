@@ -36,12 +36,14 @@
 <style scoped>
 .events-page {
   padding: 2rem;
+  padding-bottom: 4rem;
   max-width: 1200px;
   margin: 0 auto;
+  min-height: 100vh;
 }
 
 .page-title {
-  font-size: min(6vh, 3vw);
+  font-size: clamp(2rem, 5vw, 3rem);
   color: hsl(52, 100%, 50%);
   text-align: center;
   margin-bottom: 2rem;
@@ -154,6 +156,7 @@
 @media (max-width: 768px) {
   .events-page {
     padding: 1rem;
+    padding-bottom: 3rem;
   }
   
   .page-title {

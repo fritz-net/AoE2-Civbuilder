@@ -27,6 +27,9 @@ const changelogHtml = ref('')
 const loading = ref(true)
 const error = ref(false)
 
+// Internal sections to ignore
+const IGNORED_SECTIONS = ['Reverts', 'Performance Improvements', 'Code Refactoring', 'Documentation', 'Styles', 'Tests', 'Build System', 'Continuous Integration', 'Chores']
+
 // Helper function to compare semantic versions
 function compareVersion(v1: string, v2: string): number {
   const parts1 = v1.split('.').map(p => parseInt(p, 10))
@@ -47,7 +50,7 @@ function compareVersion(v1: string, v2: string): number {
 function parseChangelogMarkdown(markdown: string): string {
   const VERSION_PATTERN = /^## \[?([^\]]+)\]? - (\d{4}-\d{2}-\d{2})/
   const VERSION_PATTERN_ALT = /^## ([0-9.]+) \((\d{4}-\d{2}-\d{2})\)/
-  const SECTION_PATTERN = /^### /
+  const SECTION_PATTERN = /^### (.+)/
   const BULLET_PATTERN = /^[-*] /
   const SKIP_PATTERNS = [
     /^# Changelog/,
@@ -58,6 +61,8 @@ function parseChangelogMarkdown(markdown: string): string {
   const lines = markdown.split('\n')
   let html = ''
   let inList = false
+  let currentSection = ''
+  let skipSection = false
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim()
@@ -91,19 +96,39 @@ function parseChangelogMarkdown(markdown: string): string {
         continue
       }
       
+      // Reset section state
+      currentSection = ''
+      skipSection = false
+      
       // Compare version to 0.1.0 to determine if we should add a GitHub release link
       const shouldLink = compareVersion(version, '0.1.0') > 0
       
       if (shouldLink) {
-        html += `<b>${date} - <a href="https://github.com/fritz-net/AoE2-Civbuilder/releases/tag/v${version}" target="_blank" rel="noopener noreferrer" style="color: hsl(52, 100%, 60%);">v${version}</a></b><br>`
+        html += `<div class="version-header"><span class="version-date">${date}</span> - <a href="https://github.com/fritz-net/AoE2-Civbuilder/releases/tag/v${version}" target="_blank" rel="noopener noreferrer" class="version-link">v${version}</a></div>`
       } else {
-        html += `<b>${date} - v${version}</b><br>`
+        html += `<div class="version-header"><span class="version-date">${date}</span> - <span class="version-number">v${version}</span></div>`
       }
       continue
     }
     
-    // Skip section headers like ### Added, ### Fixed
-    if (SECTION_PATTERN.test(line)) {
+    // Match section headers like ### Added, ### Fixed
+    const sectionMatch = line.match(SECTION_PATTERN)
+    if (sectionMatch) {
+      currentSection = sectionMatch[1]
+      skipSection = IGNORED_SECTIONS.some(s => currentSection.toLowerCase().includes(s.toLowerCase()))
+      
+      if (!skipSection) {
+        if (inList) {
+          html += '<br>'
+          inList = false
+        }
+        html += `<div class="section-header">${currentSection}</div>`
+      }
+      continue
+    }
+    
+    // Skip bullets in ignored sections
+    if (skipSection) {
       continue
     }
     
@@ -111,8 +136,8 @@ function parseChangelogMarkdown(markdown: string): string {
     if (BULLET_PATTERN.test(line)) {
       let content = line.substring(2).trim()
       // Replace markdown links with HTML links
-      content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: hsl(52, 100%, 60%);">$1</a>')
-      html += `&emsp;&emsp;• ${content}<br>`
+      content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="changelog-link">$1</a>')
+      html += `<div class="changelog-item">• ${content}</div>`
       inList = true
       continue
     }
@@ -141,12 +166,14 @@ onMounted(async () => {
 <style scoped>
 .updates-page {
   padding: 2rem;
+  padding-bottom: 4rem;
   max-width: 1200px;
   margin: 0 auto;
+  min-height: 100vh;
 }
 
 .page-title {
-  font-size: min(6vh, 3vw);
+  font-size: clamp(2rem, 5vw, 3rem);
   color: hsl(52, 100%, 50%);
   text-align: center;
   margin-bottom: 2rem;
@@ -159,31 +186,68 @@ onMounted(async () => {
   border: 3px solid hsl(52, 100%, 50%);
   border-radius: 8px;
   padding: 2rem;
-  max-height: 70vh;
-  overflow-y: auto;
 }
 
 .changelog-content {
   color: #ffffff;
   font-size: 1.1rem;
-  line-height: 1.8;
+  line-height: 1.6;
 }
 
-.changelog-content :deep(b) {
+.changelog-content :deep(.version-header) {
   color: hsl(52, 100%, 50%);
-  font-size: 1.2rem;
-  display: block;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid hsl(52, 100%, 50%, 0.3);
+}
+
+.changelog-content :deep(.version-header:first-child) {
+  margin-top: 0;
+}
+
+.changelog-content :deep(.version-date) {
+  color: hsl(52, 100%, 60%);
+}
+
+.changelog-content :deep(.version-link),
+.changelog-content :deep(.version-number) {
+  color: hsl(52, 100%, 50%);
+}
+
+.changelog-content :deep(.version-link) {
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.changelog-content :deep(.version-link:hover) {
+  color: hsl(52, 100%, 70%);
+  text-decoration: underline;
+}
+
+.changelog-content :deep(.section-header) {
+  color: hsl(52, 100%, 70%);
+  font-size: 1.1rem;
+  font-weight: bold;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
+  padding-left: 0.5rem;
 }
 
-.changelog-content :deep(a) {
+.changelog-content :deep(.changelog-item) {
+  margin-left: 1.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.changelog-content :deep(.changelog-link) {
   color: hsl(52, 100%, 60%);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
-.changelog-content :deep(a:hover) {
+.changelog-content :deep(.changelog-link:hover) {
   color: hsl(52, 100%, 70%);
   text-decoration: underline;
 }
@@ -227,6 +291,7 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .updates-page {
     padding: 1rem;
+    padding-bottom: 3rem;
   }
   
   .page-title {

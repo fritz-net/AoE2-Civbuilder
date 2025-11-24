@@ -110,6 +110,13 @@ app.use(
 );
 app.use(routeSubdir, router);
 
+// Redirect root to the legacy frontend
+if (routeSubdir !== "/") {
+	app.get("/", (req, res) => {
+		res.redirect(routeSubdir);
+	});
+}
+
 app.use(zip());
 app.use(cookieParser());
 

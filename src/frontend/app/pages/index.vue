@@ -7,13 +7,9 @@
         Build Civilization
       </NuxtLink>
       
-      <div class="spacer"></div>
-      
       <button class="action-button" @click="goToCombine">
         Combine Civilizations
       </button>
-      
-      <div class="spacer"></div>
       
       <button class="action-button" @click="goToCreateDraft">
         Create Draft
@@ -42,38 +38,36 @@ const goToCreateDraft = () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 80vh;
+  height: 100vh;
   padding: 2rem;
+  box-sizing: border-box;
 }
 
 .title {
-  font-size: min(12vh, 6vw);
-  margin-top: 5vh;
+  font-size: clamp(2rem, 8vw, 5rem);
   margin-bottom: 5vh;
   color: hsl(52, 100%, 50%);
   text-shadow: 3px 3px 5px black;
   text-align: center;
   font-family: 'Cinzel', serif;
-  max-width: 70vw;
 }
 
 .action-buttons {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 3vh;
   width: 100%;
   max-width: 600px;
-  margin-top: 5vh;
 }
 
 .action-button {
-  padding: min(3vh, 1.5rem) min(4vw, 2rem);
+  padding: clamp(0.8rem, 2vh, 1.5rem) clamp(1rem, 3vw, 2rem);
   background: linear-gradient(to bottom, rgba(139, 69, 19, 0.85), rgba(101, 67, 33, 0.85));
   color: hsl(52, 100%, 50%);
   border: 3px solid hsl(52, 100%, 50%);
   border-radius: 6px;
   cursor: pointer;
-  font-size: min(6vh, 3vw);
+  font-size: clamp(1.2rem, 3vw, 2rem);
   font-family: 'Cinzel', serif;
   font-weight: normal;
   text-decoration: none;
@@ -94,22 +88,31 @@ const goToCreateDraft = () => {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
 }
 
-.spacer {
-  height: 10vh;
+@media (max-width: 768px) {
+  .home-page {
+    padding: 1rem;
+  }
+  
+  .title {
+    margin-bottom: 3vh;
+  }
+  
+  .action-buttons {
+    gap: 2vh;
+  }
 }
 
-@media (max-width: 768px) {
+@media (max-height: 600px) {
   .title {
-    font-size: 2rem;
+    margin-bottom: 2vh;
+  }
+  
+  .action-buttons {
+    gap: 1.5vh;
   }
   
   .action-button {
-    font-size: 1.5rem;
-    padding: 1rem 1.5rem;
-  }
-  
-  .spacer {
-    height: 5vh;
+    padding: 0.6rem 1rem;
   }
 }
 </style>

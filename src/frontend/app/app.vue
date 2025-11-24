@@ -21,9 +21,6 @@ body {
   background-size: 100% 100%;
   color: #ffffff;
   line-height: 1.6;
-  cursor: default;
-  user-select: none;
-  -webkit-user-select: none;
 }
 </style>
 
