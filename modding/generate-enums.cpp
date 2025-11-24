@@ -23,7 +23,7 @@ using namespace std;
 using namespace Json;
 
 // Convert name to valid C++ enum identifier
-string toEnumName(const string& name, int id) {
+string toEnumName(const string& name, int id, const string& prefix = "") {
   string result = name;
   
   // Replace non-alphanumeric characters with underscores
@@ -41,9 +41,9 @@ string toEnumName(const string& name, int id) {
     result.pop_back();
   }
   
-  // If empty or starts with digit, prefix with type
+  // If empty or starts with digit, add prefix
   if (result.empty() || isdigit(result[0])) {
-    result = "UNIT_" + result;
+    result = prefix + result;
   }
   
   // Convert to uppercase
@@ -53,8 +53,8 @@ string toEnumName(const string& name, int id) {
 }
 
 // Generate unique enum name by adding suffix if needed
-string makeUnique(const string& name, set<string>& usedNames, int id) {
-  string enumName = toEnumName(name, id);
+string makeUnique(const string& name, set<string>& usedNames, int id, const string& prefix = "") {
+  string enumName = toEnumName(name, id, prefix);
   string original = enumName;
   int suffix = 1;
   
@@ -127,15 +127,16 @@ int main(int argc, char** argv) {
         name = unit["display_name"].asString();
       }
       
-      string enumName = makeUnique(name, usedNames, id);
+      string enumName = makeUnique(name, usedNames, id, "UNIT_");
       outFile << "    " << enumName << " = " << id;
       
       if (i < units.size() - 1) {
         outFile << ",";
       }
       
-      // Add comment with internal name if different
-      if (unit.isMember("display_name") && !unit["display_name"].asString().empty()) {
+      // Add comment with internal name if display name was used
+      if (unit.isMember("display_name") && !unit["display_name"].asString().empty() && 
+          unit["name"].asString() != unit["display_name"].asString()) {
         outFile << " // " << unit["name"].asString();
       }
       
@@ -181,14 +182,14 @@ int main(int argc, char** argv) {
         name = tech["display_name"].asString();
       }
       
-      string enumName = makeUnique(name, usedNames, id);
+      string enumName = makeUnique(name, usedNames, id, "TECH_");
       outFile << "    " << enumName << " = " << id;
       
       if (i < techs.size() - 1) {
         outFile << ",";
       }
       
-      // Add comment with internal name if different
+      // Add comment with internal name if display name was used and different
       if (tech.isMember("display_name") && !tech["display_name"].asString().empty() && 
           tech["name"].asString() != tech["display_name"].asString()) {
         outFile << " // " << tech["name"].asString();
@@ -231,7 +232,7 @@ int main(int argc, char** argv) {
       int id = effect["id"].asInt();
       string name = effect["name"].asString();
       
-      string enumName = makeUnique(name, usedNames, id);
+      string enumName = makeUnique(name, usedNames, id, "EFFECT_");
       outFile << "    " << enumName << " = " << id;
       
       if (i < effects.size() - 1) {
