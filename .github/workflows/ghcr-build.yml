@@ -1,9 +1,7 @@
-name: Build and publish Docker image
+name: Build Docker image (PR validation)
 on:
-  release:
-    types: [published]
   pull_request:
-    
+
 permissions:
   contents: read
   packages: write
@@ -28,13 +26,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: Dockerfile.build-cpp
           platforms: linux/amd64
-          push: ${{ github.event_name == 'release' }}
-          tags: ghcr.io/fritz-net/aoe2-civbuilder:latest,ghcr.io/fritz-net/aoe2-civbuilder:${{ github.event.release.tag_name || github.sha }}
+          push: false
+          tags: |
+            ghcr.io/fritz-net/aoe2-civbuilder:pr-${{ github.event.pull_request.number }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
