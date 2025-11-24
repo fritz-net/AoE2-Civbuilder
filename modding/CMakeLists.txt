@@ -14,3 +14,10 @@ add_executable(
 )
 set_property(TARGET create-data-mod PROPERTY CXX_STANDARD 17)
 target_link_libraries(create-data-mod genieutils jsoncpp)
+
+add_executable(
+    extract-dat-info
+    extract-dat-info.cpp
+)
+set_property(TARGET extract-dat-info PROPERTY CXX_STANDARD 17)
+target_link_libraries(extract-dat-info genieutils jsoncpp)
