@@ -220,7 +220,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { createDefaultCiv, architectures, languages, wonders, type CivConfig } from '~/composables/useCivData'
 import { getBonusCards, maxSelections as bonusMaxSelections } from '~/composables/useBonusData'
 
@@ -249,6 +249,7 @@ const showAdvanced = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const autosaveEnabled = ref(false)
 const lastSaved = ref<Date | null>(null)
+const isRestoring = ref(true)  // Start as true to prevent autosave until initial restore/setup is complete
 
 const civConfig = reactive<CivConfig>({
   ...createDefaultCiv(),
@@ -441,7 +442,8 @@ function handleReset() {
 
 // Autosave functions
 function saveToLocalStorage() {
-  if (typeof window === 'undefined' || !autosaveEnabled.value) return
+  // Don't save during restore or on server
+  if (typeof window === 'undefined' || !autosaveEnabled.value || isRestoring.value) return
   
   updateBonusesInConfig()
   
@@ -455,8 +457,10 @@ function saveToLocalStorage() {
   lastSaved.value = new Date()
 }
 
-function loadFromLocalStorage() {
-  if (typeof window === 'undefined') return false
+function loadFromLocalStorage(): boolean {
+  if (typeof window === 'undefined') {
+    return false
+  }
   
   const savedData = localStorage.getItem(STORAGE_KEY)
   if (!savedData) return false
@@ -464,7 +468,13 @@ function loadFromLocalStorage() {
   try {
     const parsed = JSON.parse(savedData)
     if (parsed.config) {
-      Object.assign(civConfig, createDefaultCiv(), parsed.config)
+      // Use Object.keys to iterate and assign properties individually
+      // This ensures Vue's reactivity system properly tracks the changes
+      const mergedConfig = { ...createDefaultCiv(), ...parsed.config }
+      Object.keys(mergedConfig).forEach(key => {
+        ;(civConfig as Record<string, unknown>)[key] = mergedConfig[key as keyof typeof mergedConfig]
+      })
+      
       restoreBonusSelections()
       if (parsed.currentStep !== undefined) {
         currentStep.value = parsed.currentStep
@@ -504,6 +514,9 @@ function formatLastSaved(): string {
 // Debounced autosave to prevent performance issues
 let autosaveTimeout: ReturnType<typeof setTimeout> | null = null
 function debouncedSave() {
+  // Don't save during restore
+  if (isRestoring.value) return
+  
   if (autosaveTimeout) {
     clearTimeout(autosaveTimeout)
   }
@@ -542,9 +555,24 @@ onMounted(() => {
     const savedAutosave = localStorage.getItem(AUTOSAVE_KEY)
     autosaveEnabled.value = savedAutosave !== 'false'
     
-    // Try to restore from local storage if autosave is enabled
-    if (autosaveEnabled.value && !props.initialConfig) {
-      loadFromLocalStorage()
+    // Check if initialConfig has any meaningful properties (not just an empty object)
+    const hasInitialConfig = props.initialConfig && Object.keys(props.initialConfig).length > 0
+    
+    // Try to restore from local storage if autosave is enabled and no initial config was provided
+    if (autosaveEnabled.value && !hasInitialConfig) {
+      nextTick(() => {
+        loadFromLocalStorage()
+        // Re-enable autosave after restore is complete, with a delay to ensure
+        // any pending debounced saves from initialization have been processed
+        setTimeout(() => {
+          isRestoring.value = false
+        }, 1100) // Just slightly longer than the 1000ms debounce
+      })
+    } else {
+      // No restore needed, enable autosave after initial debounce period
+      setTimeout(() => {
+        isRestoring.value = false
+      }, 1100)
     }
     
     // Add beforeunload listener
@@ -555,6 +583,11 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (typeof window !== 'undefined') {
     window.removeEventListener('beforeunload', handleBeforeUnload)
+  }
+  // Clear any pending autosave timeout
+  if (autosaveTimeout) {
+    clearTimeout(autosaveTimeout)
+    autosaveTimeout = null
   }
 })
 
