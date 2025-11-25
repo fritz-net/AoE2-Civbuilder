@@ -350,9 +350,10 @@ const doneButtonText = computed(() => 'Done')
 const formattedSidebarContent = computed(() => {
   if (!props.sidebarContent) return ''
   // Regex to match quantifiers like +15%, -10%, +1, +2, free, etc.
-  // This makes them bold
+  // Only match when preceded by a space or start of text, and not inside HTML tags
+  // This avoids breaking <h3> tags etc.
   return props.sidebarContent.replace(
-    /([+-]?\d+%?|free|\bx\d+)/gi,
+    /(?<![<\w])(\+\d+%?|-\d+%?|\d+%|free\b)/gi,
     '<strong>$1</strong>'
   )
 })
