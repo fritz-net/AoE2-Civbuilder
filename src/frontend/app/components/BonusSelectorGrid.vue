@@ -135,8 +135,8 @@
               @toggle="toggleCard(card.id)"
               @hover="(hovering: boolean) => handleCardHover(card, hovering)"
             />
-            <!-- Multiplier controls (only when allowMultiplier is enabled) -->
-            <div v-if="allowMultiplier" class="multiplier-controls">
+            <!-- Multiplier controls (only when allowMultiplier is enabled and maxSelections > 1) -->
+            <div v-if="allowMultiplier && (!maxSelections || maxSelections > 1)" class="multiplier-controls">
               <button 
                 class="multiplier-btn"
                 @click.stop="decrementMultiplier(card.id)"
@@ -148,7 +148,7 @@
               <button 
                 class="multiplier-btn"
                 @click.stop="incrementMultiplier(card.id)"
-                :disabled="getCardMultiplier(card.id) >= maxMultiplier"
+                :disabled="getCardMultiplier(card.id) >= maxMultiplier || (maxSelections && selectedCount >= maxSelections)"
               >
                 +
               </button>
@@ -199,7 +199,7 @@
       <div v-if="hoveredUnitStats" class="tooltip-unit-stats">
         <!-- Unit graphic -->
         <img 
-          :src="`/img/unitgraphics/uu_${hoveredCard?.id}.jpg`" 
+          :src="getUnitGraphicUrl(hoveredCard?.id ?? 0)" 
           class="unit-graphic"
           :alt="hoveredCard?.name"
         />
@@ -207,12 +207,10 @@
         <!-- Cost with icons -->
         <div class="unit-stats-row">
           <span class="stat-label">
-            <span class="stat-icons">
-              <img v-if="hoveredUnitStats.cost[0] > 0" src="/img/staticons/food.png" class="stat-icon" :title="`${hoveredUnitStats.cost[0]} Food`" />
-              <img v-if="hoveredUnitStats.cost[1] > 0" src="/img/staticons/wood.png" class="stat-icon" :title="`${hoveredUnitStats.cost[1]} Wood`" />
-              <img v-if="hoveredUnitStats.cost[2] > 0" src="/img/staticons/stone.png" class="stat-icon" :title="`${hoveredUnitStats.cost[2]} Stone`" />
-              <img v-if="hoveredUnitStats.cost[3] > 0" src="/img/staticons/gold.png" class="stat-icon" :title="`${hoveredUnitStats.cost[3]} Gold`" />
-            </span>
+            <img v-if="hoveredUnitStats.cost[0] > 0" :src="getStatIconUrl('food')" class="stat-icon" :title="`${hoveredUnitStats.cost[0]} Food`" />
+            <img v-if="hoveredUnitStats.cost[1] > 0" :src="getStatIconUrl('wood')" class="stat-icon" :title="`${hoveredUnitStats.cost[1]} Wood`" />
+            <img v-if="hoveredUnitStats.cost[2] > 0" :src="getStatIconUrl('stone')" class="stat-icon" :title="`${hoveredUnitStats.cost[2]} Stone`" />
+            <img v-if="hoveredUnitStats.cost[3] > 0" :src="getStatIconUrl('gold')" class="stat-icon" :title="`${hoveredUnitStats.cost[3]} Gold`" />
             Cost:
           </span>
           <span class="stat-value">{{ formatCost(hoveredUnitStats.cost) }}</span>
@@ -221,7 +219,7 @@
         <!-- HP -->
         <div class="unit-stats-row">
           <span class="stat-label">
-            <img src="/img/staticons/hp.png" class="stat-icon" title="Hit Points" />
+            <img :src="getStatIconUrl('hp')" class="stat-icon" title="Hit Points" />
             HP:
           </span>
           <span class="stat-value">{{ formatStatPair(hoveredUnitStats.hp) }}</span>
@@ -239,7 +237,7 @@
         <!-- Attack Speed (reload time) -->
         <div class="unit-stats-row">
           <span class="stat-label">
-            <img src="/img/staticons/reloadTime.png" class="stat-icon" title="Attack Speed" />
+            <img :src="getStatIconUrl('reloadTime')" class="stat-icon" title="Attack Speed" />
             Attack Speed:
           </span>
           <span class="stat-value">{{ formatStatPair(hoveredUnitStats.reload) }}s</span>
@@ -248,7 +246,7 @@
         <!-- Range (only show if > 0) -->
         <div class="unit-stats-row" v-if="hoveredUnitStats.range[0] > 0">
           <span class="stat-label">
-            <img src="/img/staticons/range.png" class="stat-icon" title="Range" />
+            <img :src="getStatIconUrl('range')" class="stat-icon" title="Range" />
             Range:
           </span>
           <span class="stat-value">{{ formatStatPair(hoveredUnitStats.range) }}</span>
@@ -257,7 +255,7 @@
         <!-- Movement Speed -->
         <div class="unit-stats-row">
           <span class="stat-label">
-            <img src="/img/staticons/movementSpeed.png" class="stat-icon" title="Movement Speed" />
+            <img :src="getStatIconUrl('movementSpeed')" class="stat-icon" title="Movement Speed" />
             Speed:
           </span>
           <span class="stat-value">{{ formatStatPair(hoveredUnitStats.speed) }}</span>
@@ -266,8 +264,8 @@
         <!-- Armor -->
         <div class="unit-stats-row">
           <span class="stat-label">
-            <img src="/img/staticons/armor.png" class="stat-icon" title="Melee Armor" />
-            <img src="/img/staticons/range-armor.png" class="stat-icon" title="Pierce Armor" />
+            <img :src="getStatIconUrl('armor')" class="stat-icon" title="Melee Armor" />
+            <img :src="getStatIconUrl('range-armor')" class="stat-icon" title="Pierce Armor" />
             Armor:
           </span>
           <span class="stat-value">
@@ -564,6 +562,9 @@ function toggleCard(cardId: number) {
 function incrementMultiplier(cardId: number) {
   if (!props.allowMultiplier) return
   
+  // Don't allow incrementing if we've reached maxSelections
+  if (props.maxSelections && selectedCount.value >= props.maxSelections) return
+  
   const currentSelection = [...props.modelValue]
   const index = currentSelection.findIndex(item => {
     if (Array.isArray(item)) {
@@ -635,6 +636,20 @@ function formatArmorStat(basic: number, elite: number): string {
 }
 
 /**
+ * Get URL for stat icon
+ */
+function getStatIconUrl(iconName: string): string {
+  return `/v2/img/staticons/${iconName}.png`
+}
+
+/**
+ * Get URL for unit graphic
+ */
+function getUnitGraphicUrl(unitId: number): string {
+  return `/v2/img/unitgraphics/uu_${unitId}.jpg`
+}
+
+/**
  * Get the appropriate attack icon based on attack type
  */
 function getAttackIcon(stats: UnitStats): string {
@@ -644,10 +659,10 @@ function getAttackIcon(stats: UnitStats): string {
   
   // If unit has pierce attack but no melee attack, use pierce icon
   if (hasPierceAttack && !hasMeleeAttack) {
-    return '/img/staticons/pierceAttack.png'
+    return getStatIconUrl('pierceAttack')
   }
   // Default to melee damage icon
-  return '/img/staticons/damage.png'
+  return getStatIconUrl('damage')
 }
 </script>
 
@@ -1032,13 +1047,6 @@ function getAttackIcon(stats: UnitStats): string {
   height: 16px;
   vertical-align: middle;
   margin-right: 2px;
-}
-
-.stat-icons {
-  display: inline-flex;
-  gap: 2px;
-  margin-right: 4px;
-  vertical-align: middle;
 }
 
 .stat-label {
