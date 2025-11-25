@@ -24,9 +24,12 @@
 import { computed } from 'vue'
 import { architectures } from '~/composables/useCivData'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: number
-}>()
+  disabled?: boolean
+}>(), {
+  disabled: false
+})
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void
@@ -46,12 +49,14 @@ function handleImageError(e: Event) {
 }
 
 function next() {
+  if (props.disabled) return
   // Architecture is 1-indexed, cycles through 1-11
   const newValue = ((props.modelValue % 11) + 1)
   emit('update:modelValue', newValue)
 }
 
 function previous() {
+  if (props.disabled) return
   // Architecture is 1-indexed, cycles through 1-11
   const newValue = ((props.modelValue - 2 + 11) % 11) + 1
   emit('update:modelValue', newValue)
@@ -60,7 +65,7 @@ function previous() {
 
 <style scoped>
 .architecture-selector {
-  background: rgba(139, 69, 19, 0.5);
+  background: rgba(139, 69, 19, 0.75);
   border: 2px solid hsl(52, 100%, 50%);
   padding: 1rem;
   border-radius: 8px;

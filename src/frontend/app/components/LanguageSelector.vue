@@ -18,9 +18,12 @@
 import { computed } from 'vue'
 import { languages } from '~/composables/useCivData'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: number
-}>()
+  disabled?: boolean
+}>(), {
+  disabled: false
+})
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void
@@ -29,11 +32,13 @@ const emit = defineEmits<{
 const currentLanguageName = computed(() => languages[props.modelValue])
 
 function next() {
+  if (props.disabled) return
   const newValue = (props.modelValue + 1) % languages.length
   emit('update:modelValue', newValue)
 }
 
 function previous() {
+  if (props.disabled) return
   const newValue = (props.modelValue - 1 + languages.length) % languages.length
   emit('update:modelValue', newValue)
 }
@@ -41,7 +46,7 @@ function previous() {
 
 <style scoped>
 .language-selector {
-  background: rgba(139, 69, 19, 0.5);
+  background: rgba(139, 69, 19, 0.75);
   border: 2px solid hsl(52, 100%, 50%);
   padding: 1rem;
   border-radius: 8px;

@@ -24,9 +24,12 @@
 import { computed } from 'vue'
 import { wonders } from '~/composables/useCivData'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: number
-}>()
+  disabled?: boolean
+}>(), {
+  disabled: false
+})
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void
@@ -45,11 +48,13 @@ function handleImageError(e: Event) {
 }
 
 function next() {
+  if (props.disabled) return
   const newValue = (props.modelValue + 1) % wonders.length
   emit('update:modelValue', newValue)
 }
 
 function previous() {
+  if (props.disabled) return
   const newValue = (props.modelValue - 1 + wonders.length) % wonders.length
   emit('update:modelValue', newValue)
 }
@@ -57,7 +62,7 @@ function previous() {
 
 <style scoped>
 .wonder-selector {
-  background: rgba(139, 69, 19, 0.5);
+  background: rgba(139, 69, 19, 0.75);
   border: 2px solid hsl(52, 100%, 50%);
   padding: 1rem;
   border-radius: 8px;
@@ -107,8 +112,8 @@ function previous() {
 }
 
 .wonder-image {
-  max-width: 200px;
-  max-height: 150px;
+  width: 200px;
+  height: 150px;
   object-fit: contain;
   border: 2px solid hsl(52, 100%, 50%);
   border-radius: 4px;
@@ -118,7 +123,11 @@ function previous() {
   color: hsl(52, 100%, 50%);
   font-size: 0.85rem;
   text-align: center;
-  max-width: 200px;
-  word-wrap: break-word;
+  width: 200px;
+  height: 2.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
 }
 </style>

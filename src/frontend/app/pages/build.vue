@@ -3,10 +3,11 @@
     <CivBuilder
       ref="civBuilderRef"
       :initial-config="initialConfig"
-      next-button-text="Continue to Bonuses"
+      next-button-text="Create Civilization"
       @next="handleNext"
       @download="handleDownload"
       @reset="handleReset"
+      @config-loaded="handleConfigLoaded"
     />
   </div>
 </template>
@@ -39,9 +40,8 @@ onBeforeRouteLeave((to, from, next) => {
 })
 
 function handleNext(config: CivConfig) {
-  // Store config and navigate to bonus selection (placeholder for future implementation)
   console.log('Civ config:', config)
-  alert(`Civilization "${config.alias}" configured successfully!\n\nBonus selection coming soon.`)
+  alert(`Civilization "${config.alias}" created successfully!\n\nFull mod creation will be available soon.`)
 }
 
 function handleDownload(config: CivConfig) {
@@ -50,6 +50,10 @@ function handleDownload(config: CivConfig) {
 
 function handleReset() {
   console.log('Config reset')
+}
+
+function handleConfigLoaded(config: CivConfig) {
+  console.log('Config loaded:', config)
 }
 </script>
 

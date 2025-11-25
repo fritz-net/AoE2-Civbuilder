@@ -1,73 +1,184 @@
 <template>
   <div class="civ-builder">
     <div class="civ-builder-header">
-      <h1 class="civ-builder-title">Create Your Civilization</h1>
+      <h1 class="civ-builder-title">{{ readOnly ? 'View Civilization' : 'Create Your Civilization' }}</h1>
+      
+      <!-- File Import Button -->
+      <div v-if="!readOnly" class="import-section">
+        <label class="import-btn">
+          <span>📁 Load Config</span>
+          <input 
+            type="file" 
+            accept=".json"
+            @change="handleFileImport"
+            ref="fileInput"
+          />
+        </label>
+      </div>
     </div>
     
-    <div class="civ-builder-content">
-      <!-- Left Column: Flag Creator -->
-      <div class="builder-column flag-column">
-        <FlagCreator
-          v-model="civConfig.flag_palette"
-          v-model:custom-flag="civConfig.customFlag"
-          v-model:custom-flag-data="civConfig.customFlagData"
+    <!-- Stepper Navigation -->
+    <Stepper
+      :steps="stepLabels"
+      v-model:current-step="currentStep"
+      :allow-navigation="!readOnly"
+    />
+    
+    <!-- Step 1: Basic Info -->
+    <div v-show="currentStep === 0" class="step-content">
+      <div class="civ-builder-content">
+        <!-- Left Column: Flag Creator -->
+        <div class="builder-column flag-column">
+          <FlagCreator
+            v-model="civConfig.flag_palette"
+            v-model:custom-flag="civConfig.customFlag"
+            v-model:custom-flag-data="civConfig.customFlagData"
+            :disabled="readOnly"
+          />
+          
+          <!-- Civ Name Input -->
+          <div class="civ-name-section">
+            <label class="input-label" for="civName">Civilization Name</label>
+            <input
+              id="civName"
+              v-model="civConfig.alias"
+              type="text"
+              class="civ-name-input"
+              placeholder="Enter civilization name"
+              maxlength="30"
+              :readonly="readOnly"
+            />
+          </div>
+          
+          <!-- Description Input -->
+          <div class="civ-description-section">
+            <label class="input-label" for="civDescription">Civilization Type</label>
+            <input
+              id="civDescription"
+              v-model="civConfig.description"
+              type="text"
+              class="civ-description-input"
+              placeholder="e.g. Infantry"
+              maxlength="30"
+              :readonly="readOnly"
+            />
+          </div>
+        </div>
+        
+        <!-- Right Column: Selectors -->
+        <div class="builder-column selectors-column">
+          <ArchitectureSelector v-model="civConfig.architecture" :disabled="readOnly" />
+          
+          <div class="advanced-toggle">
+            <button class="toggle-btn" @click="showAdvanced = !showAdvanced">
+              {{ showAdvanced ? 'Hide Advanced' : 'Show Advanced' }}
+            </button>
+          </div>
+          
+          <div v-if="showAdvanced" class="advanced-options">
+            <LanguageSelector v-model="civConfig.language" :disabled="readOnly" />
+            <WonderSelector v-model="civConfig.wonder" :disabled="readOnly" />
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Step 2: Bonuses -->
+    <div v-show="currentStep === 1" class="step-content">
+      <div class="bonuses-grid">
+        <BonusSelector
+          title="Civilization Bonuses"
+          subtitle="Select up to 5 bonuses for your civilization"
+          :bonuses="civBonuses"
+          v-model="selectedCivBonuses"
+          mode="multi"
+          :max-selections="5"
+          :disabled="readOnly"
         />
         
-        <!-- Civ Name Input -->
-        <div class="civ-name-section">
-          <label class="input-label" for="civName">Civilization Name</label>
-          <input
-            id="civName"
-            v-model="civConfig.alias"
-            type="text"
-            class="civ-name-input"
-            placeholder="Enter civilization name"
-            maxlength="30"
-          />
-        </div>
-        
-        <!-- Description Input -->
-        <div class="civ-description-section">
-          <label class="input-label" for="civDescription">Civilization Type</label>
-          <input
-            id="civDescription"
-            v-model="civConfig.description"
-            type="text"
-            class="civ-description-input"
-            placeholder="e.g. Infantry"
-            maxlength="30"
-          />
-        </div>
+        <BonusSelector
+          title="Team Bonus"
+          subtitle="Select one team bonus"
+          :bonuses="teamBonuses"
+          v-model="selectedTeamBonus"
+          mode="single"
+          :disabled="readOnly"
+        />
       </div>
-      
-      <!-- Right Column: Selectors -->
-      <div class="builder-column selectors-column">
-        <ArchitectureSelector v-model="civConfig.architecture" />
+    </div>
+    
+    <!-- Step 3: Review -->
+    <div v-show="currentStep === 2" class="step-content">
+      <div class="review-section">
+        <h2 class="review-title">Review Your Civilization</h2>
         
-        <div class="advanced-toggle">
-          <button class="toggle-btn" @click="showAdvanced = !showAdvanced">
-            {{ showAdvanced ? 'Hide Advanced' : 'Show Advanced' }}
-          </button>
-        </div>
-        
-        <div v-if="showAdvanced" class="advanced-options">
-          <LanguageSelector v-model="civConfig.language" />
-          <WonderSelector v-model="civConfig.wonder" />
+        <div class="review-grid">
+          <div class="review-item">
+            <span class="review-label">Name:</span>
+            <span class="review-value">{{ civConfig.alias || 'Not set' }}</span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Type:</span>
+            <span class="review-value">{{ civConfig.description || 'Not set' }}</span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Architecture:</span>
+            <span class="review-value">{{ architectures[civConfig.architecture - 1] }}</span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Language:</span>
+            <span class="review-value">{{ languages[civConfig.language] }}</span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Wonder:</span>
+            <span class="review-value">{{ wonders[civConfig.wonder] }}</span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Civ Bonuses:</span>
+            <span class="review-value">{{ selectedCivBonuses.length }} selected</span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Team Bonus:</span>
+            <span class="review-value">{{ selectedTeamBonus.length > 0 ? 'Selected' : 'Not set' }}</span>
+          </div>
         </div>
       </div>
     </div>
     
-    <!-- Action Buttons -->
+    <!-- Navigation Buttons -->
     <div class="civ-builder-actions">
-      <button class="action-btn primary-btn" @click="handleNext">
-        {{ nextButtonText }}
-      </button>
+      <div class="nav-buttons">
+        <button 
+          v-if="currentStep > 0"
+          class="action-btn secondary-btn" 
+          @click="previousStep"
+        >
+          ← Previous
+        </button>
+        
+        <button 
+          v-if="currentStep < stepLabels.length - 1"
+          class="action-btn primary-btn" 
+          @click="nextStep"
+          :disabled="!canProceed"
+        >
+          Next →
+        </button>
+        
+        <button 
+          v-if="currentStep === stepLabels.length - 1 && !readOnly"
+          class="action-btn primary-btn" 
+          @click="handleFinish"
+        >
+          {{ nextButtonText }}
+        </button>
+      </div>
       
       <div class="secondary-actions">
         <button class="action-btn secondary-btn" @click="handleDownload">
           Download Config
         </button>
-        <button class="action-btn secondary-btn" @click="handleReset">
+        <button v-if="!readOnly" class="action-btn secondary-btn" @click="handleReset">
           Reset
         </button>
       </div>
@@ -76,68 +187,134 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { createDefaultCiv, type CivConfig } from '~/composables/useCivData'
+import { ref, reactive, computed, watch } from 'vue'
+import { createDefaultCiv, architectures, languages, wonders, type CivConfig } from '~/composables/useCivData'
 
 const props = withDefaults(defineProps<{
   initialConfig?: Partial<CivConfig>
   nextButtonText?: string
+  readOnly?: boolean
 }>(), {
-  nextButtonText: 'Next'
+  nextButtonText: 'Create Civilization',
+  readOnly: false
 })
 
 const emit = defineEmits<{
   (e: 'next', config: CivConfig): void
   (e: 'download', config: CivConfig): void
   (e: 'reset'): void
+  (e: 'configLoaded', config: CivConfig): void
 }>()
 
+const stepLabels = ['Basic Info', 'Bonuses', 'Review']
+const currentStep = ref(0)
 const showAdvanced = ref(false)
+const fileInput = ref<HTMLInputElement | null>(null)
 
 const civConfig = reactive<CivConfig>({
   ...createDefaultCiv(),
   ...props.initialConfig
 })
 
-function validateName(value: string): boolean {
+// Sample bonuses - these would typically come from the backend
+const civBonuses = ref([
+  { id: 1, name: 'Infantry +10% HP', description: 'All infantry units have +10% hit points' },
+  { id: 2, name: 'Archer +1 range', description: 'Archery range units have +1 range' },
+  { id: 3, name: 'Cavalry +15% speed', description: 'Cavalry units move 15% faster' },
+  { id: 4, name: 'Siege +20% attack', description: 'Siege weapons deal 20% more damage' },
+  { id: 5, name: 'Villager +10% work rate', description: 'Villagers work 10% faster' },
+  { id: 6, name: 'Buildings +15% HP', description: 'All buildings have +15% hit points' },
+  { id: 7, name: 'Monks +50% healing', description: 'Monks heal 50% faster' },
+  { id: 8, name: 'Ships +1 pierce armor', description: 'All ships have +1 pierce armor' },
+])
+
+const teamBonuses = ref([
+  { id: 101, name: 'Team Infantry +2 attack', description: 'Team infantry +2 attack' },
+  { id: 102, name: 'Team Archers +1 LOS', description: 'Team archery units +1 line of sight' },
+  { id: 103, name: 'Team Cavalry +1 armor', description: 'Team cavalry +1 armor' },
+  { id: 104, name: 'Team Monks +3 healing range', description: 'Team monks +3 healing range' },
+])
+
+const selectedCivBonuses = ref<number[]>([])
+const selectedTeamBonus = ref<number[]>([])
+
+const canProceed = computed(() => {
+  if (currentStep.value === 0) {
+    return civConfig.alias && civConfig.alias.length > 0
+  }
+  return true
+})
+
+function nextStep() {
+  if (currentStep.value === 0 && !validateStep1()) return
+  if (currentStep.value < stepLabels.length - 1) {
+    currentStep.value++
+  }
+}
+
+function previousStep() {
+  if (currentStep.value > 0) {
+    currentStep.value--
+  }
+}
+
+function validateStep1(): boolean {
+  if (!civConfig.alias) {
+    alert('Please enter a civilization name')
+    return false
+  }
+  
   const nameRGEX = /^[a-zA-Z0-9][a-zA-Z0-9 ]*$/
-  if (!nameRGEX.test(value)) {
+  if (!nameRGEX.test(civConfig.alias)) {
     alert('Please enter a valid civilization name (alphanumeric characters only)')
     return false
   }
-  if (value.length > 30) {
-    alert('Please enter a shorter name')
-    return false
-  }
+  
   return true
 }
 
-function validateDescription(value: string): boolean {
-  const nameRGEX = /^[a-zA-Z0-9 ]*$/
-  if (value && !nameRGEX.test(value)) {
-    alert('Please enter a valid description (alphanumeric characters only)')
-    return false
+function handleFileImport(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (!input.files || !input.files[0]) return
+  
+  const file = input.files[0]
+  const reader = new FileReader()
+  
+  reader.onload = (e) => {
+    try {
+      const content = e.target?.result as string
+      const loadedConfig = JSON.parse(content) as Partial<CivConfig>
+      
+      // Merge loaded config with defaults
+      Object.assign(civConfig, createDefaultCiv(), loadedConfig)
+      
+      // Reset to first step
+      currentStep.value = 0
+      
+      emit('configLoaded', { ...civConfig })
+      alert('Configuration loaded successfully!')
+    } catch (error) {
+      alert('Failed to load configuration file. Please ensure it is a valid JSON file.')
+    }
   }
-  if (value.length > 30) {
-    alert('Please enter a shorter description')
-    return false
+  
+  reader.readAsText(file)
+  
+  // Reset file input
+  if (fileInput.value) {
+    fileInput.value.value = ''
   }
-  return true
 }
 
-function handleNext() {
-  if (!civConfig.alias) {
-    alert('Please enter a civilization name')
-    return
-  }
-  
-  if (!validateName(civConfig.alias)) {
-    return
-  }
-  
-  if (!validateDescription(civConfig.description)) {
-    return
-  }
+function handleFinish() {
+  // Update bonuses in config
+  civConfig.bonuses = [
+    selectedCivBonuses.value,
+    selectedTeamBonus.value,
+    [],
+    [],
+    []
+  ]
   
   emit('next', { ...civConfig })
 }
@@ -148,9 +325,14 @@ function handleDownload() {
     return
   }
   
-  if (!validateName(civConfig.alias)) {
-    return
-  }
+  // Update bonuses before download
+  civConfig.bonuses = [
+    selectedCivBonuses.value,
+    selectedTeamBonus.value,
+    [],
+    [],
+    []
+  ]
   
   const dataStr = JSON.stringify(civConfig, null, 2)
   const blob = new Blob([dataStr], { type: 'application/json' })
@@ -170,13 +352,23 @@ function handleDownload() {
 function handleReset() {
   const defaults = createDefaultCiv()
   Object.assign(civConfig, defaults)
+  selectedCivBonuses.value = []
+  selectedTeamBonus.value = []
+  currentStep.value = 0
   emit('reset')
 }
+
+// Watch for initial config changes
+watch(() => props.initialConfig, (newConfig) => {
+  if (newConfig) {
+    Object.assign(civConfig, createDefaultCiv(), newConfig)
+  }
+}, { deep: true })
 
 // Expose civConfig for parent component access if needed
 defineExpose({
   civConfig,
-  handleNext,
+  handleFinish,
   handleDownload,
   handleReset
 })
@@ -214,7 +406,7 @@ defineExpose({
 
 .civ-name-section,
 .civ-description-section {
-  background: rgba(139, 69, 19, 0.5);
+  background: rgba(139, 69, 19, 0.75);
   border: 2px solid hsl(52, 100%, 50%);
   padding: 1rem;
   border-radius: 8px;
@@ -337,6 +529,10 @@ defineExpose({
   .civ-builder-title {
     font-size: 1.8rem;
   }
+  
+  .bonuses-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 600px) {
@@ -347,5 +543,110 @@ defineExpose({
   .action-btn {
     width: 100%;
   }
+  
+  .nav-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+/* Import section */
+.import-section {
+  margin-top: 1rem;
+}
+
+.import-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px solid hsl(52, 100%, 50%);
+  color: hsl(52, 100%, 50%);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.import-btn:hover {
+  background: rgba(139, 69, 19, 0.6);
+}
+
+.import-btn input {
+  display: none;
+}
+
+/* Step content */
+.step-content {
+  min-height: 400px;
+}
+
+/* Bonuses grid */
+.bonuses-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+/* Review section */
+.review-section {
+  background: rgba(139, 69, 19, 0.75);
+  border: 2px solid hsl(52, 100%, 50%);
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.review-title {
+  color: hsl(52, 100%, 50%);
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.review-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.review-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.review-label {
+  color: hsla(52, 100%, 50%, 0.8);
+  font-size: 0.95rem;
+}
+
+.review-value {
+  color: hsl(52, 100%, 50%);
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+/* Navigation buttons */
+.nav-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Read-only styles */
+.civ-name-input:read-only,
+.civ-description-input:read-only {
+  cursor: not-allowed;
+  opacity: 0.8;
 }
 </style>

@@ -52,11 +52,14 @@
 import { ref, watch, onMounted, nextTick } from 'vue'
 import { colours, flagCategories, paletteSizes } from '~/composables/useCivData'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: number[]
   customFlag: boolean
   customFlagData: string
-}>()
+  disabled?: boolean
+}>(), {
+  disabled: false
+})
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number[]): void
@@ -72,6 +75,7 @@ const customImage = ref<HTMLImageElement | null>(null)
 const localPalette = ref([...props.modelValue])
 
 function incrementPalette(index: number) {
+  if (props.disabled) return
   const newPalette = [...localPalette.value]
   newPalette[index] = (newPalette[index] + 1) % paletteSizes[index]
   localPalette.value = newPalette
@@ -82,6 +86,7 @@ function incrementPalette(index: number) {
 }
 
 function decrementPalette(index: number) {
+  if (props.disabled) return
   const newPalette = [...localPalette.value]
   newPalette[index] = (newPalette[index] - 1 + paletteSizes[index]) % paletteSizes[index]
   localPalette.value = newPalette
@@ -92,6 +97,7 @@ function decrementPalette(index: number) {
 }
 
 function handleCustomFlagToggle() {
+  if (props.disabled) return
   emit('update:customFlag', useCustomFlag.value)
   if (!useCustomFlag.value) {
     renderFlag()
@@ -421,7 +427,7 @@ onMounted(() => {
 
 <style scoped>
 .flag-creator {
-  background: rgba(139, 69, 19, 0.5);
+  background: rgba(139, 69, 19, 0.75);
   border: 2px solid hsl(52, 100%, 50%);
   padding: 1.5rem;
   border-radius: 8px;
