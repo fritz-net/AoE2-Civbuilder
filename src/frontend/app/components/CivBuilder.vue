@@ -325,12 +325,14 @@ function normalizeBonus(bonuses: (number | number[])[] | undefined): [number, nu
   if (!bonuses || !Array.isArray(bonuses)) return []
   
   return bonuses.map(bonus => {
-    if (Array.isArray(bonus)) {
-      // Already in [id, multiplier] format
-      return [bonus[0], bonus[1] || 1] as [number, number]
+    if (Array.isArray(bonus) && bonus.length >= 1) {
+      // Already in [id, multiplier] format - use length check for safety
+      const id = bonus[0]
+      const multiplier = bonus.length >= 2 ? bonus[1] : 1
+      return [id, multiplier || 1] as [number, number]
     }
     // Just a number (id), add default multiplier of 1
-    return [bonus, 1] as [number, number]
+    return [bonus as number, 1] as [number, number]
   })
 }
 
