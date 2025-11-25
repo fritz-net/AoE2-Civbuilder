@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="google-adsense-account" content="ca-pub-9790404589582022" />
 		<link rel="stylesheet" href="./css/styles.css" />
+		<link rel="stylesheet" href="./css/crosslinks.css" />
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.2.1/axios.min.js"></script>
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script>
 		<script src="./aoe2techtree/js/svg.min.js"></script>
@@ -41,6 +42,45 @@
 				<div>Donate</div>
 				<span id="donateAd" class="tooltiptext">Please consider supporting the website! You can also contribute by commissioning your own ideas into civbuilder!</span>
 			</button>
+		</div>
+		<!-- Crosslinks to v2 UI - Set data-crosslink-style to: "text", "button", "ribbon", "badge", "icon", or "fold" -->
+		<div class="crosslink-container" data-crosslink-style="ribbon">
+			<!-- Version 1: Simple Text Link -->
+			<a href="./v2" class="crosslink-text">Try New UI (v2) →</a>
+			
+			<!-- Version 2: Button Style -->
+			<a href="./v2" class="crosslink-button">Try v2 UI</a>
+			
+			<!-- Version 3: Corner Ribbon -->
+			<div class="crosslink-ribbon-wrapper">
+				<div class="crosslink-ribbon-bow"></div>
+				<a href="./v2" class="crosslink-ribbon">
+					✨ NEW UI
+					<span class="crosslink-ribbon-label">Try v2</span>
+				</a>
+			</div>
+			
+			<!-- Version 4: Floating Badge -->
+			<a href="./v2" class="crosslink-badge">
+				<span class="crosslink-badge-new">NEW</span>
+				<span>Try v2 UI</span>
+			</a>
+			
+			<!-- Version 5: Icon-Based Link -->
+			<a href="./v2" class="crosslink-icon">
+				<span class="crosslink-icon-inner">
+					<span class="crosslink-icon-arrow">→</span>
+					<span>v2</span>
+				</span>
+				<span class="crosslink-tooltip">Try the new UI version</span>
+			</a>
+			
+			<!-- Version 6: Corner Fold -->
+			<a href="./v2" class="crosslink-fold-wrapper">
+				<div class="crosslink-fold"></div>
+				<div class="crosslink-fold-shadow"></div>
+				<span class="crosslink-fold-text">NEW v2</span>
+			</a>
 		</div>
 		<script src="./js/common.js"></script>
 		<script src="./aoe2techtree/js/techtree.js"></script>
