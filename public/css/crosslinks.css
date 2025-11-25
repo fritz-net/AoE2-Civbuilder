@@ -16,6 +16,10 @@
 .crosslink-text,
 .crosslink-button,
 .crosslink-ribbon-wrapper,
+.crosslink-ribbon2-wrapper,
+.crosslink-ribbon3-wrapper,
+.crosslink-ribbon4-wrapper,
+.crosslink-ribbon5-wrapper,
 .crosslink-badge,
 .crosslink-icon,
 .crosslink-fold-wrapper {
@@ -73,10 +77,23 @@
 }
 
 /* ============================================
- * Version 3: Corner Ribbon/Bow
- * Eye-catching ribbon in the corner with "NEW" indicator
+ * RIBBON VARIANTS (5 total)
  * ============================================ */
-[data-crosslink-style="ribbon"] .crosslink-ribbon-wrapper {
+
+/* Hide all ribbon wrappers by default */
+.crosslink-ribbon-wrapper,
+.crosslink-ribbon2-wrapper,
+.crosslink-ribbon3-wrapper,
+.crosslink-ribbon4-wrapper,
+.crosslink-ribbon5-wrapper {
+	display: none;
+}
+
+/* ============================================
+ * Ribbon 1: Classic Diagonal Ribbon
+ * Traditional corner ribbon with gold borders
+ * ============================================ */
+[data-crosslink-style="ribbon1"] .crosslink-ribbon-wrapper {
 	display: block;
 	position: fixed;
 	top: 0;
@@ -132,6 +149,304 @@
 	font-size: 0.65rem;
 	opacity: 0.9;
 	margin-top: 2px;
+}
+
+/* ============================================
+ * Ribbon 2: Slim Elegant Ribbon
+ * Thin, refined ribbon with subtle gradient
+ * ============================================ */
+[data-crosslink-style="ribbon2"] .crosslink-ribbon2-wrapper {
+	display: block;
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 180px;
+	height: 180px;
+	overflow: hidden;
+	z-index: 100;
+	pointer-events: none;
+}
+
+.crosslink-ribbon2 {
+	position: absolute;
+	top: 35px;
+	right: -50px;
+	width: 220px;
+	padding: 6px 0;
+	background: linear-gradient(90deg, hsl(30, 60%, 25%) 0%, hsl(35, 70%, 35%) 50%, hsl(30, 60%, 25%) 100%);
+	color: var(--crosslink-gold);
+	text-align: center;
+	text-decoration: none;
+	font-family: "Cinzel", serif;
+	font-size: 0.75rem;
+	font-weight: normal;
+	letter-spacing: 1px;
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+	transform: rotate(45deg);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+	pointer-events: auto;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	border-top: 1px solid var(--crosslink-gold);
+	border-bottom: 1px solid var(--crosslink-gold);
+}
+
+.crosslink-ribbon2:hover {
+	background: linear-gradient(90deg, hsl(30, 70%, 30%) 0%, hsl(35, 80%, 45%) 50%, hsl(30, 70%, 30%) 100%);
+	letter-spacing: 2px;
+}
+
+.crosslink-ribbon2-accent {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 25px;
+	height: 25px;
+	background: radial-gradient(circle at center, var(--crosslink-gold) 0%, transparent 70%);
+	opacity: 0.4;
+}
+
+/* ============================================
+ * Ribbon 3: Bold Banner Ribbon
+ * Wide, prominent banner with 3D effect
+ * ============================================ */
+[data-crosslink-style="ribbon3"] .crosslink-ribbon3-wrapper {
+	display: block;
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 200px;
+	height: 200px;
+	overflow: hidden;
+	z-index: 100;
+	pointer-events: none;
+}
+
+.crosslink-ribbon3 {
+	position: absolute;
+	top: 40px;
+	right: -55px;
+	width: 250px;
+	padding: 14px 0;
+	background: linear-gradient(180deg, hsl(0, 100%, 40%) 0%, var(--crosslink-red) 50%, hsl(0, 100%, 20%) 100%);
+	color: white;
+	text-align: center;
+	text-decoration: none;
+	font-family: "Cinzel", serif;
+	font-size: 1rem;
+	font-weight: bold;
+	text-transform: uppercase;
+	text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+	transform: rotate(45deg);
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.2);
+	pointer-events: auto;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.crosslink-ribbon3:hover {
+	background: linear-gradient(180deg, hsl(0, 100%, 50%) 0%, hsl(0, 100%, 45%) 50%, hsl(0, 100%, 30%) 100%);
+	transform: rotate(45deg) scale(1.02);
+}
+
+.crosslink-ribbon3-star {
+	display: inline-block;
+	color: var(--crosslink-gold);
+	margin: 0 5px;
+	text-shadow: 0 0 10px var(--crosslink-gold);
+}
+
+.crosslink-ribbon3-shadow {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 0;
+	height: 0;
+	border-style: solid;
+	border-width: 0 15px 15px 0;
+	border-color: transparent rgba(0, 0, 0, 0.5) transparent transparent;
+}
+
+/* ============================================
+ * Ribbon 4: Minimalist Corner Tag
+ * Small, subtle corner tag with clean design
+ * ============================================ */
+[data-crosslink-style="ribbon4"] .crosslink-ribbon4-wrapper {
+	display: block;
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 120px;
+	height: 120px;
+	overflow: hidden;
+	z-index: 100;
+	pointer-events: none;
+}
+
+.crosslink-ribbon4 {
+	position: absolute;
+	top: 20px;
+	right: -35px;
+	width: 150px;
+	padding: 5px 0;
+	background: rgba(0, 0, 0, 0.75);
+	color: var(--crosslink-gold);
+	text-align: center;
+	text-decoration: none;
+	font-family: "Cinzel", serif;
+	font-size: 0.7rem;
+	font-weight: normal;
+	text-shadow: none;
+	transform: rotate(45deg);
+	box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+	pointer-events: auto;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	border: none;
+}
+
+.crosslink-ribbon4:hover {
+	background: rgba(0, 0, 0, 0.9);
+	color: white;
+}
+
+.crosslink-ribbon4-dot {
+	display: inline-block;
+	width: 6px;
+	height: 6px;
+	background: hsl(120, 70%, 45%);
+	border-radius: 50%;
+	margin-right: 5px;
+	vertical-align: middle;
+	animation: ribbon4-pulse 1.5s infinite;
+}
+
+@keyframes ribbon4-pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.4; }
+}
+
+/* ============================================
+ * Ribbon 5: Animated Sparkle Ribbon with Bow
+ * Festive ribbon with sparkle animation and decorative bow
+ * ============================================ */
+[data-crosslink-style="ribbon5"] .crosslink-ribbon5-wrapper {
+	display: block;
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 170px;
+	height: 170px;
+	overflow: visible;
+	z-index: 100;
+	pointer-events: none;
+}
+
+.crosslink-ribbon5 {
+	position: absolute;
+	top: 32px;
+	right: -45px;
+	width: 210px;
+	padding: 12px 0;
+	background: linear-gradient(135deg, hsl(350, 80%, 45%) 0%, var(--crosslink-red) 50%, hsl(350, 80%, 35%) 100%);
+	color: var(--crosslink-gold);
+	text-align: center;
+	text-decoration: none;
+	font-family: "Cinzel", serif;
+	font-size: 0.85rem;
+	font-weight: bold;
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+	transform: rotate(45deg);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+	pointer-events: auto;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	border-top: 3px solid var(--crosslink-gold);
+	border-bottom: 3px solid var(--crosslink-gold);
+	overflow: hidden;
+}
+
+.crosslink-ribbon5:hover {
+	background: linear-gradient(135deg, hsl(350, 90%, 55%) 0%, hsl(0, 100%, 50%) 50%, hsl(350, 90%, 45%) 100%);
+}
+
+.crosslink-ribbon5::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 50%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+	animation: ribbon5-shine 3s infinite;
+}
+
+@keyframes ribbon5-shine {
+	0% { left: -100%; }
+	50%, 100% { left: 150%; }
+}
+
+/* Decorative bow for ribbon5 */
+.crosslink-ribbon5-bow {
+	position: absolute;
+	top: -5px;
+	right: 55px;
+	width: 40px;
+	height: 40px;
+	pointer-events: none;
+}
+
+.crosslink-ribbon5-bow::before,
+.crosslink-ribbon5-bow::after {
+	content: "";
+	position: absolute;
+	width: 20px;
+	height: 12px;
+	background: var(--crosslink-gold);
+	border-radius: 50% 50% 0 0;
+	box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.crosslink-ribbon5-bow::before {
+	top: 5px;
+	left: 0;
+	transform: rotate(-30deg);
+}
+
+.crosslink-ribbon5-bow::after {
+	top: 5px;
+	right: 0;
+	transform: rotate(30deg);
+}
+
+.crosslink-ribbon5-bow-center {
+	position: absolute;
+	top: 12px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 10px;
+	height: 10px;
+	background: var(--crosslink-gold);
+	border-radius: 50%;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+.crosslink-ribbon5-sparkle {
+	position: absolute;
+	width: 4px;
+	height: 4px;
+	background: white;
+	border-radius: 50%;
+	animation: ribbon5-sparkle 2s infinite;
+}
+
+.crosslink-ribbon5-sparkle:nth-child(1) { top: 10px; right: 20px; animation-delay: 0s; }
+.crosslink-ribbon5-sparkle:nth-child(2) { top: 25px; right: 80px; animation-delay: 0.5s; }
+.crosslink-ribbon5-sparkle:nth-child(3) { top: 15px; right: 50px; animation-delay: 1s; }
+
+@keyframes ribbon5-sparkle {
+	0%, 100% { opacity: 0; transform: scale(0); }
+	50% { opacity: 1; transform: scale(1); }
 }
 
 /* ============================================
