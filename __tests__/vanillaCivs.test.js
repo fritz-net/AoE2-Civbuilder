@@ -7,12 +7,6 @@
  * 
  * Each vanilla civ JSON is converted to the internal data.json format and
  * then processed through the C++ create-data-mod tool to generate a DAT file.
- * 
- * Test Results: All 51 vanilla civ files pass successfully ✅
- * 
- * The issue mentioned that "there is a high chance all these files are broken",
- * but testing shows they all work correctly with the backend. No tool needed
- * to fix/regenerate these files.
  */
 
 const { execFileSync } = require('child_process');

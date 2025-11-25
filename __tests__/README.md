@@ -28,8 +28,6 @@ npm run test:watch
 
 **Test File**: `__tests__/vanillaCivs.test.js`
 
-✅ **All 51 vanilla civilization JSON files pass successfully**
-
 This test suite validates that all vanilla civilization JSON files in `public/vanillaFiles/vanillaCivs/VanillaJson/` can be successfully processed by the create-data-mod backend tool.
 
 **Test Coverage**:
@@ -37,8 +35,6 @@ This test suite validates that all vanilla civilization JSON files in `public/va
 - Each civ is converted to internal data.json format
 - Processed through C++ create-data-mod tool
 - Validates successful DAT file generation
-
-**Result**: The issue suggested "there is a high chance all these files are broken", but testing proves all vanilla civ files work correctly with the backend. No tool needed to fix/regenerate these files.
 
 ### Dat File Creation Tests
 
