@@ -100,8 +100,38 @@
       />
     </div>
 
-    <!-- Step 4: Team Bonus -->
+    <!-- Step 4: Castle Age Tech -->
     <div v-show="currentStep === 3" class="step-content">
+      <BonusSelectorGrid
+        title="Castle Age Unique Tech"
+        subtitle="Select one castle age unique technology"
+        bonus-type="castle"
+        :bonuses="castleTechs"
+        v-model="selectedCastleTech"
+        mode="single"
+        :max-selections="bonusMaxSelections.castle"
+        :disabled="readOnly"
+        :allow-multiplier="false"
+      />
+    </div>
+
+    <!-- Step 5: Imperial Age Tech -->
+    <div v-show="currentStep === 4" class="step-content">
+      <BonusSelectorGrid
+        title="Imperial Age Unique Tech"
+        subtitle="Select one imperial age unique technology"
+        bonus-type="imp"
+        :bonuses="impTechs"
+        v-model="selectedImpTech"
+        mode="single"
+        :max-selections="bonusMaxSelections.imp"
+        :disabled="readOnly"
+        :allow-multiplier="false"
+      />
+    </div>
+
+    <!-- Step 6: Team Bonus -->
+    <div v-show="currentStep === 5" class="step-content">
       <BonusSelectorGrid
         title="Team Bonus"
         subtitle="Select one team bonus"
@@ -115,8 +145,8 @@
       />
     </div>
 
-    <!-- Step 5: Tech Tree -->
-    <div v-show="currentStep === 4" class="step-content techtree-step">
+    <!-- Step 7: Tech Tree -->
+    <div v-show="currentStep === 6" class="step-content techtree-step">
       <TechTree
         ref="techTreeRef"
         :initial-tree="techtreeData"
@@ -131,8 +161,8 @@
       />
     </div>
 
-    <!-- Step 6: Review -->
-    <div v-show="currentStep === 5" class="step-content">
+    <!-- Step 8: Review -->
+    <div v-show="currentStep === 7" class="step-content">
       <div class="review-section">
         <h2 class="review-title">Review Your Civilization</h2>
         
@@ -164,6 +194,14 @@
           <div class="review-item">
             <span class="review-label">Unique Unit:</span>
             <span class="review-value">{{ selectedUniqueUnit.length > 0 ? getUniqueUnitName() : 'Not set' }}</span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Castle Tech:</span>
+            <span class="review-value">{{ selectedCastleTech.length > 0 ? 'Selected' : 'Not set' }}</span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Imperial Tech:</span>
+            <span class="review-value">{{ selectedImpTech.length > 0 ? 'Selected' : 'Not set' }}</span>
           </div>
           <div class="review-item">
             <span class="review-label">Team Bonus:</span>
@@ -264,8 +302,8 @@ const emit = defineEmits<{
 const STORAGE_KEY = 'aoe2-civbuilder-config'
 const AUTOSAVE_KEY = 'aoe2-civbuilder-autosave'
 
-// Steps: Basic Info, Civ Bonuses, Unique Unit, Team Bonus, Tech Tree, Review
-const stepLabels = ['Basic Info', 'Civ Bonuses', 'Unique Unit', 'Team Bonus', 'Tech Tree', 'Review']
+// Steps: Basic Info, Civ Bonuses, Unique Unit, Castle Tech, Imperial Tech, Team Bonus, Tech Tree, Review
+const stepLabels = ['Basic Info', 'Civ Bonuses', 'Unique Unit', 'Castle Tech', 'Imperial Tech', 'Team Bonus', 'Tech Tree', 'Review']
 const currentStep = ref(0)
 const showAdvanced = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -295,10 +333,14 @@ const techtreeData = computed({
 // Bonus sources from composable
 const civBonuses = computed(() => getBonusCards('civ'))
 const uniqueUnits = computed(() => getBonusCards('uu'))
+const castleTechs = computed(() => getBonusCards('castle'))
+const impTechs = computed(() => getBonusCards('imp'))
 const teamBonuses = computed(() => getBonusCards('team'))
 
 const selectedCivBonuses = ref<(number | [number, number])[]>([])
 const selectedUniqueUnit = ref<(number | [number, number])[]>([])
+const selectedCastleTech = ref<(number | [number, number])[]>([])
+const selectedImpTech = ref<(number | [number, number])[]>([])
 const selectedTeamBonus = ref<(number | [number, number])[]>([])
 
 // Computed sidebar content for techtree
@@ -342,6 +384,24 @@ const sidebarContent = computed(() => {
       })()
     : null
 
+  // Get castle tech name
+  const castleTechName = selectedCastleTech.value.length > 0
+    ? (() => {
+        const techId = getBonusId(selectedCastleTech.value[0])
+        const tech = castleTechs.value.find(t => t.id === techId)
+        return tech?.name || 'Unknown'
+      })()
+    : null
+
+  // Get imperial tech name
+  const impTechName = selectedImpTech.value.length > 0
+    ? (() => {
+        const techId = getBonusId(selectedImpTech.value[0])
+        const tech = impTechs.value.find(t => t.id === techId)
+        return tech?.name || 'Unknown'
+      })()
+    : null
+
   return `
 <span>${civConfig.alias || 'Custom Civilization'}</span>
 <p><em>${civConfig.description || 'Custom civilization'}</em></p>
@@ -355,6 +415,16 @@ ${bonusList || '<li>No bonuses selected</li>'}
 
 <h3>Unique Unit</h3>
 <p>${uniqueUnitName || 'No unique unit selected'}</p>
+
+<hr>
+
+<h3>Castle Age Tech</h3>
+<p>${castleTechName || 'No castle tech selected'}</p>
+
+<hr>
+
+<h3>Imperial Age Tech</h3>
+<p>${impTechName || 'No imperial tech selected'}</p>
 
 <hr>
 
@@ -466,7 +536,7 @@ function handleFileImport(event: Event) {
 /**
  * Restore bonus selections from civConfig.bonuses
  * The legacy format stores bonuses as (number | [number, number])[][]
- * where index 0 = civ bonuses, index 1 = unique units, index 4 = team bonuses
+ * where index 0 = civ bonuses, index 1 = unique units, index 2 = castle techs, index 3 = imp techs, index 4 = team bonuses
  */
 function restoreBonusSelections() {
   if (civConfig.bonuses && Array.isArray(civConfig.bonuses)) {
@@ -474,6 +544,8 @@ function restoreBonusSelections() {
     // Each bonus can be either a number (id) or [id, multiplier]
     selectedCivBonuses.value = normalizeBonus(civConfig.bonuses[0])
     selectedUniqueUnit.value = normalizeBonus(civConfig.bonuses[1])
+    selectedCastleTech.value = normalizeBonus(civConfig.bonuses[2])
+    selectedImpTech.value = normalizeBonus(civConfig.bonuses[3])
     selectedTeamBonus.value = normalizeBonus(civConfig.bonuses[4])
   }
 }
@@ -503,8 +575,8 @@ function updateBonusesInConfig() {
   civConfig.bonuses = [
     selectedCivBonuses.value,
     selectedUniqueUnit.value,
-    [],  // castle techs (not implemented yet)
-    [],  // imp techs (not implemented yet)
+    selectedCastleTech.value,
+    selectedImpTech.value,
     selectedTeamBonus.value
   ]
 }
