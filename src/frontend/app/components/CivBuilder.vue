@@ -107,8 +107,24 @@
       </div>
     </div>
     
-    <!-- Step 3: Review -->
-    <div v-show="currentStep === 2" class="step-content">
+    <!-- Step 3: Tech Tree -->
+    <div v-show="currentStep === 2" class="step-content techtree-step">
+      <TechTree
+        ref="techTreeRef"
+        :initial-tree="techtreeData"
+        :editable="!readOnly"
+        :points="techtreePoints"
+        :relative-path="techtreePath"
+        :sidebar-content="sidebarContent"
+        :sidebar-title="civConfig.alias || 'Custom Civilization'"
+        @done="handleTechtreeDone"
+        @update:tree="handleTechtreeUpdate"
+        @update:points="handlePointsUpdate"
+      />
+    </div>
+    
+    <!-- Step 4: Review -->
+    <div v-show="currentStep === 3" class="step-content">
       <div class="review-section">
         <h2 class="review-title">Review Your Civilization</h2>
         
@@ -140,6 +156,10 @@
           <div class="review-item">
             <span class="review-label">Team Bonus:</span>
             <span class="review-value">{{ selectedTeamBonus.length > 0 ? 'Selected' : 'Not set' }}</span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Tech Tree Points:</span>
+            <span class="review-value">{{ techtreePointsRemaining }} remaining</span>
           </div>
         </div>
       </div>
@@ -206,10 +226,21 @@ const emit = defineEmits<{
   (e: 'configLoaded', config: CivConfig): void
 }>()
 
-const stepLabels = ['Basic Info', 'Bonuses', 'Review']
+const stepLabels = ['Basic Info', 'Bonuses', 'Tech Tree', 'Review']
 const currentStep = ref(0)
 const showAdvanced = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
+const techTreeRef = ref<any>(null)
+
+// Tech tree state
+const techtreePath = '/civbuilder/aoe2techtree'
+const techtreePoints = ref(100)
+const techtreePointsRemaining = ref(100)
+const techtreeData = ref([
+  [13, 17, 21, 74, 545, 539, 331, 125, 83, 128, 440],
+  [12, 45, 49, 50, 68, 70, 72, 79, 82, 84, 87, 101, 103, 104, 109, 199, 209, 276, 562, 584, 598, 621, 792],
+  [22, 101, 102, 103, 408],
+])
 
 const civConfig = reactive<CivConfig>({
   ...createDefaultCiv(),
@@ -238,6 +269,38 @@ const teamBonuses = ref([
 const selectedCivBonuses = ref<number[]>([])
 const selectedTeamBonus = ref<number[]>([])
 
+// Computed sidebar content for techtree
+const sidebarContent = computed(() => {
+  const bonusList = selectedCivBonuses.value
+    .map(id => {
+      const bonus = civBonuses.value.find(b => b.id === id)
+      return bonus ? `<li>${bonus.name}</li>` : ''
+    })
+    .join('')
+  
+  const teamBonusHtml = selectedTeamBonus.value
+    .map(id => {
+      const bonus = teamBonuses.value.find(b => b.id === id)
+      return bonus ? `<p>${bonus.name}</p>` : ''
+    })
+    .join('')
+
+  return `
+<span>${civConfig.alias || 'Custom Civilization'}</span>
+<p><em>${civConfig.description || 'Custom civilization'}</em></p>
+
+<h3>Civilization Bonuses</h3>
+<ul>
+${bonusList || '<li>No bonuses selected</li>'}
+</ul>
+
+<hr>
+
+<h3>Team Bonus</h3>
+${teamBonusHtml || '<p>No team bonus selected</p>'}
+`
+})
+
 const canProceed = computed(() => {
   if (currentStep.value === 0) {
     return civConfig.alias && civConfig.alias.length > 0
@@ -256,6 +319,21 @@ function previousStep() {
   if (currentStep.value > 0) {
     currentStep.value--
   }
+}
+
+function handleTechtreeDone(tree: number[][], points: number) {
+  techtreeData.value = tree
+  techtreePointsRemaining.value = points
+  // Move to review step
+  currentStep.value = 3
+}
+
+function handleTechtreeUpdate(tree: number[][]) {
+  techtreeData.value = tree
+}
+
+function handlePointsUpdate(points: number) {
+  techtreePointsRemaining.value = points
 }
 
 function validateStep1(): boolean {
@@ -582,6 +660,12 @@ defineExpose({
 /* Step content */
 .step-content {
   min-height: 400px;
+}
+
+.techtree-step {
+  margin: -2rem -2rem 0;
+  padding: 0;
+  min-height: 100vh;
 }
 
 /* Bonuses grid */
