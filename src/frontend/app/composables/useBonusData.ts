@@ -47,6 +47,16 @@ export const imagePrefix: Record<BonusType, string> = {
 }
 
 /**
+ * Get the base URL for assets (handles Nuxt baseURL)
+ * @returns The base URL prefix for image assets
+ */
+function getAssetBaseUrl(): string {
+  // In Nuxt, assets in /public are served at the baseURL
+  // The baseURL is /v2/ so images in /public/img become /v2/img
+  return '/v2'
+}
+
+/**
  * Get the image URL for a bonus card
  * @param type - The type of bonus (civ, team, etc.)
  * @param id - The card ID
@@ -55,15 +65,16 @@ export const imagePrefix: Record<BonusType, string> = {
  */
 export function getBonusImageUrl(type: BonusType, id: number, version: number = 0): string {
   const prefix = imagePrefix[type]
-  // Use the legacy public path since images are in /public/img
-  return `/img/compressedcards/${prefix}_${id}_v${version}.jpg`
+  const baseUrl = getAssetBaseUrl()
+  return `${baseUrl}/img/compressedcards/${prefix}_${id}_v${version}.jpg`
 }
 
 /**
  * Get the frame image URL for a rarity
  */
 export function getFrameUrl(rarity: number): string {
-  return `/img/frames/frame_${rarityCssClasses[rarity]}.png`
+  const baseUrl = getAssetBaseUrl()
+  return `${baseUrl}/img/frames/frame_${rarityCssClasses[rarity]}.png`
 }
 
 /**
@@ -71,7 +82,8 @@ export function getFrameUrl(rarity: number): string {
  */
 export function getEditionUrl(edition: number): string {
   const editionIndex = edition <= 0 ? 0 : edition
-  return `/img/editions/edition_${editionIndex}.png`
+  const baseUrl = getAssetBaseUrl()
+  return `${baseUrl}/img/editions/edition_${editionIndex}.png`
 }
 
 // Civilization Bonuses, Unique Units, Castle Techs, Imperial Techs, Team Bonuses
