@@ -109,11 +109,8 @@
       <span v-if="maxUniqueSelections && maxTotalSelections && maxUniqueSelections !== maxTotalSelections">
         {{ uniqueSelectionCount }}/{{ maxUniqueSelections }} unique ({{ selectedCount }}/{{ maxTotalSelections }} total)
       </span>
-      <span v-else-if="maxTotalSelections">
-        {{ selectedCount }}/{{ maxTotalSelections }} selected
-      </span>
-      <span v-else-if="maxUniqueSelections">
-        {{ uniqueSelectionCount }}/{{ maxUniqueSelections }} selected
+      <span v-else>
+        {{ selectedCount }}/{{ maxTotalSelections || maxUniqueSelections }} selected
       </span>
     </div>
     
@@ -143,8 +140,8 @@
               @toggle="toggleCard(card.id)"
               @hover="(hovering: boolean) => handleCardHover(card, hovering)"
             />
-            <!-- Multiplier controls (only when allowMultiplier is enabled and maxUniqueSelections > 1) -->
-            <div v-if="allowMultiplier && (!maxUniqueSelections || maxUniqueSelections > 1)" class="multiplier-controls">
+            <!-- Multiplier controls (shown when multiplier is enabled) -->
+            <div v-if="allowMultiplier" class="multiplier-controls">
               <button 
                 class="multiplier-btn"
                 @click.stop="decrementMultiplier(card.id)"
