@@ -669,6 +669,7 @@ function handleCardHover(card: BonusCard, isHovering: boolean) {
 }
 
 .cards-container {
+  min-height: 400px;
   max-height: 500px;
   overflow-y: auto;
   padding-right: 0.5rem;
