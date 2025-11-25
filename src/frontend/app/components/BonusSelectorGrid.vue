@@ -206,69 +206,67 @@
         
         <!-- Cost with icons -->
         <div class="unit-stats-row">
-          <span class="stat-label">
+          <span class="stat-label">Cost:</span>
+          <span class="stat-value">
             <img v-if="hoveredUnitStats.cost[0] > 0" :src="getStatIconUrl('food')" class="stat-icon" :title="`${hoveredUnitStats.cost[0]} Food`" />
             <img v-if="hoveredUnitStats.cost[1] > 0" :src="getStatIconUrl('wood')" class="stat-icon" :title="`${hoveredUnitStats.cost[1]} Wood`" />
             <img v-if="hoveredUnitStats.cost[2] > 0" :src="getStatIconUrl('stone')" class="stat-icon" :title="`${hoveredUnitStats.cost[2]} Stone`" />
             <img v-if="hoveredUnitStats.cost[3] > 0" :src="getStatIconUrl('gold')" class="stat-icon" :title="`${hoveredUnitStats.cost[3]} Gold`" />
-            Cost:
+            {{ formatCost(hoveredUnitStats.cost) }}
           </span>
-          <span class="stat-value">{{ formatCost(hoveredUnitStats.cost) }}</span>
         </div>
         
         <!-- HP -->
         <div class="unit-stats-row">
-          <span class="stat-label">
+          <span class="stat-label">HP:</span>
+          <span class="stat-value">
             <img :src="getStatIconUrl('hp')" class="stat-icon" title="Hit Points" />
-            HP:
+            {{ formatStatPair(hoveredUnitStats.hp) }}
           </span>
-          <span class="stat-value">{{ formatStatPair(hoveredUnitStats.hp) }}</span>
         </div>
         
         <!-- Attack -->
         <div class="unit-stats-row">
-          <span class="stat-label">
+          <span class="stat-label">Attack:</span>
+          <span class="stat-value">
             <img :src="getAttackIcon(hoveredUnitStats)" class="stat-icon" title="Attack" />
-            Attack:
+            {{ getBaseAttack(hoveredUnitStats.attacks.basic) }} / {{ getBaseAttack(hoveredUnitStats.attacks.elite) }}
           </span>
-          <span class="stat-value">{{ getBaseAttack(hoveredUnitStats.attacks.basic) }} / {{ getBaseAttack(hoveredUnitStats.attacks.elite) }}</span>
         </div>
         
         <!-- Attack Speed (reload time) -->
         <div class="unit-stats-row">
-          <span class="stat-label">
+          <span class="stat-label">Attack Speed:</span>
+          <span class="stat-value">
             <img :src="getStatIconUrl('reloadTime')" class="stat-icon" title="Attack Speed" />
-            Attack Speed:
+            {{ formatStatPair(hoveredUnitStats.reload) }}s
           </span>
-          <span class="stat-value">{{ formatStatPair(hoveredUnitStats.reload) }}s</span>
         </div>
         
         <!-- Range (only show if > 0) -->
         <div class="unit-stats-row" v-if="hoveredUnitStats.range[0] > 0">
-          <span class="stat-label">
+          <span class="stat-label">Range:</span>
+          <span class="stat-value">
             <img :src="getStatIconUrl('range')" class="stat-icon" title="Range" />
-            Range:
+            {{ formatStatPair(hoveredUnitStats.range) }}
           </span>
-          <span class="stat-value">{{ formatStatPair(hoveredUnitStats.range) }}</span>
         </div>
         
         <!-- Movement Speed -->
         <div class="unit-stats-row">
-          <span class="stat-label">
+          <span class="stat-label">Speed:</span>
+          <span class="stat-value">
             <img :src="getStatIconUrl('movementSpeed')" class="stat-icon" title="Movement Speed" />
-            Speed:
+            {{ formatStatPair(hoveredUnitStats.speed) }}
           </span>
-          <span class="stat-value">{{ formatStatPair(hoveredUnitStats.speed) }}</span>
         </div>
         
         <!-- Armor -->
         <div class="unit-stats-row">
-          <span class="stat-label">
+          <span class="stat-label">Armor:</span>
+          <span class="stat-value">
             <img :src="getStatIconUrl('armor')" class="stat-icon" title="Melee Armor" />
             <img :src="getStatIconUrl('range-armor')" class="stat-icon" title="Pierce Armor" />
-            Armor:
-          </span>
-          <span class="stat-value">
             {{ formatArmorStat(hoveredUnitStats.armors.basic[0], hoveredUnitStats.armors.elite[0]) }} / 
             {{ formatArmorStat(hoveredUnitStats.armors.basic[1], hoveredUnitStats.armors.elite[1]) }}
           </span>
@@ -1029,6 +1027,9 @@ function getAttackIcon(stats: UnitStats): string {
 .stat-value {
   color: hsl(52, 100%, 50%);
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Unit graphic in tooltip */
@@ -1050,9 +1051,6 @@ function getAttackIcon(stats: UnitStats): string {
 }
 
 .stat-label {
-  display: flex;
-  align-items: center;
-  gap: 2px;
   color: hsla(52, 100%, 50%, 0.8);
   font-weight: 500;
 }
