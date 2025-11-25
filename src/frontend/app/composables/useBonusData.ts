@@ -456,7 +456,99 @@ const cardDescriptions: [string, number, number, number][][] = [
     ["Dragon Ships replace Fast Fire Ships", 2, -6, 0],
   ],
 
-  // Team Bonuses (index 4 in original, but we're using index 1 for convenience)
+  // Unique Units (index 1 in original format)
+  [
+    ["Longbowmen", 2, -1, 0],
+    ["Throwing Axemen", 0, -2, 0],
+    ["Huskarls", 1, -3, 0],
+    ["Teutonic Knights", 2, -4, 0],
+    ["Samurai", 1, -5, 0],
+    ["Chu Ko Nu", 1, -6, 0],
+    ["Cataphracts", 1, -7, 0],
+    ["Mamelukes", 1, -9, 0],
+    ["War Elephants", 3, -8, 0],
+    ["Janissaries", 2, -10, 0],
+    ["Berserks", 1, -11, 0],
+    ["Mangudai", 4, -12, 0],
+    ["Woad Raiders", 0, -13, 0],
+    ["Conquistadors", 2, -14, 0],
+    ["Jaguar Warriors", 0, -15, 0],
+    ["Plumed Archers", 1, -16, 0],
+    ["Tarkans", 0, -17, 0],
+    ["War Wagons", 0, -18, 0],
+    ["Genoese Crossbowmen", 1, -19, 0],
+    ["Ghulam", 0, -20, 0],
+    ["Kamayuks", 0, -21, 0],
+    ["Magyar Huszars", 0, -22, 0],
+    ["Boyars", 2, -23, 0],
+    ["Organ Guns", 3, -24, 0],
+    ["Shotel Warriors", 0, -25, 0],
+    ["Gbetos", 0, -26, 0],
+    ["Camel Archers", 3, -27, 0],
+    ["Ballista Elephants", 4, -28, 0],
+    ["Karambit Warriors", 0, -29, 0],
+    ["Arambai", 1, -30, 0],
+    ["Rattan Archers", 1, -31, 0],
+    ["Konniks", 1, -32, 0],
+    ["Keshiks", 0, -33, 0],
+    ["Kipchaks", 1, -34, 0],
+    ["Leitis", 4, -35, 0],
+    ["Coustilliers", 1, -36, 0],
+    ["Serjeants", 0, -37, 0],
+    ["Obuch", 2, -38, 0],
+    ["Hussite Wagons", 2, -39, 0],
+    ["Crusader Knights", 2, 1, 0],
+    ["Xolotl Warriors", 1, 1, 0],
+    ["Saboteurs", 3, 1, 0],
+    ["Ninjas", 0, 1, 0],
+    ["Flamethrowers", 3, 1, 0],
+    ["Photonmen", 4, 1, 0],
+    ["Centurions", 1, -43, 0],
+    ["Apukispay", 0, 1, 0],
+    ["Monkey Boys", 4, 1, 0],
+    ["Amazon Warriors", 0, 1, 0],
+    ["Amazon Archers", 1, 1, 0],
+    ["Iroquois Warriors", 1, 1, 0],
+    ["Varangian Guards", 0, 1, 0],
+    ["Gendarmes", 1, 1, 0],
+    ["Cuahchiqueh", 0, 1, 0],
+    ["Ritterbruder", 1, 1, 0],
+    ["Kazaks", 0, 1, 0],
+    ["Szlachcic", 0, 1, 0],
+    ["Cuirassiers", 1, 1, 0],
+    ["Rajputs", 0, 1, 0],
+    ["Seljuk Archers", 2, 1, 0],
+    ["Numidian Javelinmen", 0, 1, 0],
+    ["Sosso Guards", 0, 1, 0],
+    ["Swiss Pikemen", 1, 1, 0],
+    ["Headhunters", 3, 1, 0],
+    ["Teulu", 0, 1, 0],
+    ["Maillotins", 1, 1, 0],
+    ["Hashashin", 1, 1, 0],
+    ["Highlander", 0, 1, 0],
+    ["Stradiot", 1, 1, 0],
+    ["Ahosi", 1, 1, 0],
+    ["Landsknecht", 0, 1, 0],
+    ["Clibinarii", 0, 1, 0],
+    ["Silahtar", 0, 1, 0],
+    ["Jaridah", 2, 1, 0],
+    ["Wolf Warriors", 1, 1, 0],
+    ["Warrior Monks", 2, 1, 0],
+    ["Castellan", 1, 1, 0],
+    ["Wind Warriors", 1, 1, 0],
+    ["Chakram Throwers", 4, -42, 0],
+    ["Urumi Swordsmen", 1, -40, 0],
+    ["Rathas", 1, -41, 0],
+    ["Composite Bowmen", 3, -44, 0],
+    ["Monaspa", 2, -45, 0],
+    ["White Feather Guard", 2, -49, 0],
+    ["Fire Archers", 3, -50, 0],
+    ["Tiger Cavalry", 2, -51, 0],
+    ["Iron Pagoda", 3, -52, 0],
+    ["Liao Dao", 2, -53, 0],
+  ],
+
+  // Team Bonuses (index 4 in original, stored as index 2 here)
   [
     ["Relics generate +33% gold", 2, -15, 0],
     ["Genitour available in the Archery Range starting in the Castle Age", 2, -27, 0],
@@ -550,11 +642,14 @@ export function getBonusCards(type: BonusType): BonusCard[] {
     case 'civ':
       descriptionIndex = 0
       break
-    case 'team':
+    case 'uu':
       descriptionIndex = 1
       break
+    case 'team':
+      descriptionIndex = 2
+      break
     default:
-      // For now, only support civ and team bonuses
+      // For now, only support civ, uu, and team bonuses
       return []
   }
 

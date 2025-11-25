@@ -2,19 +2,6 @@
   <div class="civ-builder">
     <div class="civ-builder-header">
       <h1 class="civ-builder-title">{{ readOnly ? 'View Civilization' : 'Create Your Civilization' }}</h1>
-      
-      <!-- File Import Button -->
-      <div v-if="!readOnly" class="import-section">
-        <label class="import-btn">
-          <span>📁 Load Config</span>
-          <input 
-            type="file" 
-            accept=".json"
-            @change="handleFileImport"
-            ref="fileInput"
-          />
-        </label>
-      </div>
     </div>
     
     <!-- Stepper Navigation -->
@@ -83,37 +70,53 @@
       </div>
     </div>
     
-    <!-- Step 2: Bonuses -->
+    <!-- Step 2: Civilization Bonuses -->
     <div v-show="currentStep === 1" class="step-content">
-      <div class="bonuses-layout">
-        <BonusSelectorGrid
-          title="Civilization Bonuses"
-          subtitle="Select up to 6 bonuses for your civilization"
-          bonus-type="civ"
-          :bonuses="civBonuses"
-          v-model="selectedCivBonuses"
-          mode="multi"
-          :max-selections="bonusMaxSelections.civ"
-          :disabled="readOnly"
-          :allow-multiplier="true"
-        />
-        
-        <BonusSelectorGrid
-          title="Team Bonus"
-          subtitle="Select one team bonus"
-          bonus-type="team"
-          :bonuses="teamBonuses"
-          v-model="selectedTeamBonus"
-          mode="single"
-          :max-selections="bonusMaxSelections.team"
-          :disabled="readOnly"
-          :allow-multiplier="true"
-        />
-      </div>
+      <BonusSelectorGrid
+        title="Civilization Bonuses"
+        subtitle="Select up to 6 bonuses for your civilization"
+        bonus-type="civ"
+        :bonuses="civBonuses"
+        v-model="selectedCivBonuses"
+        mode="multi"
+        :max-selections="bonusMaxSelections.civ"
+        :disabled="readOnly"
+        :allow-multiplier="true"
+      />
     </div>
     
-    <!-- Step 3: Review -->
+    <!-- Step 3: Unique Unit -->
     <div v-show="currentStep === 2" class="step-content">
+      <BonusSelectorGrid
+        title="Unique Unit"
+        subtitle="Select one unique unit for your civilization"
+        bonus-type="uu"
+        :bonuses="uniqueUnits"
+        v-model="selectedUniqueUnit"
+        mode="single"
+        :max-selections="bonusMaxSelections.uu"
+        :disabled="readOnly"
+        :allow-multiplier="false"
+      />
+    </div>
+    
+    <!-- Step 4: Team Bonus -->
+    <div v-show="currentStep === 3" class="step-content">
+      <BonusSelectorGrid
+        title="Team Bonus"
+        subtitle="Select one team bonus"
+        bonus-type="team"
+        :bonuses="teamBonuses"
+        v-model="selectedTeamBonus"
+        mode="single"
+        :max-selections="bonusMaxSelections.team"
+        :disabled="readOnly"
+        :allow-multiplier="true"
+      />
+    </div>
+    
+    <!-- Step 5: Review -->
+    <div v-show="currentStep === 4" class="step-content">
       <div class="review-section">
         <h2 class="review-title">Review Your Civilization</h2>
         
@@ -141,6 +144,10 @@
           <div class="review-item">
             <span class="review-label">Civ Bonuses:</span>
             <span class="review-value">{{ selectedCivBonuses.length }} selected</span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Unique Unit:</span>
+            <span class="review-value">{{ selectedUniqueUnit.length > 0 ? getUniqueUnitName() : 'Not set' }}</span>
           </div>
           <div class="review-item">
             <span class="review-label">Team Bonus:</span>
@@ -180,6 +187,16 @@
       </div>
       
       <div class="secondary-actions">
+        <!-- Load Config Button -->
+        <label v-if="!readOnly" class="action-btn secondary-btn import-label">
+          <span>📁 Load Config</span>
+          <input 
+            type="file" 
+            accept=".json"
+            @change="handleFileImport"
+            ref="fileInput"
+          />
+        </label>
         <button class="action-btn secondary-btn" @click="handleDownload">
           Download Config
         </button>
@@ -187,12 +204,23 @@
           Reset
         </button>
       </div>
+      
+      <!-- Autosave Toggle -->
+      <div v-if="!readOnly" class="autosave-section">
+        <label class="autosave-toggle">
+          <input type="checkbox" v-model="autosaveEnabled" @change="handleAutosaveToggle" />
+          <span class="autosave-label">💾 Autosave to browser</span>
+        </label>
+        <span v-if="autosaveEnabled && lastSaved" class="autosave-status">
+          Last saved: {{ formatLastSaved() }}
+        </span>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { createDefaultCiv, architectures, languages, wonders, type CivConfig } from '~/composables/useCivData'
 import { getBonusCards, maxSelections as bonusMaxSelections } from '~/composables/useBonusData'
 
@@ -212,10 +240,15 @@ const emit = defineEmits<{
   (e: 'configLoaded', config: CivConfig): void
 }>()
 
-const stepLabels = ['Basic Info', 'Bonuses', 'Review']
+const STORAGE_KEY = 'aoe2-civbuilder-config'
+const AUTOSAVE_KEY = 'aoe2-civbuilder-autosave'
+
+const stepLabels = ['Basic Info', 'Civ Bonuses', 'Unique Unit', 'Team Bonus', 'Review']
 const currentStep = ref(0)
 const showAdvanced = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
+const autosaveEnabled = ref(false)
+const lastSaved = ref<Date | null>(null)
 
 const civConfig = reactive<CivConfig>({
   ...createDefaultCiv(),
@@ -224,9 +257,11 @@ const civConfig = reactive<CivConfig>({
 
 // Get bonus cards from the composable
 const civBonuses = computed(() => getBonusCards('civ'))
+const uniqueUnits = computed(() => getBonusCards('uu'))
 const teamBonuses = computed(() => getBonusCards('team'))
 
 const selectedCivBonuses = ref<(number | [number, number])[]>([])
+const selectedUniqueUnit = ref<(number | [number, number])[]>([])
 const selectedTeamBonus = ref<(number | [number, number])[]>([])
 
 const canProceed = computed(() => {
@@ -235,6 +270,17 @@ const canProceed = computed(() => {
   }
   return true
 })
+
+// Helper function to get unique unit name for review
+function getUniqueUnitName(): string {
+  if (selectedUniqueUnit.value.length === 0) return 'Not set'
+  const unitId = Array.isArray(selectedUniqueUnit.value[0]) 
+    ? selectedUniqueUnit.value[0][0] 
+    : selectedUniqueUnit.value[0]
+  const units = uniqueUnits.value
+  const unit = units.find(u => u.id === unitId)
+  return unit?.name || 'Unknown'
+}
 
 function nextStep() {
   if (currentStep.value === 0 && !validateStep1()) return
@@ -306,13 +352,14 @@ function handleFileImport(event: Event) {
 /**
  * Restore bonus selections from civConfig.bonuses
  * The legacy format stores bonuses as (number | [number, number])[][]
- * where index 0 = civ bonuses, index 4 = team bonuses
+ * where index 0 = civ bonuses, index 1 = unique units, index 4 = team bonuses
  */
 function restoreBonusSelections() {
   if (civConfig.bonuses && Array.isArray(civConfig.bonuses)) {
     // Convert loaded bonuses to the expected format
     // Each bonus can be either a number (id) or [id, multiplier]
     selectedCivBonuses.value = normalizeBonus(civConfig.bonuses[0])
+    selectedUniqueUnit.value = normalizeBonus(civConfig.bonuses[1])
     selectedTeamBonus.value = normalizeBonus(civConfig.bonuses[4])
   }
 }
@@ -336,17 +383,20 @@ function normalizeBonus(bonuses: (number | number[])[] | undefined): [number, nu
   })
 }
 
-function handleFinish() {
+function updateBonusesInConfig() {
   // Update bonuses in config (matching legacy format order)
   // Index: 0 = civ, 1 = unique units, 2 = castle techs, 3 = imp techs, 4 = team
   civConfig.bonuses = [
     selectedCivBonuses.value,
-    [],  // unique units (not implemented yet)
+    selectedUniqueUnit.value,
     [],  // castle techs (not implemented yet)
     [],  // imp techs (not implemented yet)
     selectedTeamBonus.value
   ]
-  
+}
+
+function handleFinish() {
+  updateBonusesInConfig()
   emit('next', { ...civConfig })
 }
 
@@ -356,15 +406,7 @@ function handleDownload() {
     return
   }
   
-  // Update bonuses before download (matching legacy format order)
-  // Index: 0 = civ, 1 = unique units, 2 = castle techs, 3 = imp techs, 4 = team
-  civConfig.bonuses = [
-    selectedCivBonuses.value,
-    [],  // unique units (not implemented yet)
-    [],  // castle techs (not implemented yet)
-    [],  // imp techs (not implemented yet)
-    selectedTeamBonus.value
-  ]
+  updateBonusesInConfig()
   
   const dataStr = JSON.stringify(civConfig, null, 2)
   const blob = new Blob([dataStr], { type: 'application/json' })
@@ -385,9 +427,92 @@ function handleReset() {
   const defaults = createDefaultCiv()
   Object.assign(civConfig, defaults)
   selectedCivBonuses.value = []
+  selectedUniqueUnit.value = []
   selectedTeamBonus.value = []
   currentStep.value = 0
+  
+  // Clear local storage if autosave was enabled
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(STORAGE_KEY)
+  }
+  
   emit('reset')
+}
+
+// Autosave functions
+function saveToLocalStorage() {
+  if (typeof window === 'undefined' || !autosaveEnabled.value) return
+  
+  updateBonusesInConfig()
+  
+  const saveData = {
+    config: { ...civConfig },
+    currentStep: currentStep.value,
+    timestamp: new Date().toISOString()
+  }
+  
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData))
+  lastSaved.value = new Date()
+}
+
+function loadFromLocalStorage() {
+  if (typeof window === 'undefined') return false
+  
+  const savedData = localStorage.getItem(STORAGE_KEY)
+  if (!savedData) return false
+  
+  try {
+    const parsed = JSON.parse(savedData)
+    if (parsed.config) {
+      Object.assign(civConfig, createDefaultCiv(), parsed.config)
+      restoreBonusSelections()
+      if (parsed.currentStep !== undefined) {
+        currentStep.value = parsed.currentStep
+      }
+      if (parsed.timestamp) {
+        lastSaved.value = new Date(parsed.timestamp)
+      }
+      return true
+    }
+  } catch (e) {
+    console.error('Failed to load saved config:', e)
+  }
+  return false
+}
+
+function handleAutosaveToggle() {
+  if (typeof window === 'undefined') return
+  
+  localStorage.setItem(AUTOSAVE_KEY, autosaveEnabled.value ? 'true' : 'false')
+  
+  if (autosaveEnabled.value) {
+    saveToLocalStorage()
+  }
+}
+
+function formatLastSaved(): string {
+  if (!lastSaved.value) return ''
+  const now = new Date()
+  const diff = now.getTime() - lastSaved.value.getTime()
+  const seconds = Math.floor(diff / 1000)
+  
+  if (seconds < 60) return 'just now'
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
+  return lastSaved.value.toLocaleTimeString()
+}
+
+// Watch for changes and autosave
+watch([civConfig, selectedCivBonuses, selectedUniqueUnit, selectedTeamBonus, currentStep], () => {
+  if (autosaveEnabled.value) {
+    saveToLocalStorage()
+  }
+}, { deep: true })
+
+// Handle page unload - save before leaving
+function handleBeforeUnload() {
+  if (autosaveEnabled.value) {
+    saveToLocalStorage()
+  }
 }
 
 // Watch for initial config changes
@@ -398,6 +523,29 @@ watch(() => props.initialConfig, (newConfig) => {
     restoreBonusSelections()
   }
 }, { deep: true })
+
+// Lifecycle hooks
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    // Load autosave preference
+    const savedAutosave = localStorage.getItem(AUTOSAVE_KEY)
+    autosaveEnabled.value = savedAutosave === 'true'
+    
+    // Try to restore from local storage if autosave is enabled
+    if (autosaveEnabled.value && !props.initialConfig) {
+      loadFromLocalStorage()
+    }
+    
+    // Add beforeunload listener
+    window.addEventListener('beforeunload', handleBeforeUnload)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+  }
+})
 
 // Expose civConfig for parent component access if needed
 defineExpose({
@@ -689,5 +837,55 @@ defineExpose({
 .civ-description-input:read-only {
   cursor: not-allowed;
   opacity: 0.8;
+}
+
+/* Import label styled as button */
+.import-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.import-label input {
+  display: none;
+}
+
+/* Autosave section */
+.autosave-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  border: 1px solid hsla(52, 100%, 50%, 0.3);
+}
+
+.autosave-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: hsl(52, 100%, 50%);
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+}
+
+.autosave-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: hsl(52, 100%, 50%);
+  cursor: pointer;
+}
+
+.autosave-label {
+  user-select: none;
+}
+
+.autosave-status {
+  color: hsla(52, 100%, 50%, 0.7);
+  font-size: 0.85rem;
+  font-style: italic;
 }
 </style>
