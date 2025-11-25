@@ -106,7 +106,7 @@
     
     <!-- Selection counter -->
     <div v-if="maxUniqueSelections || maxTotalSelections" class="selection-counter">
-      <span v-if="maxUniqueSelections && maxTotalSelections && maxUniqueSelections !== maxTotalSelections">
+      <span v-if="maxUniqueSelections && maxTotalSelections">
         {{ uniqueSelectionCount }}/{{ maxUniqueSelections }} unique ({{ selectedCount }}/{{ maxTotalSelections }} total)
       </span>
       <span v-else>

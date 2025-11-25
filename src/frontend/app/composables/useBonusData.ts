@@ -32,7 +32,7 @@ export const numCards = {
 // maxUniqueSelections: how many different bonuses can be selected
 // maxTotalSelections: total count including multipliers (null = no limit on total)
 export const maxSelections = {
-  civ: { maxUniqueSelections: 6, maxTotalSelections: 6 },
+  civ: { maxUniqueSelections: 6, maxTotalSelections: 1530 }, // 6 unique * 255 max multiplier each
   uu: { maxUniqueSelections: 1, maxTotalSelections: 1 },
   castle: { maxUniqueSelections: 1, maxTotalSelections: 255 },
   imp: { maxUniqueSelections: 1, maxTotalSelections: 255 },
