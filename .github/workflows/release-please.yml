@@ -35,7 +35,7 @@ jobs:
 
   update-release:
     needs: [release-please, build-docker]
-    if: ${{ needs.release-please.outputs.release_created && needs.release-please.outputs.tag_name }}
+    if: ${{ needs.release-please.outputs.release_created && needs.release-please.outputs.tag_name && needs.build-docker.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
