@@ -17,7 +17,8 @@
 .crosslink-button,
 .crosslink-ribbon-wrapper,
 .crosslink-badge,
-.crosslink-icon {
+.crosslink-icon,
+.crosslink-fold-wrapper {
 	display: none;
 }
 
