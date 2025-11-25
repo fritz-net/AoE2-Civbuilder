@@ -95,6 +95,7 @@
           mode="multi"
           :max-selections="bonusMaxSelections.civ"
           :disabled="readOnly"
+          :allow-multiplier="true"
         />
         
         <BonusSelectorGrid
@@ -106,6 +107,7 @@
           mode="single"
           :max-selections="bonusMaxSelections.team"
           :disabled="readOnly"
+          :allow-multiplier="true"
         />
       </div>
     </div>

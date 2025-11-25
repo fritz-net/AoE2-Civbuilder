@@ -48,7 +48,7 @@
       <div class="sort-control">
         <label class="control-label">Sort:</label>
         <select v-model="sortBy" class="sort-select">
-          <option value="id">Default (ID)</option>
+          <option value="id">Default</option>
           <option value="name">Name</option>
           <option value="rarity">Rarity</option>
           <option value="edition">Edition</option>
@@ -148,7 +148,7 @@
               <button 
                 class="multiplier-btn"
                 @click.stop="incrementMultiplier(card.id)"
-                :disabled="getCardMultiplier(card.id) >= 10"
+                :disabled="getCardMultiplier(card.id) >= maxMultiplier"
               >
                 +
               </button>
@@ -219,23 +219,15 @@ const props = withDefaults(defineProps<{
   modelValue: (number | [number, number])[]
   mode?: 'single' | 'multi'
   maxSelections?: number
-  disabled?: boolean
-  showNavigation?: boolean
-  filterPlaceholder?: string
+  maxMultiplier?: number
   allowMultiplier?: boolean
-}>(), {
-  mode: 'multi',
-  disabled: false,
-  showNavigation: false,
-  filterPlaceholder: 'e.g. "Infantry", "Archer", etc.',
-  allowMultiplier: false
-})
-  maxSelections?: number
   disabled?: boolean
   showNavigation?: boolean
   filterPlaceholder?: string
 }>(), {
   mode: 'multi',
+  maxMultiplier: 10,
+  allowMultiplier: false,
   disabled: false,
   showNavigation: false,
   filterPlaceholder: 'e.g. "Infantry", "Archer", etc.'
@@ -250,6 +242,8 @@ const emit = defineEmits<{
 // Local state
 const cardSize = ref(6)
 const filterText = ref('')
+const sortBy = ref<'id' | 'name' | 'rarity' | 'edition'>('id')
+const sortDirection = ref<'asc' | 'desc'>('asc')
 const selectedRarities = ref([true, true, true, true, true])
 const selectedEditions = ref([true, true])
 const showEditionBadge = ref(true)
@@ -305,6 +299,26 @@ const filteredUnselectedCards = computed(() => {
     }
     
     return true
+  })
+})
+
+// Sorted filtered unselected cards
+const sortedFilteredUnselectedCards = computed(() => {
+  const cards = [...filteredUnselectedCards.value]
+  const direction = sortDirection.value === 'asc' ? 1 : -1
+  
+  return cards.sort((a, b) => {
+    switch (sortBy.value) {
+      case 'name':
+        return direction * a.name.localeCompare(b.name)
+      case 'rarity':
+        return direction * (a.rarity - b.rarity)
+      case 'edition':
+        return direction * (a.edition - b.edition)
+      case 'id':
+      default:
+        return direction * (a.id - b.id)
+    }
   })
 })
 
@@ -370,6 +384,51 @@ function toggleCard(cardId: number) {
       currentSelection.splice(index, 1)
     }
     emit('update:modelValue', currentSelection)
+  }
+}
+
+// Multiplier functions for bonus stacking (enabled via allowMultiplier prop)
+function incrementMultiplier(cardId: number) {
+  if (!props.allowMultiplier) return
+  
+  const currentSelection = [...props.modelValue]
+  const index = currentSelection.findIndex(item => {
+    if (Array.isArray(item)) {
+      return item[0] === cardId
+    }
+    return item === cardId
+  })
+  
+  if (index !== -1) {
+    const currentValue = Array.isArray(currentSelection[index]) 
+      ? currentSelection[index][1] 
+      : DEFAULT_MULTIPLIER
+    if (currentValue < props.maxMultiplier) {
+      currentSelection[index] = [cardId, currentValue + 1]
+      emit('update:modelValue', currentSelection)
+    }
+  }
+}
+
+function decrementMultiplier(cardId: number) {
+  if (!props.allowMultiplier) return
+  
+  const currentSelection = [...props.modelValue]
+  const index = currentSelection.findIndex(item => {
+    if (Array.isArray(item)) {
+      return item[0] === cardId
+    }
+    return item === cardId
+  })
+  
+  if (index !== -1) {
+    const currentValue = Array.isArray(currentSelection[index]) 
+      ? currentSelection[index][1] 
+      : DEFAULT_MULTIPLIER
+    if (currentValue > 1) {
+      currentSelection[index] = [cardId, currentValue - 1]
+      emit('update:modelValue', currentSelection)
+    }
   }
 }
 
@@ -440,7 +499,8 @@ function handleCardHover(card: BonusCard, isHovering: boolean) {
 }
 
 .size-control,
-.filter-control {
+.filter-control,
+.sort-control {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -471,6 +531,36 @@ function handleCardHover(card: BonusCard, isHovering: boolean) {
   color: hsla(52, 100%, 50%, 0.5);
 }
 
+.sort-select {
+  padding: 0.4rem 0.6rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  color: hsl(52, 100%, 50%);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.sort-select option {
+  background: #1a1a1a;
+  color: hsl(52, 100%, 50%);
+}
+
+.sort-direction-btn {
+  padding: 0.35rem 0.6rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  color: hsl(52, 100%, 50%);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-direction-btn:hover {
+  background: rgba(139, 69, 19, 0.6);
+}
+
 .filter-row {
   display: flex;
   flex-wrap: wrap;
@@ -485,18 +575,83 @@ function handleCardHover(card: BonusCard, isHovering: boolean) {
   gap: 0.5rem;
 }
 
-.filter-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: hsla(52, 100%, 50%, 0.9);
-  font-size: 0.8rem;
+/* Styled pill toggle filters */
+.filter-toggle {
+  display: inline-flex;
   cursor: pointer;
 }
 
-.filter-checkbox input {
-  accent-color: hsl(52, 100%, 50%);
-  cursor: pointer;
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-pill {
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  background: rgba(0, 0, 0, 0.4);
+  color: hsla(52, 100%, 50%, 0.6);
+}
+
+.filter-toggle.active .toggle-pill {
+  background: rgba(0, 0, 0, 0.6);
+  color: hsl(52, 100%, 50%);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Rarity pill colors */
+.rarity-pill-common {
+  border-color: #b0b0b0;
+}
+.filter-toggle.active .rarity-pill-common {
+  background: rgba(176, 176, 176, 0.2);
+  color: #d0d0d0;
+}
+
+.rarity-pill-uncommon {
+  border-color: #4ade80;
+}
+.filter-toggle.active .rarity-pill-uncommon {
+  background: rgba(74, 222, 128, 0.2);
+  color: #4ade80;
+}
+
+.rarity-pill-rare {
+  border-color: #60a5fa;
+}
+.filter-toggle.active .rarity-pill-rare {
+  background: rgba(96, 165, 250, 0.2);
+  color: #60a5fa;
+}
+
+.rarity-pill-epic {
+  border-color: #c084fc;
+}
+.filter-toggle.active .rarity-pill-epic {
+  background: rgba(192, 132, 252, 0.2);
+  color: #c084fc;
+}
+
+.rarity-pill-legendary {
+  border-color: #fbbf24;
+}
+.filter-toggle.active .rarity-pill-legendary {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+}
+
+/* Edition pill */
+.edition-pill {
+  border-color: hsl(52, 100%, 50%);
+}
+.filter-toggle.active .edition-pill {
+  background: rgba(255, 215, 0, 0.15);
 }
 
 .show-edition-toggle {
@@ -544,6 +699,61 @@ function handleCardHover(card: BonusCard, isHovering: boolean) {
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: flex-start;
+}
+
+.selected-cards-grid {
+  gap: 1rem;
+}
+
+.selected-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Multiplier controls */
+.multiplier-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  border: 1px solid hsl(52, 100%, 50%);
+}
+
+.multiplier-btn {
+  width: 1.5rem;
+  height: 1.5rem;
+  background: rgba(139, 69, 19, 0.8);
+  border: 1px solid hsl(52, 100%, 50%);
+  color: hsl(52, 100%, 50%);
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.multiplier-btn:hover:not(:disabled) {
+  background: rgba(160, 82, 45, 0.9);
+}
+
+.multiplier-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.multiplier-value {
+  color: hsl(52, 100%, 50%);
+  font-size: 0.85rem;
+  font-weight: bold;
+  min-width: 1.2rem;
+  text-align: center;
 }
 
 /* Hover tooltip */
