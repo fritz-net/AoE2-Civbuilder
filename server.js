@@ -1135,7 +1135,12 @@ function draftIO(io) {
 								}
 							}
 							mod_data.techtree.push(player_techtree);
-							mod_data.civ_bonus.push(draft["players"][i]["bonuses"][0]);
+							// Civ bonuses - these can be multiplier tuples too
+							var civBonuses = [];
+							for (var j = 0; j < draft["players"][i]["bonuses"][0].length; j++) {
+								civBonuses.push(extractBonusId(draft["players"][i]["bonuses"][0][j]));
+							}
+							mod_data.civ_bonus.push(civBonuses);
 							mod_data.architecture.push(draft["players"][i]["architecture"]);
 							mod_data.language.push(draft["players"][i]["language"]);
 							var team_bonuses = [];
