@@ -32,7 +32,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = withDefaults(defineProps<{
   steps: string[]
@@ -46,7 +46,15 @@ const emit = defineEmits<{
   (e: 'update:currentStep', value: number): void
 }>()
 
-const maxReachedStep = computed(() => props.currentStep)
+// Track the maximum step the user has reached
+const maxReachedStep = ref(props.currentStep)
+
+// Update maxReachedStep when currentStep changes
+watch(() => props.currentStep, (newStep) => {
+  if (newStep > maxReachedStep.value) {
+    maxReachedStep.value = newStep
+  }
+})
 
 function goToStep(index: number) {
   if (props.allowNavigation && index <= maxReachedStep.value) {

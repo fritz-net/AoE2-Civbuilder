@@ -292,9 +292,12 @@ function handleFileImport(event: Event) {
       currentStep.value = 0
       
       emit('configLoaded', { ...civConfig })
-      alert('Configuration loaded successfully!')
     } catch (error) {
-      alert('Failed to load configuration file. Please ensure it is a valid JSON file.')
+      console.error('Failed to load configuration:', error)
+      const errorMessage = error instanceof SyntaxError 
+        ? 'Invalid JSON format in the configuration file.'
+        : 'Failed to load configuration file. Please ensure it is a valid JSON file.'
+      alert(errorMessage)
     }
   }
   
