@@ -129,6 +129,7 @@ function os_func() {
 			if (error) {
 				console.log(`stdout: ${stdout}`);
 				console.error(`exec error: ${error}`);
+				console.error(`failed command: ${cmd}`);
 				if (typeof failure === 'function') {
 					failure();
 				} else {
@@ -540,10 +541,22 @@ const zipModFolder = (req, res, next) => {
 /**
  * Helper function to extract bonus ID from bonus data
  * Bonus data can be either a number (legacy) or [id, multiplier] (new UI)
+ * @param {number|number[]} bonus - Either a number (legacy format) or [id, multiplier] array (new UI format)
+ * @returns {number} - The bonus ID
  */
 function extractBonusId(bonus) {
 	if (Array.isArray(bonus)) {
+		// Validate array has at least one element
+		if (bonus.length === 0) {
+			console.error('Warning: Empty bonus array encountered');
+			return 0;
+		}
 		return bonus[0]; // Return the ID from [id, multiplier]
+	}
+	// Handle null/undefined
+	if (bonus === null || bonus === undefined) {
+		console.error('Warning: Null or undefined bonus encountered');
+		return 0;
 	}
 	return bonus; // Return the number directly
 }
