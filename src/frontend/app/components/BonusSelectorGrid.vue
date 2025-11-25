@@ -182,11 +182,12 @@
       </div>
     </div>
     
-    <!-- Hover tooltip -->
+    <!-- Hover tooltip - follows mouse cursor -->
     <div 
       v-if="hoveredCard" 
       class="hover-tooltip"
       :class="`rarity-bg-${rarityCssClasses[hoveredCard.rarity]}`"
+      :style="tooltipStyle"
     >
       <div class="tooltip-rarity" :class="`rarity-text-${rarityCssClasses[hoveredCard.rarity]}`">
         {{ rarityNames[hoveredCard.rarity] }}
@@ -199,7 +200,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { 
   type BonusCard,
   type BonusType,
@@ -248,6 +249,48 @@ const selectedRarities = ref([true, true, true, true, true])
 const selectedEditions = ref([true, true])
 const showEditionBadge = ref(true)
 const hoveredCard = ref<BonusCard | null>(null)
+
+// Mouse position for tooltip
+const mouseX = ref(0)
+const mouseY = ref(0)
+
+function updateMousePosition(event: MouseEvent) {
+  mouseX.value = event.clientX
+  mouseY.value = event.clientY
+}
+
+// Tooltip style - positions tooltip near cursor with offset
+const tooltipStyle = computed(() => {
+  const offsetX = 15
+  const offsetY = 15
+  const tooltipWidth = 350
+  const tooltipHeight = 100
+  
+  // Check if tooltip would overflow right edge
+  const rightOverflow = mouseX.value + offsetX + tooltipWidth > window.innerWidth
+  // Check if tooltip would overflow bottom
+  const bottomOverflow = mouseY.value + offsetY + tooltipHeight > window.innerHeight
+  
+  const left = rightOverflow ? mouseX.value - tooltipWidth - offsetX : mouseX.value + offsetX
+  const top = bottomOverflow ? mouseY.value - tooltipHeight - offsetY : mouseY.value + offsetY
+  
+  return {
+    left: `${left}px`,
+    top: `${top}px`
+  }
+})
+
+onMounted(() => {
+  if (typeof window !== 'undefined') {
+    window.addEventListener('mousemove', updateMousePosition)
+  }
+})
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('mousemove', updateMousePosition)
+  }
+})
 
 // Constants
 const DEFAULT_MULTIPLIER = 1
@@ -757,19 +800,17 @@ function handleCardHover(card: BonusCard, isHovering: boolean) {
   text-align: center;
 }
 
-/* Hover tooltip */
+/* Hover tooltip - follows mouse cursor */
 .hover-tooltip {
   position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 500px;
-  padding: 1rem 1.5rem;
-  background: rgba(0, 0, 0, 0.9);
+  max-width: 350px;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.95);
   border: 2px solid hsl(52, 100%, 50%);
   border-radius: 8px;
-  z-index: 1000;
+  z-index: 9999;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
 }
 
 .tooltip-rarity {
