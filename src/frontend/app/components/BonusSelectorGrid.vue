@@ -226,7 +226,7 @@ const props = withDefaults(defineProps<{
   filterPlaceholder?: string
 }>(), {
   mode: 'multi',
-  maxMultiplier: 10,
+  maxMultiplier: 255,
   allowMultiplier: false,
   disabled: false,
   showNavigation: false,
