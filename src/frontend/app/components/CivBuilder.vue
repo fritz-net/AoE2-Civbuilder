@@ -538,9 +538,9 @@ watch(() => props.initialConfig, (newConfig) => {
 // Lifecycle hooks
 onMounted(() => {
   if (typeof window !== 'undefined') {
-    // Load autosave preference
+    // Load autosave preference (defaults to true if not set)
     const savedAutosave = localStorage.getItem(AUTOSAVE_KEY)
-    autosaveEnabled.value = savedAutosave === 'true'
+    autosaveEnabled.value = savedAutosave !== 'false'
     
     // Try to restore from local storage if autosave is enabled
     if (autosaveEnabled.value && !props.initialConfig) {
