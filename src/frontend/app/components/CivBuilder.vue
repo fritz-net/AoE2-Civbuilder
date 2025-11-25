@@ -279,6 +279,9 @@ function handleFileImport(event: Event) {
       // Merge loaded config with defaults
       Object.assign(civConfig, createDefaultCiv(), loadedConfig)
       
+      // Restore bonus selections from loaded config
+      restoreBonusSelections()
+      
       // Reset to first step
       currentStep.value = 0
       
@@ -300,14 +303,46 @@ function handleFileImport(event: Event) {
   }
 }
 
+/**
+ * Restore bonus selections from civConfig.bonuses
+ * The legacy format stores bonuses as (number | [number, number])[][]
+ * where index 0 = civ bonuses, index 4 = team bonuses
+ */
+function restoreBonusSelections() {
+  if (civConfig.bonuses && Array.isArray(civConfig.bonuses)) {
+    // Convert loaded bonuses to the expected format
+    // Each bonus can be either a number (id) or [id, multiplier]
+    selectedCivBonuses.value = normalizeBonus(civConfig.bonuses[0])
+    selectedTeamBonus.value = normalizeBonus(civConfig.bonuses[4])
+  }
+}
+
+/**
+ * Normalize bonus array to always be [id, multiplier] format
+ * Legacy format might have just number (id) or [id, multiplier]
+ */
+function normalizeBonus(bonuses: (number | number[])[] | undefined): [number, number][] {
+  if (!bonuses || !Array.isArray(bonuses)) return []
+  
+  return bonuses.map(bonus => {
+    if (Array.isArray(bonus)) {
+      // Already in [id, multiplier] format
+      return [bonus[0], bonus[1] || 1] as [number, number]
+    }
+    // Just a number (id), add default multiplier of 1
+    return [bonus, 1] as [number, number]
+  })
+}
+
 function handleFinish() {
-  // Update bonuses in config
+  // Update bonuses in config (matching legacy format order)
+  // Index: 0 = civ, 1 = unique units, 2 = castle techs, 3 = imp techs, 4 = team
   civConfig.bonuses = [
     selectedCivBonuses.value,
-    selectedTeamBonus.value,
-    [],
-    [],
-    []
+    [],  // unique units (not implemented yet)
+    [],  // castle techs (not implemented yet)
+    [],  // imp techs (not implemented yet)
+    selectedTeamBonus.value
   ]
   
   emit('next', { ...civConfig })
@@ -319,13 +354,14 @@ function handleDownload() {
     return
   }
   
-  // Update bonuses before download
+  // Update bonuses before download (matching legacy format order)
+  // Index: 0 = civ, 1 = unique units, 2 = castle techs, 3 = imp techs, 4 = team
   civConfig.bonuses = [
     selectedCivBonuses.value,
-    selectedTeamBonus.value,
-    [],
-    [],
-    []
+    [],  // unique units (not implemented yet)
+    [],  // castle techs (not implemented yet)
+    [],  // imp techs (not implemented yet)
+    selectedTeamBonus.value
   ]
   
   const dataStr = JSON.stringify(civConfig, null, 2)
@@ -356,6 +392,8 @@ function handleReset() {
 watch(() => props.initialConfig, (newConfig) => {
   if (newConfig) {
     Object.assign(civConfig, createDefaultCiv(), newConfig)
+    // Restore bonus selections when config changes
+    restoreBonusSelections()
   }
 }, { deep: true })
 
