@@ -1151,22 +1151,28 @@ void Civbuilder::setupData() {
         }
     }
 
-    // Make all villagers have power-up effect
+    // Make all villagers have power-up effect - "Villagers work faster when nearby other villagers"
     for (Civ &civ : this->df->Civs) {
         for (int i = 4; i < unitSets[28].size(); i++) {
             civ.Units[unitSets[28][i]].Bird.TaskList.push_back(civ.Units[1803].Bird.TaskList[5]);
             int taskListSize = civ.Units[unitSets[28][i]].Bird.TaskList.size();
             civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].ClassID = 4;
             civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].UnitID = -1;
-            civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].WorkValue2 = 20;
-            civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].WorkRange = 2;
+
+            // how many auras stack? 4 means max is 5 vills within range
+            civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].WorkValue2 = 4;
+            
             civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].CombatLevelFlag = 6;
             civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].TargetDiplomacy = 1;
             civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].SearchWaitTime = 13;
-            if (unitSets[28][i] == 214 || unitSets[28][i] == 259) {
-                civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].WorkValue1 = 0.36;
+
+            civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].WorkValue1 = 0.2;
+
+            if (unitSets[28][i] == UNIT_VFFAR || unitSets[28][i] == UNIT_VMFAR) { // 214,259 = farmer
+                //civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].WorkValue1 = 0.36;
+                civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].WorkRange = 2.5;
             } else {
-                civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].WorkValue1 = 0.2;
+                civ.Units[unitSets[28][i]].Bird.TaskList[taskListSize - 1].WorkRange = 1.5;
             }
         }
     }
@@ -4234,7 +4240,7 @@ void Civbuilder::createCivBonuses() {
 
     // Villagers cooperate - "Villagers work faster when nearby other villagers"
     e.EffectCommands.clear();
-    e.EffectCommands.push_back(createEC(0, -1, 4, 63, 96));
+    e.EffectCommands.push_back(createEC(0, -1, 4, 63, 96)); // this enables aura effect
     this->createCivBonus(CIV_BONUS_324_VILLAGERS_COOPERATE, e, "C-Bonus, Villagers cooperate");
 
     // Husbandry affects attack speed
