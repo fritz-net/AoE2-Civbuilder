@@ -4,9 +4,6 @@
       <div class="points">{{ pointsLabel }}: {{ techtreePoints }}</div>
       <button v-if="editable" class="toolbar-btn" @click="handleFill">Fill</button>
       <button v-if="editable" class="toolbar-btn" @click="handleReset">Reset</button>
-      <button class="toolbar-btn" @click="toggleMaximize" :title="isMaximized ? 'Exit Fullscreen' : 'Maximize'">
-        {{ isMaximized ? '⤓' : '⤢' }}
-      </button>
       <button class="toolbar-btn primary" @click="handleDone">{{ doneButtonText }}</button>
     </div>
 
@@ -17,7 +14,7 @@
         <button class="sidebar-toggle" @click="toggleSidebar" title="Hide Sidebar">×</button>
       </div>
       <!-- Note: sidebarContent is trusted HTML from the civ builder, not user input -->
-      <div class="sidebar-content" v-html="sidebarContent"></div>
+      <div class="sidebar-content" v-html="formattedSidebarContent"></div>
     </div>
 
     <!-- Toggle Sidebar Button (when hidden) -->
@@ -30,7 +27,16 @@
       ☰
     </button>
 
-    <div ref="techtreeRef" class="techtree" :style="techtreeStyle" @mouseleave="hideHelp">
+    <!-- Maximize button at top right of techtree -->
+    <button 
+      class="maximize-btn" 
+      @click="toggleMaximize" 
+      :title="isMaximized ? 'Exit Fullscreen' : 'Maximize'"
+    >
+      {{ isMaximized ? '⤓' : '⤢' }}
+    </button>
+
+    <div ref="techtreeRef" class="techtree" :style="techtreeStyle" @mouseleave="hideHelp" @wheel="handleWheel">
       <svg
         ref="svgRef"
         :width="tree.width"
@@ -339,6 +345,17 @@ const ageIcons = computed(() => {
 const pointsLabel = computed(() => props.editable ? 'Points Remaining' : 'Points Spent')
 
 const doneButtonText = computed(() => 'Done')
+
+// Format sidebar content with bold quantifiers
+const formattedSidebarContent = computed(() => {
+  if (!props.sidebarContent) return ''
+  // Regex to match quantifiers like +15%, -10%, +1, +2, free, etc.
+  // This makes them bold
+  return props.sidebarContent.replace(
+    /([+-]?\d+%?|free|\bx\d+)/gi,
+    '<strong>$1</strong>'
+  )
+})
 
 const helpTextContent = computed(() => {
   if (!focusedCaret.value || !data.value) return ''
@@ -731,6 +748,14 @@ function toggleSidebar() {
   showSidebar.value = !showSidebar.value
 }
 
+function handleWheel(event: WheelEvent) {
+  // When scrolling over techtree area, scroll horizontally instead of vertically
+  if (techtreeRef.value && event.deltaY !== 0) {
+    event.preventDefault()
+    techtreeRef.value.scrollLeft += event.deltaY
+  }
+}
+
 function calculatePoints(): number {
   if (!data.value) return 0
   
@@ -779,6 +804,8 @@ defineExpose({
   z-index: 9999;
   min-height: 100vh;
   height: 100vh;
+  display: flex;
+  flex-direction: row;
 }
 
 .techtree {
@@ -787,6 +814,7 @@ defineExpose({
   overflow-y: hidden;
   position: relative;
   border-left: 6px solid #4d3617;
+  padding-bottom: 90px; /* Space for toolbar so it doesn't overlap scrollbar */
 }
 
 .techtree-svg {
@@ -839,11 +867,38 @@ defineExpose({
   margin-right: 30px;
 }
 
+/* Maximize button at top right of techtree */
+.maximize-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 3001;
+  background: rgba(77, 54, 23, 0.9);
+  color: white;
+  border: 2px solid #4d3617;
+  padding: 8px 12px;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.maximize-btn:hover {
+  background: rgba(77, 54, 23, 1);
+}
+
+.is-maximized .maximize-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 10001;
+}
+
 /* Left Sidebar Styles */
 .techtree-sidebar {
   width: 20rem;
   min-width: 20rem;
-  height: 100vh;
+  height: calc(100vh - 90px); /* Leave space for toolbar */
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
@@ -854,11 +909,12 @@ defineExpose({
 }
 
 .is-maximized .techtree-sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  z-index: 10000;
+  position: relative;
+  left: auto;
+  top: auto;
+  bottom: auto;
+  z-index: auto;
+  height: calc(100vh - 90px);
 }
 
 .sidebar-header {
