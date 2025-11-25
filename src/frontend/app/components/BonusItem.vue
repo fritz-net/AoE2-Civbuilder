@@ -82,6 +82,8 @@ const rarityCssClasses = ['common', 'uncommon', 'rare', 'epic', 'legendary']
 
 const rarityClass = computed(() => rarityCssClasses[props.rarity] || 'common')
 
+// Card style creates intentionally square cards for consistent grid layout
+// Both width and height are set to the same value (in rem units)
 const cardStyle = computed(() => ({
   width: `${props.size}rem`,
   height: `${props.size}rem`,

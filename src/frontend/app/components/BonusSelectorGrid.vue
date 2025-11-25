@@ -198,6 +198,9 @@ const selectedEditions = ref([true, true])
 const showEditionBadge = ref(true)
 const hoveredCard = ref<BonusCard | null>(null)
 
+// Constants
+const DEFAULT_MULTIPLIER = 1
+
 // Computed properties
 const selectedCount = computed(() => props.modelValue.length)
 
@@ -206,26 +209,27 @@ const isMaxReached = computed(() => {
   return selectedCount.value >= props.maxSelections
 })
 
-// Get selected card IDs (handling both simple number and [id, multiplier] format)
-const selectedIds = computed(() => {
-  return props.modelValue.map(item => {
+// Get selected card IDs as a Set for O(1) lookup (handling both simple number and [id, multiplier] format)
+const selectedIdSet = computed(() => {
+  const ids = props.modelValue.map(item => {
     if (Array.isArray(item)) {
       return item[0]
     }
     return item
   })
+  return new Set(ids)
 })
 
 // Selected cards
 const selectedCards = computed(() => {
-  return props.bonuses.filter(card => selectedIds.value.includes(card.id))
+  return props.bonuses.filter(card => selectedIdSet.value.has(card.id))
 })
 
 // Filter unselected cards
 const filteredUnselectedCards = computed(() => {
   return props.bonuses.filter(card => {
-    // Skip if selected
-    if (selectedIds.value.includes(card.id)) return false
+    // Skip if selected (using Set for O(1) lookup)
+    if (selectedIdSet.value.has(card.id)) return false
     
     // Check rarity filter
     if (!selectedRarities.value[card.rarity]) return false
@@ -270,11 +274,11 @@ function getCardMultiplier(cardId: number): number {
   if (Array.isArray(item)) {
     return item[1]
   }
-  return 1
+  return DEFAULT_MULTIPLIER
 }
 
 function isSelected(cardId: number): boolean {
-  return selectedIds.value.includes(cardId)
+  return selectedIdSet.value.has(cardId)
 }
 
 function toggleCard(cardId: number) {
@@ -291,7 +295,7 @@ function toggleCard(cardId: number) {
   if (props.mode === 'single') {
     // Single selection mode - replace selection
     if (index === -1) {
-      emit('update:modelValue', [[cardId, 1]])
+      emit('update:modelValue', [[cardId, DEFAULT_MULTIPLIER]])
     } else {
       // Toggle off
       emit('update:modelValue', [])
@@ -303,7 +307,7 @@ function toggleCard(cardId: number) {
       if (props.maxSelections && currentSelection.length >= props.maxSelections) {
         return // Max reached
       }
-      currentSelection.push([cardId, 1])
+      currentSelection.push([cardId, DEFAULT_MULTIPLIER])
     } else {
       // Remove card
       currentSelection.splice(index, 1)

@@ -48,6 +48,10 @@ export const imagePrefix: Record<BonusType, string> = {
 
 /**
  * Get the image URL for a bonus card
+ * @param type - The type of bonus (civ, team, etc.)
+ * @param id - The card ID
+ * @param version - Image version number for cache busting (from card metadata, defaults to 0)
+ * @returns The URL path to the card image
  */
 export function getBonusImageUrl(type: BonusType, id: number, version: number = 0): string {
   const prefix = imagePrefix[type]
@@ -545,8 +549,8 @@ export function getBonusCards(type: BonusType): BonusCard[] {
   const descriptions = cardDescriptions[descriptionIndex]
   return descriptions.map((desc, index) => ({
     id: index,
-    name: desc[0],
-    description: desc[0],
+    name: desc[0], // Display name (same as description for bonus cards)
+    description: desc[0], // Full description text
     rarity: desc[1],
     edition: desc[2],
     imageVersion: desc[3]
