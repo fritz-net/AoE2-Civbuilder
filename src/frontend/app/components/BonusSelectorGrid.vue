@@ -208,11 +208,18 @@
         <div class="unit-stats-row">
           <span class="stat-label">Cost:</span>
           <span class="stat-value">
-            <img v-if="hoveredUnitStats.cost[0] > 0" :src="getStatIconUrl('food')" class="stat-icon" :title="`${hoveredUnitStats.cost[0]} Food`" />
-            <img v-if="hoveredUnitStats.cost[1] > 0" :src="getStatIconUrl('wood')" class="stat-icon" :title="`${hoveredUnitStats.cost[1]} Wood`" />
-            <img v-if="hoveredUnitStats.cost[2] > 0" :src="getStatIconUrl('stone')" class="stat-icon" :title="`${hoveredUnitStats.cost[2]} Stone`" />
-            <img v-if="hoveredUnitStats.cost[3] > 0" :src="getStatIconUrl('gold')" class="stat-icon" :title="`${hoveredUnitStats.cost[3]} Gold`" />
-            {{ formatCost(hoveredUnitStats.cost) }}
+            <template v-if="hoveredUnitStats.cost[0] > 0">
+              <img :src="getStatIconUrl('food')" class="stat-icon" title="Food" />{{ hoveredUnitStats.cost[0] }}
+            </template>
+            <template v-if="hoveredUnitStats.cost[1] > 0">
+              <img :src="getStatIconUrl('wood')" class="stat-icon" title="Wood" />{{ hoveredUnitStats.cost[1] }}
+            </template>
+            <template v-if="hoveredUnitStats.cost[2] > 0">
+              <img :src="getStatIconUrl('stone')" class="stat-icon" title="Stone" />{{ hoveredUnitStats.cost[2] }}
+            </template>
+            <template v-if="hoveredUnitStats.cost[3] > 0">
+              <img :src="getStatIconUrl('gold')" class="stat-icon" title="Gold" />{{ hoveredUnitStats.cost[3] }}
+            </template>
           </span>
         </div>
         
