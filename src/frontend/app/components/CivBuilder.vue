@@ -85,23 +85,26 @@
     
     <!-- Step 2: Bonuses -->
     <div v-show="currentStep === 1" class="step-content">
-      <div class="bonuses-grid">
-        <BonusSelector
+      <div class="bonuses-layout">
+        <BonusSelectorGrid
           title="Civilization Bonuses"
-          subtitle="Select up to 5 bonuses for your civilization"
+          subtitle="Select up to 6 bonuses for your civilization"
+          bonus-type="civ"
           :bonuses="civBonuses"
           v-model="selectedCivBonuses"
           mode="multi"
-          :max-selections="5"
+          :max-selections="bonusMaxSelections.civ"
           :disabled="readOnly"
         />
         
-        <BonusSelector
+        <BonusSelectorGrid
           title="Team Bonus"
           subtitle="Select one team bonus"
+          bonus-type="team"
           :bonuses="teamBonuses"
           v-model="selectedTeamBonus"
           mode="single"
+          :max-selections="bonusMaxSelections.team"
           :disabled="readOnly"
         />
       </div>
@@ -189,6 +192,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
 import { createDefaultCiv, architectures, languages, wonders, type CivConfig } from '~/composables/useCivData'
+import { getBonusCards, maxSelections as bonusMaxSelections } from '~/composables/useBonusData'
 
 const props = withDefaults(defineProps<{
   initialConfig?: Partial<CivConfig>
@@ -216,27 +220,12 @@ const civConfig = reactive<CivConfig>({
   ...props.initialConfig
 })
 
-// Sample bonuses - these would typically come from the backend
-const civBonuses = ref([
-  { id: 1, name: 'Infantry +10% HP', description: 'All infantry units have +10% hit points' },
-  { id: 2, name: 'Archer +1 range', description: 'Archery range units have +1 range' },
-  { id: 3, name: 'Cavalry +15% speed', description: 'Cavalry units move 15% faster' },
-  { id: 4, name: 'Siege +20% attack', description: 'Siege weapons deal 20% more damage' },
-  { id: 5, name: 'Villager +10% work rate', description: 'Villagers work 10% faster' },
-  { id: 6, name: 'Buildings +15% HP', description: 'All buildings have +15% hit points' },
-  { id: 7, name: 'Monks +50% healing', description: 'Monks heal 50% faster' },
-  { id: 8, name: 'Ships +1 pierce armor', description: 'All ships have +1 pierce armor' },
-])
+// Get bonus cards from the composable
+const civBonuses = computed(() => getBonusCards('civ'))
+const teamBonuses = computed(() => getBonusCards('team'))
 
-const teamBonuses = ref([
-  { id: 101, name: 'Team Infantry +2 attack', description: 'Team infantry +2 attack' },
-  { id: 102, name: 'Team Archers +1 LOS', description: 'Team archery units +1 line of sight' },
-  { id: 103, name: 'Team Cavalry +1 armor', description: 'Team cavalry +1 armor' },
-  { id: 104, name: 'Team Monks +3 healing range', description: 'Team monks +3 healing range' },
-])
-
-const selectedCivBonuses = ref<number[]>([])
-const selectedTeamBonus = ref<number[]>([])
+const selectedCivBonuses = ref<(number | [number, number])[]>([])
+const selectedTeamBonus = ref<(number | [number, number])[]>([])
 
 const canProceed = computed(() => {
   if (currentStep.value === 0) {
@@ -584,7 +573,14 @@ defineExpose({
   min-height: 400px;
 }
 
-/* Bonuses grid */
+/* Bonuses layout */
+.bonuses-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Bonuses grid - keeping for backwards compatibility */
 .bonuses-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
