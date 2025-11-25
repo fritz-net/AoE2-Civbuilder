@@ -21,7 +21,7 @@
     
     <p v-if="subtitle" class="section-subtitle">{{ subtitle }}</p>
     
-    <!-- Controls: Size slider and filters -->
+    <!-- Controls: Size slider, filters, and sorting -->
     <div class="controls-row">
       <div class="size-control">
         <label class="control-label">Card Size:</label>
@@ -44,6 +44,23 @@
           class="filter-input"
         />
       </div>
+      
+      <div class="sort-control">
+        <label class="control-label">Sort:</label>
+        <select v-model="sortBy" class="sort-select">
+          <option value="id">Default (ID)</option>
+          <option value="name">Name</option>
+          <option value="rarity">Rarity</option>
+          <option value="edition">Edition</option>
+        </select>
+        <button 
+          class="sort-direction-btn"
+          @click="sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'"
+          :title="sortDirection === 'asc' ? 'Ascending' : 'Descending'"
+        >
+          {{ sortDirection === 'asc' ? '↑' : '↓' }}
+        </button>
+      </div>
     </div>
     
     <!-- Rarity and Edition filters -->
@@ -52,13 +69,17 @@
         <label 
           v-for="(rarity, index) in rarityNames" 
           :key="index"
-          class="filter-checkbox"
+          class="filter-toggle"
+          :class="{ 'active': selectedRarities[index] }"
         >
           <input 
             type="checkbox" 
             v-model="selectedRarities[index]"
+            class="toggle-input"
           />
-          <span :class="`rarity-${rarityCssClasses[index]}`">{{ rarity }}</span>
+          <span class="toggle-pill" :class="`rarity-pill-${rarityCssClasses[index]}`">
+            {{ rarity }}
+          </span>
         </label>
       </div>
       
@@ -66,17 +87,19 @@
         <label 
           v-for="(edition, index) in editionNames" 
           :key="index"
-          class="filter-checkbox"
+          class="filter-toggle"
+          :class="{ 'active': selectedEditions[index] }"
         >
           <input 
             type="checkbox" 
             v-model="selectedEditions[index]"
+            class="toggle-input"
           />
-          <span>{{ edition }}</span>
+          <span class="toggle-pill edition-pill">{{ edition }}</span>
         </label>
-        <label class="filter-checkbox show-edition-toggle">
-          <input type="checkbox" v-model="showEditionBadge" />
-          <span>Show Edition</span>
+        <label class="filter-toggle show-edition-toggle" :class="{ 'active': showEditionBadge }">
+          <input type="checkbox" v-model="showEditionBadge" class="toggle-input" />
+          <span class="toggle-pill edition-pill">Show Edition</span>
         </label>
       </div>
     </div>
@@ -90,25 +113,47 @@
     <div class="cards-container">
       <!-- Selected cards section -->
       <div v-if="selectedCards.length > 0" class="selected-section">
-        <div class="cards-grid">
-          <BonusItem
+        <div class="cards-grid selected-cards-grid">
+          <div 
             v-for="card in selectedCards"
             :key="`selected-${card.id}`"
-            :id="card.id"
-            :name="card.name"
-            :description="card.description"
-            :rarity="card.rarity"
-            :edition="card.edition"
-            :image-url="getCardImageUrl(card)"
-            :frame-url="getCardFrameUrl(card)"
-            :edition-url="getCardEditionUrl(card)"
-            :selected="true"
-            :size="cardSize"
-            :show-edition="showEditionBadge"
-            :multiplier="getCardMultiplier(card.id)"
-            @toggle="toggleCard(card.id)"
-            @hover="(hovering: boolean) => handleCardHover(card, hovering)"
-          />
+            class="selected-card-wrapper"
+          >
+            <BonusItem
+              :id="card.id"
+              :name="card.name"
+              :description="card.description"
+              :rarity="card.rarity"
+              :edition="card.edition"
+              :image-url="getCardImageUrl(card)"
+              :frame-url="getCardFrameUrl(card)"
+              :edition-url="getCardEditionUrl(card)"
+              :selected="true"
+              :size="cardSize"
+              :show-edition="showEditionBadge"
+              :multiplier="getCardMultiplier(card.id)"
+              @toggle="toggleCard(card.id)"
+              @hover="(hovering: boolean) => handleCardHover(card, hovering)"
+            />
+            <!-- Multiplier controls (only when allowMultiplier is enabled) -->
+            <div v-if="allowMultiplier" class="multiplier-controls">
+              <button 
+                class="multiplier-btn"
+                @click.stop="decrementMultiplier(card.id)"
+                :disabled="getCardMultiplier(card.id) <= 1"
+              >
+                −
+              </button>
+              <span class="multiplier-value">{{ getCardMultiplier(card.id) }}</span>
+              <button 
+                class="multiplier-btn"
+                @click.stop="incrementMultiplier(card.id)"
+                :disabled="getCardMultiplier(card.id) >= 10"
+              >
+                +
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -116,7 +161,7 @@
       <div class="unselected-section">
         <div class="cards-grid">
           <BonusItem
-            v-for="card in filteredUnselectedCards"
+            v-for="card in sortedFilteredUnselectedCards"
             :key="`unselected-${card.id}`"
             :id="card.id"
             :name="card.name"
@@ -173,6 +218,18 @@ const props = withDefaults(defineProps<{
   bonuses: BonusCard[]
   modelValue: (number | [number, number])[]
   mode?: 'single' | 'multi'
+  maxSelections?: number
+  disabled?: boolean
+  showNavigation?: boolean
+  filterPlaceholder?: string
+  allowMultiplier?: boolean
+}>(), {
+  mode: 'multi',
+  disabled: false,
+  showNavigation: false,
+  filterPlaceholder: 'e.g. "Infantry", "Archer", etc.',
+  allowMultiplier: false
+})
   maxSelections?: number
   disabled?: boolean
   showNavigation?: boolean
