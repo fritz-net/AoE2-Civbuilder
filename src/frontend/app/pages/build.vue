@@ -59,18 +59,17 @@ function handleConfigLoaded(config: CivConfig) {
 
 <style scoped>
 .build-page {
-  padding: 6rem 2rem 2rem;
-  padding-left: max(2rem, 14vw);
-  padding-right: max(2rem, 10vw);
-  max-width: 1600px;
+  padding: 2rem;
+  padding-bottom: 4rem;
+  max-width: 1200px;
   margin: 0 auto;
-  min-height: 80vh;
+  min-height: 100vh;
 }
 
 @media (max-width: 768px) {
   .build-page {
     padding: 1rem;
-    padding-top: 4rem;
+    padding-bottom: 3rem;
   }
 }
 </style>
