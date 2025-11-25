@@ -28,37 +28,37 @@
     </button>
 
     <!-- Maximize button at top right of techtree -->
-    <button 
-      class="maximize-btn" 
-      @click="toggleMaximize" 
-      :title="isMaximized ? 'Exit Fullscreen' : 'Maximize'"
-    >
-      {{ isMaximized ? '⤓' : '⤢' }}
-    </button>
-
     <div ref="techtreeRef" class="techtree" :style="techtreeStyle" @mouseleave="hideHelp" @wheel="handleWheel">
-      <svg
-        ref="svgRef"
-        :width="tree.width"
-        :height="tree.height"
-        class="techtree-svg"
+      <button 
+        class="maximize-btn" 
+        @click="toggleMaximize" 
+        :title="isMaximized ? 'Exit Fullscreen' : 'Maximize'"
       >
-        <!-- Age Row Highlighters -->
-        <rect
+        {{ isMaximized ? '⤓' : '⤢' }}
+      </button>
+      <div class="svg-wrapper" :style="svgWrapperStyle">
+        <svg
+          ref="svgRef"
           :width="tree.width"
-          :height="tree.height / 4"
-          fill="#4d3617"
-          fill-opacity="0.3"
-          @mouseover="hideHelp"
-        />
-        <rect
-          :width="tree.width"
-          :height="tree.height / 4"
-          :y="tree.height / 4 * 2"
-          fill="#4d3617"
-          fill-opacity="0.3"
-          @mouseover="hideHelp"
-        />
+          :height="tree.height"
+          class="techtree-svg"
+        >
+          <!-- Age Row Highlighters -->
+          <rect
+            :width="tree.width"
+            :height="tree.height / 4"
+            fill="#4d3617"
+            fill-opacity="0.3"
+            @mouseover="hideHelp"
+          />
+          <rect
+            :width="tree.width"
+            :height="tree.height / 4"
+            :y="tree.height / 4 * 2"
+            fill="#4d3617"
+            fill-opacity="0.3"
+            @mouseover="hideHelp"
+          />
 
         <!-- Age Icons -->
         <g v-for="(age, index) in ageIcons" :key="age.name" @mouseover="hideHelp">
@@ -196,7 +196,8 @@
             @click="handleCaretClick(caret)"
           />
         </g>
-      </svg>
+        </svg>
+      </div>
 
       <!-- Help tooltip -->
       <div
@@ -217,7 +218,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import type { Caret, Tree, TechtreeData, LaneRows } from '~/composables/useTechtreeData'
 import {
   TYPES,
@@ -287,16 +288,43 @@ const helptextStyle = ref<{ top: string; left: string; display: string }>({
 })
 const isMaximized = ref(false)
 const showSidebar = ref(true)
+const containerHeight = ref(typeof window !== 'undefined' ? window.innerHeight : 600)
 
 // Computed
 const connections = computed(() => getConnections())
 const connectionPoints = computed(() => getConnectionPoints(tree.value))
 const parentConnections = computed(() => new Map(connections.value.map(([parent, child]) => [child, parent])))
 
+// Scale factor to fit techtree in viewport without vertical scroll when not maximized
+const techtreeScale = computed(() => {
+  if (isMaximized.value) return 1
+  // Calculate available height (viewport minus toolbar height and some padding)
+  const availableHeight = containerHeight.value - 90 - 20 // 90px toolbar, 20px padding
+  const treeHeight = tree.value.height
+  if (treeHeight > availableHeight && availableHeight > 100) {
+    return availableHeight / treeHeight
+  }
+  return 1
+})
+
 const backgroundUrl = computed(() => `${props.relativePath}/img/Backgrounds/bg_aoe2_hd_paper.jpg`)
 const containerStyle = computed(() => ({
   background: `url('${backgroundUrl.value}') repeat`,
 }))
+
+// Apply scaling to SVG wrapper to fit techtree in viewport
+const svgWrapperStyle = computed(() => {
+  const scale = techtreeScale.value
+  if (scale < 1) {
+    return {
+      transform: `scale(${scale})`,
+      transformOrigin: 'top left',
+      width: `${100 / scale}%`,
+    }
+  }
+  return {}
+})
+
 const techtreeStyle = computed(() => ({
   background: `url('${backgroundUrl.value}') repeat local`,
 }))
@@ -363,11 +391,27 @@ const helpTextContent = computed(() => {
   return getHelpText(focusedCaret.value)
 })
 
+// Handle window resize to update scale
+function handleResize() {
+  if (typeof window !== 'undefined') {
+    containerHeight.value = window.innerHeight
+  }
+}
+
 // Initialize
 onMounted(async () => {
   await loadData()
   if (props.initialTree) {
     localtree.value = JSON.parse(JSON.stringify(props.initialTree))
+  }
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', handleResize)
+  }
+})
+
+onUnmounted(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', handleResize)
   }
 })
 
@@ -812,10 +856,15 @@ defineExpose({
 .techtree {
   flex: 1;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: auto;
   position: relative;
   border-left: 6px solid #4d3617;
   padding-bottom: 90px; /* Space for toolbar so it doesn't overlap scrollbar */
+}
+
+.svg-wrapper {
+  display: inline-block;
+  min-width: 100%;
 }
 
 .techtree-svg {
@@ -870,10 +919,10 @@ defineExpose({
 
 /* Maximize button at top right of techtree */
 .maximize-btn {
-  position: fixed;
+  position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 3001;
+  z-index: 100;
   background: rgba(77, 54, 23, 0.9);
   color: white;
   border: 2px solid #4d3617;
@@ -889,10 +938,10 @@ defineExpose({
 }
 
 .is-maximized .maximize-btn {
-  position: fixed;
+  position: absolute;
   top: 10px;
   right: 10px;
-  z-index: 10001;
+  z-index: 100;
 }
 
 /* Left Sidebar Styles */
