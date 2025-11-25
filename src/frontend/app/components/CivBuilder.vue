@@ -501,10 +501,21 @@ function formatLastSaved(): string {
   return lastSaved.value.toLocaleTimeString()
 }
 
+// Debounced autosave to prevent performance issues
+let autosaveTimeout: ReturnType<typeof setTimeout> | null = null
+function debouncedSave() {
+  if (autosaveTimeout) {
+    clearTimeout(autosaveTimeout)
+  }
+  autosaveTimeout = setTimeout(() => {
+    saveToLocalStorage()
+  }, 1000) // Debounce for 1 second
+}
+
 // Watch for changes and autosave
 watch([civConfig, selectedCivBonuses, selectedUniqueUnit, selectedTeamBonus, currentStep], () => {
   if (autosaveEnabled.value) {
-    saveToLocalStorage()
+    debouncedSave()
   }
 }, { deep: true })
 
