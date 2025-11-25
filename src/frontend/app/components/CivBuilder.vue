@@ -303,19 +303,44 @@ const selectedTeamBonus = ref<(number | [number, number])[]>([])
 
 // Computed sidebar content for techtree
 const sidebarContent = computed(() => {
+  // Helper to extract ID from bonus entry (could be number or [id, multiplier] tuple)
+  const getBonusId = (entry: number | [number, number]): number => {
+    return Array.isArray(entry) ? entry[0] : entry
+  }
+  const getMultiplier = (entry: number | [number, number]): number => {
+    return Array.isArray(entry) ? entry[1] : 1
+  }
+
   const bonusList = selectedCivBonuses.value
-    .map(id => {
-      const bonus = civBonuses.value.find(b => b.id === id)
-      return bonus ? `<li>${bonus.name}</li>` : ''
+    .map(entry => {
+      const bonusId = getBonusId(entry)
+      const multiplier = getMultiplier(entry)
+      const bonus = civBonuses.value.find(b => b.id === bonusId)
+      if (!bonus) return ''
+      const multiplierSuffix = multiplier > 1 ? ` [x${multiplier}]` : ''
+      return `<li>${bonus.name}${multiplierSuffix}</li>`
     })
     .join('')
   
   const teamBonusHtml = selectedTeamBonus.value
-    .map(id => {
-      const bonus = teamBonuses.value.find(b => b.id === id)
-      return bonus ? `<p>${bonus.name}</p>` : ''
+    .map(entry => {
+      const bonusId = getBonusId(entry)
+      const multiplier = getMultiplier(entry)
+      const bonus = teamBonuses.value.find(b => b.id === bonusId)
+      if (!bonus) return ''
+      const multiplierSuffix = multiplier > 1 ? ` [x${multiplier}]` : ''
+      return `<p>${bonus.name}${multiplierSuffix}</p>`
     })
     .join('')
+
+  // Get unique unit name
+  const uniqueUnitName = selectedUniqueUnit.value.length > 0
+    ? (() => {
+        const unitId = getBonusId(selectedUniqueUnit.value[0])
+        const unit = uniqueUnits.value.find(u => u.id === unitId)
+        return unit?.name || 'Unknown'
+      })()
+    : null
 
   return `
 <span>${civConfig.alias || 'Custom Civilization'}</span>
@@ -325,6 +350,11 @@ const sidebarContent = computed(() => {
 <ul>
 ${bonusList || '<li>No bonuses selected</li>'}
 </ul>
+
+<hr>
+
+<h3>Unique Unit</h3>
+<p>${uniqueUnitName || 'No unique unit selected'}</p>
 
 <hr>
 
@@ -367,8 +397,8 @@ function previousStep() {
 function handleTechtreeDone(tree: number[][], points: number) {
   techtreeData.value = tree
   techtreePointsRemaining.value = points
-  // Move to review step
-  currentStep.value = 3
+  // Move to next step (currentStep is 4 for techtree, so next is 5 for review)
+  nextStep()
 }
 
 function handleTechtreeUpdate(tree: number[][]) {
