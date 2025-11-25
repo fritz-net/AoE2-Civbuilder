@@ -873,14 +873,19 @@ defineExpose({
 
 .techtree-toolbar {
   position: fixed;
-  bottom: 0;
-  right: 0;
+  bottom: 20px;
+  right: 20px;
   z-index: 3000;
   display: flex;
   gap: 0;
   padding: 0;
   width: 700px;
   height: 75px;
+}
+
+.is-maximized .techtree-toolbar {
+  bottom: 20px;
+  right: 20px;
 }
 
 .points {
