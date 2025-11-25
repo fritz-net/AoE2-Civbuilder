@@ -129,7 +129,12 @@ function os_func() {
 			if (error) {
 				console.log(`stdout: ${stdout}`);
 				console.error(`exec error: ${error}`);
-				failure(); // TODO this function is not existing as it seems
+				if (typeof failure === 'function') {
+					failure();
+				} else {
+					// If no failure callback provided, log error and continue
+					console.error('Command failed but no failure callback provided');
+				}
 			}
 			if (stdout) {
 				console.log(stdout);
@@ -446,7 +451,22 @@ const writeUUIcons = (req, res, next) => {
 	var civ = JSON.parse(data);
 	for (var i = 0; i < civ.techtree.length; i++) {
 		//Persians and Saracens are index 7 & 8 but War Elephants and Mamelukes are index 8 & 7
-		var iconsrc = iconids[civ.techtree[i][0]];
+		var unitId = civ.techtree[i][0];
+		
+		// Validate that unitId is defined and within valid range
+		if (unitId === undefined || unitId === null) {
+			console.error(`[${req.body.seed}]: Warning - Unit ID is undefined for civ techtree index ${i}`);
+			continue;
+		}
+		
+		var iconsrc = iconids[unitId];
+		
+		// Validate that icon source exists
+		if (iconsrc === undefined) {
+			console.error(`[${req.body.seed}]: Warning - No icon found for unit ID ${unitId} at techtree index ${i}`);
+			continue;
+		}
+		
 		if (i == civ.techtree.length - 1) {
 			osUtil.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {
 				next();
@@ -516,6 +536,17 @@ const zipModFolder = (req, res, next) => {
 		});
 	}
 };
+
+/**
+ * Helper function to extract bonus ID from bonus data
+ * Bonus data can be either a number (legacy) or [id, multiplier] (new UI)
+ */
+function extractBonusId(bonus) {
+	if (Array.isArray(bonus)) {
+		return bonus[0]; // Return the ID from [id, multiplier]
+	}
+	return bonus; // Return the number directly
+}
 
 const writeIconsJson = async (req, res, next) => {
 	console.log(`[${req.body.seed}]: Writing icons and json...`);
@@ -724,7 +755,9 @@ const writeIconsJson = async (req, res, next) => {
 
 			//Unique Unit
 			if (civs[i]["bonuses"][1].length != 0) {
-				player_techtree[0] = civs[i]["bonuses"][1][0];
+				// Extract ID from bonus data (could be number or [id, multiplier])
+				var uniqueUnitBonus = civs[i]["bonuses"][1][0];
+				player_techtree[0] = extractBonusId(uniqueUnitBonus);
 			} else {
 				player_techtree[0] = 0;
 			}
@@ -733,7 +766,7 @@ const writeIconsJson = async (req, res, next) => {
 			if (civs[i]["bonuses"][2].length != 0) {
 				var castletechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][2].length; j++) {
-					castletechs.push(civs[i]["bonuses"][2][j]);
+					castletechs.push(extractBonusId(civs[i]["bonuses"][2][j]));
 				}
 				mod_data.castletech.push(castletechs);
 			} else {
@@ -744,7 +777,7 @@ const writeIconsJson = async (req, res, next) => {
 			if (civs[i]["bonuses"][3].length != 0) {
 				var imptechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][3].length; j++) {
-					imptechs.push(civs[i]["bonuses"][3][j]);
+					imptechs.push(extractBonusId(civs[i]["bonuses"][3][j]));
 				}
 				mod_data.imptech.push(imptechs);
 			} else {
@@ -759,11 +792,17 @@ const writeIconsJson = async (req, res, next) => {
 			}
 			mod_data.techtree.push(player_techtree);
 
-			mod_data.civ_bonus.push(civs[i]["bonuses"][0]);
+			// Civ bonuses - these can be multiplier tuples too
+			var civBonuses = [];
+			for (var j = 0; j < civs[i]["bonuses"][0].length; j++) {
+				civBonuses.push(extractBonusId(civs[i]["bonuses"][0][j]));
+			}
+			mod_data.civ_bonus.push(civBonuses);
+			
 			if (civs[i]["bonuses"][4].length != 0) {
 				var team_bonuses = [];
 				for (var j = 0; j < civs[i]["bonuses"][4].length; j++) {
-					team_bonuses.push(civs[i]["bonuses"][4][j]);
+					team_bonuses.push(extractBonusId(civs[i]["bonuses"][4][j]));
 				}
 				mod_data.team_bonus.push(team_bonuses);
 			} else {
@@ -1080,14 +1119,14 @@ function draftIO(io) {
 							mod_data.castle.push(draft["players"][i]["castle"]);
 							mod_data.wonder.push(draft["players"][i]["wonder"]);
 							//Unique Unit
-							player_techtree[0] = draft["players"][i]["bonuses"][1][0];
+							player_techtree[0] = extractBonusId(draft["players"][i]["bonuses"][1][0]);
 							//Castle Tech
 							var castletechs = [];
-							castletechs.push(draft["players"][i]["bonuses"][2][0]);
+							castletechs.push(extractBonusId(draft["players"][i]["bonuses"][2][0]));
 							mod_data.castletech.push(castletechs);
 							//Imp Tech
 							var imptechs = [];
-							imptechs.push(draft["players"][i]["bonuses"][3][0]);
+							imptechs.push(extractBonusId(draft["players"][i]["bonuses"][3][0]));
 							mod_data.imptech.push(imptechs);
 							//Tech Tree
 							for (var j = 0; j < draft["players"][i]["tree"].length; j++) {
@@ -1100,7 +1139,7 @@ function draftIO(io) {
 							mod_data.architecture.push(draft["players"][i]["architecture"]);
 							mod_data.language.push(draft["players"][i]["language"]);
 							var team_bonuses = [];
-							team_bonuses.push(draft["players"][i]["bonuses"][4][0]);
+							team_bonuses.push(extractBonusId(draft["players"][i]["bonuses"][4][0]));
 							mod_data.team_bonus.push(team_bonuses);
 						}
 						console.log(JSON.stringify(mod_data, null, 2));
@@ -1114,7 +1153,22 @@ function draftIO(io) {
 								osUtil.execCommand(`cp ./public/img/uniticons/blank.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${blanks[i]}_50730.png`, function () {});
 							}
 							for (var i = 0; i < mod_data.techtree.length; i++) {
-								var iconsrc = iconids[mod_data.techtree[i][0]];
+								var unitId = mod_data.techtree[i][0];
+								
+								// Validate that unitId is defined and within valid range
+								if (unitId === undefined || unitId === null) {
+									console.error(`[${draft["id"]}]: Warning - Unit ID is undefined for civ techtree index ${i}`);
+									continue;
+								}
+								
+								var iconsrc = iconids[unitId];
+								
+								// Validate that icon source exists
+								if (iconsrc === undefined) {
+									console.error(`[${draft["id"]}]: Warning - No icon found for unit ID ${unitId} at techtree index ${i}`);
+									continue;
+								}
+								
 								if (i == mod_data.techtree.length - 1) {
 									osUtil.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {
 										//Write Tech Tree
