@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.0.0...v1.1.0) (2025-11-25)
+
+
+### Features
+
+* Add civilization builder components with stepper navigation and bonus selectors ([#76](https://github.com/fritz-net/AoE2-Civbuilder/issues/76)) ([4dd9f38](https://github.com/fritz-net/AoE2-Civbuilder/commit/4dd9f38b0a547b752c9fd6fdec2f5005174280be))
+
+
+### Bug Fixes
+
+* Add redirect from / to /civbuilder/ for legacy frontend ([0450dad](https://github.com/fritz-net/AoE2-Civbuilder/commit/0450dad99fb3973866053f8e48f3f12a48913416))
+* Home screen buttons fit without vertical scroll ([77a2b5b](https://github.com/fritz-net/AoE2-Civbuilder/commit/77a2b5b058824b0668506ce87700947112192920))
+* Make text selectable by removing user-select: none ([59c0ce0](https://github.com/fritz-net/AoE2-Civbuilder/commit/59c0ce0e08c7dc75a9b2b353b23a97dae8460084))
+* Pages scroll the entire page, not inner container; changelog shows sections ([6345c61](https://github.com/fritz-net/AoE2-Civbuilder/commit/6345c61af36fd272bde4842b93ff584de6349028))
+
 ## 1.0.0 (2025-11-24)
 
 
