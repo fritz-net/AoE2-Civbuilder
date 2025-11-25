@@ -192,7 +192,43 @@
       <div class="tooltip-rarity" :class="`rarity-text-${rarityCssClasses[hoveredCard.rarity]}`">
         {{ rarityNames[hoveredCard.rarity] }}
       </div>
-      <div class="tooltip-description">
+      <div class="tooltip-name">{{ hoveredCard.name }}</div>
+      
+      <!-- Unit stats for unique units -->
+      <div v-if="hoveredUnitStats" class="tooltip-unit-stats">
+        <div class="unit-stats-row">
+          <span class="stat-label">Cost:</span>
+          <span class="stat-value">{{ formatCost(hoveredUnitStats.cost) }}</span>
+        </div>
+        <div class="unit-stats-row">
+          <span class="stat-label">HP:</span>
+          <span class="stat-value">{{ hoveredUnitStats.hp.join(' / ') }}</span>
+        </div>
+        <div class="unit-stats-row">
+          <span class="stat-label">Attack:</span>
+          <span class="stat-value">{{ getBaseAttack(hoveredUnitStats.attacks.basic) }} / {{ getBaseAttack(hoveredUnitStats.attacks.elite) }}</span>
+        </div>
+        <div class="unit-stats-row" v-if="hoveredUnitStats.range[0] > 0">
+          <span class="stat-label">Range:</span>
+          <span class="stat-value">{{ hoveredUnitStats.range.join(' / ') }}</span>
+        </div>
+        <div v-if="formatAttackBonuses(hoveredUnitStats.attacks.elite).length > 0" class="attack-bonuses">
+          <div class="stat-label">Attack Bonuses:</div>
+          <div 
+            v-for="(bonus, index) in formatAttackBonuses(hoveredUnitStats.attacks.elite)" 
+            :key="index"
+            class="attack-bonus"
+          >
+            {{ bonus }}
+          </div>
+        </div>
+        <div v-if="hoveredUnitStats.special" class="unit-special">
+          {{ hoveredUnitStats.special }}
+        </div>
+      </div>
+      
+      <!-- Description for non-unit bonuses -->
+      <div v-else class="tooltip-description">
         {{ hoveredCard.description }}
       </div>
     </div>
@@ -211,6 +247,13 @@ import {
   getFrameUrl,
   getEditionUrl
 } from '~/composables/useBonusData'
+import { 
+  unitStats, 
+  formatCost, 
+  formatAttackBonuses, 
+  getBaseAttack,
+  type UnitStats 
+} from '~/composables/useUnitStats'
 
 const props = withDefaults(defineProps<{
   title: string
@@ -284,6 +327,12 @@ const tooltipStyle = computed(() => {
     left: `${left}px`,
     top: `${top}px`
   }
+})
+
+// Get unit stats for the hovered card (only for unique units)
+const hoveredUnitStats = computed((): UnitStats | null => {
+  if (!hoveredCard.value || props.bonusType !== 'uu') return null
+  return unitStats[hoveredCard.value.id] || null
 })
 
 onMounted(() => {
@@ -820,7 +869,14 @@ function handleCardHover(card: BonusCard, isHovering: boolean) {
 }
 
 .tooltip-rarity {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.tooltip-name {
+  color: hsl(52, 100%, 50%);
+  font-size: 1.1rem;
   font-weight: bold;
   margin-bottom: 0.5rem;
 }
@@ -829,6 +885,48 @@ function handleCardHover(card: BonusCard, isHovering: boolean) {
   color: hsl(52, 100%, 50%);
   font-size: 1rem;
   line-height: 1.4;
+}
+
+/* Unit stats tooltip styles */
+.tooltip-unit-stats {
+  font-size: 0.9rem;
+}
+
+.unit-stats-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  color: hsla(52, 100%, 50%, 0.8);
+  font-weight: 500;
+}
+
+.stat-value {
+  color: hsl(52, 100%, 50%);
+  font-weight: bold;
+}
+
+.attack-bonuses {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid hsla(52, 100%, 50%, 0.3);
+}
+
+.attack-bonus {
+  color: hsl(120, 70%, 50%);
+  font-size: 0.85rem;
+  margin-left: 0.5rem;
+}
+
+.unit-special {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid hsla(52, 100%, 50%, 0.3);
+  color: hsl(280, 70%, 70%);
+  font-style: italic;
+  font-size: 0.85rem;
 }
 
 /* Rarity colors */
