@@ -43,30 +43,31 @@ jobs:
       - name: Update release with Docker image info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ needs.release-please.outputs.tag_name }}
         run: |
-          TAG_NAME="${{ needs.release-please.outputs.tag_name }}"
           DOCKER_IMAGE="ghcr.io/fritz-net/aoe2-civbuilder:${TAG_NAME}"
           
-          # Get current release body
-          CURRENT_BODY=$(gh api repos/${{ github.repository }}/releases/tags/${TAG_NAME} --jq '.body')
+          # Get current release body and store in a file to handle special characters
+          gh api "repos/${{ github.repository }}/releases/tags/${TAG_NAME}" --jq '.body' > /tmp/current_body.txt
           
-          # Append Docker image info to release body
-          NEW_BODY="${CURRENT_BODY}
-
-          ---
-
-          ## Docker Image
-
-          \`\`\`bash
-          docker pull ${DOCKER_IMAGE}
-          \`\`\`
-
-          Or use the latest tag:
-          \`\`\`bash
-          docker pull ghcr.io/fritz-net/aoe2-civbuilder:latest
-          \`\`\`"
+          # Append Docker image section to the file
+          {
+            echo ""
+            echo "---"
+            echo ""
+            echo "## Docker Image"
+            echo ""
+            echo '```bash'
+            echo "docker pull ${DOCKER_IMAGE}"
+            echo '```'
+            echo ""
+            echo "Or use the latest tag:"
+            echo '```bash'
+            echo "docker pull ghcr.io/fritz-net/aoe2-civbuilder:latest"
+            echo '```'
+          } >> /tmp/current_body.txt
           
-          # Update the release
-          gh api repos/${{ github.repository }}/releases/tags/${TAG_NAME} \
+          # Update the release using the file content
+          gh api "repos/${{ github.repository }}/releases/tags/${TAG_NAME}" \
             --method PATCH \
-            --field body="${NEW_BODY}"
+            --field body=@/tmp/current_body.txt
