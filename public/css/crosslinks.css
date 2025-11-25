@@ -1,0 +1,117 @@
+/* Crosslinks between UI v1 and v2 - Ribbon Style
+ * Corner ribbon with gold borders and animated shine effect
+ */
+
+/* ============================================
+ * Common styles
+ * ============================================ */
+.crosslink-container {
+	--crosslink-gold: hsl(52, 100%, 50%);
+	--crosslink-red: hsl(0, 100%, 34%);
+	--crosslink-red-hover: hsl(0, 100%, 64%);
+}
+
+/* ============================================
+ * Ribbon: Classic Diagonal Ribbon with Shine Animation
+ * Traditional corner ribbon with gold borders and animated shine effect
+ * ============================================ */
+.crosslink-ribbon-wrapper {
+	display: block;
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 150px;
+	height: 150px;
+	overflow: hidden;
+	z-index: 100;
+	pointer-events: none;
+}
+
+.crosslink-ribbon {
+	position: absolute;
+	top: 30px;
+	right: -40px;
+	width: 200px;
+	padding: 10px 0;
+	background: linear-gradient(135deg, var(--crosslink-red) 0%, hsl(0, 100%, 25%) 100%);
+	color: var(--crosslink-gold);
+	text-align: center;
+	text-decoration: none;
+	font-family: "Cinzel", serif;
+	font-size: 0.85rem;
+	font-weight: bold;
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+	transform: rotate(45deg);
+	box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+	pointer-events: auto;
+	cursor: pointer;
+	transition: background 0.3s ease;
+	border-top: 2px solid var(--crosslink-gold);
+	border-bottom: 2px solid var(--crosslink-gold);
+	overflow: hidden;
+}
+
+.crosslink-ribbon:hover {
+	background: linear-gradient(135deg, var(--crosslink-red-hover) 0%, hsl(0, 100%, 40%) 100%);
+}
+
+/* Shiny animation effect */
+.crosslink-ribbon::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 50%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+	animation: ribbon-shine 3s infinite;
+}
+
+@keyframes ribbon-shine {
+	0% { left: -100%; }
+	50%, 100% { left: 150%; }
+}
+
+.crosslink-ribbon-bow {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 0;
+	height: 0;
+	border-style: solid;
+	border-width: 0 60px 60px 0;
+	border-color: transparent var(--crosslink-gold) transparent transparent;
+	opacity: 0.3;
+}
+
+.crosslink-ribbon-label {
+	display: block;
+	font-size: 0.65rem;
+	opacity: 0.9;
+	margin-top: 2px;
+}
+
+/* ============================================
+ * Responsive adjustments
+ * ============================================ */
+@media only screen and (max-width: 768px) {
+	.crosslink-ribbon-wrapper {
+		width: 120px;
+		height: 120px;
+	}
+
+	.crosslink-ribbon {
+		top: 20px;
+		right: -50px;
+		width: 180px;
+		font-size: 0.75rem;
+		padding: 8px 0;
+	}
+}
+
+/* Hide on very small screens */
+@media only screen and (max-width: 500px) {
+	.crosslink-container {
+		display: none;
+	}
+}
