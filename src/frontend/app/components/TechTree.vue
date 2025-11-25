@@ -27,15 +27,16 @@
       ☰
     </button>
 
-    <!-- Maximize button at top right of techtree -->
+    <!-- Maximize button at top right of techtree (fixed position) -->
+    <button 
+      class="maximize-btn" 
+      @click="toggleMaximize" 
+      :title="isMaximized ? 'Exit Fullscreen' : 'Maximize'"
+    >
+      {{ isMaximized ? '⤓' : '⤢' }}
+    </button>
+
     <div ref="techtreeRef" class="techtree" :style="techtreeStyle" @mouseleave="hideHelp" @wheel="handleWheel">
-      <button 
-        class="maximize-btn" 
-        @click="toggleMaximize" 
-        :title="isMaximized ? 'Exit Fullscreen' : 'Maximize'"
-      >
-        {{ isMaximized ? '⤓' : '⤢' }}
-      </button>
       <div class="svg-wrapper" :style="svgWrapperStyle">
         <svg
           ref="svgRef"
@@ -298,11 +299,14 @@ const parentConnections = computed(() => new Map(connections.value.map(([parent,
 // Scale factor to fit techtree in viewport without vertical scroll when not maximized
 const techtreeScale = computed(() => {
   if (isMaximized.value) return 1
-  // Calculate available height (viewport minus toolbar height and some padding)
-  const availableHeight = containerHeight.value - 90 - 20 // 90px toolbar, 20px padding
+  // Calculate available height (viewport minus navbar ~60px, toolbar ~95px, padding ~20px)
+  const navbarHeight = 60
+  const toolbarHeight = 95
+  const padding = 20
+  const availableHeight = containerHeight.value - navbarHeight - toolbarHeight - padding
   const treeHeight = tree.value.height
   if (treeHeight > availableHeight && availableHeight > 100) {
-    return availableHeight / treeHeight
+    return Math.max(availableHeight / treeHeight, 0.4) // Minimum scale of 0.4
   }
   return 1
 })
@@ -856,10 +860,15 @@ defineExpose({
 .techtree {
   flex: 1;
   overflow-x: auto;
-  overflow-y: auto;
+  overflow-y: hidden;
   position: relative;
   border-left: 6px solid #4d3617;
-  padding-bottom: 90px; /* Space for toolbar so it doesn't overlap scrollbar */
+  padding-bottom: 100px; /* Space for toolbar */
+}
+
+.is-maximized .techtree {
+  overflow-y: auto;
+  padding-bottom: 100px;
 }
 
 .svg-wrapper {
@@ -881,6 +890,10 @@ defineExpose({
   padding: 0;
   width: 700px;
   height: 75px;
+  background: rgba(245, 230, 200, 0.95);
+  border: 2px solid #4d3617;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .is-maximized .techtree-toolbar {
@@ -922,12 +935,12 @@ defineExpose({
   margin-right: 30px;
 }
 
-/* Maximize button at top right of techtree */
+/* Maximize button at top right of techtree - fixed position so it doesn't scroll */
 .maximize-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 100;
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 3001;
   background: rgba(77, 54, 23, 0.9);
   color: white;
   border: 2px solid #4d3617;
@@ -943,10 +956,10 @@ defineExpose({
 }
 
 .is-maximized .maximize-btn {
-  position: absolute;
+  position: fixed;
   top: 10px;
-  right: 10px;
-  z-index: 100;
+  right: 20px;
+  z-index: 10001;
 }
 
 /* Left Sidebar Styles */
