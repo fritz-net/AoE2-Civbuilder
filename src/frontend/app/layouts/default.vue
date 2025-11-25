@@ -6,6 +6,7 @@
       <NuxtLink to="/about" class="nav-button">About</NuxtLink>
       <NuxtLink to="/events" class="nav-button">Events</NuxtLink>
       <NuxtLink to="/updates" class="nav-button">Updates</NuxtLink>
+      <a :href="v1Url" class="nav-button classic-ui-link">Classic UI</a>
     </nav>
     
     <div class="top-right-links" v-if="showNavigation">
@@ -186,6 +187,12 @@ const showNavigation = computed(() => {
   background: linear-gradient(to bottom, rgba(160, 82, 45, 0.95), rgba(139, 69, 19, 0.95));
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* Classic UI menu link - subtle styling to indicate it goes to v1 */
+.classic-ui-link {
+  opacity: 0.85;
+  font-size: min(1.8vh, 0.9vw) !important;
 }
 
 /* ============================================
