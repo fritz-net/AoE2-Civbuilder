@@ -1,11 +1,33 @@
 <template>
-  <div class="techtree-container" :style="containerStyle">
+  <div class="techtree-container" :class="{ 'is-maximized': isMaximized }" :style="containerStyle">
     <div class="techtree-toolbar" :style="toolbarStyle">
       <div class="points">{{ pointsLabel }}: {{ techtreePoints }}</div>
       <button v-if="editable" class="toolbar-btn" @click="handleFill">Fill</button>
       <button v-if="editable" class="toolbar-btn" @click="handleReset">Reset</button>
+      <button class="toolbar-btn" @click="toggleMaximize" :title="isMaximized ? 'Exit Fullscreen' : 'Maximize'">
+        {{ isMaximized ? '⤓' : '⤢' }}
+      </button>
       <button class="toolbar-btn primary" @click="handleDone">{{ doneButtonText }}</button>
     </div>
+
+    <!-- Left Sidebar Panel -->
+    <div v-if="showSidebar && sidebarContent" class="techtree-sidebar" :style="sidebarStyle">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">{{ sidebarTitle }}</h2>
+        <button class="sidebar-toggle" @click="toggleSidebar" title="Hide Sidebar">×</button>
+      </div>
+      <div class="sidebar-content" v-html="sidebarContent"></div>
+    </div>
+
+    <!-- Toggle Sidebar Button (when hidden) -->
+    <button 
+      v-if="!showSidebar && sidebarContent" 
+      class="sidebar-show-btn" 
+      @click="toggleSidebar"
+      title="Show Sidebar"
+    >
+      ☰
+    </button>
 
     <div ref="techtreeRef" class="techtree" :style="techtreeStyle" @mouseleave="hideHelp">
       <svg
@@ -215,6 +237,8 @@ interface Props {
   points?: number
   description?: string
   relativePath?: string
+  sidebarContent?: string
+  sidebarTitle?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -222,6 +246,8 @@ const props = withDefaults(defineProps<Props>(), {
   points: 0,
   description: '',
   relativePath: '/aoe2techtree',
+  sidebarContent: '',
+  sidebarTitle: 'Civilization Info',
 })
 
 const emit = defineEmits<{
@@ -252,6 +278,8 @@ const helptextStyle = ref<{ top: string; left: string; display: string }>({
   left: '0px',
   display: 'none',
 })
+const isMaximized = ref(false)
+const showSidebar = ref(true)
 
 // Computed
 const connections = computed(() => getConnections())
@@ -266,6 +294,9 @@ const techtreeStyle = computed(() => ({
   background: `url('${backgroundUrl.value}') repeat local`,
 }))
 const toolbarStyle = computed(() => ({
+  background: `url('${backgroundUrl.value}') repeat`,
+}))
+const sidebarStyle = computed(() => ({
   background: `url('${backgroundUrl.value}') repeat`,
 }))
 
@@ -672,6 +703,32 @@ function handleDone() {
   emit('done', localtree.value, techtreePoints.value)
 }
 
+function toggleMaximize() {
+  isMaximized.value = !isMaximized.value
+  
+  // Use Fullscreen API when available
+  if (typeof document !== 'undefined') {
+    if (isMaximized.value) {
+      const elem = document.documentElement
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen().catch(() => {
+          // Fullscreen API not available, fallback to CSS-only fullscreen
+        })
+      }
+    } else {
+      if (document.exitFullscreen && document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {
+          // Ignore errors when exiting fullscreen
+        })
+      }
+    }
+  }
+}
+
+function toggleSidebar() {
+  showSidebar.value = !showSidebar.value
+}
+
 function calculatePoints(): number {
   if (!data.value) return 0
   
@@ -694,16 +751,32 @@ defineExpose({
   techtreePoints,
   handleFill,
   handleReset,
+  toggleMaximize,
+  toggleSidebar,
+  isMaximized,
+  showSidebar,
 })
 </script>
 
 <style scoped>
 .techtree-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   width: 100%;
   min-height: 100vh;
   font-family: 'Merriweather', Georgia, 'Times New Roman', Times, serif;
+  position: relative;
+}
+
+.techtree-container.is-maximized {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  min-height: 100vh;
+  height: 100vh;
 }
 
 .techtree {
@@ -726,12 +799,12 @@ defineExpose({
   display: flex;
   gap: 0;
   padding: 0;
-  width: 600px;
+  width: 700px;
   height: 75px;
 }
 
 .points {
-  flex: 60%;
+  flex: 50%;
   color: black;
   font-size: 24px;
   text-align: left;
@@ -742,7 +815,7 @@ defineExpose({
 }
 
 .toolbar-btn {
-  flex: 20%;
+  flex: 12%;
   color: black;
   font-size: 24px;
   text-align: center;
@@ -762,6 +835,115 @@ defineExpose({
 
 .toolbar-btn.primary {
   margin-right: 30px;
+}
+
+/* Left Sidebar Styles */
+.techtree-sidebar {
+  width: 20rem;
+  min-width: 20rem;
+  height: 100vh;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: 1rem;
+  border-right: 6px solid #4d3617;
+  order: -1; /* Ensure it appears on the left */
+}
+
+.is-maximized .techtree-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 10000;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #4d3617;
+}
+
+.sidebar-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  color: #4d3617;
+}
+
+.sidebar-toggle {
+  background: transparent;
+  border: 2px solid #4d3617;
+  color: #4d3617;
+  font-size: 20px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-content {
+  font-size: 11pt;
+  line-height: 1.5;
+}
+
+.sidebar-content :deep(h3) {
+  font-size: 14pt;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: #4d3617;
+}
+
+.sidebar-content :deep(ul) {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.sidebar-content :deep(li) {
+  margin-bottom: 0.3rem;
+}
+
+.sidebar-content :deep(span) {
+  font-size: 16pt;
+  font-weight: bold;
+}
+
+.sidebar-content :deep(hr) {
+  border: none;
+  border-top: 1px solid #4d3617;
+  margin: 1rem 0;
+}
+
+/* Show sidebar button */
+.sidebar-show-btn {
+  position: fixed;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3001;
+  background: rgba(77, 54, 23, 0.9);
+  color: white;
+  border: none;
+  padding: 10px 8px;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 0 5px 5px 0;
+}
+
+.sidebar-show-btn:hover {
+  background: rgba(77, 54, 23, 1);
 }
 
 .techtree-panel {
@@ -840,7 +1022,12 @@ defineExpose({
   
   .techtree-toolbar {
     width: 100%;
-    max-width: 600px;
+    max-width: 700px;
+  }
+  
+  .techtree-sidebar {
+    width: 16rem;
+    min-width: 16rem;
   }
 }
 </style>
