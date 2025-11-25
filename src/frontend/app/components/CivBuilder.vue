@@ -281,6 +281,7 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { createDefaultCiv, architectures, languages, wonders, type CivConfig } from '~/composables/useCivData'
 import { getBonusCards, maxSelections as bonusMaxSelections } from '~/composables/useBonusData'
+import { BONUS_INDEX } from '~/../../shared/bonusConstants'
 
 const props = withDefaults(defineProps<{
   initialConfig?: Partial<CivConfig>
@@ -535,18 +536,22 @@ function handleFileImport(event: Event) {
 
 /**
  * Restore bonus selections from civConfig.bonuses
- * The legacy format stores bonuses as (number | [number, number])[][]
- * where index 0 = civ bonuses, index 1 = unique units, index 2 = castle techs, index 3 = imp techs, index 4 = team bonuses
+ * The legacy format stores bonuses with indices defined in BONUS_INDEX:
+ * - CIV (0): civ bonuses - can be number or [id, multiplier]
+ * - UNIQUE_UNIT (1): unique units - always plain number (not tuple)
+ * - CASTLE_TECH (2): castle techs - can be number or [id, multiplier]
+ * - IMPERIAL_TECH (3): imp techs - can be number or [id, multiplier]
+ * - TEAM (4): team bonuses - can be number or [id, multiplier]
  */
 function restoreBonusSelections() {
   if (civConfig.bonuses && Array.isArray(civConfig.bonuses)) {
     // Convert loaded bonuses to the expected format
-    // Each bonus can be either a number (id) or [id, multiplier]
-    selectedCivBonuses.value = normalizeBonus(civConfig.bonuses[0])
-    selectedUniqueUnit.value = normalizeBonus(civConfig.bonuses[1])
-    selectedCastleTech.value = normalizeBonus(civConfig.bonuses[2])
-    selectedImpTech.value = normalizeBonus(civConfig.bonuses[3])
-    selectedTeamBonus.value = normalizeBonus(civConfig.bonuses[4])
+    selectedCivBonuses.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.CIV])
+    // Unique units are plain numbers in legacy format, but we normalize to [id, 1] internally
+    selectedUniqueUnit.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.UNIQUE_UNIT])
+    selectedCastleTech.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.CASTLE_TECH])
+    selectedImpTech.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.IMPERIAL_TECH])
+    selectedTeamBonus.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.TEAM])
   }
 }
 
@@ -571,10 +576,11 @@ function normalizeBonus(bonuses: (number | number[])[] | undefined): [number, nu
 
 function updateBonusesInConfig() {
   // Update bonuses in config (matching legacy format order)
-  // Index: 0 = civ, 1 = unique units, 2 = castle techs, 3 = imp techs, 4 = team
+  // Use BONUS_INDEX constants for clarity
   civConfig.bonuses = [
     selectedCivBonuses.value,
-    selectedUniqueUnit.value,
+    // Unique units should be stored as plain numbers in legacy format (not tuples)
+    selectedUniqueUnit.value.map(entry => entry[0]), // Extract just the ID
     selectedCastleTech.value,
     selectedImpTech.value,
     selectedTeamBonus.value

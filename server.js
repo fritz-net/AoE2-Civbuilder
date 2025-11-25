@@ -21,6 +21,7 @@ const { numBonuses, numBasicTechs, nameArr, colours, iconids, blanks, indexDicti
 const { createCivilizationsJson } = require("./process_mod/createCivilizationsJson.js");
 const commonJs = require("./public/js/common.js");
 const { integrateNuxt } = require("./nuxt-integration.js");
+const { BONUS_INDEX } = require("./src/shared/bonusConstants.js");
 
 console.log("Starting server...");
 
@@ -769,18 +770,18 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Unique Unit
-			if (civs[i]["bonuses"][1].length != 0) {
+			if (civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT].length != 0) {
 				// Extract ID from bonus data (could be number or [id, multiplier])
-				player_techtree[0] = extractBonusId(civs[i]["bonuses"][1][0], `unique unit for civ ${i}`);
+				player_techtree[0] = extractBonusId(civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT][0], `unique unit for civ ${i}`);
 			} else {
 				player_techtree[0] = 0;
 			}
 
 			//Castle Tech
-			if (civs[i]["bonuses"][2].length != 0) {
+			if (civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length != 0) {
 				var castletechs = [];
-				for (var j = 0; j < civs[i]["bonuses"][2].length; j++) {
-					castletechs.push(extractBonusId(civs[i]["bonuses"][2][j], `castle tech for civ ${i}`));
+				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length; j++) {
+					castletechs.push(extractBonusId(civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH][j], `castle tech for civ ${i}`));
 				}
 				mod_data.castletech.push(castletechs);
 			} else {
@@ -788,10 +789,10 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Imp Tech
-			if (civs[i]["bonuses"][3].length != 0) {
+			if (civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length != 0) {
 				var imptechs = [];
-				for (var j = 0; j < civs[i]["bonuses"][3].length; j++) {
-					imptechs.push(extractBonusId(civs[i]["bonuses"][3][j], `imp tech for civ ${i}`));
+				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length; j++) {
+					imptechs.push(extractBonusId(civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH][j], `imp tech for civ ${i}`));
 				}
 				mod_data.imptech.push(imptechs);
 			} else {
@@ -808,17 +809,17 @@ const writeIconsJson = async (req, res, next) => {
 
 			// Civ bonuses - these can be multiplier tuples too
 			var civBonuses = [];
-			if (civs[i]["bonuses"] && civs[i]["bonuses"][0] && Array.isArray(civs[i]["bonuses"][0])) {
-				for (var j = 0; j < civs[i]["bonuses"][0].length; j++) {
-					civBonuses.push(extractBonusId(civs[i]["bonuses"][0][j], `civ bonus for civ ${i}`));
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.CIV] && Array.isArray(civs[i]["bonuses"][BONUS_INDEX.CIV])) {
+				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.CIV].length; j++) {
+					civBonuses.push(extractBonusId(civs[i]["bonuses"][BONUS_INDEX.CIV][j], `civ bonus for civ ${i}`));
 				}
 			}
 			mod_data.civ_bonus.push(civBonuses);
 			
-			if (civs[i]["bonuses"] && civs[i]["bonuses"][4] && civs[i]["bonuses"][4].length != 0) {
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.TEAM] && civs[i]["bonuses"][BONUS_INDEX.TEAM].length != 0) {
 				var team_bonuses = [];
-				for (var j = 0; j < civs[i]["bonuses"][4].length; j++) {
-					team_bonuses.push(extractBonusId(civs[i]["bonuses"][4][j], `team bonus for civ ${i}`));
+				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.TEAM].length; j++) {
+					team_bonuses.push(extractBonusId(civs[i]["bonuses"][BONUS_INDEX.TEAM][j], `team bonus for civ ${i}`));
 				}
 				mod_data.team_bonus.push(team_bonuses);
 			} else {
