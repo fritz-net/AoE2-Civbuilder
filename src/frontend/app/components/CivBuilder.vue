@@ -237,17 +237,17 @@ const techtreePath = '/civbuilder/aoe2techtree'
 const techtreePoints = ref(100)
 const techtreePointsRemaining = ref(100)
 
+const civConfig = reactive<CivConfig>({
+  ...createDefaultCiv(),
+  ...props.initialConfig
+})
+
 // Use computed getter/setter to sync techtreeData with civConfig.tree
 const techtreeData = computed({
   get: () => civConfig.tree,
   set: (value: number[][]) => {
     civConfig.tree = value
   }
-})
-
-const civConfig = reactive<CivConfig>({
-  ...createDefaultCiv(),
-  ...props.initialConfig
 })
 
 // Sample bonuses - these would typically come from the backend
