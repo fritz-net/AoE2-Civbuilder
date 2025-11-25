@@ -259,20 +259,26 @@ function updateMousePosition(event: MouseEvent) {
   mouseY.value = event.clientY
 }
 
+// Tooltip configuration constants
+const TOOLTIP_OFFSET_X = 15
+const TOOLTIP_OFFSET_Y = 15
+const TOOLTIP_WIDTH = 350 // matches max-width in CSS
+const TOOLTIP_HEIGHT = 100 // approximate height for overflow detection
+
 // Tooltip style - positions tooltip near cursor with offset
 const tooltipStyle = computed(() => {
-  const offsetX = 15
-  const offsetY = 15
-  const tooltipWidth = 350
-  const tooltipHeight = 100
+  // Guard for SSR - return default position if window is undefined
+  if (typeof window === 'undefined') {
+    return { left: '0px', top: '0px' }
+  }
   
   // Check if tooltip would overflow right edge
-  const rightOverflow = mouseX.value + offsetX + tooltipWidth > window.innerWidth
+  const rightOverflow = mouseX.value + TOOLTIP_OFFSET_X + TOOLTIP_WIDTH > window.innerWidth
   // Check if tooltip would overflow bottom
-  const bottomOverflow = mouseY.value + offsetY + tooltipHeight > window.innerHeight
+  const bottomOverflow = mouseY.value + TOOLTIP_OFFSET_Y + TOOLTIP_HEIGHT > window.innerHeight
   
-  const left = rightOverflow ? mouseX.value - tooltipWidth - offsetX : mouseX.value + offsetX
-  const top = bottomOverflow ? mouseY.value - tooltipHeight - offsetY : mouseY.value + offsetY
+  const left = rightOverflow ? mouseX.value - TOOLTIP_WIDTH - TOOLTIP_OFFSET_X : mouseX.value + TOOLTIP_OFFSET_X
+  const top = bottomOverflow ? mouseY.value - TOOLTIP_HEIGHT - TOOLTIP_OFFSET_Y : mouseY.value + TOOLTIP_OFFSET_Y
   
   return {
     left: `${left}px`,
