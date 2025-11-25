@@ -99,7 +99,7 @@
         :allow-multiplier="false"
       />
     </div>
-    
+
     <!-- Step 4: Team Bonus -->
     <div v-show="currentStep === 3" class="step-content">
       <BonusSelectorGrid
@@ -114,9 +114,25 @@
         :allow-multiplier="true"
       />
     </div>
-    
-    <!-- Step 5: Review -->
-    <div v-show="currentStep === 4" class="step-content">
+
+    <!-- Step 5: Tech Tree -->
+    <div v-show="currentStep === 4" class="step-content techtree-step">
+      <TechTree
+        ref="techTreeRef"
+        :initial-tree="techtreeData"
+        :editable="!readOnly"
+        :points="techtreePoints"
+        :relative-path="techtreePath"
+        :sidebar-content="sidebarContent"
+        :sidebar-title="civConfig.alias || 'Custom Civilization'"
+        @done="handleTechtreeDone"
+        @update:tree="handleTechtreeUpdate"
+        @update:points="handlePointsUpdate"
+      />
+    </div>
+
+    <!-- Step 6: Review -->
+    <div v-show="currentStep === 5" class="step-content">
       <div class="review-section">
         <h2 class="review-title">Review Your Civilization</h2>
         
@@ -152,6 +168,10 @@
           <div class="review-item">
             <span class="review-label">Team Bonus:</span>
             <span class="review-value">{{ selectedTeamBonus.length > 0 ? 'Selected' : 'Not set' }}</span>
+          </div>
+          <div class="review-item">
+            <span class="review-label">Tech Tree Points:</span>
+            <span class="review-value">{{ techtreePointsRemaining }} remaining</span>
           </div>
         </div>
       </div>
@@ -240,23 +260,39 @@ const emit = defineEmits<{
   (e: 'configLoaded', config: CivConfig): void
 }>()
 
+// Local storage keys and autosave config
 const STORAGE_KEY = 'aoe2-civbuilder-config'
 const AUTOSAVE_KEY = 'aoe2-civbuilder-autosave'
 
-const stepLabels = ['Basic Info', 'Civ Bonuses', 'Unique Unit', 'Team Bonus', 'Review']
+// Steps: Basic Info, Civ Bonuses, Unique Unit, Team Bonus, Tech Tree, Review
+const stepLabels = ['Basic Info', 'Civ Bonuses', 'Unique Unit', 'Team Bonus', 'Tech Tree', 'Review']
 const currentStep = ref(0)
 const showAdvanced = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const autosaveEnabled = ref(false)
 const lastSaved = ref<Date | null>(null)
 const isRestoring = ref(true)  // Start as true to prevent autosave until initial restore/setup is complete
+const techTreeRef = ref<any>(null)
+
+// Tech tree state
+const techtreePath = '/civbuilder/aoe2techtree'
+const techtreePoints = ref(100)
+const techtreePointsRemaining = ref(100)
 
 const civConfig = reactive<CivConfig>({
   ...createDefaultCiv(),
   ...props.initialConfig
 })
 
-// Get bonus cards from the composable
+// Use computed getter/setter to sync techtreeData with civConfig.tree
+const techtreeData = computed({
+  get: () => civConfig.tree,
+  set: (value: number[][]) => {
+    civConfig.tree = value
+  }
+})
+
+// Bonus sources from composable
 const civBonuses = computed(() => getBonusCards('civ'))
 const uniqueUnits = computed(() => getBonusCards('uu'))
 const teamBonuses = computed(() => getBonusCards('team'))
@@ -264,6 +300,38 @@ const teamBonuses = computed(() => getBonusCards('team'))
 const selectedCivBonuses = ref<(number | [number, number])[]>([])
 const selectedUniqueUnit = ref<(number | [number, number])[]>([])
 const selectedTeamBonus = ref<(number | [number, number])[]>([])
+
+// Computed sidebar content for techtree
+const sidebarContent = computed(() => {
+  const bonusList = selectedCivBonuses.value
+    .map(id => {
+      const bonus = civBonuses.value.find(b => b.id === id)
+      return bonus ? `<li>${bonus.name}</li>` : ''
+    })
+    .join('')
+  
+  const teamBonusHtml = selectedTeamBonus.value
+    .map(id => {
+      const bonus = teamBonuses.value.find(b => b.id === id)
+      return bonus ? `<p>${bonus.name}</p>` : ''
+    })
+    .join('')
+
+  return `
+<span>${civConfig.alias || 'Custom Civilization'}</span>
+<p><em>${civConfig.description || 'Custom civilization'}</em></p>
+
+<h3>Civilization Bonuses</h3>
+<ul>
+${bonusList || '<li>No bonuses selected</li>'}
+</ul>
+
+<hr>
+
+<h3>Team Bonus</h3>
+${teamBonusHtml || '<p>No team bonus selected</p>'}
+`
+})
 
 const canProceed = computed(() => {
   if (currentStep.value === 0) {
@@ -294,6 +362,21 @@ function previousStep() {
   if (currentStep.value > 0) {
     currentStep.value--
   }
+}
+
+function handleTechtreeDone(tree: number[][], points: number) {
+  techtreeData.value = tree
+  techtreePointsRemaining.value = points
+  // Move to review step
+  currentStep.value = 3
+}
+
+function handleTechtreeUpdate(tree: number[][]) {
+  techtreeData.value = tree
+}
+
+function handlePointsUpdate(points: number) {
+  techtreePointsRemaining.value = points
 }
 
 function validateStep1(): boolean {
@@ -430,6 +513,7 @@ function handleReset() {
   selectedCivBonuses.value = []
   selectedUniqueUnit.value = []
   selectedTeamBonus.value = []
+  techtreePointsRemaining.value = techtreePoints.value
   currentStep.value = 0
   
   // Clear local storage if autosave was enabled
@@ -807,14 +891,19 @@ defineExpose({
   min-height: 400px;
 }
 
-/* Bonuses layout */
 .bonuses-layout {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-/* Bonuses grid - keeping for backwards compatibility */
+.techtree-step {
+  margin: -2rem -2rem 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* Bonuses grid */
 .bonuses-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
