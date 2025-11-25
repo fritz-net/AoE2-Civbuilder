@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.1.0...v1.2.0) (2025-11-25)
+
+
+### Features
+
+* add civ, team bonus, and unique unit selectors for new UI ([#79](https://github.com/fritz-net/AoE2-Civbuilder/issues/79)) ([4157c04](https://github.com/fritz-net/AoE2-Civbuilder/commit/4157c0448d3b35ef8d72413a1e3c749e85b90c53))
+* add crosslinks between UI v1 and v2 ([#87](https://github.com/fritz-net/AoE2-Civbuilder/issues/87)) ([8131a1d](https://github.com/fritz-net/AoE2-Civbuilder/commit/8131a1d252b58e0415bb1e4401cb330451d76791))
+* create Vue component for existing techtree ([#80](https://github.com/fritz-net/AoE2-Civbuilder/issues/80)) ([89c02b4](https://github.com/fritz-net/AoE2-Civbuilder/commit/89c02b48bd6e68a7823e9bd190ef8132c830fc9b))
+
+
+### Bug Fixes
+
+* villager aura balancing - "Villagers work faster when nearby other villagers" ([#90](https://github.com/fritz-net/AoE2-Civbuilder/issues/90)) ([c366a5e](https://github.com/fritz-net/AoE2-Civbuilder/commit/c366a5e8aaee8644aaa160dd22f830dfaea43a98))
+
 ## [1.1.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.0.0...v1.1.0) (2025-11-25)
 
 
