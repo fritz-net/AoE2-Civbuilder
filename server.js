@@ -542,20 +542,22 @@ const zipModFolder = (req, res, next) => {
  * Helper function to extract bonus ID from bonus data
  * Bonus data can be either a number (legacy) or [id, multiplier] (new UI)
  * @param {number|number[]} bonus - Either a number (legacy format) or [id, multiplier] array (new UI format)
+ * @param {string} [context] - Optional context for error messages (e.g., "civ bonus", "unique unit")
  * @returns {number} - The bonus ID
  */
-function extractBonusId(bonus) {
+function extractBonusId(bonus, context) {
+	const errorContext = context ? ` in ${context}` : '';
 	if (Array.isArray(bonus)) {
 		// Validate array has at least one element
 		if (bonus.length === 0) {
-			console.error('Warning: Empty bonus array encountered');
+			console.error(`Warning: Empty bonus array encountered${errorContext}`);
 			return 0;
 		}
 		return bonus[0]; // Return the ID from [id, multiplier]
 	}
 	// Handle null/undefined
 	if (bonus === null || bonus === undefined) {
-		console.error('Warning: Null or undefined bonus encountered');
+		console.error(`Warning: Null or undefined bonus encountered${errorContext}`);
 		return 0;
 	}
 	return bonus; // Return the number directly
@@ -807,12 +809,14 @@ const writeIconsJson = async (req, res, next) => {
 
 			// Civ bonuses - these can be multiplier tuples too
 			var civBonuses = [];
-			for (var j = 0; j < civs[i]["bonuses"][0].length; j++) {
-				civBonuses.push(extractBonusId(civs[i]["bonuses"][0][j]));
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][0] && Array.isArray(civs[i]["bonuses"][0])) {
+				for (var j = 0; j < civs[i]["bonuses"][0].length; j++) {
+					civBonuses.push(extractBonusId(civs[i]["bonuses"][0][j]));
+				}
 			}
 			mod_data.civ_bonus.push(civBonuses);
 			
-			if (civs[i]["bonuses"][4].length != 0) {
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][4] && civs[i]["bonuses"][4].length != 0) {
 				var team_bonuses = [];
 				for (var j = 0; j < civs[i]["bonuses"][4].length; j++) {
 					team_bonuses.push(extractBonusId(civs[i]["bonuses"][4][j]));
@@ -1150,8 +1154,10 @@ function draftIO(io) {
 							mod_data.techtree.push(player_techtree);
 							// Civ bonuses - these can be multiplier tuples too
 							var civBonuses = [];
-							for (var j = 0; j < draft["players"][i]["bonuses"][0].length; j++) {
-								civBonuses.push(extractBonusId(draft["players"][i]["bonuses"][0][j]));
+							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][0] && Array.isArray(draft["players"][i]["bonuses"][0])) {
+								for (var j = 0; j < draft["players"][i]["bonuses"][0].length; j++) {
+									civBonuses.push(extractBonusId(draft["players"][i]["bonuses"][0][j]));
+								}
 							}
 							mod_data.civ_bonus.push(civBonuses);
 							mod_data.architecture.push(draft["players"][i]["architecture"]);
