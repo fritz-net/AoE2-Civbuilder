@@ -20,6 +20,9 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
+// Load constants once at module level
+const { numBonuses, numBasicTechs, indexDictionary } = require('../process_mod/constants.js');
+
 describe('Vanilla Civs JSON Files', () => {
   let testDir;
   const projectRoot = path.join(__dirname, '..');
@@ -56,8 +59,6 @@ describe('Vanilla Civs JSON Files', () => {
    * This mimics the conversion done in server.js
    */
   function convertVanillaCivToDataJson(vanillaCivData) {
-    const { numBonuses, numBasicTechs, indexDictionary } = require('../process_mod/constants.js');
-    
     const mod_data = {};
     mod_data.name = [vanillaCivData.alias || "Unknown"];
     mod_data.description = [vanillaCivData.description || ""];
@@ -87,6 +88,8 @@ describe('Vanilla Civs JSON Files', () => {
     }
 
     // Helper to extract bonus ID from [id, multiplier] or just id
+    // This is a simplified version of extractBonusId from server.js
+    // It doesn't include error logging since test failures will reveal issues
     function extractBonusId(bonus) {
       if (Array.isArray(bonus)) {
         return bonus[0];
