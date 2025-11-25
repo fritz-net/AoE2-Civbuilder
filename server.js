@@ -771,8 +771,7 @@ const writeIconsJson = async (req, res, next) => {
 			//Unique Unit
 			if (civs[i]["bonuses"][1].length != 0) {
 				// Extract ID from bonus data (could be number or [id, multiplier])
-				var uniqueUnitBonus = civs[i]["bonuses"][1][0];
-				player_techtree[0] = extractBonusId(uniqueUnitBonus);
+				player_techtree[0] = extractBonusId(civs[i]["bonuses"][1][0], `unique unit for civ ${i}`);
 			} else {
 				player_techtree[0] = 0;
 			}
@@ -781,7 +780,7 @@ const writeIconsJson = async (req, res, next) => {
 			if (civs[i]["bonuses"][2].length != 0) {
 				var castletechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][2].length; j++) {
-					castletechs.push(extractBonusId(civs[i]["bonuses"][2][j]));
+					castletechs.push(extractBonusId(civs[i]["bonuses"][2][j], `castle tech for civ ${i}`));
 				}
 				mod_data.castletech.push(castletechs);
 			} else {
@@ -792,7 +791,7 @@ const writeIconsJson = async (req, res, next) => {
 			if (civs[i]["bonuses"][3].length != 0) {
 				var imptechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][3].length; j++) {
-					imptechs.push(extractBonusId(civs[i]["bonuses"][3][j]));
+					imptechs.push(extractBonusId(civs[i]["bonuses"][3][j], `imp tech for civ ${i}`));
 				}
 				mod_data.imptech.push(imptechs);
 			} else {
@@ -811,7 +810,7 @@ const writeIconsJson = async (req, res, next) => {
 			var civBonuses = [];
 			if (civs[i]["bonuses"] && civs[i]["bonuses"][0] && Array.isArray(civs[i]["bonuses"][0])) {
 				for (var j = 0; j < civs[i]["bonuses"][0].length; j++) {
-					civBonuses.push(extractBonusId(civs[i]["bonuses"][0][j]));
+					civBonuses.push(extractBonusId(civs[i]["bonuses"][0][j], `civ bonus for civ ${i}`));
 				}
 			}
 			mod_data.civ_bonus.push(civBonuses);
@@ -819,7 +818,7 @@ const writeIconsJson = async (req, res, next) => {
 			if (civs[i]["bonuses"] && civs[i]["bonuses"][4] && civs[i]["bonuses"][4].length != 0) {
 				var team_bonuses = [];
 				for (var j = 0; j < civs[i]["bonuses"][4].length; j++) {
-					team_bonuses.push(extractBonusId(civs[i]["bonuses"][4][j]));
+					team_bonuses.push(extractBonusId(civs[i]["bonuses"][4][j], `team bonus for civ ${i}`));
 				}
 				mod_data.team_bonus.push(team_bonuses);
 			} else {
@@ -1136,14 +1135,24 @@ function draftIO(io) {
 							mod_data.castle.push(draft["players"][i]["castle"]);
 							mod_data.wonder.push(draft["players"][i]["wonder"]);
 							//Unique Unit
-							player_techtree[0] = extractBonusId(draft["players"][i]["bonuses"][1][0]);
+							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][1] && draft["players"][i]["bonuses"][1][0] !== undefined) {
+								player_techtree[0] = extractBonusId(draft["players"][i]["bonuses"][1][0], "unique unit");
+							}
 							//Castle Tech
 							var castletechs = [];
-							castletechs.push(extractBonusId(draft["players"][i]["bonuses"][2][0]));
+							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][2] && draft["players"][i]["bonuses"][2][0] !== undefined) {
+								castletechs.push(extractBonusId(draft["players"][i]["bonuses"][2][0], "castle tech"));
+							} else {
+								castletechs.push(0);
+							}
 							mod_data.castletech.push(castletechs);
 							//Imp Tech
 							var imptechs = [];
-							imptechs.push(extractBonusId(draft["players"][i]["bonuses"][3][0]));
+							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][3] && draft["players"][i]["bonuses"][3][0] !== undefined) {
+								imptechs.push(extractBonusId(draft["players"][i]["bonuses"][3][0], "imp tech"));
+							} else {
+								imptechs.push(0);
+							}
 							mod_data.imptech.push(imptechs);
 							//Tech Tree
 							for (var j = 0; j < draft["players"][i]["tree"].length; j++) {
@@ -1156,14 +1165,18 @@ function draftIO(io) {
 							var civBonuses = [];
 							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][0] && Array.isArray(draft["players"][i]["bonuses"][0])) {
 								for (var j = 0; j < draft["players"][i]["bonuses"][0].length; j++) {
-									civBonuses.push(extractBonusId(draft["players"][i]["bonuses"][0][j]));
+									civBonuses.push(extractBonusId(draft["players"][i]["bonuses"][0][j], "civ bonus"));
 								}
 							}
 							mod_data.civ_bonus.push(civBonuses);
 							mod_data.architecture.push(draft["players"][i]["architecture"]);
 							mod_data.language.push(draft["players"][i]["language"]);
 							var team_bonuses = [];
-							team_bonuses.push(extractBonusId(draft["players"][i]["bonuses"][4][0]));
+							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][4] && draft["players"][i]["bonuses"][4][0] !== undefined) {
+								team_bonuses.push(extractBonusId(draft["players"][i]["bonuses"][4][0], "team bonus"));
+							} else {
+								team_bonuses.push(0);
+							}
 							mod_data.team_bonus.push(team_bonuses);
 						}
 						console.log(JSON.stringify(mod_data, null, 2));
