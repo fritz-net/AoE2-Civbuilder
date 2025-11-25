@@ -29,12 +29,14 @@ export const numCards = {
 }
 
 // Maximum selections per bonus type
+// maxUniqueSelections: how many different bonuses can be selected
+// maxTotalSelections: total count including multipliers (null = no limit on total)
 export const maxSelections = {
-  civ: 6,
-  uu: 1,
-  castle: 1,
-  imp: 1,
-  team: 1
+  civ: { maxUniqueSelections: 6, maxTotalSelections: 6 },
+  uu: { maxUniqueSelections: 1, maxTotalSelections: 1 },
+  castle: { maxUniqueSelections: 1, maxTotalSelections: 255 },
+  imp: { maxUniqueSelections: 1, maxTotalSelections: 255 },
+  team: { maxUniqueSelections: 1, maxTotalSelections: 255 }
 }
 
 // Image prefix for each bonus type

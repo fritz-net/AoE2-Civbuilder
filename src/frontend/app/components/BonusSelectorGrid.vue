@@ -105,8 +105,16 @@
     </div>
     
     <!-- Selection counter -->
-    <div v-if="maxSelections" class="selection-counter">
-      {{ selectedCount }}/{{ maxSelections }} selected
+    <div v-if="maxUniqueSelections || maxTotalSelections" class="selection-counter">
+      <span v-if="maxUniqueSelections && maxTotalSelections && maxUniqueSelections !== maxTotalSelections">
+        {{ uniqueSelectionCount }}/{{ maxUniqueSelections }} unique ({{ selectedCount }}/{{ maxTotalSelections }} total)
+      </span>
+      <span v-else-if="maxTotalSelections">
+        {{ selectedCount }}/{{ maxTotalSelections }} selected
+      </span>
+      <span v-else-if="maxUniqueSelections">
+        {{ uniqueSelectionCount }}/{{ maxUniqueSelections }} selected
+      </span>
     </div>
     
     <!-- Card Grid -->
@@ -135,8 +143,8 @@
               @toggle="toggleCard(card.id)"
               @hover="(hovering: boolean) => handleCardHover(card, hovering)"
             />
-            <!-- Multiplier controls (only when allowMultiplier is enabled and maxSelections > 1) -->
-            <div v-if="allowMultiplier && (!maxSelections || maxSelections > 1)" class="multiplier-controls">
+            <!-- Multiplier controls (only when allowMultiplier is enabled and maxUniqueSelections > 1) -->
+            <div v-if="allowMultiplier && (!maxUniqueSelections || maxUniqueSelections > 1)" class="multiplier-controls">
               <button 
                 class="multiplier-btn"
                 @click.stop="decrementMultiplier(card.id)"
@@ -148,7 +156,7 @@
               <button 
                 class="multiplier-btn"
                 @click.stop="incrementMultiplier(card.id)"
-                :disabled="getCardMultiplier(card.id) >= maxMultiplier || (maxSelections && selectedCount >= maxSelections)"
+                :disabled="getCardMultiplier(card.id) >= maxMultiplier || (maxTotalSelections && selectedCount >= maxTotalSelections)"
               >
                 +
               </button>
@@ -332,7 +340,8 @@ const props = withDefaults(defineProps<{
   bonuses: BonusCard[]
   modelValue: (number | [number, number])[]
   mode?: 'single' | 'multi'
-  maxSelections?: number
+  maxUniqueSelections?: number // Max number of different bonuses that can be selected
+  maxTotalSelections?: number // Max total count including multipliers
   maxMultiplier?: number
   allowMultiplier?: boolean
   disabled?: boolean
@@ -422,6 +431,12 @@ const DEFAULT_MULTIPLIER = 1
 
 // Computed properties
 // Count selected items - with multipliers, 6x bonus A counts as 6 selected
+// Count unique selections (number of different bonuses selected)
+const uniqueSelectionCount = computed(() => {
+  return props.modelValue.length
+})
+
+// Count total selections including multipliers
 const selectedCount = computed(() => {
   return props.modelValue.reduce((total, item) => {
     if (Array.isArray(item)) {
@@ -431,9 +446,14 @@ const selectedCount = computed(() => {
   }, 0)
 })
 
-const isMaxReached = computed(() => {
-  if (!props.maxSelections) return false
-  return selectedCount.value >= props.maxSelections
+const isMaxUniqueReached = computed(() => {
+  if (!props.maxUniqueSelections) return false
+  return uniqueSelectionCount.value >= props.maxUniqueSelections
+})
+
+const isMaxTotalReached = computed(() => {
+  if (!props.maxTotalSelections) return false
+  return selectedCount.value >= props.maxTotalSelections
 })
 
 // Get selected card IDs as a Set for O(1) lookup (handling both simple number and [id, multiplier] format)
@@ -550,9 +570,9 @@ function toggleCard(cardId: number) {
   } else {
     // Multi selection mode
     if (index === -1) {
-      // Add card
-      if (props.maxSelections && currentSelection.length >= props.maxSelections) {
-        return // Max reached
+      // Add card - check maxUniqueSelections (number of different bonuses)
+      if (props.maxUniqueSelections && currentSelection.length >= props.maxUniqueSelections) {
+        return // Max unique selections reached
       }
       currentSelection.push([cardId, DEFAULT_MULTIPLIER])
     } else {
@@ -567,8 +587,8 @@ function toggleCard(cardId: number) {
 function incrementMultiplier(cardId: number) {
   if (!props.allowMultiplier) return
   
-  // Don't allow incrementing if we've reached maxSelections
-  if (props.maxSelections && selectedCount.value >= props.maxSelections) return
+  // Don't allow incrementing if we've reached maxTotalSelections
+  if (props.maxTotalSelections && selectedCount.value >= props.maxTotalSelections) return
   
   const currentSelection = [...props.modelValue]
   const index = currentSelection.findIndex(item => {

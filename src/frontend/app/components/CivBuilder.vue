@@ -79,7 +79,8 @@
         :bonuses="civBonuses"
         v-model="selectedCivBonuses"
         mode="multi"
-        :max-selections="bonusMaxSelections.civ"
+        :max-unique-selections="bonusMaxSelections.civ.maxUniqueSelections"
+        :max-total-selections="bonusMaxSelections.civ.maxTotalSelections"
         :disabled="readOnly"
         :allow-multiplier="true"
       />
@@ -94,7 +95,8 @@
         :bonuses="uniqueUnits"
         v-model="selectedUniqueUnit"
         mode="single"
-        :max-selections="bonusMaxSelections.uu"
+        :max-unique-selections="bonusMaxSelections.uu.maxUniqueSelections"
+        :max-total-selections="bonusMaxSelections.uu.maxTotalSelections"
         :disabled="readOnly"
         :allow-multiplier="false"
       />
@@ -109,9 +111,10 @@
         :bonuses="castleTechs"
         v-model="selectedCastleTech"
         mode="single"
-        :max-selections="bonusMaxSelections.castle"
+        :max-unique-selections="bonusMaxSelections.castle.maxUniqueSelections"
+        :max-total-selections="bonusMaxSelections.castle.maxTotalSelections"
         :disabled="readOnly"
-        :allow-multiplier="false"
+        :allow-multiplier="true"
       />
     </div>
 
@@ -124,9 +127,10 @@
         :bonuses="impTechs"
         v-model="selectedImpTech"
         mode="single"
-        :max-selections="bonusMaxSelections.imp"
+        :max-unique-selections="bonusMaxSelections.imp.maxUniqueSelections"
+        :max-total-selections="bonusMaxSelections.imp.maxTotalSelections"
         :disabled="readOnly"
-        :allow-multiplier="false"
+        :allow-multiplier="true"
       />
     </div>
 
@@ -139,7 +143,8 @@
         :bonuses="teamBonuses"
         v-model="selectedTeamBonus"
         mode="single"
-        :max-selections="bonusMaxSelections.team"
+        :max-unique-selections="bonusMaxSelections.team.maxUniqueSelections"
+        :max-total-selections="bonusMaxSelections.team.maxTotalSelections"
         :disabled="readOnly"
         :allow-multiplier="true"
       />
