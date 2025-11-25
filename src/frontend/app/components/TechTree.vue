@@ -16,6 +16,7 @@
         <h2 class="sidebar-title">{{ sidebarTitle }}</h2>
         <button class="sidebar-toggle" @click="toggleSidebar" title="Hide Sidebar">×</button>
       </div>
+      <!-- Note: sidebarContent is trusted HTML from the civ builder, not user input -->
       <div class="sidebar-content" v-html="sidebarContent"></div>
     </div>
 
@@ -712,13 +713,14 @@ function toggleMaximize() {
       const elem = document.documentElement
       if (elem.requestFullscreen) {
         elem.requestFullscreen().catch(() => {
-          // Fullscreen API not available, fallback to CSS-only fullscreen
+          // Handle fullscreen request failure (user gesture required, permission denied, or API unavailable)
+          // CSS-only fullscreen mode is still applied via the is-maximized class
         })
       }
     } else {
       if (document.exitFullscreen && document.fullscreenElement) {
         document.exitFullscreen().catch(() => {
-          // Ignore errors when exiting fullscreen
+          // Handle exit fullscreen failure gracefully - CSS mode will still work
         })
       }
     }
