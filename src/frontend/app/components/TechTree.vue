@@ -899,6 +899,7 @@ defineExpose({
 .sidebar-content {
   font-size: 11pt;
   line-height: 1.5;
+  color: #4d3617;
 }
 
 .sidebar-content :deep(h3) {
@@ -915,11 +916,21 @@ defineExpose({
 
 .sidebar-content :deep(li) {
   margin-bottom: 0.3rem;
+  color: #4d3617;
+}
+
+.sidebar-content :deep(p) {
+  color: #4d3617;
 }
 
 .sidebar-content :deep(span) {
   font-size: 16pt;
   font-weight: bold;
+  color: #4d3617;
+}
+
+.sidebar-content :deep(em) {
+  color: #4d3617;
 }
 
 .sidebar-content :deep(hr) {
