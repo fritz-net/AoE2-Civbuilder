@@ -422,6 +422,12 @@ onUnmounted(() => {
 watch(() => props.initialTree, (newTree) => {
   if (newTree) {
     localtree.value = JSON.parse(JSON.stringify(newTree))
+    // Recalculate points when tree is loaded from props
+    if (data.value && props.editable) {
+      const usedPoints = calculatePoints()
+      techtreePoints.value = props.points - usedPoints
+      emit('update:points', techtreePoints.value)
+    }
   }
 }, { deep: true })
 
@@ -443,6 +449,13 @@ async function loadData() {
     
     // Rebuild tree with data and names
     tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600)
+    
+    // Recalculate points after data is loaded if tree was already set
+    if (props.editable && localtree.value.some(arr => arr.length > 0)) {
+      const usedPoints = calculatePoints()
+      techtreePoints.value = props.points - usedPoints
+      emit('update:points', techtreePoints.value)
+    }
   } catch (error) {
     console.error('Failed to load techtree data:', error)
   }
