@@ -236,11 +236,14 @@ const techTreeRef = ref<any>(null)
 const techtreePath = '/civbuilder/aoe2techtree'
 const techtreePoints = ref(100)
 const techtreePointsRemaining = ref(100)
-const techtreeData = ref([
-  [13, 17, 21, 74, 545, 539, 331, 125, 83, 128, 440],
-  [12, 45, 49, 50, 68, 70, 72, 79, 82, 84, 87, 101, 103, 104, 109, 199, 209, 276, 562, 584, 598, 621, 792],
-  [22, 101, 102, 103, 408],
-])
+
+// Use computed getter/setter to sync techtreeData with civConfig.tree
+const techtreeData = computed({
+  get: () => civConfig.tree,
+  set: (value: number[][]) => {
+    civConfig.tree = value
+  }
+})
 
 const civConfig = reactive<CivConfig>({
   ...createDefaultCiv(),
@@ -435,6 +438,7 @@ function handleReset() {
   Object.assign(civConfig, defaults)
   selectedCivBonuses.value = []
   selectedTeamBonus.value = []
+  techtreePointsRemaining.value = techtreePoints.value
   currentStep.value = 0
   emit('reset')
 }
