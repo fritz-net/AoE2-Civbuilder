@@ -1,13 +1,13 @@
 <template>
-  <div class="techtree-container">
-    <div class="techtree-toolbar">
-      <div class="points">{{ pointsLabel }}: {{ points }}</div>
+  <div class="techtree-container" :style="containerStyle">
+    <div class="techtree-toolbar" :style="toolbarStyle">
+      <div class="points">{{ pointsLabel }}: {{ techtreePoints }}</div>
       <button v-if="editable" class="toolbar-btn" @click="handleFill">Fill</button>
       <button v-if="editable" class="toolbar-btn" @click="handleReset">Reset</button>
       <button class="toolbar-btn primary" @click="handleDone">{{ doneButtonText }}</button>
     </div>
 
-    <div ref="techtreeRef" class="techtree" @mouseleave="hideHelp">
+    <div ref="techtreeRef" class="techtree" :style="techtreeStyle" @mouseleave="hideHelp">
       <svg
         ref="svgRef"
         :width="tree.width"
@@ -258,6 +258,17 @@ const connections = computed(() => getConnections())
 const connectionPoints = computed(() => getConnectionPoints(tree.value))
 const parentConnections = computed(() => new Map(connections.value.map(([parent, child]) => [child, parent])))
 
+const backgroundUrl = computed(() => `${props.relativePath}/img/Backgrounds/bg_aoe2_hd_paper.jpg`)
+const containerStyle = computed(() => ({
+  background: `url('${backgroundUrl.value}') repeat`,
+}))
+const techtreeStyle = computed(() => ({
+  background: `url('${backgroundUrl.value}') repeat local`,
+}))
+const toolbarStyle = computed(() => ({
+  background: `url('${backgroundUrl.value}') repeat`,
+}))
+
 const visibleConnections = computed(() => {
   return connections.value
     .filter(([, child]) => !danglingCarets.includes(child))
@@ -278,12 +289,20 @@ const allCarets = computed(() => {
 
 const iconHeight = computed(() => Math.min(tree.value.height / 4 / 2, 112))
 
-const ageIcons = computed(() => [
-  { name: 'dark', image: 'dark_age_de.png', displayName: data.value?.strings[data.value?.age_names['Dark Age']] || 'Dark Age' },
-  { name: 'feudal', image: 'feudal_age_de.png', displayName: data.value?.strings[data.value?.age_names['Feudal Age']] || 'Feudal Age' },
-  { name: 'castle', image: 'castle_age_de.png', displayName: data.value?.strings[data.value?.age_names['Castle Age']] || 'Castle Age' },
-  { name: 'imperial', image: 'imperial_age_de.png', displayName: data.value?.strings[data.value?.age_names['Imperial Age']] || 'Imperial Age' },
-])
+const ageIcons = computed(() => {
+  const getAgeName = (key: string, fallback: string): string => {
+    if (!data.value?.strings || !data.value?.age_names) return fallback
+    const stringKey = data.value.age_names[key]
+    return data.value.strings[stringKey] || fallback
+  }
+  
+  return [
+    { name: 'dark', image: 'dark_age_de.png', displayName: getAgeName('Dark Age', 'Dark Age') },
+    { name: 'feudal', image: 'feudal_age_de.png', displayName: getAgeName('Feudal Age', 'Feudal Age') },
+    { name: 'castle', image: 'castle_age_de.png', displayName: getAgeName('Castle Age', 'Castle Age') },
+    { name: 'imperial', image: 'imperial_age_de.png', displayName: getAgeName('Imperial Age', 'Imperial Age') },
+  ]
+})
 
 const pointsLabel = computed(() => props.editable ? 'Points Remaining' : 'Points Spent')
 
@@ -311,16 +330,21 @@ watch(() => props.initialTree, (newTree) => {
 // Methods
 async function loadData() {
   try {
+    // Load data.json first
     const response = await fetch(`${props.relativePath}/data/data.json`)
     const jsonData = await response.json()
+    
+    // Load locale strings before setting the data
+    const localeResponse = await fetch(`${props.relativePath}/data/locales/en/strings.json`)
+    const strings = await localeResponse.json()
+    jsonData.strings = strings
+    
+    // Now set the data with strings included
     data.value = jsonData
     setTechtreeData(jsonData)
     
-    // Rebuild tree with data
+    // Rebuild tree with data and names
     tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600)
-    
-    // Load locale strings
-    await loadLocale('en')
   } catch (error) {
     console.error('Failed to load techtree data:', error)
   }
@@ -332,6 +356,7 @@ async function loadLocale(localeCode: string) {
     const strings = await response.json()
     if (data.value) {
       data.value.strings = strings
+      setTechtreeData(data.value)
       // Rebuild tree with localized names
       tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600)
     }
@@ -678,7 +703,6 @@ defineExpose({
   flex-direction: column;
   width: 100%;
   min-height: 100vh;
-  background: url('/aoe2techtree/img/Backgrounds/bg_aoe2_hd_paper.jpg') repeat;
   font-family: 'Merriweather', Georgia, 'Times New Roman', Times, serif;
 }
 
@@ -687,7 +711,6 @@ defineExpose({
   overflow-x: auto;
   overflow-y: hidden;
   position: relative;
-  background: url('/aoe2techtree/img/Backgrounds/bg_aoe2_hd_paper.jpg') repeat local;
   border-left: 6px solid #4d3617;
 }
 
@@ -705,7 +728,6 @@ defineExpose({
   padding: 0;
   width: 600px;
   height: 75px;
-  background: url('/aoe2techtree/img/Backgrounds/bg_aoe2_hd_paper.jpg') repeat;
 }
 
 .points {

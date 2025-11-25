@@ -23,7 +23,8 @@ const initialTree = ref([
 ])
 
 const startingPoints = ref(100)
-const relativePath = '/aoe2techtree'
+// The aoe2techtree assets are served from the main Express server at /civbuilder/aoe2techtree
+const relativePath = '/civbuilder/aoe2techtree'
 
 function handleDone(tree: number[][], points: number) {
   console.log('Tech tree completed:', { tree, points })

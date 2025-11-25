@@ -234,7 +234,9 @@ export function formatName(originalname: string): string {
 
 function getName(id: number, itemtype: 'units' | 'buildings' | 'techs'): string {
   if (!techtreeData) return String(id)
-  const languageNameId = techtreeData.data[itemtype][id]?.LanguageNameId
+  if (!techtreeData.strings) return String(id)
+  const languageNameId = techtreeData.data[itemtype]?.[id]?.LanguageNameId
+  if (!languageNameId) return String(id)
   return techtreeData.strings[languageNameId] || String(id)
 }
 
