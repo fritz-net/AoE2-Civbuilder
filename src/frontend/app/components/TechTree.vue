@@ -1059,11 +1059,12 @@ defineExpose({
 .helptext {
   position: absolute;
   width: 300px;
-  background-color: #eee;
-  border: 2px solid #bbb;
+  background-color: #f5e6c8;
+  border: 2px solid #4d3617;
   padding: 0.4rem;
   font-size: 10pt;
   z-index: 100;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .helptext :deep(p) {
