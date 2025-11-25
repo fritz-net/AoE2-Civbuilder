@@ -24,6 +24,22 @@ npm run test:watch
 
 ## Current Tests
 
+### Vanilla Civs Tests
+
+**Test File**: `__tests__/vanillaCivs.test.js`
+
+✅ **All 51 vanilla civilization JSON files pass successfully**
+
+This test suite validates that all vanilla civilization JSON files in `public/vanillaFiles/vanillaCivs/VanillaJson/` can be successfully processed by the create-data-mod backend tool.
+
+**Test Coverage**:
+- 51 vanilla civilizations (Armenians, Aztecs, Bengalis, Berbers, Bohemians, Britons, Bulgarians, Burgundians, Burmese, Byzantines, Celts, Chinese, Cumans, Dravidians, Ethiopians, Franks, Georgians, Goths, Gurjaras, Hindustanis, Huns, Inca, Incas, Italians, Japanese, Jurchens, Khitans, Khmer, Koreans, Lithuanians, Magyars, Malay, Malians, Mayans, Mongols, Persians, Poles, Portuguese, Romans, Saracens, Shu, Sicilians, Slavs, Spanish, Tatars, Teutons, Turks, Vietnamese, Vikings, Wei, Wu)
+- Each civ is converted to internal data.json format
+- Processed through C++ create-data-mod tool
+- Validates successful DAT file generation
+
+**Result**: The issue suggested "there is a high chance all these files are broken", but testing proves all vanilla civ files work correctly with the backend. No tool needed to fix/regenerate these files.
+
 ### Dat File Creation Tests
 
 These tests validate dat file creation with different dat file versions using the exact input data from the crash log.
