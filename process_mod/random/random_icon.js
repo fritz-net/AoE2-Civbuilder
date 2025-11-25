@@ -94,6 +94,22 @@ async function drawFlag(seed, symbol, output_paths, input_path) {
   var division = seed[1];
   var overlay = seed[2];
 
+  // Validate colour_palette to prevent crashes from undefined colors
+  if (!Array.isArray(colour_palette) || colour_palette.length < 5) {
+    console.error("ERROR: Invalid colour_palette structure. Expected array of 5 colors, got:", colour_palette);
+    throw new Error("Invalid colour_palette: must be an array with at least 5 color entries");
+  }
+
+  // Check each color entry is valid (array of 3 RGB values)
+  for (let i = 0; i < 5; i++) {
+    if (!Array.isArray(colour_palette[i]) || colour_palette[i].length < 3) {
+      console.error(`ERROR: colour_palette[${i}] is invalid. Expected [R, G, B] array, got:`, colour_palette[i]);
+      console.error("Full colour_palette:", JSON.stringify(colour_palette));
+      console.error("Division:", division, "Overlay:", overlay);
+      throw new Error(`Invalid colour_palette[${i}]: expected [R, G, B] array with 3 values`);
+    }
+  }
+
   var primary_division_colour = "rgb(" + colour_palette[0][0] + ", " + colour_palette[0][1] + ", " + colour_palette[0][2] + ")";
   var secondary_division_colour = "rgb(" + colour_palette[1][0] + ", " + colour_palette[1][1] + ", " + colour_palette[1][2] + ")";
   var tertiary_division_colour = "rgb(" + colour_palette[2][0] + ", " + colour_palette[2][1] + ", " + colour_palette[2][2] + ")";
