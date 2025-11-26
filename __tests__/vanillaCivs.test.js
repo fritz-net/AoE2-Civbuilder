@@ -18,7 +18,6 @@ const os = require('os');
 const { numBonuses, numBasicTechs, indexDictionary } = require('../process_mod/constants.js');
 
 describe('Vanilla Civs JSON Files', () => {
-  let testDir;
   const projectRoot = path.join(__dirname, '..');
   const createDataModPath = path.join(projectRoot, 'modding', 'build', 'create-data-mod');
   const vanillaCivsDir = path.join(projectRoot, 'public', 'vanillaFiles', 'vanillaCivs', 'VanillaJson');
@@ -33,18 +32,6 @@ describe('Vanilla Civs JSON Files', () => {
     // Check if C++ executable exists
     if (!fs.existsSync(createDataModPath)) {
       console.log('Skipping tests - C++ executable not built. Run: cd modding && ./scripts/build.sh');
-    }
-  });
-
-  beforeEach(() => {
-    // Create a temporary directory for test outputs
-    testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'civbuilder-vanilla-test-'));
-  });
-
-  afterEach(() => {
-    // Clean up test directory
-    if (fs.existsSync(testDir)) {
-      fs.rmSync(testDir, { recursive: true, force: true });
     }
   });
 
@@ -167,50 +154,80 @@ describe('Vanilla Civs JSON Files', () => {
       return { skipped: true };
     }
 
-    // Read and convert vanilla civ JSON to data.json format
-    const vanillaCivData = JSON.parse(fs.readFileSync(civFilePath, 'utf8'));
-    const dataJson = convertVanillaCivToDataJson(vanillaCivData);
+    // Create a temporary directory for this specific test
+    const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'civbuilder-vanilla-test-'));
     
-    // Write data.json to temp directory
-    const testDataPath = path.join(testDir, 'data.json');
-    fs.writeFileSync(testDataPath, JSON.stringify(dataJson, null, 2));
-    
-    // Output paths
-    const outputDatPath = path.join(testDir, 'empires2_x2_p1.dat');
-    const outputAiConfigPath = path.join(testDir, 'aiconfig.json');
-
-    // Run create-data-mod
-    const args = [testDataPath, vanillaDatPath, outputDatPath, outputAiConfigPath];
-
     let stdout, stderr;
     let exitCode = 0;
-
+    let testDataPath, outputDatPath, outputAiConfigPath, vanillaCivData;
+    
     try {
+      // Read and convert vanilla civ JSON to data.json format
+      vanillaCivData = JSON.parse(fs.readFileSync(civFilePath, 'utf8'));
+      const dataJson = convertVanillaCivToDataJson(vanillaCivData);
+      
+      // Write data.json to temp directory
+      testDataPath = path.join(testDir, 'data.json');
+      fs.writeFileSync(testDataPath, JSON.stringify(dataJson, null, 2));
+      
+      // Output paths
+      outputDatPath = path.join(testDir, 'empires2_x2_p1.dat');
+      outputAiConfigPath = path.join(testDir, 'aiconfig.json');
+
+      // Run create-data-mod
+      const args = [testDataPath, vanillaDatPath, outputDatPath, outputAiConfigPath];
+
       stdout = execFileSync(createDataModPath, args, {
         encoding: 'utf8',
         cwd: projectRoot,
         timeout: 30000, // 30 second timeout
       });
+      
+      // Check if output files exist and get their stats BEFORE cleanup
+      const outputDatExists = fs.existsSync(outputDatPath);
+      const outputAiConfigExists = fs.existsSync(outputAiConfigPath);
+      const datSize = outputDatExists ? fs.statSync(outputDatPath).size : 0;
+      
+      // Clean up test directory
+      if (fs.existsSync(testDir)) {
+        fs.rmSync(testDir, { recursive: true, force: true });
+      }
+      
+      return {
+        exitCode,
+        stdout,
+        stderr,
+        outputDatExists,
+        outputAiConfigExists,
+        datSize,
+        vanillaCivData,
+      };
     } catch (error) {
       stderr = error.stderr || error.message;
       stdout = error.stdout || '';
       exitCode = error.status !== null ? error.status : (error.signal ? 139 : 1);
+      
+      // Clean up test directory on error
+      if (fs.existsSync(testDir)) {
+        fs.rmSync(testDir, { recursive: true, force: true });
+      }
+      
+      return {
+        exitCode,
+        stdout,
+        stderr,
+        outputDatExists: false,
+        outputAiConfigExists: false,
+        datSize: 0,
+        vanillaCivData,
+      };
     }
-
-    return {
-      exitCode,
-      stdout,
-      stderr,
-      outputDatPath,
-      outputAiConfigPath,
-      testDataPath,
-      vanillaCivData,
-    };
   }
 
   // Generate a test case for each vanilla civ JSON file
+  // Use describe.each with test.concurrent to run tests in parallel
   describe.each(vanillaCivFiles)('Vanilla Civ: %s', (civFileName) => {
-    test(`should successfully process ${civFileName}`, () => {
+    test.concurrent(`should successfully process ${civFileName}`, () => {
       const result = testVanillaCiv(civFileName);
       
       // Skip if executable not built
@@ -236,12 +253,11 @@ describe('Vanilla Civs JSON Files', () => {
       expect(result.exitCode).toBe(0);
       
       // Output files should be created
-      expect(fs.existsSync(result.outputDatPath)).toBe(true);
-      expect(fs.existsSync(result.outputAiConfigPath)).toBe(true);
+      expect(result.outputDatExists).toBe(true);
+      expect(result.outputAiConfigExists).toBe(true);
 
       // Output files should have content
-      const datStats = fs.statSync(result.outputDatPath);
-      expect(datStats.size).toBeGreaterThan(0);
+      expect(result.datSize).toBeGreaterThan(0);
     }, 60000); // 60 second timeout per test
   });
 });
