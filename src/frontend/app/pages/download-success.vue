@@ -47,8 +47,7 @@
               <li>Locate the downloaded .zip file</li>
               <li>Extract the contents to your Age of Empires II mods folder:
                 <ul>
-                  <li><strong>Steam:</strong> <code>C:\Program Files (x86)\Steam\steamapps\common\AoE2DE\mods\local</code></li>
-                  <li><strong>Microsoft Store / Xbox:</strong> <code>C:\Users\{username}\Games\Age of Empires 2 DE\{userId}\mods</code></li>
+                  <li><strong>Steam:</strong> <code>C:\Users\[YourUsername]\Games\Age of Empires 2 DE\[YourID]\mods\local</code></li>
                 </ul>
               </li>
               <li>Launch Age of Empires II: Definitive Edition</li>
