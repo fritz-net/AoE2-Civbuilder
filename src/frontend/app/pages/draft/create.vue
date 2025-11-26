@@ -146,7 +146,7 @@ const router = useRouter()
 const rarityTexts = ['Ordinary', 'Distinguished', 'Superior', 'Epic', 'Legendary']
 
 const draftSettings = ref({
-  numPlayers: 1,
+  numPlayers: 2,
   rounds: 4,
   techTreePoints: 200,
   allowedRarities: [true, true, true, true, true],

@@ -58,7 +58,7 @@ test.describe('Draft Mode - Draft Creation Form', () => {
     const bonusesInput = page.locator('#bonusesPerPlayer');
     const techTreeInput = page.locator('#techTreePoints');
     
-    await expect(numPlayersInput).toHaveValue('1');
+    await expect(numPlayersInput).toHaveValue('2');
     await expect(bonusesInput).toHaveValue('4');
     await expect(techTreeInput).toHaveValue('200');
   });
