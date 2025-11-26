@@ -497,7 +497,8 @@ function renderFlag() {
     // Load and draw the actual symbol image
     // Symbol palette value is 1-indexed, but files are 0-indexed
     const symbolIndex = symbol - 1
-    const symbolPath = `/img/symbols/symbol_${symbolIndex}.png`
+    // Use /v2 base path for Nuxt app
+    const symbolPath = `/v2/img/symbols/symbol_${symbolIndex}.png`
     
     // Load symbol image
     const symbolImg = new Image()
