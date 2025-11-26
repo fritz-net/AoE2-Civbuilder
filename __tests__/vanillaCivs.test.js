@@ -18,7 +18,6 @@ const os = require('os');
 const { numBonuses, numBasicTechs, indexDictionary } = require('../process_mod/constants.js');
 
 describe('Vanilla Civs JSON Files', () => {
-  let testDir;
   const projectRoot = path.join(__dirname, '..');
   const createDataModPath = path.join(projectRoot, 'modding', 'build', 'create-data-mod');
   const vanillaCivsDir = path.join(projectRoot, 'public', 'vanillaFiles', 'vanillaCivs', 'VanillaJson');
@@ -33,18 +32,6 @@ describe('Vanilla Civs JSON Files', () => {
     // Check if C++ executable exists
     if (!fs.existsSync(createDataModPath)) {
       console.log('Skipping tests - C++ executable not built. Run: cd modding && ./scripts/build.sh');
-    }
-  });
-
-  beforeEach(() => {
-    // Create a temporary directory for test outputs
-    testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'civbuilder-vanilla-test-'));
-  });
-
-  afterEach(() => {
-    // Clean up test directory
-    if (fs.existsSync(testDir)) {
-      fs.rmSync(testDir, { recursive: true, force: true });
     }
   });
 
@@ -167,23 +154,27 @@ describe('Vanilla Civs JSON Files', () => {
       return { skipped: true };
     }
 
-    // Read and convert vanilla civ JSON to data.json format
-    const vanillaCivData = JSON.parse(fs.readFileSync(civFilePath, 'utf8'));
-    const dataJson = convertVanillaCivToDataJson(vanillaCivData);
+    // Create a temporary directory for this specific test
+    const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'civbuilder-vanilla-test-'));
     
-    // Write data.json to temp directory
-    const testDataPath = path.join(testDir, 'data.json');
-    fs.writeFileSync(testDataPath, JSON.stringify(dataJson, null, 2));
-    
-    // Output paths
-    const outputDatPath = path.join(testDir, 'empires2_x2_p1.dat');
-    const outputAiConfigPath = path.join(testDir, 'aiconfig.json');
+    try {
+      // Read and convert vanilla civ JSON to data.json format
+      const vanillaCivData = JSON.parse(fs.readFileSync(civFilePath, 'utf8'));
+      const dataJson = convertVanillaCivToDataJson(vanillaCivData);
+      
+      // Write data.json to temp directory
+      const testDataPath = path.join(testDir, 'data.json');
+      fs.writeFileSync(testDataPath, JSON.stringify(dataJson, null, 2));
+      
+      // Output paths
+      const outputDatPath = path.join(testDir, 'empires2_x2_p1.dat');
+      const outputAiConfigPath = path.join(testDir, 'aiconfig.json');
 
-    // Run create-data-mod
-    const args = [testDataPath, vanillaDatPath, outputDatPath, outputAiConfigPath];
+      // Run create-data-mod
+      const args = [testDataPath, vanillaDatPath, outputDatPath, outputAiConfigPath];
 
-    let stdout, stderr;
-    let exitCode = 0;
+      let stdout, stderr;
+      let exitCode = 0;
 
     try {
       stdout = execFileSync(createDataModPath, args, {
@@ -195,6 +186,11 @@ describe('Vanilla Civs JSON Files', () => {
       stderr = error.stderr || error.message;
       stdout = error.stdout || '';
       exitCode = error.status !== null ? error.status : (error.signal ? 139 : 1);
+    } finally {
+      // Clean up test directory
+      if (fs.existsSync(testDir)) {
+        fs.rmSync(testDir, { recursive: true, force: true });
+      }
     }
 
     return {

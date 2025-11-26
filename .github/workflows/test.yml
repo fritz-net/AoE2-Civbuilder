@@ -24,6 +24,14 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Cache system dependencies
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/test.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -57,6 +65,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Cache system dependencies
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/test.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
 
       - name: Install system dependencies
         run: |

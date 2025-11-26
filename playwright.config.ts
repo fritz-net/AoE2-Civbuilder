@@ -33,6 +33,12 @@ export default defineConfig({
     /* Screenshot on failure */
     screenshot: 'only-on-failure',
     
+    /* Action timeout - reduced from 30s to 15s */
+    actionTimeout: 15 * 1000,
+    
+    /* Navigation timeout - 15s */
+    navigationTimeout: 15 * 1000,
+    
     /* Use system Chromium if available (CI environment) */
     ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH && {
       launchOptions: {
