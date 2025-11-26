@@ -74,7 +74,7 @@
     <div v-show="currentStep === 1" class="step-content">
       <BonusSelectorGrid
         title="Civilization Bonuses"
-        subtitle="Select up to 6 bonuses for your civilization"
+        subtitle="Select up to 6 bonuses, each can be multiplied up to 255 times"
         bonus-type="civ"
         :bonuses="civBonuses"
         v-model="selectedCivBonuses"
@@ -106,7 +106,7 @@
     <div v-show="currentStep === 3" class="step-content">
       <BonusSelectorGrid
         title="Castle Age Unique Tech"
-        subtitle="Select one castle age unique technology"
+        subtitle="Select one technology, can be multiplied up to 255 times"
         bonus-type="castle"
         :bonuses="castleTechs"
         v-model="selectedCastleTech"
@@ -122,7 +122,7 @@
     <div v-show="currentStep === 4" class="step-content">
       <BonusSelectorGrid
         title="Imperial Age Unique Tech"
-        subtitle="Select one imperial age unique technology"
+        subtitle="Select one technology, can be multiplied up to 255 times"
         bonus-type="imp"
         :bonuses="impTechs"
         v-model="selectedImpTech"
@@ -138,7 +138,7 @@
     <div v-show="currentStep === 5" class="step-content">
       <BonusSelectorGrid
         title="Team Bonus"
-        subtitle="Select one team bonus"
+        subtitle="Select one bonus, can be multiplied up to 255 times"
         bonus-type="team"
         :bonuses="teamBonuses"
         v-model="selectedTeamBonus"
@@ -448,10 +448,13 @@ const canProceed = computed(() => {
 
 // Helper function to get unique unit name for review
 function getUniqueUnitName(): string {
-  if (selectedUniqueUnit.value.length === 0) return 'Not set'
-  const unitId = Array.isArray(selectedUniqueUnit.value[0]) 
-    ? selectedUniqueUnit.value[0][0] 
-    : selectedUniqueUnit.value[0]
+  if (!selectedUniqueUnit.value || selectedUniqueUnit.value.length === 0) return 'Not set'
+  const firstUnit = selectedUniqueUnit.value[0]
+  if (!firstUnit) return 'Not set'
+  const unitId = Array.isArray(firstUnit) 
+    ? firstUnit[0] 
+    : firstUnit
+  if (unitId === undefined || unitId === null) return 'Not set'
   const units = uniqueUnits.value
   const unit = units.find(u => u.id === unitId)
   return unit?.name || 'Unknown'
