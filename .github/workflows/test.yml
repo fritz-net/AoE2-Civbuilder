@@ -76,12 +76,9 @@ jobs:
           cd modding
           ./scripts/build.sh
 
-      - name: Install Playwright with system Chromium
+      - name: Configure Playwright to use system Chromium
         run: |
-          # Install system chromium and dependencies
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser chromium-codecs-ffmpeg
-          # Set environment to use system chromium
+          # Use system chromium instead of downloading Playwright's version
           echo "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1" >> $GITHUB_ENV
           echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser" >> $GITHUB_ENV
 
