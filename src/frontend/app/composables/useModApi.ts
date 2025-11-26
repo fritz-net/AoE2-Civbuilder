@@ -68,23 +68,10 @@ export async function createMod(
   const modifiers = options.modifiers || defaultModifiers
   
   try {
-    // Get the base URL for the API
-    // The Vue app is at /v2 or /{prefix}/v2, but the API is at / or /{prefix}
-    // We need to remove the /v2 suffix from the current path to get the API base
-    let apiPath = ''
-    
-    if (typeof window !== 'undefined') {
-      const pathname = window.location.pathname
-      
-      // Extract the base path by removing /v2 and anything after it
-      // Examples:
-      //   /v2/build -> '' (root API)
-      //   /civbuilder/v2/build -> /civbuilder (API at /civbuilder)
-      const v2Index = pathname.indexOf('/v2')
-      if (v2Index >= 0) {
-        apiPath = pathname.substring(0, v2Index)
-      }
-    }
+    // The API router is mounted at both / and /{prefix} on the server
+    // For the Vue UI (at /v2), we always use the root mount (/)
+    // This avoids needing to detect the prefix from the URL
+    const apiPath = ''
     
     // Create URL-encoded body (server expects this format, not FormData)
     const body = new URLSearchParams()
@@ -92,7 +79,7 @@ export async function createMod(
     body.append('presets', JSON.stringify(presets))
     body.append('modifiers', JSON.stringify(modifiers))
     
-    // Make the request - apiPath already has leading slash or is empty
+    // Make the request - apiPath is empty, so we use /create directly
     const response = await fetch(`${apiPath}/create`, {
       method: 'POST',
       headers: {
