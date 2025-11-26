@@ -4717,18 +4717,14 @@ void Civbuilder::createCivBonuses() {
 
     // disable farms
     this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_FARMS_MAKE_AVAIL)); // 102 = disable tech
-    // enable pastures + its techs
+    // disable mill techs (replaced by pasture techs which are enabled via techtree)
+    this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_HORSE_COLLAR)); // 102 = disable tech
+    this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_HEAVY_PLOW)); // 102 = disable tech
+    this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_CROP_ROTATION)); // 102 = disable tech
+    // enable pastures (pasture techs are enabled via techtree, not given for free)
     this->civBonuses[CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES] = {
-        TECH_C_BONUS_PASTURES,
-
-        // TODO tbd: maybe we should set them only via techtree? cause currently they are free tech points
-        TECH_TRANSHUMANCE, 
-        TECH_PASTORALISM,
-        TECH_DOMESTICATION
+        TECH_C_BONUS_PASTURES
     };
-    // TODO (do) we need to disable farm techs???
-    // TODO (de) pastures need mill as requirement??? - no - kithans can do it without mill too
-    //this->df->Techs[TECH_C_BONUS_PASTURES].RequiredTechs[2] = TECH_MILL_MAKE_AVAIL;
 
     // Shepherds and Herders generate +10% additional food
     this->civBonuses[CIV_BONUS_357_SHEPHERDS_AND_HERDERS_GENERATE_10_ADDITIONAL_FOOD] = {TECH_RESERVED_20};
