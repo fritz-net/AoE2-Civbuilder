@@ -167,8 +167,8 @@ const goHome = () => {
 }
 
 onMounted(async () => {
-  // Initialize socket first
-  initSocket()
+  // Initialize socket first (async - loads script)
+  await initSocket()
   
   // Setup listeners before loading so we can receive the gamestate
   setupSocketListeners()

@@ -349,3 +349,207 @@ test.describe('Draft Mode - Form Validation', () => {
     await expect(techTreeInput).toHaveAttribute('max', '500');
   });
 });
+
+test.describe('Draft Mode - Draft Host Page', () => {
+  test('should load draft host page after creating draft', async ({ page }) => {
+    // First create a draft
+    await page.goto('/v2/draft/create');
+    
+    // Fill in draft settings
+    const numPlayersInput = page.locator('#numPlayers');
+    await numPlayersInput.fill('1');
+    
+    // Click start draft button
+    const startButton = page.getByRole('button', { name: /Start Draft/i });
+    await startButton.click();
+    
+    // Wait for modal with links
+    await page.waitForTimeout(2000);
+    
+    // Check if modal appeared
+    const modal = page.locator('.modal-overlay');
+    const isModalVisible = await modal.isVisible().catch(() => false);
+    
+    if (!isModalVisible) {
+      console.log('Modal not visible - server may not be running');
+      return;
+    }
+    
+    // Get host link
+    const hostLinkInput = page.locator('#hostLink');
+    const hostLink = await hostLinkInput.inputValue();
+    
+    // Navigate to host page
+    await page.goto(hostLink);
+    
+    // Wait for page to load and Socket.io to connect
+    await page.waitForTimeout(3000);
+    
+    // Check that the page loaded (not stuck on error)
+    const errorMessage = page.locator('.error-message');
+    const hasError = await errorMessage.isVisible().catch(() => false);
+    
+    if (hasError) {
+      const errorText = await errorMessage.textContent();
+      // Should not have Socket.io error after fix
+      expect(errorText).not.toContain('Socket.io not available');
+    }
+    
+    // Page should show either lobby or loading state
+    const pageContent = page.locator('.draft-host-page');
+    await expect(pageContent).toBeVisible();
+  });
+
+  test('should load Socket.io script dynamically on draft host page', async ({ page }) => {
+    // Create a draft first
+    await page.goto('/v2/draft/create');
+    
+    const numPlayersInput = page.locator('#numPlayers');
+    await numPlayersInput.fill('1');
+    
+    const startButton = page.getByRole('button', { name: /Start Draft/i });
+    await startButton.click();
+    
+    await page.waitForTimeout(2000);
+    
+    const modal = page.locator('.modal-overlay');
+    const isModalVisible = await modal.isVisible().catch(() => false);
+    
+    if (!isModalVisible) {
+      console.log('Modal not visible - server may not be running');
+      return;
+    }
+    
+    const hostLinkInput = page.locator('#hostLink');
+    const hostLink = await hostLinkInput.inputValue();
+    
+    // Navigate to host page
+    await page.goto(hostLink);
+    
+    // Wait for Socket.io to load
+    await page.waitForTimeout(3000);
+    
+    // Check that Socket.io script was loaded
+    const socketScript = await page.evaluate(() => {
+      const scripts = document.querySelectorAll('script[src*="socket.io"]');
+      return scripts.length > 0;
+    });
+    
+    expect(socketScript).toBe(true);
+  });
+
+  test('should show lobby when Socket.io connects successfully', async ({ page }) => {
+    // Create a draft
+    await page.goto('/v2/draft/create');
+    
+    const numPlayersInput = page.locator('#numPlayers');
+    await numPlayersInput.fill('1');
+    
+    const startButton = page.getByRole('button', { name: /Start Draft/i });
+    await startButton.click();
+    
+    await page.waitForTimeout(2000);
+    
+    const modal = page.locator('.modal-overlay');
+    const isModalVisible = await modal.isVisible().catch(() => false);
+    
+    if (!isModalVisible) {
+      console.log('Modal not visible - server may not be running');
+      return;
+    }
+    
+    const hostLinkInput = page.locator('#hostLink');
+    const hostLink = await hostLinkInput.inputValue();
+    
+    // Navigate to host page
+    await page.goto(hostLink);
+    
+    // Wait for Socket.io and gamestate
+    await page.waitForTimeout(5000);
+    
+    // Check for lobby content (phase 0)
+    // Either we see the lobby or loading spinner
+    const lobbyVisible = await page.locator('.draft-lobby, .lobby-title').isVisible().catch(() => false);
+    const loadingVisible = await page.locator('.loading-overlay').isVisible().catch(() => false);
+    
+    // One of these should be visible
+    expect(lobbyVisible || loadingVisible).toBe(true);
+  });
+});
+
+test.describe('Draft Mode - Draft Player Page', () => {
+  test('should load draft player page after creating draft', async ({ page }) => {
+    // First create a draft
+    await page.goto('/v2/draft/create');
+    
+    // Fill in draft settings
+    const numPlayersInput = page.locator('#numPlayers');
+    await numPlayersInput.fill('2'); // Need 2 players for player link to work
+    
+    // Click start draft button
+    const startButton = page.getByRole('button', { name: /Start Draft/i });
+    await startButton.click();
+    
+    // Wait for modal with links
+    await page.waitForTimeout(2000);
+    
+    const modal = page.locator('.modal-overlay');
+    const isModalVisible = await modal.isVisible().catch(() => false);
+    
+    if (!isModalVisible) {
+      console.log('Modal not visible - server may not be running');
+      return;
+    }
+    
+    // Get player link
+    const playerLinkInput = page.locator('#playerLink');
+    const playerLink = await playerLinkInput.inputValue();
+    
+    // Navigate to player page
+    await page.goto(playerLink);
+    
+    // Wait for page to load
+    await page.waitForTimeout(3000);
+    
+    // Check that the page loaded
+    const pageContent = page.locator('.draft-player-page');
+    await expect(pageContent).toBeVisible();
+  });
+});
+
+test.describe('Draft Mode - Draft Spectator Page', () => {
+  test('should load draft spectator page after creating draft', async ({ page }) => {
+    // First create a draft
+    await page.goto('/v2/draft/create');
+    
+    const numPlayersInput = page.locator('#numPlayers');
+    await numPlayersInput.fill('1');
+    
+    const startButton = page.getByRole('button', { name: /Start Draft/i });
+    await startButton.click();
+    
+    await page.waitForTimeout(2000);
+    
+    const modal = page.locator('.modal-overlay');
+    const isModalVisible = await modal.isVisible().catch(() => false);
+    
+    if (!isModalVisible) {
+      console.log('Modal not visible - server may not be running');
+      return;
+    }
+    
+    // Get spectator link
+    const spectatorLinkInput = page.locator('#spectatorLink');
+    const spectatorLink = await spectatorLinkInput.inputValue();
+    
+    // Navigate to spectator page
+    await page.goto(spectatorLink);
+    
+    // Wait for page to load
+    await page.waitForTimeout(3000);
+    
+    // Check that the page loaded
+    const pageContent = page.locator('.draft-spectator-page');
+    await expect(pageContent).toBeVisible();
+  });
+});

@@ -109,19 +109,57 @@ export const useDraft = () => {
     return null
   }
 
+  // Load Socket.io script dynamically
+  const loadSocketScript = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      // @ts-ignore
+      if (typeof io !== 'undefined') {
+        resolve()
+        return
+      }
+      
+      // Check if script already exists
+      if (document.querySelector('script[src="/socket.io/socket.io.js"]')) {
+        // Wait for it to load
+        const checkIo = setInterval(() => {
+          // @ts-ignore
+          if (typeof io !== 'undefined') {
+            clearInterval(checkIo)
+            resolve()
+          }
+        }, 50)
+        return
+      }
+      
+      // Create and load script
+      const script = document.createElement('script')
+      script.src = '/socket.io/socket.io.js'
+      script.async = true
+      script.onload = () => resolve()
+      script.onerror = () => reject(new Error('Failed to load Socket.io'))
+      document.head.appendChild(script)
+    })
+  }
+
   // Initialize socket connection
-  const initSocket = () => {
+  const initSocket = async () => {
     if (typeof window === 'undefined') return
     
-    // Socket.io should be available from the server
-    // @ts-ignore
-    if (typeof io !== 'undefined') {
+    try {
+      // Load Socket.io script first
+      await loadSocketScript()
+      
       // @ts-ignore
-      socket.value = io()
-      isConnected.value = true
-      console.log('Socket.io connected')
-    } else {
-      console.error('Socket.io not available')
+      if (typeof io !== 'undefined') {
+        // @ts-ignore
+        socket.value = io()
+        isConnected.value = true
+        console.log('Socket.io connected')
+      } else {
+        throw new Error('Socket.io failed to initialize')
+      }
+    } catch (err) {
+      console.error('Socket.io not available:', err)
       error.value = 'Socket.io not available'
     }
   }
