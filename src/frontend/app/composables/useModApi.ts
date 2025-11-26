@@ -40,8 +40,9 @@ export async function createMod(
   const seed = options.seed || generateSeed()
   
   // Format civs into the presets format expected by the server
+  // The server expects { presets: [...civs] }
   const presets = {
-    civs: civs.map(civ => ({
+    presets: civs.map(civ => ({
       alias: civ.alias,
       description: civ.description,
       flag_palette: civ.flag_palette,
@@ -60,10 +61,17 @@ export async function createMod(
   formData.append('seed', seed)
   formData.append('presets', JSON.stringify(presets))
   
-  // Add modifiers if provided
-  if (options.modifiers) {
-    formData.append('modifiers', JSON.stringify(options.modifiers))
+  // Add modifiers - server expects this even if empty
+  const defaultModifiers = {
+    randomCosts: false,
+    hp: 1.0,
+    speed: 1.0,
+    blind: false,
+    infinity: false,
+    building: 1.0
   }
+  const modifiers = options.modifiers || defaultModifiers
+  formData.append('modifiers', JSON.stringify(modifiers))
   
   try {
     // Get the base URL for the API
