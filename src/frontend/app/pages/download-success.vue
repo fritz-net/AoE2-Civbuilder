@@ -48,12 +48,18 @@
               <li>Extract the contents to your Age of Empires II mods folder:
                 <ul>
                   <li><strong>Steam:</strong> <code>C:\Users\[YourUsername]\Games\Age of Empires 2 DE\[YourID]\mods\local</code></li>
+                  <li>Both Zips (<code>*-data.zip</code>, <code>*-ui.zip</code>) should then also be extracted so you end up with:
+                    <ul>
+                      <li><code>[ModName]-data</code> folder</li>
+                      <li><code>[ModName]-ui</code> folder</li>
+                    </ul>
+                  </li>
                 </ul>
               </li>
               <li>Launch Age of Empires II: Definitive Edition</li>
               <li>Your mod is enabled by default</li>
-              <li>On game start, select the data mod to use</li>
               <li>Make sure only one custom civ UI mod is enabled at a time</li>
+              <li>On game start, select the data mod to use</li>
             </ol>
             
             <h3>Need Help?</h3>

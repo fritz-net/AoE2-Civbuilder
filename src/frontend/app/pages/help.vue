@@ -24,9 +24,11 @@
           ></iframe>
         </div>
       </div>
+
+      <!-- TODO single player section -->
       
       <div class="instructions-section">
-        <h2>Publication Instructions</h2>
+        <h2>Publication Instructions (only needed for multiplayer!)</h2>
         <ol class="instructions-list">
           <li>
             Click the Download Button ("Random Civilizations" on homepage, or "Download Mod" after completing a draft) and extract the .zip file
