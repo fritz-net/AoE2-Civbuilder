@@ -1,0 +1,378 @@
+<template>
+  <div class="draft-board">
+    <!-- Header -->
+    <div class="board-header">
+      <div class="phase-info">
+        <h1 class="phase-title">{{ phaseTitle }}</h1>
+        <div class="round-info">Round {{ roundNumber }}</div>
+      </div>
+      
+      <!-- Timer (if enabled) -->
+      <TimerCountdown
+        v-if="timerDuration > 0"
+        :duration="timerDuration"
+        :auto-start="isMyTurn"
+        :show-progress="true"
+        @complete="handleTimerComplete"
+      />
+    </div>
+
+    <!-- Main game area -->
+    <div class="game-container">
+      <!-- Players sidebar -->
+      <div class="players-sidebar">
+        <div
+          v-for="(player, index) in orderedPlayers"
+          :key="player.index"
+          class="player-card"
+          :class="{ 'player-active': player.index === currentPlayerIndex }"
+          @click="$emit('view-player', player.index)"
+        >
+          <div class="player-flag">
+            <canvas
+              :ref="(el) => setFlagCanvas(el as HTMLCanvasElement, player.index)"
+              :width="85"
+              :height="85"
+              class="flag-canvas"
+            ></canvas>
+          </div>
+          <div class="player-info">
+            <div class="player-civ-name">{{ player.alias || '?' }}</div>
+            <div class="player-name">{{ player.name }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cards board -->
+      <div class="cards-board">
+        <div class="cards-container">
+          <DraftCard
+            v-for="(card, index) in displayCards"
+            :key="index"
+            :card="card"
+            :size="cardSize"
+            :margin="cardMargin"
+            :selectable="isMyTurn && !card.hidden"
+            :hidden="card.hidden"
+            @select="handleCardSelect"
+            @hover="handleCardHover"
+            @unhover="handleCardUnhover"
+          />
+        </div>
+
+        <!-- Help box for card details -->
+        <div v-show="hoveredCard" class="help-box">
+          <div class="help-content">
+            <slot name="card-details" :card="hoveredCard">
+              <div v-if="hoveredCard">
+                <h3>{{ hoveredCard.name }}</h3>
+                <p>{{ hoveredCard.description }}</p>
+              </div>
+            </slot>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import DraftCard from './DraftCard.vue'
+import TimerCountdown from './TimerCountdown.vue'
+import type { DraftPlayer } from '~/composables/useDraft'
+
+interface DisplayCard {
+  id: number
+  type: number
+  rarity?: number
+  name?: string
+  description?: string
+  hidden?: boolean
+}
+
+const props = withDefaults(defineProps<{
+  phaseTitle: string
+  roundNumber: number
+  players: DraftPlayer[]
+  playerOrder: number[]
+  currentPlayerIndex: number
+  cards: DisplayCard[]
+  isMyTurn: boolean
+  timerDuration?: number
+}>(), {
+  timerDuration: 0,
+})
+
+const emit = defineEmits<{
+  (e: 'select-card', card: DisplayCard): void
+  (e: 'view-player', playerIndex: number): void
+  (e: 'timer-complete'): void
+}>()
+
+const hoveredCard = ref<DisplayCard | null>(null)
+const flagCanvasRefs = ref<Map<number, HTMLCanvasElement>>(new Map())
+
+// Ordered players based on draft order
+const orderedPlayers = computed(() => {
+  return props.playerOrder.map((index) => ({
+    ...props.players[index],
+    index,
+  }))
+})
+
+// Display cards with computed properties
+const displayCards = computed(() => {
+  return props.cards.map(card => ({
+    ...card,
+    hidden: card.id === -1 || card.hidden,
+  }))
+})
+
+// Card sizing based on number of cards
+const cardSize = computed(() => {
+  const count = props.cards.length
+  if (count < 9) return 16
+  if (count < 13) return 12
+  if (count < 15) return 11
+  if (count < 19) return 10
+  if (count < 25) return 9
+  if (count < 33) return 8
+  if (count < 45) return 7
+  return 6
+})
+
+const cardMargin = computed(() => {
+  const count = props.cards.length
+  if (count < 19) return 1
+  if (count < 33) return 0.5
+  return 0.3
+})
+
+const setFlagCanvas = (canvas: HTMLCanvasElement | null, playerIndex: number) => {
+  if (canvas) {
+    flagCanvasRefs.value.set(playerIndex, canvas)
+    // TODO: Draw flag using player's flag_palette
+    // This would integrate with the flag drawing logic from FlagCreator
+  }
+}
+
+const handleCardSelect = (card: DisplayCard) => {
+  if (props.isMyTurn && !card.hidden) {
+    emit('select-card', card)
+  }
+}
+
+const handleCardHover = (card: DisplayCard) => {
+  hoveredCard.value = card
+}
+
+const handleCardUnhover = () => {
+  hoveredCard.value = null
+}
+
+const handleTimerComplete = () => {
+  emit('timer-complete')
+}
+
+onMounted(() => {
+  // Initialize any necessary setup
+})
+</script>
+
+<style scoped>
+.draft-board {
+  width: 100%;
+  min-height: 100vh;
+  background: url('/img/draftbackground.jpg') center/cover;
+  display: flex;
+  flex-direction: column;
+}
+
+.board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: rgba(0, 0, 0, 0.7);
+  border-bottom: 3px solid hsl(52, 100%, 50%);
+}
+
+.phase-info {
+  flex: 1;
+}
+
+.phase-title {
+  margin: 0;
+  font-size: 2.5rem;
+  color: hsl(52, 100%, 50%);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.round-info {
+  font-size: 1.2rem;
+  color: #f0e6d2;
+  margin-top: 0.5rem;
+}
+
+.game-container {
+  flex: 1;
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.players-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.player-card {
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border: 2px solid rgba(255, 204, 0, 0.5);
+  border-radius: 8px;
+  padding: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.player-card:hover {
+  border-color: hsl(52, 100%, 50%);
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.4);
+  transform: translateX(5px);
+}
+
+.player-active {
+  border-color: rgb(0, 200, 0);
+  border-width: 3px;
+  box-shadow: 0 0 16px rgba(0, 200, 0, 0.6);
+}
+
+.player-flag {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.flag-canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 204, 0, 0.3);
+}
+
+.player-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.player-civ-name {
+  color: hsl(52, 100%, 50%);
+  font-weight: bold;
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-name {
+  color: #f0e6d2;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cards-board {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+}
+
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.help-box {
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.95), rgba(101, 67, 33, 0.95));
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: auto;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.help-content {
+  color: #f0e6d2;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.help-content h3 {
+  color: hsl(52, 100%, 50%);
+  margin: 0 0 0.5rem 0;
+}
+
+.help-content p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 1024px) {
+  .game-container {
+    flex-direction: column;
+  }
+
+  .players-sidebar {
+    flex-direction: row;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .player-card {
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .board-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .phase-title {
+    font-size: 1.8rem;
+  }
+
+  .round-info {
+    font-size: 1rem;
+  }
+
+  .player-flag {
+    width: 50px;
+    height: 50px;
+  }
+
+  .cards-container {
+    padding: 0.5rem;
+  }
+}
+</style>
