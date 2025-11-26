@@ -243,7 +243,7 @@ async function handleCreateMod() {
 
 .upload-section {
   background: rgba(139, 69, 19, 0.75);
-  border: 2px solid hsl(52, 100%, 50%);
+  border: 3px solid hsl(52, 100%, 50%);
   padding: 2rem;
   border-radius: 8px;
   text-align: center;
@@ -295,8 +295,7 @@ async function handleCreateMod() {
   background: rgba(160, 82, 45, 0.85);
   border-color: hsl(52, 100%, 60%);
   border-style: dashed;
-  border-width: 3px;
-  /* Removed transform: scale(1.02) to prevent layout shift */
+  /* Keep border-width at 3px - same as default to prevent shift */
   box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
   transition: all 0.2s ease;
 }
