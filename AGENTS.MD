@@ -54,6 +54,7 @@ The project has two parallel frontends:
 **E2E Tests for Vue/Nuxt UI**
 - Not yet implemented
 - Future location: likely `src/frontend/tests/` or `__tests__/e2e/`
+- should use playwright
 
 ### Tools and Utilities
 
@@ -108,6 +109,8 @@ branch name should start with "agent/123-description-of-task" where 123 is the c
 
 ## PR Handling
 - if UI was changed/related add screenshots after each session as PR comment; if importend or final add to main PR content too
+  - use proper markdown image embedding
+  - check if images actually show what we expect them to show (no blank pages, wrong position of elements, wrong colors, dark mode not working, ...)
   - evaluate if url pattern is correct:
     - wrong: https://github.com/user-attachments/assets/ribbon1-classic.png
     - good: https://github.com/user-attachments/assets/7091a86c-8cbf-4970-bccd-1c3fee4780fe
