@@ -21,8 +21,8 @@ describe('Changelog Parser', () => {
 
   // Legacy UI parser (from public/js/client.js)
   function parseChangelogMarkdownLegacy(markdown) {
-    const VERSION_PATTERN_OLD = /^## \[([^\]]+)\] - (\d{4}-\d{2}-\d{2})/;
-    const VERSION_PATTERN_NEW = /^## \[([^\]]+)\]\([^)]+\) \((\d{4}-\d{2}-\d{2})\)/;
+    // Matches both: ## [version](link) (YYYY-MM-DD) and ## [version] (YYYY-MM-DD)
+    const VERSION_PATTERN = /^## \[([^\]]+)\](?:\([^)]+\))? \((\d{4}-\d{2}-\d{2})\)/;
     const VERSION_PATTERN_UNRELEASED = /^## \[Unreleased\]/i;
     const SECTION_PATTERN = /^### /;
     const BULLET_PATTERN = /^- /;
@@ -53,10 +53,7 @@ describe('Changelog Parser', () => {
         continue;
       }
       
-      let versionMatch = line.match(VERSION_PATTERN_NEW);
-      if (!versionMatch) {
-        versionMatch = line.match(VERSION_PATTERN_OLD);
-      }
+      const versionMatch = line.match(VERSION_PATTERN);
       
       if (versionMatch) {
         inUnreleased = false;
@@ -98,8 +95,8 @@ describe('Changelog Parser', () => {
 
   // Vue UI parser (from src/frontend/app/pages/updates.vue)
   function parseChangelogMarkdownVue(markdown) {
-    const VERSION_PATTERN_OLD = /^## \[?([^\]]+)\]? - (\d{4}-\d{2}-\d{2})/;
-    const VERSION_PATTERN_NEW = /^## \[([^\]]+)\]\([^)]+\) \((\d{4}-\d{2}-\d{2})\)/;
+    // Matches both: ## [version](link) (YYYY-MM-DD) and ## [version] (YYYY-MM-DD)
+    const VERSION_PATTERN = /^## \[([^\]]+)\](?:\([^)]+\))? \((\d{4}-\d{2}-\d{2})\)/;
     const VERSION_PATTERN_UNRELEASED = /^## \[Unreleased\]/i;
     const SECTION_PATTERN = /^### (.+)/;
     const BULLET_PATTERN = /^[-*] /;
@@ -134,10 +131,7 @@ describe('Changelog Parser', () => {
         continue;
       }
       
-      let versionMatch = line.match(VERSION_PATTERN_NEW);
-      if (!versionMatch) {
-        versionMatch = line.match(VERSION_PATTERN_OLD);
-      }
+      const versionMatch = line.match(VERSION_PATTERN);
       
       if (versionMatch) {
         inUnreleased = false;
@@ -221,7 +215,7 @@ describe('Changelog Parser', () => {
     });
 
     test('parses old format', () => {
-      const markdown = `## [0.1.0] - 2025-05-02
+      const markdown = `## [0.1.0] (2025-05-02)
 
 ### Added
 - Updated website with 3K DLC content`;
@@ -239,7 +233,7 @@ describe('Changelog Parser', () => {
 ### Added
 - Something new
 
-## [1.0.0] - 2024-01-01
+## [1.0.0] (2024-01-01)
 
 ### Added
 - Released feature`;
@@ -270,7 +264,7 @@ describe('Changelog Parser', () => {
     });
 
     test('parses old format', () => {
-      const markdown = `## [0.1.0] - 2025-05-02
+      const markdown = `## [0.1.0] (2025-05-02)
 
 ### Added
 - Updated website with 3K DLC content`;
@@ -288,7 +282,7 @@ describe('Changelog Parser', () => {
 ### Added
 - Something new
 
-## [1.0.0] - 2024-01-01
+## [1.0.0] (2024-01-01)
 
 ### Added
 - Released feature`;

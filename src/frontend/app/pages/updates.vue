@@ -48,8 +48,8 @@ function compareVersion(v1: string, v2: string): number {
 
 // Helper function to parse changelog markdown and convert to HTML
 function parseChangelogMarkdown(markdown: string): string {
-  const VERSION_PATTERN_OLD = /^## \[?([^\]]+)\]? - (\d{4}-\d{2}-\d{2})/
-  const VERSION_PATTERN_NEW = /^## \[([^\]]+)\]\([^)]+\) \((\d{4}-\d{2}-\d{2})\)/
+  // Matches both: ## [version](link) (YYYY-MM-DD) and ## [version] (YYYY-MM-DD)
+  const VERSION_PATTERN = /^## \[([^\]]+)\](?:\([^)]+\))? \((\d{4}-\d{2}-\d{2})\)/
   const VERSION_PATTERN_UNRELEASED = /^## \[Unreleased\]/i
   const SECTION_PATTERN = /^### (.+)/
   const BULLET_PATTERN = /^[-*] /
@@ -85,13 +85,8 @@ function parseChangelogMarkdown(markdown: string): string {
       continue
     }
     
-    // Match version headers: both old and new formats
-    // Old format: ## [version] - YYYY-MM-DD
-    // New format: ## [version](link) (YYYY-MM-DD)
-    let versionMatch = line.match(VERSION_PATTERN_NEW)
-    if (!versionMatch) {
-      versionMatch = line.match(VERSION_PATTERN_OLD)
-    }
+    // Match version headers: ## [version](link) (YYYY-MM-DD) or ## [version] (YYYY-MM-DD)
+    const versionMatch = line.match(VERSION_PATTERN)
     
     if (versionMatch) {
       inUnreleased = false
