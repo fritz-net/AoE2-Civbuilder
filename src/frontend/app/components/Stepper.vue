@@ -11,7 +11,7 @@
           :class="{
             'step-active': currentStep === index,
             'step-completed': currentStep > index,
-            'step-clickable': allowNavigation && index <= maxReachedStep
+            'step-clickable': isStepAccessible(index)
           }"
           @click="goToStep(index)"
         >
@@ -38,8 +38,12 @@ const props = withDefaults(defineProps<{
   steps: string[]
   currentStep: number
   allowNavigation?: boolean
+  canProceedToNext?: boolean
+  accessibleSteps?: number[]
 }>(), {
-  allowNavigation: true
+  allowNavigation: true,
+  canProceedToNext: false,
+  accessibleSteps: () => []
 })
 
 const emit = defineEmits<{
@@ -56,8 +60,34 @@ watch(() => props.currentStep, (newStep) => {
   }
 })
 
+// Update maxReachedStep when accessible steps change (for data restore)
+watch(() => props.accessibleSteps, (newAccessibleSteps) => {
+  if (newAccessibleSteps && newAccessibleSteps.length > 0) {
+    const maxAccessible = Math.max(...newAccessibleSteps)
+    if (maxAccessible > maxReachedStep.value) {
+      maxReachedStep.value = maxAccessible
+    }
+  }
+}, { immediate: true })
+
+// Check if a step is accessible
+function isStepAccessible(index: number): boolean {
+  if (!props.allowNavigation) return false
+  
+  // Always allow going back to previous steps
+  if (index <= maxReachedStep.value) return true
+  
+  // Allow clicking on next step if canProceedToNext is true
+  if (index === props.currentStep + 1 && props.canProceedToNext) return true
+  
+  // Allow clicking on steps marked as accessible
+  if (props.accessibleSteps && props.accessibleSteps.includes(index)) return true
+  
+  return false
+}
+
 function goToStep(index: number) {
-  if (props.allowNavigation && index <= maxReachedStep.value) {
+  if (isStepAccessible(index)) {
     emit('update:currentStep', index)
   }
 }
