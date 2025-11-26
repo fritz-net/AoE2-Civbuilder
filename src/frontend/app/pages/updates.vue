@@ -48,8 +48,9 @@ function compareVersion(v1: string, v2: string): number {
 
 // Helper function to parse changelog markdown and convert to HTML
 function parseChangelogMarkdown(markdown: string): string {
-  const VERSION_PATTERN = /^## \[?([^\]]+)\]? - (\d{4}-\d{2}-\d{2})/
-  const VERSION_PATTERN_ALT = /^## ([0-9.]+) \((\d{4}-\d{2}-\d{2})\)/
+  // Matches both: ## [version](link) (YYYY-MM-DD) and ## [version] (YYYY-MM-DD)
+  const VERSION_PATTERN = /^## \[([^\]]+)\](?:\([^)]+\))? \((\d{4}-\d{2}-\d{2})\)/
+  const VERSION_PATTERN_UNRELEASED = /^## \[Unreleased\]/i
   const SECTION_PATTERN = /^### (.+)/
   const BULLET_PATTERN = /^[-*] /
   const SKIP_PATTERNS = [
@@ -63,6 +64,7 @@ function parseChangelogMarkdown(markdown: string): string {
   let inList = false
   let currentSection = ''
   let skipSection = false
+  let inUnreleased = false
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim()
@@ -77,24 +79,23 @@ function parseChangelogMarkdown(markdown: string): string {
       continue
     }
     
-    // Match version headers
-    let versionMatch = line.match(VERSION_PATTERN)
-    if (!versionMatch) {
-      versionMatch = line.match(VERSION_PATTERN_ALT)
+    // Check for Unreleased section
+    if (VERSION_PATTERN_UNRELEASED.test(line)) {
+      inUnreleased = true
+      continue
     }
     
+    // Match version headers: ## [version](link) (YYYY-MM-DD) or ## [version] (YYYY-MM-DD)
+    const versionMatch = line.match(VERSION_PATTERN)
+    
     if (versionMatch) {
+      inUnreleased = false
       if (inList) {
         html += '<br>'
         inList = false
       }
       const version = versionMatch[1]
       const date = versionMatch[2]
-      
-      // Skip "Unreleased" versions
-      if (version.toLowerCase() === 'unreleased') {
-        continue
-      }
       
       // Reset section state
       currentSection = ''
@@ -108,6 +109,11 @@ function parseChangelogMarkdown(markdown: string): string {
       } else {
         html += `<div class="version-header"><span class="version-date">${date}</span> - <span class="version-number">v${version}</span></div>`
       }
+      continue
+    }
+    
+    // Skip content in Unreleased section
+    if (inUnreleased) {
       continue
     }
     
