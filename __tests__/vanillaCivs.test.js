@@ -205,9 +205,9 @@ describe('Vanilla Civs JSON Files', () => {
   }
 
   // Generate a test case for each vanilla civ JSON file
-  // Use describe.each with test.concurrent to run tests in parallel
+  // Run sequentially since C++ backend is single-threaded
   describe.each(vanillaCivFiles)('Vanilla Civ: %s', (civFileName) => {
-    test.concurrent(`should successfully process ${civFileName}`, () => {
+    test(`should successfully process ${civFileName}`, () => {
       const result = testVanillaCiv(civFileName);
       
       // Skip if executable not built
