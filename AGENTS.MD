@@ -104,6 +104,20 @@ while scope is optional
 
 branch name should start with "agent/123-description-of-task" where 123 is the current PR id
 
+# Agent Workflow
+
+## PR Handling
+- if UI was changed/related add screenshots after each session as PR comment; if importend or final add to main PR content too
+  - evaluate if url pattern is correct:
+    - wrong: https://github.com/user-attachments/assets/ribbon1-classic.png
+    - good: https://github.com/user-attachments/assets/7091a86c-8cbf-4970-bccd-1c3fee4780fe
+    - good: https://private-user-images.githubusercontent.com/122795841/518943158-75803498-1b92-4fce-9b8e-75e68400169c.png?jwt=...token... # gets replaced from former link
+- PR title should follow convetional commit style
+
+## git usage
+- create commits after each step/task
+- commit msg should follow conventional commit style
+
 ## Ending a Task/Conversation/Session
 - at the end scan similar files and evaluate if there is similar/duplicated code;
   - refactor those BUT only if it is safe and minimal
