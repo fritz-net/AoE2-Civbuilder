@@ -3,7 +3,8 @@
     <CivBuilder
       ref="civBuilderRef"
       :initial-config="initialConfig"
-      next-button-text="Create Civilization"
+      :next-button-text="isCreating ? 'Creating Mod...' : 'Create Mod'"
+      :is-loading="isCreating"
       @next="handleNext"
       @download="handleDownload"
       @reset="handleReset"
@@ -14,9 +15,11 @@
 
 <script setup lang="ts">
 import type { CivConfig } from '~/composables/useCivData'
+import { useModApi } from '~/composables/useModApi'
 
 const router = useRouter()
 const civBuilderRef = ref<{ civConfig: CivConfig } | null>(null)
+const { isCreating, error, createMod } = useModApi()
 
 const initialConfig = ref<Partial<CivConfig>>({})
 
@@ -39,9 +42,16 @@ onBeforeRouteLeave((to, from, next) => {
   next()
 })
 
-function handleNext(config: CivConfig) {
-  console.log('Civ config:', config)
-  alert(`Civilization "${config.alias}" created successfully!\n\nFull mod creation will be available soon.`)
+async function handleNext(config: CivConfig) {
+  console.log('Creating mod for civ config:', config)
+  
+  try {
+    await createMod([config])
+    alert(`Civilization "${config.alias}" mod created successfully!\n\nYour download should start automatically.`)
+  } catch (err) {
+    console.error('Error creating mod:', err)
+    alert(`Failed to create mod: ${error.value || 'Unknown error'}`)
+  }
 }
 
 function handleDownload(config: CivConfig) {
