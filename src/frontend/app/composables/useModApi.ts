@@ -69,24 +69,20 @@ export async function createMod(
   
   try {
     // Get the base URL for the API
-    // The API is served at the root path with a possible subdirectory prefix
-    // For example, if the site is at http://localhost:4000/civbuilder, the API is at /civbuilder/create
-    // But the Vue app is always at /v2, so we need to figure out the correct base path
-    let baseUrl = ''
+    // The Vue app is at /v2 or /{prefix}/v2, but the API is at / or /{prefix}
+    // We need to remove the /v2 suffix from the current path to get the API base
+    let apiPath = ''
     
     if (typeof window !== 'undefined') {
-      // In production/development, detect the correct base URL
-      // If we're at /v2, the API is at the parent level
-      const origin = window.location.origin
       const pathname = window.location.pathname
       
-      // If pathname starts with /v2, we need to remove it to get the API base
-      if (pathname.startsWith('/v2')) {
-        // Check if there's a prefix before /v2 (e.g., /civbuilder/v2)
-        const match = pathname.match(/^(.*?)\/v2/)
-        baseUrl = origin + (match ? match[1] : '')
-      } else {
-        baseUrl = origin
+      // Extract the base path by removing /v2 and anything after it
+      // Examples:
+      //   /v2/build -> '' (root API)
+      //   /civbuilder/v2/build -> /civbuilder (API at /civbuilder)
+      const v2Index = pathname.indexOf('/v2')
+      if (v2Index >= 0) {
+        apiPath = pathname.substring(0, v2Index)
       }
     }
     
@@ -96,8 +92,8 @@ export async function createMod(
     body.append('presets', JSON.stringify(presets))
     body.append('modifiers', JSON.stringify(modifiers))
     
-    // Make the request
-    const response = await fetch(`${baseUrl}/create`, {
+    // Make the request - apiPath already has leading slash or is empty
+    const response = await fetch(`${apiPath}/create`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
