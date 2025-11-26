@@ -628,6 +628,8 @@ function handleReset() {
   Object.assign(civConfig, defaults)
   selectedCivBonuses.value = []
   selectedUniqueUnit.value = []
+  selectedCastleTech.value = []
+  selectedImpTech.value = []
   selectedTeamBonus.value = []
   techtreePointsRemaining.value = techtreePoints.value
   currentStep.value = 0

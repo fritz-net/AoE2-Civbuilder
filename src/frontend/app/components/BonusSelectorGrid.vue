@@ -177,7 +177,7 @@
             :frame-url="getCardFrameUrl(card)"
             :edition-url="getCardEditionUrl(card)"
             :selected="false"
-            :disabled="isMaxReached && mode === 'multi'"
+            :disabled="isMaxUniqueReached && mode === 'multi'"
             :size="cardSize"
             :show-edition="showEditionBadge"
             @toggle="toggleCard(card.id)"
