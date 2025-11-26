@@ -3,7 +3,9 @@
 // Helper function to parse changelog markdown and convert to HTML
 function parseChangelogMarkdown(markdown) {
 	// Regex patterns for changelog parsing
-	const VERSION_PATTERN = /^## \[([^\]]+)\] - (\d{4}-\d{2}-\d{2})/;
+	const VERSION_PATTERN_OLD = /^## \[([^\]]+)\] - (\d{4}-\d{2}-\d{2})/;
+	const VERSION_PATTERN_NEW = /^## \[([^\]]+)\]\([^)]+\) \((\d{4}-\d{2}-\d{2})\)/;
+	const VERSION_PATTERN_UNRELEASED = /^## \[Unreleased\]/i;
 	const SECTION_PATTERN = /^### /;
 	const BULLET_PATTERN = /^- /;
 	const SKIP_PATTERNS = [
@@ -15,6 +17,7 @@ function parseChangelogMarkdown(markdown) {
 	const lines = markdown.split('\n');
 	let html = '';
 	let inList = false;
+	let inUnreleased = false;
 	
 	for (let i = 0; i < lines.length; i++) {
 		const line = lines[i].trim();
@@ -29,20 +32,28 @@ function parseChangelogMarkdown(markdown) {
 			continue;
 		}
 		
-		// Match version headers: ## [version] - YYYY-MM-DD
-		const versionMatch = line.match(VERSION_PATTERN);
+		// Check for Unreleased section
+		if (VERSION_PATTERN_UNRELEASED.test(line)) {
+			inUnreleased = true;
+			continue;
+		}
+		
+		// Match version headers: both old and new formats
+		// Old format: ## [version] - YYYY-MM-DD
+		// New format: ## [version](link) (YYYY-MM-DD)
+		let versionMatch = line.match(VERSION_PATTERN_NEW);
+		if (!versionMatch) {
+			versionMatch = line.match(VERSION_PATTERN_OLD);
+		}
+		
 		if (versionMatch) {
+			inUnreleased = false;
 			if (inList) {
 				html += '<br>';
 				inList = false;
 			}
 			const version = versionMatch[1];
 			const date = versionMatch[2];
-			
-			// Skip "Unreleased" versions
-			if (version.toLowerCase() === 'unreleased') {
-				continue;
-			}
 			
 			// Compare version to 0.1.0 to determine if we should add a GitHub release link
 			const shouldLink = compareVersion(version, '0.1.0') > 0;
@@ -54,6 +65,11 @@ function parseChangelogMarkdown(markdown) {
 				// Add version without link
 				html += `<b>${date} - v${version}</b><br>`;
 			}
+			continue;
+		}
+		
+		// Skip content in Unreleased section
+		if (inUnreleased) {
 			continue;
 		}
 		
