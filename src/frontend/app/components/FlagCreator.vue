@@ -182,209 +182,362 @@ function renderFlag() {
   ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
   ctx.fillRect(0, 0, width, height)
   
-  // Draw division pattern
+  // Draw division pattern - matching legacy random_icon.js exactly
+  // 0 = solid color background
+  // 1 = halves split vertically
+  // 2 = halves split horizontally
+  // 3 = thirds split vertically
+  // 4 = thirds split horizontally
+  // 5 = quarters split orthogonally, opposite corners same color
+  // 6 = quarters split diagonally, opposite corners same color
+  // 7 = halves split diagonally, top-left to bottom-right
+  // 8 = halves split diagonally, bottom-left to top-right
+  // 9 = stripes vertically
+  // 10 = stripes horizontally
+  // 11 = checkered
   switch (division) {
-    case 0: // Solid
+    case 0:
+      // Solid - already filled
       break
-    case 1: // Horizontal half
+    case 1:
+      // Halves split vertically
+      ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
+      ctx.fillRect(0, 0, 128, 256)
       ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(0, height / 2, width, height / 2)
+      ctx.fillRect(128, 0, 128, 256)
       break
-    case 2: // Vertical half
+    case 2:
+      // Halves split horizontally
+      ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
+      ctx.fillRect(0, 0, 256, 128)
       ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(width / 2, 0, width / 2, height)
+      ctx.fillRect(0, 128, 256, 128)
       break
-    case 3: // Diagonal
+    case 3:
+      // Thirds split vertically
+      ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
+      ctx.fillRect(0, 0, 85, 256)
       ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.beginPath()
-      ctx.moveTo(0, 0)
-      ctx.lineTo(width, 0)
-      ctx.lineTo(width, height)
-      ctx.closePath()
-      ctx.fill()
-      break
-    case 4: // Quarters
-      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(width / 2, 0, width / 2, height / 2)
-      ctx.fillRect(0, height / 2, width / 2, height / 2)
-      break
-    case 5: // Horizontal thirds
-      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(0, height / 3, width, height / 3)
+      ctx.fillRect(85, 0, 86, 256)
       ctx.fillStyle = `rgb(${color3[0]}, ${color3[1]}, ${color3[2]})`
-      ctx.fillRect(0, (2 * height) / 3, width, height / 3)
+      ctx.fillRect(171, 0, 85, 256)
       break
-    case 6: // Vertical thirds
+    case 4:
+      // Thirds split horizontally
+      ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
+      ctx.fillRect(0, 0, 256, 85)
       ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(width / 3, 0, width / 3, height)
+      ctx.fillRect(0, 85, 256, 86)
       ctx.fillStyle = `rgb(${color3[0]}, ${color3[1]}, ${color3[2]})`
-      ctx.fillRect((2 * width) / 3, 0, width / 3, height)
+      ctx.fillRect(0, 171, 256, 85)
       break
-    case 7: // Cross
+    case 5:
+      // Quarters split orthogonally, opposite corners same color
+      ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
+      ctx.fillRect(0, 0, 128, 128)
+      ctx.fillRect(128, 128, 128, 128)
       ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(width / 3, 0, width / 3, height)
-      ctx.fillRect(0, height / 3, width, height / 3)
+      ctx.fillRect(0, 128, 128, 128)
+      ctx.fillRect(128, 0, 128, 128)
       break
-    case 8: // Saltire (X cross)
+    case 6:
+      // Quarters split diagonally, opposite corners same color
+      ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      ctx.lineTo(128, 128)
+      ctx.lineTo(0, 256)
+      ctx.closePath()
+      ctx.fill()
+      ctx.beginPath()
+      ctx.moveTo(256, 0)
+      ctx.lineTo(128, 128)
+      ctx.lineTo(256, 256)
+      ctx.closePath()
+      ctx.fill()
       ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
       ctx.beginPath()
       ctx.moveTo(0, 0)
-      ctx.lineTo(width / 4, 0)
-      ctx.lineTo(width, (3 * height) / 4)
-      ctx.lineTo(width, height)
-      ctx.lineTo((3 * width) / 4, height)
-      ctx.lineTo(0, height / 4)
+      ctx.lineTo(128, 128)
+      ctx.lineTo(256, 0)
       ctx.closePath()
       ctx.fill()
       ctx.beginPath()
-      ctx.moveTo(width, 0)
-      ctx.lineTo((3 * width) / 4, 0)
-      ctx.lineTo(0, (3 * height) / 4)
-      ctx.lineTo(0, height)
-      ctx.lineTo(width / 4, height)
-      ctx.lineTo(width, height / 4)
+      ctx.moveTo(0, 256)
+      ctx.lineTo(128, 128)
+      ctx.lineTo(256, 256)
       ctx.closePath()
       ctx.fill()
       break
-    case 9: // Border
-      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(width / 8, height / 8, (6 * width) / 8, (6 * height) / 8)
-      break
-    case 10: // Chevron
+    case 7:
+      // Halves split diagonally, top-left to bottom-right
+      ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      ctx.lineTo(256, 256)
+      ctx.lineTo(256, 0)
+      ctx.closePath()
+      ctx.fill()
       ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
       ctx.beginPath()
       ctx.moveTo(0, 0)
-      ctx.lineTo(width / 2, height / 2)
-      ctx.lineTo(0, height)
+      ctx.lineTo(256, 256)
+      ctx.lineTo(0, 256)
       ctx.closePath()
       ctx.fill()
       break
-    case 11: // Diamond
-      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
+    case 8:
+      // Halves split diagonally, bottom-left to top-right
+      ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
       ctx.beginPath()
-      ctx.moveTo(width / 2, height / 6)
-      ctx.lineTo((5 * width) / 6, height / 2)
-      ctx.lineTo(width / 2, (5 * height) / 6)
-      ctx.lineTo(width / 6, height / 2)
+      ctx.moveTo(256, 0)
+      ctx.lineTo(0, 256)
+      ctx.lineTo(0, 0)
       ctx.closePath()
       ctx.fill()
+      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
+      ctx.beginPath()
+      ctx.moveTo(256, 0)
+      ctx.lineTo(0, 256)
+      ctx.lineTo(256, 256)
+      ctx.closePath()
+      ctx.fill()
+      break
+    case 9:
+      // Stripes vertically
+      ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
+      ctx.fillRect(0, 0, 28, 256)
+      ctx.fillRect(57, 0, 28, 256)
+      ctx.fillRect(114, 0, 28, 256)
+      ctx.fillRect(171, 0, 28, 256)
+      ctx.fillRect(228, 0, 28, 256)
+      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
+      ctx.fillRect(28, 0, 29, 256)
+      ctx.fillRect(85, 0, 29, 256)
+      ctx.fillRect(142, 0, 29, 256)
+      ctx.fillRect(199, 0, 29, 256)
+      break
+    case 10:
+      // Stripes horizontally
+      ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
+      ctx.fillRect(0, 0, 256, 28)
+      ctx.fillRect(0, 57, 256, 28)
+      ctx.fillRect(0, 114, 256, 28)
+      ctx.fillRect(0, 171, 256, 28)
+      ctx.fillRect(0, 228, 256, 28)
+      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
+      ctx.fillRect(0, 28, 256, 29)
+      ctx.fillRect(0, 85, 256, 29)
+      ctx.fillRect(0, 142, 256, 29)
+      ctx.fillRect(0, 199, 256, 29)
+      break
+    case 11:
+      // Checkered
+      for (let i = 0; i < 7; i++) {
+        for (let j = 0; j < 7; j++) {
+          if ((i + j) % 2 == 0) {
+            ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
+          } else {
+            ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
+          }
+          ctx.fillRect(37 * (((i + 1) / 2) | 0) + 36 * ((i / 2) | 0), 37 * (((j + 1) / 2) | 0) + 36 * ((j / 2) | 0), 36 + ((i + 1) % 2), 36 + ((j + 1) % 2))
+        }
+      }
       break
   }
   
-  // Draw overlay pattern
+  // Draw overlay pattern and determine symbol position & size - matching legacy random_icon.js
+  // 0 = no overlay
+  // 1 = central cross
+  // 2 = off-center cross
+  // 3 = X
+  // 4 = diagonal band, top-left to bottom-right
+  // 5 = diagonal band, bottom-left to top-right
+  // 6 = central circle
+  // 7 = semicircle on left-edge
+  // 8 = triangle on left-edge
+  // 9 = central diamond
+  // 10 = top-left quarter
+  // 11 = central square
   const overlay = palette[6]
-  if (overlay > 0) {
-    ctx.fillStyle = `rgb(${color4[0]}, ${color4[1]}, ${color4[2]})`
-    switch (overlay) {
-      case 1: // Small cross
-        ctx.fillRect((2 * width) / 5, height / 4, width / 5, height / 2)
-        ctx.fillRect(width / 4, (2 * height) / 5, width / 2, height / 5)
-        break
-      case 2: // Circle
-        ctx.beginPath()
-        ctx.arc(width / 2, height / 2, width / 4, 0, 2 * Math.PI)
-        ctx.fill()
-        break
-      case 3: // Star (simplified)
-        drawStar(ctx, width / 2, height / 2, 5, width / 4, width / 8, color4)
-        break
-      case 4: // Triangle
-        ctx.beginPath()
-        ctx.moveTo(width / 2, height / 4)
-        ctx.lineTo((3 * width) / 4, (3 * height) / 4)
-        ctx.lineTo(width / 4, (3 * height) / 4)
-        ctx.closePath()
-        ctx.fill()
-        break
-      case 5: // Crescent
-        ctx.beginPath()
-        ctx.arc(width / 2, height / 2, width / 4, 0, 2 * Math.PI)
-        ctx.fill()
-        ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
-        ctx.beginPath()
-        ctx.arc(width / 2 + width / 10, height / 2, width / 5, 0, 2 * Math.PI)
-        ctx.fill()
-        break
-      case 6: // Horizontal stripes
-        for (let i = 0; i < 8; i += 2) {
-          ctx.fillRect(0, (i * height) / 8, width, height / 8)
-        }
-        break
-      case 7: // Vertical stripes
-        for (let i = 0; i < 8; i += 2) {
-          ctx.fillRect((i * width) / 8, 0, width / 8, height)
-        }
-        break
-      case 8: // Corner triangle
-        ctx.beginPath()
-        ctx.moveTo(0, 0)
-        ctx.lineTo(width / 2, 0)
-        ctx.lineTo(0, height / 2)
-        ctx.closePath()
-        ctx.fill()
-        break
-      case 9: // Two circles
-        ctx.beginPath()
-        ctx.arc(width / 3, height / 2, width / 6, 0, 2 * Math.PI)
-        ctx.fill()
-        ctx.beginPath()
-        ctx.arc((2 * width) / 3, height / 2, width / 6, 0, 2 * Math.PI)
-        ctx.fill()
-        break
-      case 10: // Bend
-        ctx.beginPath()
-        ctx.moveTo(0, height / 4)
-        ctx.lineTo(width / 4, 0)
-        ctx.lineTo(width, (3 * height) / 4)
-        ctx.lineTo((3 * width) / 4, height)
-        ctx.closePath()
-        ctx.fill()
-        break
-      case 11: // Pale (center stripe)
-        ctx.fillRect(width / 3, 0, width / 3, height)
-        break
-    }
+  let symbol_position_x = 0
+  let symbol_position_y = 0
+  let symbol_size = 256
+  
+  ctx.fillStyle = `rgb(${color4[0]}, ${color4[1]}, ${color4[2]})`
+  switch (overlay) {
+    case 0:
+      symbol_position_x = 24
+      symbol_position_y = 24
+      symbol_size = 208
+      break
+    case 1:
+      ctx.fillRect(104, 0, 48, 256)
+      ctx.fillRect(0, 104, 256, 48)
+      symbol_position_x = 24
+      symbol_position_y = 24
+      symbol_size = 208
+      break
+    case 2:
+      ctx.fillRect(71, 0, 48, 256)
+      ctx.fillRect(0, 104, 256, 48)
+      symbol_position_x = 0
+      symbol_position_y = 33
+      symbol_size = 190
+      break
+    case 3:
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      ctx.lineTo(34, 0)
+      ctx.lineTo(256, 222)
+      ctx.lineTo(256, 256)
+      ctx.lineTo(222, 256)
+      ctx.lineTo(0, 34)
+      ctx.closePath()
+      ctx.fill()
+      ctx.beginPath()
+      ctx.moveTo(256, 0)
+      ctx.lineTo(256, 34)
+      ctx.lineTo(34, 256)
+      ctx.lineTo(0, 256)
+      ctx.lineTo(0, 222)
+      ctx.lineTo(222, 0)
+      ctx.closePath()
+      ctx.fill()
+      symbol_position_x = 24
+      symbol_position_y = 24
+      symbol_size = 208
+      break
+    case 4:
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      ctx.lineTo(34, 0)
+      ctx.lineTo(256, 222)
+      ctx.lineTo(256, 256)
+      ctx.lineTo(222, 256)
+      ctx.lineTo(0, 34)
+      ctx.closePath()
+      ctx.fill()
+      symbol_position_x = 24
+      symbol_position_y = 24
+      symbol_size = 208
+      break
+    case 5:
+      ctx.beginPath()
+      ctx.moveTo(256, 0)
+      ctx.lineTo(256, 34)
+      ctx.lineTo(34, 256)
+      ctx.lineTo(0, 256)
+      ctx.lineTo(0, 222)
+      ctx.lineTo(222, 0)
+      ctx.closePath()
+      ctx.fill()
+      symbol_position_x = 24
+      symbol_position_y = 24
+      symbol_size = 208
+      break
+    case 6:
+      ctx.beginPath()
+      ctx.arc(128, 128, 100, 0, 2 * Math.PI)
+      ctx.closePath()
+      ctx.fill()
+      symbol_position_x = 48
+      symbol_position_y = 48
+      symbol_size = 160
+      break
+    case 7:
+      ctx.beginPath()
+      ctx.arc(0, 128, 128, -Math.PI / 2, Math.PI / 2)
+      ctx.closePath()
+      ctx.fill()
+      symbol_position_x = 3
+      symbol_position_y = 73
+      symbol_size = 110
+      break
+    case 8:
+      ctx.beginPath()
+      ctx.moveTo(0, 0)
+      ctx.lineTo(196, 128)
+      ctx.lineTo(0, 256)
+      ctx.closePath()
+      ctx.fill()
+      symbol_position_x = 8
+      symbol_position_y = 78
+      symbol_size = 100
+      break
+    case 9:
+      ctx.beginPath()
+      ctx.moveTo(128, 0)
+      ctx.lineTo(256, 128)
+      ctx.lineTo(128, 256)
+      ctx.lineTo(0, 128)
+      ctx.closePath()
+      ctx.fill()
+      symbol_position_x = 64
+      symbol_position_y = 64
+      symbol_size = 128
+      break
+    case 10:
+      ctx.fillRect(0, 0, 128, 128)
+      symbol_position_x = 2
+      symbol_position_y = 2
+      symbol_size = 124
+      break
+    case 11:
+      ctx.fillRect(32, 32, 192, 192)
+      symbol_position_x = 36
+      symbol_position_y = 36
+      symbol_size = 184
+      break
   }
   
-  // Draw symbol
+  // Draw symbol - matching legacy random_icon.js
   const symbol = palette[7]
   if (symbol > 0) {
-    ctx.fillStyle = `rgb(${color5[0]}, ${color5[1]}, ${color5[2]})`
-    // For now, draw a simple symbol indicator
-    const symbolSize = width / 8
-    const cx = width / 2
-    const cy = height / 2
+    // Load and draw the actual symbol image
+    // Symbol palette value is 1-indexed, but files are 0-indexed
+    const symbolIndex = symbol - 1
+    // Use /v2 base path for Nuxt app
+    const symbolPath = `/v2/img/symbols/symbol_${symbolIndex}.png`
     
-    // Draw symbol number as text for placeholder
-    ctx.font = `bold ${symbolSize}px Arial`
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(symbol.toString(), cx, cy)
+    // Load symbol image
+    const symbolImg = new Image()
+    symbolImg.onload = () => {
+      // Create a temporary canvas to process the symbol
+      const tempCanvas = document.createElement('canvas')
+      tempCanvas.width = width
+      tempCanvas.height = height
+      const tempCtx = tempCanvas.getContext('2d')
+      if (!tempCtx) return
+      
+      // Draw the symbol image at the calculated position and size
+      tempCtx.drawImage(symbolImg, symbol_position_x, symbol_position_y, symbol_size, symbol_size)
+      
+      // Get the image data to colorize it
+      const symbolData = tempCtx.getImageData(0, 0, width, height)
+      const pixels = symbolData.data
+      
+      // Colorize the symbol: replace non-transparent pixels with color5
+      for (let i = 0; i < pixels.length; i += 4) {
+        if (pixels[i + 3] !== 0) { // If pixel is not transparent
+          pixels[i] = color5[0]     // Red
+          pixels[i + 1] = color5[1] // Green
+          pixels[i + 2] = color5[2] // Blue
+          pixels[i + 3] = 255       // Alpha
+        }
+      }
+      
+      // Put the colorized symbol data back
+      tempCtx.putImageData(symbolData, 0, 0)
+      
+      // Draw the colorized symbol on top of the flag
+      ctx.drawImage(tempCanvas, 0, 0)
+    }
+    symbolImg.onerror = (err) => {
+      console.error('Failed to load symbol image:', symbolPath, err)
+    }
+    symbolImg.src = symbolPath
   }
-}
-
-function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, spikes: number, outerRadius: number, innerRadius: number, color: number[]) {
-  let rot = Math.PI / 2 * 3
-  let x = cx
-  let y = cy
-  const step = Math.PI / spikes
-
-  ctx.beginPath()
-  ctx.moveTo(cx, cy - outerRadius)
-  for (let i = 0; i < spikes; i++) {
-    x = cx + Math.cos(rot) * outerRadius
-    y = cy + Math.sin(rot) * outerRadius
-    ctx.lineTo(x, y)
-    rot += step
-
-    x = cx + Math.cos(rot) * innerRadius
-    y = cy + Math.sin(rot) * innerRadius
-    ctx.lineTo(x, y)
-    rot += step
-  }
-  ctx.lineTo(cx, cy - outerRadius)
-  ctx.closePath()
-  ctx.fill()
 }
 
 watch(() => props.modelValue, (newVal) => {

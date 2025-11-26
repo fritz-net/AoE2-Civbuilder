@@ -39,6 +39,7 @@ The project has two parallel frontends:
 - Used for displaying and editing tech trees in both UIs
 
 ### Testing
+- use full cpp backend (needs to be compiled first) not only node server
 
 **Unit Tests** (`__tests__/`)
 - Test framework: Jest
