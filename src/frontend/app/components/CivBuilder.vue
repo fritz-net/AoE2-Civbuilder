@@ -909,6 +909,59 @@ defineExpose({
   gap: 1rem;
 }
 
+/* Solution 2: Floating Action Buttons (FAB) */
+@media (max-height: 800px), (max-width: 900px) {
+  .nav-buttons {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.5rem;
+    pointer-events: none;
+    z-index: 1000;
+  }
+  
+  .nav-buttons .action-btn {
+    pointer-events: auto;
+    min-width: auto;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+  }
+  
+  .nav-buttons .action-btn:hover {
+    transform: scale(1.1);
+  }
+  
+  .secondary-actions,
+  .autosave-section {
+    position: fixed;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.85));
+    backdrop-filter: blur(5px);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 2px solid hsl(52, 100%, 50%);
+  }
+  
+  .autosave-section {
+    bottom: 5rem;
+  }
+}
+
 .action-btn {
   padding: 1rem 2rem;
   font-family: 'Cinzel', serif;
