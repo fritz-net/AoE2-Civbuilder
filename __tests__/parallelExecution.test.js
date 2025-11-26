@@ -54,40 +54,48 @@ describe('Parallel Command Execution', () => {
     expect(serverCode).toContain('exec(cmd, { cwd: __dirname }');
     
     // Check that process.chdir is not used in the main execution flow
-    // Note: It may still be commented out for documentation purposes
-    const activeChdir = serverCode.match(/^[^/\n]*process\.chdir\([^)]+\);/gm);
-    expect(activeChdir).toBeNull();
+    // Look for process.chdir calls that are not commented out
+    const lines = serverCode.split('\n');
+    let activeChdir = [];
+    
+    for (const line of lines) {
+      // Skip lines that start with comment (after trimming whitespace)
+      const trimmedLine = line.trim();
+      if (trimmedLine.startsWith('//')) continue;
+      
+      // Check for process.chdir calls
+      if (trimmedLine.includes('process.chdir(')) {
+        activeChdir.push(line);
+      }
+    }
+    
+    expect(activeChdir).toEqual([]);
   });
 
   test('execSync calls should use cwd option', () => {
     const fs = require('fs');
     const serverCode = fs.readFileSync(path.join(projectRoot, 'server.js'), 'utf8');
     
-    // Find all execSync calls and verify they have cwd option
-    // Match execSync calls that are not comments
-    const execSyncPattern = /execSync\(`[^`]+`\)/g;
-    const execSyncCalls = serverCode.match(execSyncPattern) || [];
-    
-    // All active execSync calls should have { cwd: __dirname }
-    const execSyncWithCwdPattern = /execSync\(`[^`]+`,\s*\{\s*cwd:\s*__dirname\s*\}\)/g;
-    const execSyncWithCwdCalls = serverCode.match(execSyncWithCwdPattern) || [];
-    
-    // Either all calls have cwd, or there are no calls without cwd
     // Count execSync calls that DON'T have the cwd option
+    // Parse line by line to handle different string formats
     const lines = serverCode.split('\n');
-    let callsWithoutCwd = 0;
+    let callsWithoutCwd = [];
     
-    for (const line of lines) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const trimmedLine = line.trim();
+      
       // Skip comment lines
-      if (line.trim().startsWith('//')) continue;
+      if (trimmedLine.startsWith('//')) continue;
       
       // Check if line has execSync but not with cwd option
-      if (line.includes('execSync(') && !line.includes('{ cwd:')) {
-        callsWithoutCwd++;
+      // This handles template literals, single quotes, double quotes, and concatenation
+      if (trimmedLine.includes('execSync(') && !line.includes('{ cwd:') && !line.includes('{cwd:')) {
+        callsWithoutCwd.push({ line: i + 1, content: trimmedLine });
       }
     }
     
-    expect(callsWithoutCwd).toBe(0);
+    expect(callsWithoutCwd).toEqual([]);
   });
 
   test('route handlers should not include chToAppDir or chToTmpDir', () => {
