@@ -182,26 +182,46 @@ describe('Vanilla Civs JSON Files', () => {
         cwd: projectRoot,
         timeout: 30000, // 30 second timeout
       });
-    } catch (error) {
-      stderr = error.stderr || error.message;
-      stdout = error.stdout || '';
-      exitCode = error.status !== null ? error.status : (error.signal ? 139 : 1);
-    } finally {
+      
+      // Check if output files exist and get their stats BEFORE cleanup
+      const outputDatExists = fs.existsSync(outputDatPath);
+      const outputAiConfigExists = fs.existsSync(outputAiConfigPath);
+      const datSize = outputDatExists ? fs.statSync(outputDatPath).size : 0;
+      
       // Clean up test directory
       if (fs.existsSync(testDir)) {
         fs.rmSync(testDir, { recursive: true, force: true });
       }
+      
+      return {
+        exitCode,
+        stdout,
+        stderr,
+        outputDatExists,
+        outputAiConfigExists,
+        datSize,
+        vanillaCivData,
+      };
+    } catch (error) {
+      stderr = error.stderr || error.message;
+      stdout = error.stdout || '';
+      exitCode = error.status !== null ? error.status : (error.signal ? 139 : 1);
+      
+      // Clean up test directory on error
+      if (fs.existsSync(testDir)) {
+        fs.rmSync(testDir, { recursive: true, force: true });
+      }
+      
+      return {
+        exitCode,
+        stdout,
+        stderr,
+        outputDatExists: false,
+        outputAiConfigExists: false,
+        datSize: 0,
+        vanillaCivData,
+      };
     }
-
-    return {
-      exitCode,
-      stdout,
-      stderr,
-      outputDatPath,
-      outputAiConfigPath,
-      testDataPath,
-      vanillaCivData,
-    };
   }
 
   // Generate a test case for each vanilla civ JSON file
@@ -233,12 +253,11 @@ describe('Vanilla Civs JSON Files', () => {
       expect(result.exitCode).toBe(0);
       
       // Output files should be created
-      expect(fs.existsSync(result.outputDatPath)).toBe(true);
-      expect(fs.existsSync(result.outputAiConfigPath)).toBe(true);
+      expect(result.outputDatExists).toBe(true);
+      expect(result.outputAiConfigExists).toBe(true);
 
       // Output files should have content
-      const datStats = fs.statSync(result.outputDatPath);
-      expect(datStats.size).toBeGreaterThan(0);
+      expect(result.datSize).toBeGreaterThan(0);
     }, 60000); // 60 second timeout per test
   });
 });
