@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.2.1...v1.3.0) (2025-11-26)
+
+
+### Features
+
+* new UI: Extend tooltips, fix techtree navigation, add castle/imperial tech selection, and implement flexible bonus multipliers ([#88](https://github.com/fritz-net/AoE2-Civbuilder/issues/88)) ([86278a8](https://github.com/fritz-net/AoE2-Civbuilder/commit/86278a822cdf935ad32d8c0a706052ec98a63247))
+
 ## [1.2.1](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.2.0...v1.2.1) (2025-11-25)
 
 
