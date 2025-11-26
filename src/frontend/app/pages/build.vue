@@ -46,8 +46,17 @@ async function handleNext(config: CivConfig) {
   console.log('Creating mod for civ config:', config)
   
   try {
-    await createMod([config])
-    alert(`Civilization "${config.alias}" mod created successfully!\n\nYour download should start automatically.`)
+    const seed = await createMod([config])
+    
+    // Navigate to download success page
+    const router = useRouter()
+    router.push({
+      path: '/download-success',
+      query: {
+        civs: config.alias,
+        filename: `${seed}.zip`
+      }
+    })
   } catch (err) {
     console.error('Error creating mod:', err)
     alert(`Failed to create mod: ${error.value || 'Unknown error'}`)

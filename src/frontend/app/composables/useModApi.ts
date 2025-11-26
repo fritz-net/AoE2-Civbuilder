@@ -31,12 +31,12 @@ function generateSeed(): string {
  * Create a mod from one or more civ configurations
  * @param civs Array of civ configurations to include in the mod
  * @param options Optional parameters for mod creation
- * @returns Promise that resolves when download starts
+ * @returns Promise that resolves with seed (filename) when download starts
  */
 export async function createMod(
   civs: CivConfig[],
   options: ModCreationOptions = {}
-): Promise<void> {
+): Promise<string> {
   const seed = options.seed || generateSeed()
   
   // Format civs into the presets format expected by the server
@@ -104,6 +104,9 @@ export async function createMod(
     a.click()
     document.body.removeChild(a)
     window.URL.revokeObjectURL(url)
+    
+    // Return the seed (filename) for navigation purposes
+    return seed
   } catch (error) {
     console.error('Error creating mod:', error)
     throw error
@@ -120,12 +123,13 @@ export function useModApi() {
   async function createModWithState(
     civs: CivConfig[],
     options: ModCreationOptions = {}
-  ): Promise<void> {
+  ): Promise<string> {
     isCreating.value = true
     error.value = null
     
     try {
-      await createMod(civs, options)
+      const seed = await createMod(civs, options)
+      return seed
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Unknown error occurred'
       throw err

@@ -190,8 +190,18 @@ async function handleCreateMod() {
   }
 
   try {
-    await createMod(civs.value)
-    alert(`Combined mod created successfully with ${civs.value.length} civilization(s)!\n\nYour download should start automatically.`)
+    const seed = await createMod(civs.value)
+    
+    // Navigate to download success page with civ names
+    const civNames = civs.value.map(c => c.alias).join(',')
+    const router = useRouter()
+    router.push({
+      path: '/download-success',
+      query: {
+        civs: civNames,
+        filename: `${seed}.zip`
+      }
+    })
   } catch (err) {
     console.error('Error creating combined mod:', err)
     alert(`Failed to create mod: ${error.value || 'Unknown error'}`)
