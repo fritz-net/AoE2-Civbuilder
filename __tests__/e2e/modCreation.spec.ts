@@ -95,8 +95,10 @@ test.describe('Combine Page - Multi-Civ Mod Creation', () => {
   });
 
   // Note: The following test requires C++ binary to be built
-  // It's skipped by default but can be enabled in CI/CD where the binary is available
-  test.skip('should create combined mod and trigger download', async ({ page }) => {
+  // It's enabled in CI where the binary is available
+  const shouldSkipDownloadTests = !process.env.CI;
+  
+  (shouldSkipDownloadTests ? test.skip : test)('should create combined mod and trigger download', async ({ page }) => {
     await page.goto('/v2/combine');
     
     // Upload files
@@ -191,8 +193,8 @@ test.describe('Build Page - Single Civ Mod Creation', () => {
     await expect(civNameInput).toHaveValue('StoredCiv');
   });
 
-  // Note: Requires C++ binary - skipped by default
-  test.skip('should create mod at end of stepper', async ({ page }) => {
+  // Note: Requires C++ binary - enabled in CI
+  (shouldSkipDownloadTests ? test.skip : test)('should create mod at end of stepper', async ({ page }) => {
     await page.goto('/v2/build');
     
     // Fill in basic info

@@ -32,6 +32,13 @@ export default defineConfig({
     
     /* Screenshot on failure */
     screenshot: 'only-on-failure',
+    
+    /* Use system Chromium if available (CI environment) */
+    ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH && {
+      launchOptions: {
+        executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH,
+      },
+    }),
   },
 
   /* Configure projects for major browsers */

@@ -17,7 +17,9 @@
       "/node_modules/",
       "/__tests__/helpers/",
       "/__tests__/e2e/"
-    ]
+    ],
+    "maxWorkers": "50%",
+    "maxConcurrency": 10
   },
   "dependencies": {
     "axios": "^0.21.1",
