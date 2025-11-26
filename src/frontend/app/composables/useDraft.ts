@@ -1,5 +1,6 @@
 /**
  * Composable for draft-related functionality
+ * Uses Socket.io for real-time updates like legacy UI
  */
 import { ref, computed } from 'vue'
 import type { CivConfig } from './useCivData'
@@ -50,6 +51,7 @@ export const useDraft = () => {
   const playerNumber = ref<number>(-1)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+  const isConnected = ref(false)
 
   // Computed properties
   const isHost = computed(() => playerNumber.value === 0)
@@ -95,40 +97,62 @@ export const useDraft = () => {
     return names[turn.roundType] || ''
   })
 
+  // Get cookie value helper
+  const getCookie = (name: string): string | null => {
+    const cookies = document.cookie.split(';')
+    for (const cookie of cookies) {
+      const [key, value] = cookie.trim().split('=')
+      if (key === name) {
+        return value
+      }
+    }
+    return null
+  }
+
   // Initialize socket connection
   const initSocket = () => {
     if (typeof window === 'undefined') return
     
-    // Socket.io should be available from CDN or installed
+    // Socket.io should be available from the server
     // @ts-ignore
     if (typeof io !== 'undefined') {
       // @ts-ignore
       socket.value = io()
+      isConnected.value = true
+      console.log('Socket.io connected')
+    } else {
+      console.error('Socket.io not available')
+      error.value = 'Socket.io not available'
     }
   }
 
-  // Load draft data from server
+  // Load draft data via Socket.io (like legacy code)
   const loadDraft = async (draftId: string) => {
     isLoading.value = true
     error.value = null
     
     try {
       // Get player number from cookie
-      const cookies = document.cookie.split(';')
-      for (const cookie of cookies) {
-        const [key, value] = cookie.trim().split('=')
-        if (key === 'playerNumber') {
-          playerNumber.value = parseInt(value, 10)
-        }
+      const playerNumberCookie = getCookie('playerNumber')
+      if (playerNumberCookie !== null) {
+        playerNumber.value = parseInt(playerNumberCookie, 10)
       }
-
-      // In production, this would load from server
-      // For now, we'll simulate the draft structure
-      const response = await fetch(`/api/draft/${draftId}`)
-      if (response.ok) {
-        draft.value = await response.json()
+      
+      // If socket is connected, use socket to get gamestate
+      if (socket.value && isConnected.value) {
+        // Join the room first
+        socket.value.emit('join room', draftId)
+        
+        // Request gamestate via socket
+        socket.value.emit('get gamestate', draftId, playerNumber.value)
       } else {
-        throw new Error('Failed to load draft')
+        // Fallback to API if socket not available
+        const response = await fetch(`/api/draft/${draftId}`)
+        if (response.ok) {
+          draft.value = await response.json()
+        } else {
+          throw new Error('Failed to load draft')
+        }
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Unknown error'
@@ -141,58 +165,82 @@ export const useDraft = () => {
   // Join socket room
   const joinRoom = (draftId: string) => {
     if (!socket.value) return
-    socket.value.emit('join', draftId)
+    socket.value.emit('join room', draftId)
   }
 
-  // Update player ready status
+  // Update player ready status (toggle ready)
   const updateReady = (playerId: number) => {
     if (!socket.value || !draft.value) return
-    socket.value.emit('ready', {
-      draftID: draft.value.id,
-      playerNumber: playerId,
-    })
+    socket.value.emit('toggle ready', draft.value.id, playerId)
   }
 
   // Start the draft
   const startDraft = () => {
     if (!socket.value || !draft.value) return
-    socket.value.emit('start', draft.value.id)
+    socket.value.emit('start draft', draft.value.id)
+  }
+
+  // Update player tech tree
+  const updateTree = (playerId: number, tree: number[][]) => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('update tree', draft.value.id, playerId, tree)
   }
 
   // Update player civilization info
-  const updateCivInfo = (playerId: number, data: Partial<DraftPlayer>) => {
+  const updateCivInfo = (playerId: number, civName: string, flagPalette: number[], architecture: number, language: number) => {
     if (!socket.value || !draft.value) return
-    socket.value.emit('updateCivInfo', {
-      draftID: draft.value.id,
-      playerNumber: playerId,
-      ...data,
-    })
+    socket.value.emit('update civ info', draft.value.id, playerId, civName, flagPalette, architecture, language)
   }
 
   // End turn and select card
   const selectCard = (cardIndex: number, turn: number) => {
     if (!socket.value || !draft.value) return
-    socket.value.emit('endTurn', {
-      draftID: draft.value.id,
-      cardIndex,
-      turn,
-    })
+    socket.value.emit('end turn', draft.value.id, cardIndex, turn)
+  }
+
+  // Request private gamestate (for spectators)
+  const getPrivateGamestate = (draftId: string) => {
+    if (!socket.value) return
+    socket.value.emit('get private gamestate', draftId)
+  }
+
+  // Refill cards
+  const refillCards = () => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('refill', draft.value.id)
+  }
+
+  // Clear cards
+  const clearCards = () => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('clear', draft.value.id)
   }
 
   // Setup socket listeners
   const setupSocketListeners = () => {
     if (!socket.value) return
 
-    socket.value.on('updateLobby', (updatedDraft: Draft) => {
+    // Main gamestate update handler (used by legacy code)
+    socket.value.on('set gamestate', (updatedDraft: Draft) => {
+      console.log('Received gamestate update:', updatedDraft)
       draft.value = updatedDraft
+      isLoading.value = false
     })
 
-    socket.value.on('updateGame', (updatedDraft: Draft) => {
-      draft.value = updatedDraft
+    // Error handler
+    socket.value.on('bug', () => {
+      error.value = 'An error occurred in the draft'
     })
 
-    socket.value.on('error', (message: string) => {
-      error.value = message
+    // Connection handlers
+    socket.value.on('connect', () => {
+      isConnected.value = true
+      console.log('Socket connected')
+    })
+
+    socket.value.on('disconnect', () => {
+      isConnected.value = false
+      console.log('Socket disconnected')
     })
   }
 
@@ -201,6 +249,7 @@ export const useDraft = () => {
     if (socket.value) {
       socket.value.disconnect()
       socket.value = null
+      isConnected.value = false
     }
   }
 
@@ -209,6 +258,7 @@ export const useDraft = () => {
     playerNumber,
     isLoading,
     error,
+    isConnected,
     isHost,
     currentPlayer,
     currentPhase,
@@ -219,8 +269,12 @@ export const useDraft = () => {
     joinRoom,
     updateReady,
     startDraft,
+    updateTree,
     updateCivInfo,
     selectCard,
+    getPrivateGamestate,
+    refillCards,
+    clearCards,
     setupSocketListeners,
     cleanup,
   }

@@ -177,6 +177,7 @@ const {
   joinRoom,
   updateReady,
   startDraft,
+  updateTree,
   updateCivInfo,
   selectCard,
   setupSocketListeners,
@@ -256,16 +257,16 @@ const handleToggleReady = () => {
 
 const handleSaveSetup = () => {
   if (playerNumber.value >= 0) {
-    updateCivInfo(playerNumber.value, {
-      alias: civConfig.value.alias,
-      flag_palette: civConfig.value.flag_palette,
-      architecture: civConfig.value.architecture,
-      language: civConfig.value.language,
-      tree: civConfig.value.tree as any,
-      customFlag: civConfig.value.customFlag,
-      customFlagData: civConfig.value.customFlagData,
-      ready: 1,
-    } as any)
+    // Update civ info with the correct parameters matching server expectations
+    updateCivInfo(
+      playerNumber.value,
+      civConfig.value.alias,
+      civConfig.value.flag_palette,
+      civConfig.value.architecture,
+      civConfig.value.language
+    )
+    // Also update tech tree separately
+    updateTree(playerNumber.value, civConfig.value.tree as number[][])
   }
 }
 
@@ -293,13 +294,14 @@ const goHome = () => {
 }
 
 onMounted(async () => {
+  // Initialize socket first
   initSocket()
-  await loadDraft(draftId.value)
   
-  if (draft.value) {
-    joinRoom(draftId.value)
-    setupSocketListeners()
-  }
+  // Setup listeners before loading so we can receive the gamestate
+  setupSocketListeners()
+  
+  // Load draft - this will use socket.io to get gamestate
+  await loadDraft(draftId.value)
 })
 
 onUnmounted(() => {

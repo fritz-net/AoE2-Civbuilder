@@ -167,13 +167,14 @@ const goHome = () => {
 }
 
 onMounted(async () => {
+  // Initialize socket first
   initSocket()
-  await loadDraft(draftId.value)
   
-  if (draft.value) {
-    joinRoom(draftId.value)
-    setupSocketListeners()
-  }
+  // Setup listeners before loading so we can receive the gamestate
+  setupSocketListeners()
+  
+  // Load draft - this will use socket.io to get gamestate
+  await loadDraft(draftId.value)
 })
 
 onUnmounted(() => {
