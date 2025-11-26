@@ -529,11 +529,11 @@ export function getConnections(showPastures: boolean = false): [string, string][
 
   // Add farm/pasture specific connections based on showPastures option
   if (showPastures) {
-    // Pasture tech connections
-    connections.push([b(MILL), t(DOMESTICATION)])
+    // Pasture tech connections - connected to Pasture building, not Mill
+    // Pasture is independent, not connected to Mill
+    connections.push([b(PASTURE), t(DOMESTICATION)])
     connections.push([t(DOMESTICATION), t(PASTORALISM)])
     connections.push([t(PASTORALISM), t(TRANSHUMANCE)])
-    connections.push([b(MILL), b(PASTURE)])
   } else {
     // Farm tech connections (default)
     connections.push([b(MILL), t(HORSE_COLLAR)])
@@ -835,31 +835,33 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
 
   // Farm lane (or Pasture lane if showPastures is enabled)
   if (showPastures) {
-    // Show Pasture building instead of Farm
+    // When showPastures is enabled, Pasture replaces Farm
+    // Pasture has its own lane with pasture techs
     const pasturelane = createLane()
-    pasturelane.rows.dark_2.push(building(PASTURE))
+    pasturelane.rows.dark_1.push(building(PASTURE))
+    pasturelane.rows.feudal_1.push(tech(DOMESTICATION))
+    pasturelane.rows.castle_1.push(tech(PASTORALISM))
+    pasturelane.rows.imperial_1.push(tech(TRANSHUMANCE))
     tree.lanes.push(pasturelane)
+
+    // Mill lane - just the mill building for market connection, no farm techs
+    const milllane = createLane()
+    milllane.rows.dark_1.push(building(MILL))
+    tree.lanes.push(milllane)
   } else {
+    // Default: Farm lane
     const farmlane = createLane()
     farmlane.rows.dark_2.push(building(FARM))
     tree.lanes.push(farmlane)
-  }
 
-  // Mill lane with farm techs or pasture techs
-  const milllane = createLane()
-  milllane.rows.dark_1.push(building(MILL))
-  if (showPastures) {
-    // Show Pasture techs instead of Farm techs
-    milllane.rows.feudal_1.push(tech(DOMESTICATION))
-    milllane.rows.castle_1.push(tech(PASTORALISM))
-    milllane.rows.imperial_1.push(tech(TRANSHUMANCE))
-  } else {
-    // Show Farm techs (default)
+    // Mill lane with farm techs
+    const milllane = createLane()
+    milllane.rows.dark_1.push(building(MILL))
     milllane.rows.feudal_1.push(tech(HORSE_COLLAR))
     milllane.rows.castle_1.push(tech(HEAVY_PLOW))
     milllane.rows.imperial_1.push(tech(CROP_ROTATION))
+    tree.lanes.push(milllane)
   }
-  tree.lanes.push(milllane)
 
   // Update positions
   const connections = getConnections(showPastures)

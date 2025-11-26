@@ -336,6 +336,7 @@ export const unclickableCarets = [
   'building_584',
   'building_562',
   'building_68',
+  'building_1889', // PASTURE - should be enabled by default like Mill
   'tech_408',
 ]
 
