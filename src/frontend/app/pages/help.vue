@@ -25,7 +25,34 @@
         </div>
       </div>
 
-      <!-- TODO single player section -->
+      <!-- Single Player Instructions -->
+      <div class="instructions-section">
+        <h2>Single Player / Local Mod Installation</h2>
+        <ol class="instructions-list">
+          <li>
+            Locate the downloaded .zip file from the mod creation
+          </li>
+          <li>
+            Extract the contents to your Age of Empires II mods folder:
+            <ul>
+              <li><strong>Steam:</strong> <code>C:\Program Files (x86)\Steam\steamapps\common\AoE2DE\mods\local</code></li>
+              <li><strong>Microsoft Store / Xbox:</strong> <code>C:\Users\{username}\Games\Age of Empires 2 DE\{userId}\mods</code></li>
+            </ul>
+          </li>
+          <li>
+            Launch Age of Empires II: Definitive Edition
+          </li>
+          <li>
+            Your mod is enabled by default
+          </li>
+          <li>
+            On game start, select the data mod to use
+          </li>
+          <li>
+            Make sure only one custom civ UI mod is enabled at a time
+          </li>
+        </ol>
+      </div>
       
       <div class="instructions-section">
         <h2>Publication Instructions (only needed for multiplayer!)</h2>
