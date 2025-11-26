@@ -9,6 +9,9 @@ import * as fs from 'fs';
 
 const VANILLA_CIVS_DIR = path.join(__dirname, '../../public/vanillaFiles/vanillaCivs/VanillaJson');
 
+// Skip download tests locally (C++ backend not built), but run in CI
+const shouldSkipDownloadTests = !process.env.CI;
+
 test.describe('Combine Page - Multi-Civ Mod Creation', () => {
   test('should load combine page successfully', async ({ page }) => {
     await page.goto('/v2/combine');
@@ -96,8 +99,6 @@ test.describe('Combine Page - Multi-Civ Mod Creation', () => {
 
   // Note: The following test requires C++ binary to be built
   // It's enabled in CI where the binary is available
-  const shouldSkipDownloadTests = !process.env.CI;
-  
   (shouldSkipDownloadTests ? test.skip : test)('should create combined mod and trigger download', async ({ page }) => {
     await page.goto('/v2/combine');
     
