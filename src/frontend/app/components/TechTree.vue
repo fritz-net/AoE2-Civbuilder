@@ -250,6 +250,7 @@ interface Props {
   relativePath?: string
   sidebarContent?: string
   sidebarTitle?: string
+  showPastures?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -259,6 +260,7 @@ const props = withDefaults(defineProps<Props>(), {
   relativePath: '/aoe2techtree',
   sidebarContent: '',
   sidebarTitle: 'Civilization Info',
+  showPastures: false,
 })
 
 const emit = defineEmits<{
@@ -273,7 +275,7 @@ const svgRef = ref<SVGSVGElement | null>(null)
 const helptextRef = ref<HTMLDivElement | null>(null)
 
 // State
-const tree = ref<Tree>(getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600))
+const tree = ref<Tree>(getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: props.showPastures }))
 const data = ref<TechtreeData | null>(null)
 const localtree = ref<number[][]>([
   [13, 17, 21, 74, 545, 539, 331, 125, 83, 128, 440],
@@ -294,7 +296,7 @@ const showSidebar = ref(true)
 const containerHeight = ref(typeof window !== 'undefined' ? window.innerHeight : 600)
 
 // Computed
-const connections = computed(() => getConnections())
+const connections = computed(() => getConnections(props.showPastures))
 const connectionPoints = computed(() => getConnectionPoints(tree.value))
 const parentConnections = computed(() => new Map(connections.value.map(([parent, child]) => [child, parent])))
 
@@ -433,6 +435,11 @@ watch(() => props.initialTree, (newTree) => {
   }
 }, { deep: true })
 
+// Watch for showPastures prop changes to rebuild the tree
+watch(() => props.showPastures, (newShowPastures) => {
+  tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: newShowPastures })
+})
+
 // Methods
 async function loadData() {
   try {
@@ -450,7 +457,7 @@ async function loadData() {
     setTechtreeData(jsonData)
     
     // Rebuild tree with data and names
-    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600)
+    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: props.showPastures })
     
     // Recalculate points after data is loaded if tree was already set
     if (props.editable && localtree.value.some(arr => arr.length > 0)) {
@@ -471,7 +478,7 @@ async function loadLocale(localeCode: string) {
       data.value.strings = strings
       setTechtreeData(data.value)
       // Rebuild tree with localized names
-      tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600)
+      tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: props.showPastures })
     }
   } catch (error) {
     console.error('Failed to load locale:', error)

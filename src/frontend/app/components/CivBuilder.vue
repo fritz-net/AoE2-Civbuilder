@@ -160,6 +160,7 @@
         :relative-path="techtreePath"
         :sidebar-content="sidebarContent"
         :sidebar-title="civConfig.alias || 'Custom Civilization'"
+        :show-pastures="showPasturesInTechtree"
         @done="handleTechtreeDone"
         @update:tree="handleTechtreeUpdate"
         @update:points="handlePointsUpdate"
@@ -440,6 +441,18 @@ ${bonusList || '<li>No bonuses selected</li>'}
 <h3>Team Bonus</h3>
 ${teamBonusHtml || '<p>No team bonus selected</p>'}
 `
+})
+
+// CIV_BONUS_105 (index 105) is "Economic upgrades cost -33% food and available one age earlier"
+// When this bonus is selected, we should show Pasture building and pasture techs instead of Farm and farm techs
+const PASTURES_BONUS_ID = 105
+
+const showPasturesInTechtree = computed(() => {
+  // Check if bonus 105 is selected in civ bonuses
+  return selectedCivBonuses.value.some(entry => {
+    const bonusId = Array.isArray(entry) ? entry[0] : entry
+    return bonusId === PASTURES_BONUS_ID
+  })
 })
 
 const canProceed = computed(() => {
