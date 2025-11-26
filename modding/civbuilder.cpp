@@ -6426,12 +6426,36 @@ void Civbuilder::assignUniqueUnits() {
 
 void Civbuilder::assignBasicTechs() {
     for (int i = 0; i < this->config["techtree"].size(); i++) {
+        // Check if this civ has the pastures bonus (CIV_BONUS_356)
+        bool hasPastures = false;
+        for (int k = 0; k < this->config["civ_bonus"][i].size(); k++) {
+            int bonusIndex = -1;
+            try {
+                bonusIndex = this->config["civ_bonus"][i][k].asInt();
+            } catch (...) {
+                bonusIndex = this->config["civ_bonus"][i][k][0].asInt();
+            }
+            if (bonusIndex == CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES) {
+                hasPastures = true;
+                break;
+            }
+        }
+
         for (int j = 0; j < this->config["techtree"][i].size(); j++) {
             if (this->config["techtree"][i][j] == 0) {
                 // Disable tech
-                if (basicTechs[j] != -1) {
-                    ai["civs"][i]["tt"].append(basicTechs[j]);
-                    this->df->Effects[techTreeIDs[i]].EffectCommands.push_back(createEC(102, -1, -1, -1, basicTechs[j]));
+                int techToDisable = basicTechs[j];
+                
+                // Map mill techs to pasture techs if civ has pastures bonus
+                if (hasPastures) {
+                    if (j == TECHTREE_INDEX_HORSE_COLLAR) techToDisable = TECH_DOMESTICATION;  // Horse Collar -> Domestication
+                    else if (j == TECHTREE_INDEX_HEAVY_PLOW) techToDisable = TECH_PASTORALISM;  // Heavy Plow -> Pastoralism
+                    else if (j == TECHTREE_INDEX_CROP_ROTATION) techToDisable = TECH_TRANSHUMANCE;  // Crop Rotation -> Transhumance
+                }
+                
+                if (techToDisable != -1) {
+                    ai["civs"][i]["tt"].append(techToDisable);
+                    this->df->Effects[techTreeIDs[i]].EffectCommands.push_back(createEC(102, -1, -1, -1, techToDisable));
                 }
             }
         }

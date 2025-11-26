@@ -41,6 +41,11 @@ const vector<int> basicTechs = {-1,  -1,  -1,  -1,  414, 222, 207, 217, 264, 87,
 const vector<int> productivityRates = {47, 190, 79, 189, 216, 198, 199, 200};
 const vector<int> gatherRates = {214, 57, 354, 581, 216, 218, 220, 590, 259, 56, 120, 579, 122, 123, 124, 592, 13};
 
+// Tech tree indices for mill/pasture techs (indices into basicTechs array)
+const int TECHTREE_INDEX_HORSE_COLLAR = 122;     // Maps to TECH_HORSE_COLLAR (14) or TECH_DOMESTICATION (1014)
+const int TECHTREE_INDEX_HEAVY_PLOW = 123;       // Maps to TECH_HEAVY_PLOW (13) or TECH_PASTORALISM (1013)
+const int TECHTREE_INDEX_CROP_ROTATION = 124;   // Maps to TECH_CROP_ROTATION (12) or TECH_TRANSHUMANCE (1012)
+
 const vector<int> militaryClasses = {0, 55, 22, 35, 6, 54, 13, 51, 36, 12, 44, 23, 47};
 const vector<int> siegeClasses = {13, 51, 54, 55};
 const vector<int> buildingClasses = {3, 27, 39, 49, 52};
