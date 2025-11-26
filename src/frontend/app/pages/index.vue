@@ -22,8 +22,7 @@
 const router = useRouter()
 
 const goToCombine = () => {
-  // TODO: Implement combine civilizations page
-  alert('Combine Civilizations - Coming soon in Vue3 version!')
+  router.push('/combine')
 }
 
 const goToCreateDraft = () => {
