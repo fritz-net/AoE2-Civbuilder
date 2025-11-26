@@ -9,6 +9,7 @@ permissions:
   contents: read
 
 jobs:
+  # Unit tests job
   test:
     runs-on: ubuntu-latest
     steps:
@@ -22,6 +23,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Cache system dependencies
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/test.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
 
       - name: Install system dependencies
         run: |
@@ -39,5 +48,63 @@ jobs:
           cd modding
           ./scripts/build.sh
 
-      - name: Run tests
+      - name: Run unit tests
         run: npm test
+
+  # E2E tests job (runs in parallel with unit tests)
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache system dependencies
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: ${{ runner.os }}-apt-${{ hashFiles('.github/workflows/test.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake liblz4-dev libboost-iostreams-dev libjsoncpp-dev libbz2-dev liblzma-dev
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Build Nuxt frontend
+        run: npm run build:nuxt
+
+      - name: Build C++ component
+        run: |
+          cd modding
+          ./scripts/build.sh
+
+      - name: Configure Playwright to use system Chromium
+        run: |
+          # Use system chromium instead of downloading Playwright's version
+          echo "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1" >> $GITHUB_ENV
+          echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser" >> $GITHUB_ENV
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/chromium-browser
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30

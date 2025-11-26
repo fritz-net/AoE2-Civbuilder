@@ -3,7 +3,8 @@
     <CivBuilder
       ref="civBuilderRef"
       :initial-config="initialConfig"
-      next-button-text="Create Civilization"
+      :next-button-text="isCreating ? 'Creating Mod...' : 'Create Mod'"
+      :is-loading="isCreating"
       @next="handleNext"
       @download="handleDownload"
       @reset="handleReset"
@@ -14,9 +15,11 @@
 
 <script setup lang="ts">
 import type { CivConfig } from '~/composables/useCivData'
+import { useModApi } from '~/composables/useModApi'
 
 const router = useRouter()
 const civBuilderRef = ref<{ civConfig: CivConfig } | null>(null)
+const { isCreating, error, createMod } = useModApi()
 
 const initialConfig = ref<Partial<CivConfig>>({})
 
@@ -27,8 +30,17 @@ const hasUnsavedChanges = computed(() => {
   return config?.alias !== '' || config?.description !== ''
 })
 
+// Flag to allow navigation after successful mod creation
+const allowNavigation = ref(false)
+
 // Prevent accidental navigation when user has unsaved changes
 onBeforeRouteLeave((to, from, next) => {
+  // Always allow navigation if flag is set (after mod creation)
+  if (allowNavigation.value) {
+    next()
+    return
+  }
+  
   if (hasUnsavedChanges.value) {
     const answer = window.confirm('You have unsaved changes. Are you sure you want to leave?')
     if (!answer) {
@@ -39,9 +51,27 @@ onBeforeRouteLeave((to, from, next) => {
   next()
 })
 
-function handleNext(config: CivConfig) {
-  console.log('Civ config:', config)
-  alert(`Civilization "${config.alias}" created successfully!\n\nFull mod creation will be available soon.`)
+async function handleNext(config: CivConfig) {
+  console.log('Creating mod for civ config:', config)
+  
+  try {
+    const seed = await createMod([config])
+    
+    // Set flag to allow navigation without warning
+    allowNavigation.value = true
+    
+    // Navigate to download success page
+    await router.push({
+      path: '/download-success',
+      query: {
+        civs: config.alias,
+        filename: `${seed}.zip`
+      }
+    })
+  } catch (err) {
+    console.error('Error creating mod:', err)
+    alert(`Failed to create mod: ${error.value || 'Unknown error'}`)
+  }
 }
 
 function handleDownload(config: CivConfig) {

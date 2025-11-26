@@ -24,9 +24,32 @@
           ></iframe>
         </div>
       </div>
+
+      <!-- Single Player Instructions -->
+      <div class="instructions-section">
+        <h2>Single Player / Local Mod Installation</h2>
+        <ol class="instructions-list">
+          <li>Locate the downloaded .zip file</li>
+          <li>Extract the contents to your Age of Empires II mods folder:
+            <ul>
+              <li><strong>Steam:</strong> <code>C:\Users\[YourUsername]\Games\Age of Empires 2 DE\[YourID]\mods\local</code></li>
+              <li>Both Zips (<code>*-data.zip</code>, <code>*-ui.zip</code>) should then also be extracted so you end up with:
+                <ul>
+                  <li><code>[ModName]-data</code> folder</li>
+                  <li><code>[ModName]-ui</code> folder</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li>Launch Age of Empires II: Definitive Edition</li>
+          <li>Your mod is enabled by default</li>
+          <li>Make sure only one custom civ UI mod is enabled at a time</li>
+          <li>On game start, select the data mod to use</li>
+        </ol>
+      </div>
       
       <div class="instructions-section">
-        <h2>Publication Instructions</h2>
+        <h2>Publication Instructions (only needed for multiplayer!)</h2>
         <ol class="instructions-list">
           <li>
             Click the Download Button ("Random Civilizations" on homepage, or "Download Mod" after completing a draft) and extract the .zip file

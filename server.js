@@ -109,13 +109,17 @@ app.use(
 		},
 	})
 );
+
+// Mount router at the configured routeSubdir (e.g., /civbuilder for legacy UI)
 app.use(routeSubdir, router);
 
-// Redirect root to the legacy frontend
+// Also mount router at root for Vue UI (which is at /v2)
+// This ensures API endpoints work for both:
+// - Legacy UI can use /civbuilder/create
+// - Vue UI can use /create
 if (routeSubdir !== "/") {
-	app.get("/", (req, res) => {
-		res.redirect(routeSubdir);
-	});
+	app.use("/", router);
+	console.log(`[API] Routes available at both ${routeSubdir} and / (for Vue UI)`);
 }
 
 app.use(zip());
@@ -509,8 +513,9 @@ const writeDatFile = async (req, res, next) => {
 		() => {
 			next();
 		},
-		() => {
-			res.render("failure", { error: "Mod creation failed" });
+		(error) => {
+			console.error(`[${req.body.seed}]: Failed to create data mod:`, error);
+			res.status(500).send("Mod creation failed: Unable to generate data mod");
 		}
 	);
 };

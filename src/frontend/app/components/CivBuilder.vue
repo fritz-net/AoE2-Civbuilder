@@ -244,6 +244,7 @@
           v-if="currentStep === stepLabels.length - 1 && !readOnly"
           class="action-btn primary-btn" 
           @click="handleFinish"
+          :disabled="isLoading"
         >
           {{ nextButtonText }}
         </button>
@@ -292,9 +293,11 @@ const props = withDefaults(defineProps<{
   initialConfig?: Partial<CivConfig>
   nextButtonText?: string
   readOnly?: boolean
+  isLoading?: boolean
 }>(), {
   nextButtonText: 'Create Civilization',
-  readOnly: false
+  readOnly: false,
+  isLoading: false
 })
 
 const emit = defineEmits<{
