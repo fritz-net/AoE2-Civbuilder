@@ -157,26 +157,26 @@ describe('Vanilla Civs JSON Files', () => {
     // Create a temporary directory for this specific test
     const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'civbuilder-vanilla-test-'));
     
+    let stdout, stderr;
+    let exitCode = 0;
+    let testDataPath, outputDatPath, outputAiConfigPath, vanillaCivData;
+    
     try {
       // Read and convert vanilla civ JSON to data.json format
-      const vanillaCivData = JSON.parse(fs.readFileSync(civFilePath, 'utf8'));
+      vanillaCivData = JSON.parse(fs.readFileSync(civFilePath, 'utf8'));
       const dataJson = convertVanillaCivToDataJson(vanillaCivData);
       
       // Write data.json to temp directory
-      const testDataPath = path.join(testDir, 'data.json');
+      testDataPath = path.join(testDir, 'data.json');
       fs.writeFileSync(testDataPath, JSON.stringify(dataJson, null, 2));
       
       // Output paths
-      const outputDatPath = path.join(testDir, 'empires2_x2_p1.dat');
-      const outputAiConfigPath = path.join(testDir, 'aiconfig.json');
+      outputDatPath = path.join(testDir, 'empires2_x2_p1.dat');
+      outputAiConfigPath = path.join(testDir, 'aiconfig.json');
 
       // Run create-data-mod
       const args = [testDataPath, vanillaDatPath, outputDatPath, outputAiConfigPath];
 
-      let stdout, stderr;
-      let exitCode = 0;
-
-    try {
       stdout = execFileSync(createDataModPath, args, {
         encoding: 'utf8',
         cwd: projectRoot,
