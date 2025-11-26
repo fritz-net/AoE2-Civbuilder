@@ -56,11 +56,6 @@ export async function createMod(
     }))
   }
   
-  // Create form data
-  const formData = new FormData()
-  formData.append('seed', seed)
-  formData.append('presets', JSON.stringify(presets))
-  
   // Add modifiers - server expects this even if empty
   const defaultModifiers = {
     randomCosts: false,
@@ -71,7 +66,6 @@ export async function createMod(
     building: 1.0
   }
   const modifiers = options.modifiers || defaultModifiers
-  formData.append('modifiers', JSON.stringify(modifiers))
   
   try {
     // Get the base URL for the API
@@ -96,10 +90,19 @@ export async function createMod(
       }
     }
     
+    // Create URL-encoded body (server expects this format, not FormData)
+    const body = new URLSearchParams()
+    body.append('seed', seed)
+    body.append('presets', JSON.stringify(presets))
+    body.append('modifiers', JSON.stringify(modifiers))
+    
     // Make the request
     const response = await fetch(`${baseUrl}/create`, {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: body.toString()
     })
     
     if (!response.ok) {
