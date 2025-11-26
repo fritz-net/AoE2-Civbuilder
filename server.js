@@ -513,8 +513,9 @@ const writeDatFile = async (req, res, next) => {
 		() => {
 			next();
 		},
-		() => {
-			res.render("failure", { error: "Mod creation failed" });
+		(error) => {
+			console.error(`[${req.body.seed}]: Failed to create data mod:`, error);
+			res.status(500).send("Mod creation failed: Unable to generate data mod");
 		}
 	);
 };

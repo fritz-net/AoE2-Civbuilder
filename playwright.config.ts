@@ -57,9 +57,9 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'node server.js',
-    url: 'http://localhost:4000',
-    reuseExistingServer: !process.env.CI,
+    command: 'npm start',
+    url: 'http://localhost:4000/v2/',
+    reuseExistingServer: true, // Allow reusing server in development
     timeout: 120 * 1000,
   },
 });
