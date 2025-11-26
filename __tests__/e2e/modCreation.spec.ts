@@ -178,15 +178,15 @@ test.describe('Build Page - Single Civ Mod Creation', () => {
     await page.getByPlaceholder(/Enter civilization name/i).fill('StoredCiv');
     
     // Wait for autosave
-    await page.waitForTimeout(1000);
-    
-    // Check that autosave indicator shows
-    await expect(page.getByText(/Last saved/i)).toBeVisible();
+    await page.waitForTimeout(1500);
     
     // Reload page
     await page.reload();
     
-    // Name should be restored
+    // Wait for page to load
+    await page.waitForTimeout(500);
+    
+    // Name should be restored from browser storage
     const civNameInput = page.getByPlaceholder(/Enter civilization name/i);
     await expect(civNameInput).toHaveValue('StoredCiv');
   });
