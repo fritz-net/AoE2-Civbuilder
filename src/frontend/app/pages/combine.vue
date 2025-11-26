@@ -9,7 +9,14 @@
 
     <div class="combine-content">
       <!-- Upload Section -->
-      <div class="upload-section">
+      <div 
+        class="upload-section"
+        @drop.prevent="handleDrop"
+        @dragover.prevent="handleDragOver"
+        @dragenter.prevent="handleDragEnter"
+        @dragleave.prevent="handleDragLeave"
+        :class="{ 'drag-over': isDragging }"
+      >
         <h2>Add Civilizations</h2>
         <label class="upload-btn">
           <input 
@@ -22,6 +29,7 @@
           <span>📁 Choose JSON Files</span>
         </label>
         <p class="upload-hint">Select one or more .json civilization files</p>
+        <p class="drag-hint">or drag and drop JSON files here</p>
       </div>
 
       <!-- Civs List -->
@@ -87,12 +95,46 @@ import { useModApi } from '~/composables/useModApi'
 const { isCreating, error, createMod } = useModApi()
 const fileInput = ref<HTMLInputElement | null>(null)
 const civs = ref<CivConfig[]>([])
+const isDragging = ref(false)
 
-function handleFileUpload(event: Event) {
-  const input = event.target as HTMLInputElement
-  if (!input.files || input.files.length === 0) return
+function handleDragOver(event: DragEvent) {
+  event.preventDefault()
+}
 
-  const files = Array.from(input.files)
+function handleDragEnter(event: DragEvent) {
+  event.preventDefault()
+  isDragging.value = true
+}
+
+function handleDragLeave(event: DragEvent) {
+  event.preventDefault()
+  // Only set to false if we're leaving the upload section entirely
+  if (event.target === event.currentTarget) {
+    isDragging.value = false
+  }
+}
+
+function handleDrop(event: DragEvent) {
+  event.preventDefault()
+  isDragging.value = false
+  
+  const files = event.dataTransfer?.files
+  if (!files || files.length === 0) return
+  
+  // Filter for JSON files only
+  const jsonFiles = Array.from(files).filter(file => 
+    file.name.toLowerCase().endsWith('.json')
+  )
+  
+  if (jsonFiles.length === 0) {
+    alert('Please drop only JSON files')
+    return
+  }
+  
+  processFiles(jsonFiles)
+}
+
+function processFiles(files: File[]) {
   const readers = files.map(file => {
     return new Promise<CivConfig>((resolve, reject) => {
       const reader = new FileReader()
@@ -122,6 +164,13 @@ function handleFileUpload(event: Event) {
     .catch(err => {
       alert(`Error loading files: ${err.message}`)
     })
+}
+
+function handleFileUpload(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (!input.files || input.files.length === 0) return
+
+  processFiles(Array.from(input.files))
 }
 
 function removeCiv(index: number) {
@@ -222,6 +271,22 @@ async function handleCreateMod() {
   margin-top: 1rem;
   color: hsla(52, 100%, 50%, 0.7);
   font-size: 0.9rem;
+}
+
+.drag-hint {
+  margin-top: 0.5rem;
+  color: hsla(52, 100%, 50%, 0.6);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.upload-section.drag-over {
+  background: rgba(160, 82, 45, 0.85);
+  border-color: hsl(52, 100%, 60%);
+  border-style: dashed;
+  border-width: 3px;
+  transform: scale(1.02);
+  transition: all 0.2s ease;
 }
 
 .civs-section {
