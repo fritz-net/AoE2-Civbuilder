@@ -105,8 +105,13 @@
     </div>
     
     <!-- Selection counter -->
-    <div v-if="maxSelections" class="selection-counter">
-      {{ selectedCount }}/{{ maxSelections }} selected
+    <div v-if="maxUniqueSelections || maxTotalSelections" class="selection-counter">
+      <span v-if="maxUniqueSelections && maxTotalSelections">
+        {{ uniqueSelectionCount }}/{{ maxUniqueSelections }} unique ({{ selectedCount }}/{{ maxTotalSelections }} total)
+      </span>
+      <span v-else>
+        {{ selectedCount }}/{{ maxTotalSelections || maxUniqueSelections }} selected
+      </span>
     </div>
     
     <!-- Card Grid -->
@@ -135,7 +140,7 @@
               @toggle="toggleCard(card.id)"
               @hover="(hovering: boolean) => handleCardHover(card, hovering)"
             />
-            <!-- Multiplier controls (only when allowMultiplier is enabled) -->
+            <!-- Multiplier controls (shown when multiplier is enabled) -->
             <div v-if="allowMultiplier" class="multiplier-controls">
               <button 
                 class="multiplier-btn"
@@ -148,7 +153,7 @@
               <button 
                 class="multiplier-btn"
                 @click.stop="incrementMultiplier(card.id)"
-                :disabled="getCardMultiplier(card.id) >= maxMultiplier"
+                :disabled="getCardMultiplier(card.id) >= maxMultiplier || (maxTotalSelections && selectedCount >= maxTotalSelections)"
               >
                 +
               </button>
@@ -172,7 +177,7 @@
             :frame-url="getCardFrameUrl(card)"
             :edition-url="getCardEditionUrl(card)"
             :selected="false"
-            :disabled="isMaxReached && mode === 'multi'"
+            :disabled="isMaxUniqueReached && mode === 'multi'"
             :size="cardSize"
             :show-edition="showEditionBadge"
             @toggle="toggleCard(card.id)"
@@ -192,26 +197,94 @@
       <div class="tooltip-rarity" :class="`rarity-text-${rarityCssClasses[hoveredCard.rarity]}`">
         {{ rarityNames[hoveredCard.rarity] }}
       </div>
-      <div class="tooltip-name">{{ hoveredCard.name }}</div>
+      <!-- Only show name as title for unique units -->
+      <div v-if="hoveredUnitStats" class="tooltip-name">{{ hoveredCard.name }}</div>
       
       <!-- Unit stats for unique units -->
       <div v-if="hoveredUnitStats" class="tooltip-unit-stats">
+        <!-- Unit graphic -->
+        <img 
+          :src="getUnitGraphicUrl(hoveredCard?.id ?? 0)" 
+          class="unit-graphic"
+          :alt="hoveredCard?.name"
+        />
+        
+        <!-- Cost with icons -->
         <div class="unit-stats-row">
           <span class="stat-label">Cost:</span>
-          <span class="stat-value">{{ formatCost(hoveredUnitStats.cost) }}</span>
+          <span class="stat-value">
+            <template v-if="hoveredUnitStats.cost[0] > 0">
+              <img :src="getStatIconUrl('food')" class="stat-icon" title="Food" />{{ hoveredUnitStats.cost[0] }}
+            </template>
+            <template v-if="hoveredUnitStats.cost[1] > 0">
+              <img :src="getStatIconUrl('wood')" class="stat-icon" title="Wood" />{{ hoveredUnitStats.cost[1] }}
+            </template>
+            <template v-if="hoveredUnitStats.cost[2] > 0">
+              <img :src="getStatIconUrl('stone')" class="stat-icon" title="Stone" />{{ hoveredUnitStats.cost[2] }}
+            </template>
+            <template v-if="hoveredUnitStats.cost[3] > 0">
+              <img :src="getStatIconUrl('gold')" class="stat-icon" title="Gold" />{{ hoveredUnitStats.cost[3] }}
+            </template>
+          </span>
         </div>
+        
+        <!-- HP -->
         <div class="unit-stats-row">
           <span class="stat-label">HP:</span>
-          <span class="stat-value">{{ hoveredUnitStats.hp.join(' / ') }}</span>
+          <span class="stat-value">
+            <img :src="getStatIconUrl('hp')" class="stat-icon" title="Hit Points" />
+            {{ formatStatPair(hoveredUnitStats.hp) }}
+          </span>
         </div>
+        
+        <!-- Attack -->
         <div class="unit-stats-row">
           <span class="stat-label">Attack:</span>
-          <span class="stat-value">{{ getBaseAttack(hoveredUnitStats.attacks.basic) }} / {{ getBaseAttack(hoveredUnitStats.attacks.elite) }}</span>
+          <span class="stat-value">
+            <img :src="getAttackIcon(hoveredUnitStats)" class="stat-icon" title="Attack" />
+            {{ getBaseAttack(hoveredUnitStats.attacks.basic) }} / {{ getBaseAttack(hoveredUnitStats.attacks.elite) }}
+          </span>
         </div>
+        
+        <!-- Attack Speed (reload time) -->
+        <div class="unit-stats-row">
+          <span class="stat-label">Attack Speed:</span>
+          <span class="stat-value">
+            <img :src="getStatIconUrl('reloadTime')" class="stat-icon" title="Attack Speed" />
+            {{ formatStatPair(hoveredUnitStats.reload) }}s
+          </span>
+        </div>
+        
+        <!-- Range (only show if > 0) -->
         <div class="unit-stats-row" v-if="hoveredUnitStats.range[0] > 0">
           <span class="stat-label">Range:</span>
-          <span class="stat-value">{{ hoveredUnitStats.range.join(' / ') }}</span>
+          <span class="stat-value">
+            <img :src="getStatIconUrl('range')" class="stat-icon" title="Range" />
+            {{ formatStatPair(hoveredUnitStats.range) }}
+          </span>
         </div>
+        
+        <!-- Movement Speed -->
+        <div class="unit-stats-row">
+          <span class="stat-label">Speed:</span>
+          <span class="stat-value">
+            <img :src="getStatIconUrl('movementSpeed')" class="stat-icon" title="Movement Speed" />
+            {{ formatStatPair(hoveredUnitStats.speed) }}
+          </span>
+        </div>
+        
+        <!-- Armor -->
+        <div class="unit-stats-row">
+          <span class="stat-label">Armor:</span>
+          <span class="stat-value">
+            <img :src="getStatIconUrl('armor')" class="stat-icon" title="Melee Armor" />
+            <img :src="getStatIconUrl('range-armor')" class="stat-icon" title="Pierce Armor" />
+            {{ formatArmorStat(hoveredUnitStats.armors.basic[0], hoveredUnitStats.armors.elite[0]) }} / 
+            {{ formatArmorStat(hoveredUnitStats.armors.basic[1], hoveredUnitStats.armors.elite[1]) }}
+          </span>
+        </div>
+        
+        <!-- Attack bonuses -->
         <div v-if="formatAttackBonuses(hoveredUnitStats.attacks.elite).length > 0" class="attack-bonuses">
           <div class="stat-label">Attack Bonuses:</div>
           <div 
@@ -222,6 +295,8 @@
             {{ bonus }}
           </div>
         </div>
+        
+        <!-- Special ability -->
         <div v-if="hoveredUnitStats.special" class="unit-special">
           {{ hoveredUnitStats.special }}
         </div>
@@ -262,7 +337,8 @@ const props = withDefaults(defineProps<{
   bonuses: BonusCard[]
   modelValue: (number | [number, number])[]
   mode?: 'single' | 'multi'
-  maxSelections?: number
+  maxUniqueSelections?: number // Max number of different bonuses that can be selected
+  maxTotalSelections?: number // Max total count including multipliers
   maxMultiplier?: number
   allowMultiplier?: boolean
   disabled?: boolean
@@ -351,11 +427,30 @@ onUnmounted(() => {
 const DEFAULT_MULTIPLIER = 1
 
 // Computed properties
-const selectedCount = computed(() => props.modelValue.length)
+// Count selected items - with multipliers, 6x bonus A counts as 6 selected
+// Count unique selections (number of different bonuses selected)
+const uniqueSelectionCount = computed(() => {
+  return props.modelValue.length
+})
 
-const isMaxReached = computed(() => {
-  if (!props.maxSelections) return false
-  return selectedCount.value >= props.maxSelections
+// Count total selections including multipliers
+const selectedCount = computed(() => {
+  return props.modelValue.reduce((total, item) => {
+    if (Array.isArray(item)) {
+      return total + item[1] // Add the multiplier value
+    }
+    return total + 1
+  }, 0)
+})
+
+const isMaxUniqueReached = computed(() => {
+  if (!props.maxUniqueSelections) return false
+  return uniqueSelectionCount.value >= props.maxUniqueSelections
+})
+
+const isMaxTotalReached = computed(() => {
+  if (!props.maxTotalSelections) return false
+  return selectedCount.value >= props.maxTotalSelections
 })
 
 // Get selected card IDs as a Set for O(1) lookup (handling both simple number and [id, multiplier] format)
@@ -472,9 +567,9 @@ function toggleCard(cardId: number) {
   } else {
     // Multi selection mode
     if (index === -1) {
-      // Add card
-      if (props.maxSelections && currentSelection.length >= props.maxSelections) {
-        return // Max reached
+      // Add card - check maxUniqueSelections (number of different bonuses)
+      if (props.maxUniqueSelections && currentSelection.length >= props.maxUniqueSelections) {
+        return // Max unique selections reached
       }
       currentSelection.push([cardId, DEFAULT_MULTIPLIER])
     } else {
@@ -488,6 +583,9 @@ function toggleCard(cardId: number) {
 // Multiplier functions for bonus stacking (enabled via allowMultiplier prop)
 function incrementMultiplier(cardId: number) {
   if (!props.allowMultiplier) return
+  
+  // Don't allow incrementing if we've reached maxTotalSelections
+  if (props.maxTotalSelections && selectedCount.value >= props.maxTotalSelections) return
   
   const currentSelection = [...props.modelValue]
   const index = currentSelection.findIndex(item => {
@@ -536,6 +634,57 @@ function handleCardHover(card: BonusCard, isHovering: boolean) {
   } else {
     hoveredCard.value = null
   }
+}
+
+/**
+ * Format a stat pair (basic/elite values) 
+ * If both values are the same, show just one. Otherwise show "basic (elite)"
+ */
+function formatStatPair(values: number[]): string {
+  if (values.length === 1 || values[0] === values[1]) {
+    return String(values[0])
+  }
+  return `${values[0]} (${values[1]})`
+}
+
+/**
+ * Format armor stat comparison between basic and elite
+ */
+function formatArmorStat(basic: number, elite: number): string {
+  if (basic === elite) {
+    return String(basic)
+  }
+  return `${basic} (${elite})`
+}
+
+/**
+ * Get URL for stat icon
+ */
+function getStatIconUrl(iconName: string): string {
+  return `/v2/img/staticons/${iconName}.png`
+}
+
+/**
+ * Get URL for unit graphic
+ */
+function getUnitGraphicUrl(unitId: number): string {
+  return `/v2/img/unitgraphics/uu_${unitId}.jpg`
+}
+
+/**
+ * Get the appropriate attack icon based on attack type
+ */
+function getAttackIcon(stats: UnitStats): string {
+  // Check if unit has pierce attack (class 3) as primary attack
+  const hasPierceAttack = stats.attacks.basic.some(([classId]) => classId === 3)
+  const hasMeleeAttack = stats.attacks.basic.some(([classId]) => classId === 4)
+  
+  // If unit has pierce attack but no melee attack, use pierce icon
+  if (hasPierceAttack && !hasMeleeAttack) {
+    return getStatIconUrl('pierceAttack')
+  }
+  // Default to melee damage icon
+  return getStatIconUrl('damage')
 }
 </script>
 
@@ -896,16 +1045,38 @@ function handleCardHover(card: BonusCard, isHovering: boolean) {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.25rem;
-}
-
-.stat-label {
-  color: hsla(52, 100%, 50%, 0.8);
-  font-weight: 500;
+  align-items: center;
 }
 
 .stat-value {
   color: hsl(52, 100%, 50%);
   font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Unit graphic in tooltip */
+.unit-graphic {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  border: 1px solid hsla(52, 100%, 50%, 0.3);
+}
+
+/* Stat icons */
+.stat-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-right: 2px;
+}
+
+.stat-label {
+  color: hsla(52, 100%, 50%, 0.8);
+  font-weight: 500;
 }
 
 .attack-bonuses {

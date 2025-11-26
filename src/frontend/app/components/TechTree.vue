@@ -27,14 +27,16 @@
       ☰
     </button>
 
-    <!-- Maximize button at top right of techtree (fixed position) -->
-    <button 
-      class="maximize-btn" 
-      @click="toggleMaximize" 
-      :title="isMaximized ? 'Exit Fullscreen' : 'Maximize'"
-    >
-      {{ isMaximized ? '⤓' : '⤢' }}
-    </button>
+    <!-- Maximize button wrapper - positioned in top right of techtree area -->
+    <div class="maximize-btn-wrapper">
+      <button 
+        class="maximize-btn" 
+        @click="toggleMaximize" 
+        :title="isMaximized ? 'Exit Fullscreen' : 'Maximize'"
+      >
+        {{ isMaximized ? '⤓' : '⤢' }}
+      </button>
+    </div>
 
     <div ref="techtreeRef" class="techtree" :style="techtreeStyle" @mouseleave="hideHelp" @wheel="handleWheel">
       <div class="svg-wrapper" :style="svgWrapperStyle">
@@ -948,12 +950,15 @@ defineExpose({
   margin-right: 30px;
 }
 
-/* Maximize button at top right of techtree - fixed position so it doesn't scroll */
-.maximize-btn {
-  position: fixed;
-  top: 70px;
-  right: 20px;
+/* Maximize button wrapper - positions button at top right of techtree area */
+.maximize-btn-wrapper {
+  position: absolute;
+  top: 10px;
+  right: 10px;
   z-index: 3001;
+}
+
+.maximize-btn {
   background: rgba(77, 54, 23, 0.9);
   color: white;
   border: 2px solid #4d3617;
@@ -968,7 +973,7 @@ defineExpose({
   background: rgba(77, 54, 23, 1);
 }
 
-.is-maximized .maximize-btn {
+.is-maximized .maximize-btn-wrapper {
   position: fixed;
   top: 10px;
   right: 20px;

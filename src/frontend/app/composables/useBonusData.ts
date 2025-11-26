@@ -29,12 +29,14 @@ export const numCards = {
 }
 
 // Maximum selections per bonus type
+// maxUniqueSelections: how many different bonuses can be selected
+// maxTotalSelections: total count including multipliers (null = no limit on total)
 export const maxSelections = {
-  civ: 6,
-  uu: 1,
-  castle: 1,
-  imp: 1,
-  team: 1
+  civ: { maxUniqueSelections: 6, maxTotalSelections: 1530 }, // 6 unique * 255 max multiplier each
+  uu: { maxUniqueSelections: 1, maxTotalSelections: 1 },
+  castle: { maxUniqueSelections: 1, maxTotalSelections: 255 },
+  imp: { maxUniqueSelections: 1, maxTotalSelections: 255 },
+  team: { maxUniqueSelections: 1, maxTotalSelections: 255 }
 }
 
 // Image prefix for each bonus type
@@ -548,7 +550,134 @@ const cardDescriptions: [string, number, number, number][][] = [
     ["Liao Dao", 2, -53, 0],
   ],
 
-  // Team Bonuses (index 4 in original, stored as index 2 here)
+  // Castle Age Unique Techs (index 2 in original, stored as index 2 here)
+  [
+    ["Atlatl (Skirmishers +1 attack, +1 range) [400F 350G]", 0, -15, 0],
+    ["Kasbah (team Castles work 25% faster) [250F 250G]", 0, -27, 0],
+    ["Yeomen (+1 foot archer and skirmisher range, +2 tower attack) [750W 450G]", 2, -1, 0],
+    ["Stirrups (Cavalry attack 33% faster) [400F 200G]", 3, -32, 0],
+    ["Burgundian Vineyards (Farmers slowly generate gold in addition to food) [400F 300G]", 2, -36, 0],
+    ["Manipur Cavalry (Cavalry +4 attack vs. Ranged Soldiers) [300F 300G]", 0, -30, 0],
+    ["Greek Fire (Fire ships +1 range, Bombard Towers and Dromons increased blast radius) [250F 300G]", 0, -7, 0],
+    ["Stronghold (Castles, Kreposts and Towers fire 33% faster, Castles and Kreposts heal allied infantry in a 7 tile radius) [250F 200G]", 1, -13, 0],
+    ["Great Wall (Walls and towers +30% HP) [400W 200S]", 0, -6, 0],
+    ["Steppe Husbandry (Light Cavalry, Steppe Lancers and Cavalry Archers trained 100% faster) [200F 300W]", 1, -34, 0],
+    ["Royal Heirs (Unique Unit and Camels receive -3 damage from Mounted Units) [300F 300G]", 1, -25, 0],
+    ["Bearded Axe (Unique Unit +1 range) [300F 300G]", 4, -2, 0],
+    ["Anarchy (create Unique Unit at barracks) [450F 250G]", 2, -3, 0],
+    ["Marauders (create Unique Unit at stables) [300W 200G]", 2, -17, 0],
+    ["Andean Sling (Skirmishers and Slingers no minimum range, Slingers +1 attack) [200F 300G]", 0, -21, 0],
+    ["Grand Trunk Road (All gold income 10% faster, Market trading fee reduced to 10%) [250F 200W]", 1, -20, 0],
+    ["Pavise (Archer-line, Condottiero, and Unique Unit +1/+1 armor) [200W 150G]", 1, 1, 0],
+    ["Yasama (Towers shoot extra arrows) [300F 300W]", 2, -5, 0],
+    ["Tusk Swords (Melee elephant units +3 attack) [300W 450G]", 3, -28, 0],
+    ["Eupseong (Watch Towers, Guard Towers, and Keeps +2 range) [300F 300W]", 1, -18, 0],
+    ["Hill Forts (Town Centers +3 range) [250F 250G]", 0, -35, 0],
+    ["Corvinian Army (Unique Unit gold cost converted to additional food/wood cost) [200F 300G]", 4, -22, 0],
+    ["Thalassocracy (upgrades Docks to Harbors, which fire arrows) [300F 300G]", 1, -29, 0],
+    ["Tigui (Town Centers fire arrows when ungarrisoned) [200F 300W]", 0, -26, 0],
+    ["Hul'che Javelineers (Skirmishers throw a second projectile) [300F 300G]", 1, -16, 0],
+    ["Nomads (lost houses do not decrease population headroom) [300W 150G]", 0, -12, 0],
+    ["Kamandaran (Archer-line gold cost is replaced by additional wood cost) [400F 300G]", 3, -8, 0],
+    ["Carrack (Ships +1/+1 armor) [200W 300G]", 1, -24, 0],
+    ["Madrasah (Monks return 50 gold when killed) [200F 100G]", 0, 1, 0],
+    ["First Crusade (Each Town Center (maxiumum 5) spawns a one-time batch of 5 of your Unique Unit; units are more resistant to conversion) [400F 300G]", 3, -37, 0],
+    ["Orthodoxy (Monk units +3/+3P armor) [200F 300G]", 1, 1, 0],
+    ["Inquisition (Monk convert faster) [100F 300G]", 1, -14, 0],
+    ["Silk Armor (Light Cavalry, Steppe Lancers and Cavalry Archers receive +1/+1P armor) [400W 300G]", 1, -33, 0],
+    ["Ironclad (Siege units extra melee armor) [400W 350G]", 1, -4, 0],
+    ["Sipahi (Cavalry Archers +20 HP) [350F 150G]", 2, -10, 0],
+    ["Chatras (Elephant units +100 HP) [250F 250G]", 2, -31, 0],
+    ["Chieftains (Infantry deal bonus damage to cavalry, generate gold when killing villagers, trade units, and monks) [600F 450G]", 1, -11, 0],
+    ["Szlachta Privileges (Knight-line costs -60% gold) [500F 300G]", 3, -38, 0],
+    ["Wagenburg Tactics (Gunpowder units move 15% faster) [300F 300G]", 1, -39, 0],
+    ["Deconstruction (Siege units fire 33% faster) [400W 400G]", 2, 1, 0],
+    ["Obsidian Arrows (Archer-line +6 attack vs. buildings) [300F 300G]", 3, 1, 0],
+    ["Tortoise Engineers (Rams train 100% faster) [100W 200G]", 0, 1, 0],
+    ["Panoply (Infantry +1/+1P armor, +1 attack) [300F 200G]", 2, 1, 0],
+    ["Clout Archery (Archery Ranges work 50% faster) [150W 250G]", 1, 1, 0],
+    ["Medical Corps (Elephant units regenerate 30 HP per minute) [300F 200G]", 1, -40, 0],
+    ["Paiks (Unique Unit and elephant units attack 20% faster) [375W 275G]", 3, -41, 0],
+    ["Kshatriyas (Military units cost -25% food) [500F 450G]", 3, -42, 0],
+    ["Detinets (40% of Castle, Tower, Krepost, and Donjon stone cost replaced with wood) [400W 200G]", 2, -23, 0],
+    ["Zealotry (Camel units +20 hit points) [400F 400G]", 1, 1, 0],
+    ["Ballistas (Scorpions and Ballista Elephants fire 33% faster, Galleys +2 attack) [400W 300G]", 1, -43, 0],
+    ["Bimaristan (Monk units automatically heal multiple nearby units) [300W 200G]", 0, -9, 0],
+    ["Cilician Fleet (Demolition Ships +20% blast radius; Galley-line and Dromons +1 range) [350W 300G]", 0, -44, 0],
+    ["Svan Towers (Defensive buildings +2 attack; towers fire arrows that pierce multiple units) [300F 200G]", 2, -45, 0],
+    ["Replaceable Parts (Siege units +1/+1P armor, repairing siege is free) [400W 250G]", 2, 1, 0],
+    ["Silk Road (Trade units cost -50%) [250F 250G]", 0, -19, 0],
+    ["Coiled Serpent Array (Spearman-line and Unique Unit gain additional HP when near each other) [350F 300G]", 2, -49, 0],
+    ["Red Cliff Tactics (Demolition Ships and Fire Archers deal fire damage to ships and buildings) [400F 250G]", 1, -50, 0],
+    ["Tuntian (Soldiers passively produce food) [250F 300G]", 2, -51, 0],
+    ["Fortified Bastions (Fortifications regenerate 500 HP per minute) [350F 250W]", 1, -52, 0],
+    ["Lamellar Armor (Infantry and Skirmishers reflect 25% melee damage back to the attacker) [450F 300G]", 3, -53, 0],
+  ],
+
+  // Imperial Age Unique Techs (index 3 in original, stored as index 3 here)
+  [
+    ["Garland Wars (Infantry +4 attack) [450F 750G]", 2, -15, 0],
+    ["Maghrebi Camels (Camel units regenerate) [700F 300G]", 1, -27, 0],
+    ["Warwolf (Trebuchet units do blast damage) [800W 400G]", 1, -1, 0],
+    ["Bagains (Militia-line gains +5 armor) [900F 450G]", 2, -32, 0],
+    ["Flemish Revolution (Upgrades all existing Villagers to Flemish Militia; create Flemish Militia at Town Centers) [200F 150G + 10F 5G per villager]", 0, -36, 0],
+    ["Howdah (Elephant units +1/+1P armor) [400F 300W]", 1, -30, 0],
+    ["Logistica (Unique Unit causes trample damage) [800F 600G]", 4, -7, 0],
+    ["Furor Celtica (Siege Workshop units +40% HP) [750F 450G]", 1, -13, 0],
+    ["Rocketry (Scorpions, Rocket Carts and Lou Chuans +25% attack; Lou Chuans fire rockets) [1100W 900G]", 2, -6, 0],
+    ["Elite Mercenaries (team members can train 5 free elite versions of your Unique Unit per castle) [650F 400G]", 0, -34, 0],
+    ["Torsion Engines (increases blast radius of Siege Workshop units) [1000F 600G]", 3, -25, 0],
+    ["Chivalry (Stables work 40% faster) [600W 500G]", 0, -2, 0],
+    ["Perfusion (Barracks work 100% faster) [400W 600G]", 1, -3, 0],
+    ["Atheism (+100 years for Relic, Wonder victories; enemy relics generate -50% resources) [500F 3OOW]", 0, -17, 0],
+    ["Fabric Shields (Shock Infantry, Slingers, Unique Unit +1/+2 armor) [600F 600G]", 1, -21, 0],
+    ["Shatagni (Hand Cannoneers +2 range) [500F 300G]", 0, -20, 0],
+    ["Pirotechnia (Hand cannoneers deal +15% pass through damage and are more accurate) [650F 500G]", 2, -19, 0],
+    ["Kataparuto (Trebuchet units fire, pack faster) [550W 300G]", 1, -5, 0],
+    ["Double Crossbow (Scorpion and Ballista units fire two projectiles) [700F 400G]", 1, -28, 0],
+    ["Shinkichon (Rocket Carts and Turtle Ships +1 range, fire additional rockets) [1100F 800G]", 0, -18, 0],
+    ["Tower Shields (Spearmen and Skirmishers +2P armor) [500F 200G]", 1, -35, 0],
+    ["Recurve Bow (Cavalry archers +1 range, +1 attack) [600W 400G]", 1, -22, 0],
+    ["Forced Levy (Militia-line gold cost is replaced by additional food cost) [850F 500G]", 3, -29, 0],
+    ["Farimba (Cavalry +5 attack) [650F 400G]", 4, -26, 0],
+    ["El Dorado (Shock Infantry have +40 hit points) [750F 450G]", 2, -16, 0],
+    ["Drill (Siege workshop units move 50% faster) [500W 450G]", 2, -12, 0],
+    ["Citadels (Castles and Kreposts fire Bullets [+4 attack, +3 vs Rams, +3 vs Infantry], receive -25% bonus damage) [600W 300G]", 3, -8, 0],
+    ["Arquebus (gunpowder units more accurate) [700F 400G]", 0, -24, 0],
+    ["Counterweights (Trebuchet units and Mangonel-line +15% attack) [650F 500G]", 0, -9, 0],
+    ["Hauberk (Knights +1/+2P armor) [700F 600G]", 1, -37, 0],
+    ["Druzhina (Infantry damage adjacent units) [900F 500G]", 2, -23, 0],
+    ["Supremacy (Villagers stronger in combat) [400F 250G]", 0, -14, 0],
+    ["Timurid Siegecraft (Trebuchet units +2 range, enables Flaming Camels) [500W 400G]", 1, -33, 0],
+    ["Crenellations (+3 range Castles garrisoned infantry fire arrows) [600F 400S]", 1, -4, 0],
+    ["Artillery (+2 range Bombard Towers, Bombard Cannons, Cannon Galleons) [600F 650G]", 2, -10, 0],
+    ["Paper Money (Lumberjacks slowly generate gold in addition to wood) [550F 200W]", 2, -31, 0],
+    ["Bogsveigar (Foot Archers and Unique ships +1 attack) [650F 500G]", 0, -11, 0],
+    ["Lechitic Legacy (Light Cavalry deals trample damage) [750F 550G]", 3, -38, 0],
+    ["Hussite Reforms (Monks and Monastery upgrades have their gold cost replaced by food) [500F 450G]", 1, -39, 0],
+    ["Brigandine Armor (Camels and Cavalry Archers +2/+1P armor) [500W 500G]", 1, 1, 0],
+    ["Field Repairmen (Rams regain HP) [350W 650G]", 0, 1, 0],
+    ["Golden Age (All buildings work 10% faster) [300S 600G]", 1, 1, 0],
+    ["Villager's Revenge (Dead villagers become Halberdiers) [500F 250G]", 1, 1, 0],
+    ["Gate Crashing (Ram gold cost is replaced by additional wood cost) [600W 700G]", 2, 1, 0],
+    ["Wootz Steel (Infantry and cavalry attacks ignore armor) [650F 550G]", 4, -40, 0],
+    ["Mahayana (Villagers and monk units take 10% less population space) [800W 650G]", 2, -41, 0],
+    ["Frontier Guards (Camel units and Elephant Archers +4 melee armor) [800F 700G]", 1, -42, 0],
+    ["Comitatenses (Militia-line, Knight-line, and Unique Unit train 50% faster and receive a 5 damage charge attack) [700F 800G]", 1, -43, 0],
+    ["Fereters (Infantry except Spearmen +30 HP, Warrior Priests +100% heal speed) [550F 400G]", 2, -44, 0],
+    ["Aznauri Cavalry (Cavalry units take 15% less population space) [750F 250G]", 1, -45, 0],
+    ["Pila (Skirmisher attacks strip armour) [700F 600G]", 3, 1, 0],
+    ["Enlistment (Infantry take 15% less population space) [700F 300G]", 1, 1, 0],
+    ["Marshalled Hunters (Foot archers and skirmishers take 15% less population space) [750W 250G]", 1, 1, 0],
+    ["Shigetō Yumi (Unique Unit, Mounted Archers, and Towers attack 15% faster and deal +2 anti-unique unit damage) [750F 350G]", 1, 1, 0],
+    ["Bolt Magazine (Archer-line, Lou Chans, and War Chariots fire additional projectiles)", 3, -49, 0],
+    ["Sitting Tiger (Trebuchet units fire additional projectiles) [600W, 300G]", 4, -50, 0],
+    ["Ming Guang Armor (Mounted units +4 melee armor) [600F 450G]", 4, -51, 0],
+    ["Thunderclap Bombs (Rocket Carts, Grenadiers, and Lou Chuans detonate when defeated; projectiles produce additional explosions) [900F 600G]", 2, -52, 0],
+    ["Ordo Cavalry (Cavalry regenerates HP in combat) [600F 300G]", 2, -53, 0],
+  ],
+
+  // Team Bonuses (index 4 in original, stored as index 4 here)
   [
     ["Relics generate +33% gold", 2, -15, 0],
     ["Genitour available in the Archery Range starting in the Castle Age", 2, -27, 0],
@@ -645,11 +774,16 @@ export function getBonusCards(type: BonusType): BonusCard[] {
     case 'uu':
       descriptionIndex = 1
       break
-    case 'team':
+    case 'castle':
       descriptionIndex = 2
       break
+    case 'imp':
+      descriptionIndex = 3
+      break
+    case 'team':
+      descriptionIndex = 4
+      break
     default:
-      // For now, only support civ, uu, and team bonuses
       return []
   }
 
