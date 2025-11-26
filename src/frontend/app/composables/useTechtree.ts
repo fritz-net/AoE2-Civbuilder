@@ -529,13 +529,13 @@ export function getConnections(showPastures: boolean = false): [string, string][
 
   // Add farm/pasture specific connections based on showPastures option
   if (showPastures) {
-    // Pasture techs connections
+    // Pasture tech connections
     connections.push([b(MILL), t(DOMESTICATION)])
     connections.push([t(DOMESTICATION), t(PASTORALISM)])
     connections.push([t(PASTORALISM), t(TRANSHUMANCE)])
     connections.push([b(MILL), b(PASTURE)])
   } else {
-    // Farm techs connections (default)
+    // Farm tech connections (default)
     connections.push([b(MILL), t(HORSE_COLLAR)])
     connections.push([t(HORSE_COLLAR), t(HEAVY_PLOW)])
     connections.push([t(HEAVY_PLOW), t(CROP_ROTATION)])
