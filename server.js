@@ -945,6 +945,20 @@ router.get("/draft/:id", checkCookies, authenticateDraft, function (req, res) {
 	}
 });
 
+// API endpoint to get draft data as JSON for Vue UI
+router.get("/api/draft/:id", checkCookies, authenticateDraft, function (req, res) {
+	if (req.authenticated == 0) {
+		res.status(404).json({ error: "Draft does not exist" });
+	} else {
+		const draft = getDraft(req.params.id);
+		if (draft === -1) {
+			res.status(404).json({ error: "Draft does not exist" });
+		} else {
+			res.json(draft);
+		}
+	}
+});
+
 router.post("/download", (req, res) => {
 	res.download(__dirname + "/modding/requested_mods/" + req.body.draftID + ".zip");
 });
