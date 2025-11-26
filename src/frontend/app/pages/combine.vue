@@ -247,6 +247,7 @@ async function handleCreateMod() {
   padding: 2rem;
   border-radius: 8px;
   text-align: center;
+  transition: all 0.2s ease;
 }
 
 .upload-section h2 {
@@ -295,7 +296,8 @@ async function handleCreateMod() {
   border-color: hsl(52, 100%, 60%);
   border-style: dashed;
   border-width: 3px;
-  transform: scale(1.02);
+  /* Removed transform: scale(1.02) to prevent layout shift */
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
   transition: all 0.2s ease;
 }
 

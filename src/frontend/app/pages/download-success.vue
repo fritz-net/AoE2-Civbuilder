@@ -25,15 +25,15 @@
       </div>
       
       <div class="download-actions">
-        <NuxtLink to="/v2/build" class="action-button primary-btn">
+        <NuxtLink to="/build" class="action-button primary-btn">
           Create Another Civ
         </NuxtLink>
         
-        <NuxtLink to="/v2/combine" class="action-button secondary-btn">
+        <NuxtLink to="/combine" class="action-button secondary-btn">
           Combine More Civs
         </NuxtLink>
         
-        <NuxtLink to="/v2/" class="action-button tertiary-btn">
+        <NuxtLink to="/" class="action-button tertiary-btn">
           Back to Home
         </NuxtLink>
       </div>
@@ -48,17 +48,17 @@
               <li>Extract the contents to your Age of Empires II mods folder:
                 <ul>
                   <li><strong>Steam:</strong> <code>C:\Program Files (x86)\Steam\steamapps\common\AoE2DE\mods\local</code></li>
-                  <li><strong>Microsoft Store:</strong> <code>C:\Users\[YourUsername]\Games\Age of Empires 2 DE\[YourID]\mods\local</code></li>
+                  <li><strong>Microsoft Store / Xbox:</strong> <code>C:\Users\{username}\Games\Age of Empires 2 DE\{userId}\mods</code></li>
                 </ul>
               </li>
               <li>Launch Age of Empires II: Definitive Edition</li>
-              <li>Go to Tools → Mods</li>
-              <li>Enable your new civilization mod</li>
-              <li>Restart the game</li>
+              <li>Your mod is enabled by default</li>
+              <li>On game start, select the data mod to use</li>
+              <li>Make sure only one custom civ UI mod is enabled at a time</li>
             </ol>
             
             <h3>Need Help?</h3>
-            <p>Visit the <NuxtLink to="/v2/help">Help page</NuxtLink> for more information or join our <a href="https://discord.gg/vQxck6JDwf" target="_blank" rel="noopener">Discord community</a>.</p>
+            <p>Visit the <NuxtLink to="/help">Help page</NuxtLink> for more information or join our <a href="https://discord.gg/vQxck6JDwf" target="_blank" rel="noopener">Discord community</a>.</p>
           </div>
         </details>
       </div>

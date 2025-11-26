@@ -30,8 +30,17 @@ const hasUnsavedChanges = computed(() => {
   return config?.alias !== '' || config?.description !== ''
 })
 
+// Flag to allow navigation after successful mod creation
+const allowNavigation = ref(false)
+
 // Prevent accidental navigation when user has unsaved changes
 onBeforeRouteLeave((to, from, next) => {
+  // Always allow navigation if flag is set (after mod creation)
+  if (allowNavigation.value) {
+    next()
+    return
+  }
+  
   if (hasUnsavedChanges.value) {
     const answer = window.confirm('You have unsaved changes. Are you sure you want to leave?')
     if (!answer) {
@@ -48,9 +57,11 @@ async function handleNext(config: CivConfig) {
   try {
     const seed = await createMod([config])
     
+    // Set flag to allow navigation without warning
+    allowNavigation.value = true
+    
     // Navigate to download success page
-    const router = useRouter()
-    router.push({
+    await router.push({
       path: '/download-success',
       query: {
         civs: config.alias,
