@@ -1,8 +1,28 @@
 <template>
   <div class="draft-host-page">
+    <!-- Join Form (before entering lobby) -->
+    <div v-if="needsToJoin" class="join-phase">
+      <h1 class="join-title">Civilization Drafter</h1>
+      <form class="join-box" @submit.prevent="handleJoin">
+        <label for="playerName" class="join-label">Player (or Team) Name</label>
+        <input
+          id="playerName"
+          v-model="playerName"
+          type="text"
+          class="join-input"
+          placeholder="Enter your name"
+          required
+          maxlength="30"
+        />
+        <button type="submit" class="join-button" :disabled="isJoining">
+          {{ isJoining ? 'Joining...' : 'Join Draft' }}
+        </button>
+      </form>
+    </div>
+
     <!-- Phase 0: Lobby -->
     <DraftLobby
-      v-if="currentPhase === 0"
+      v-else-if="currentPhase === 0"
       :players="draft?.players || []"
       :player-number="playerNumber"
       :is-host="isHost"
@@ -115,6 +135,11 @@ const route = useRoute()
 const router = useRouter()
 const draftId = computed(() => route.params.id as string)
 
+// Join form state
+const needsToJoin = ref(true)
+const playerName = ref('')
+const isJoining = ref(false)
+
 const {
   draft,
   playerNumber,
@@ -172,6 +197,41 @@ const displayCards = computed(() => {
   }))
 })
 
+const handleJoin = async () => {
+  if (!playerName.value.trim()) return
+  
+  isJoining.value = true
+  
+  try {
+    // POST to /join endpoint to register as host (joinType=0)
+    const response = await fetch('/join', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        draftID: draftId.value,
+        civ_name: playerName.value.trim(),
+        joinType: '0', // 0 = host
+      }).toString(),
+      redirect: 'manual', // Don't follow redirect, we'll handle it
+    })
+    
+    // After successful join, reload the page to get cookies
+    if (response.ok || response.type === 'opaqueredirect') {
+      // Reload to get new cookies and show lobby
+      window.location.reload()
+    } else {
+      const text = await response.text()
+      throw new Error(text || 'Failed to join draft')
+    }
+  } catch (err) {
+    console.error('Failed to join draft:', err)
+    error.value = err instanceof Error ? err.message : 'Failed to join draft'
+    isJoining.value = false
+  }
+}
+
 const handleStartDraft = () => {
   startDraft()
 }
@@ -220,15 +280,38 @@ const goHome = () => {
   router.push('/v2')
 }
 
+// Helper to get cookie value
+const getCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [key, value] = cookie.trim().split('=')
+    if (key === name) {
+      return value
+    }
+  }
+  return null
+}
+
 onMounted(async () => {
-  // Initialize socket first (async - loads script)
-  await initSocket()
+  // Check if already joined (has playerNumber cookie for this draft)
+  const playerNumberCookie = getCookie('playerNumber')
+  const draftIdCookie = getCookie('draftID')
   
-  // Setup listeners before loading so we can receive the gamestate
-  setupSocketListeners()
-  
-  // Load draft - this will use socket.io to get gamestate
-  await loadDraft(draftId.value)
+  if (playerNumberCookie !== null && draftIdCookie === draftId.value) {
+    // Already joined, skip join form
+    needsToJoin.value = false
+    
+    // Initialize socket first (async - loads script)
+    await initSocket()
+    
+    // Setup listeners before loading so we can receive the gamestate
+    setupSocketListeners()
+    
+    // Load draft - this will use socket.io to get gamestate
+    await loadDraft(draftId.value)
+  }
+  // Otherwise, show join form
 })
 
 onUnmounted(() => {
@@ -240,6 +323,81 @@ onUnmounted(() => {
 .draft-host-page {
   min-height: 100vh;
   background: url('/img/aoe2background.jpg') center/cover;
+}
+
+/* Join Form Styles */
+.join-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 2rem;
+}
+
+.join-title {
+  font-size: 4rem;
+  color: hsl(52, 100%, 50%);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  font-family: 'TrajanPro', serif;
+  margin-bottom: 2rem;
+}
+
+.join-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border: 3px solid hsl(52, 100%, 50%);
+  border-radius: 8px;
+  padding: 2rem 3rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.join-label {
+  font-size: 1.3rem;
+  color: hsl(52, 100%, 50%);
+  font-weight: bold;
+}
+
+.join-input {
+  width: 300px;
+  padding: 0.75rem 1rem;
+  font-size: 1.1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 204, 0, 0.5);
+  border-radius: 4px;
+  color: #f0e6d2;
+  text-align: center;
+}
+
+.join-input:focus {
+  outline: none;
+  border-color: hsl(52, 100%, 50%);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
+.join-button {
+  padding: 0.75rem 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: linear-gradient(to bottom, hsl(52, 100%, 50%), hsl(45, 100%, 40%));
+  border: 2px solid hsl(52, 100%, 60%);
+  border-radius: 4px;
+  color: #1a0f0a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.join-button:hover:not(:disabled) {
+  background: linear-gradient(to bottom, hsl(52, 100%, 60%), hsl(45, 100%, 50%));
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
+}
+
+.join-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .setup-phase {
