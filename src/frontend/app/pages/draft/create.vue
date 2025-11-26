@@ -9,7 +9,7 @@
           id="numPlayers"
           v-model.number="draftSettings.numPlayers"
           type="number"
-          min="2"
+          min="1"
           max="8"
           class="form-input"
         />
@@ -146,7 +146,7 @@ const router = useRouter()
 const rarityTexts = ['Ordinary', 'Distinguished', 'Superior', 'Epic', 'Legendary']
 
 const draftSettings = ref({
-  numPlayers: 2,
+  numPlayers: 1,
   rounds: 4,
   techTreePoints: 200,
   allowedRarities: [true, true, true, true, true],
@@ -184,11 +184,8 @@ const createDraft = async () => {
       throw new Error('Failed to create draft')
     }
 
-    // The server redirects to draft_links.pug, but we need to parse the response
-    // Since we're doing this in Vue, we'll parse the text response
+    // Parse the HTML response to extract the draft ID
     const text = await response.text()
-    
-    // Extract links from the HTML response
     const parser = new DOMParser()
     const doc = parser.parseFromString(text, 'text/html')
     
@@ -196,10 +193,22 @@ const createDraft = async () => {
     const playerLink = doc.querySelector('#link2')?.getAttribute('value') || ''
     const spectatorLink = doc.querySelector('#link3')?.getAttribute('value') || ''
 
+    // Extract draft ID from one of the links (they all contain it)
+    const draftIdMatch = hostLink.match(/\/draft\/(?:host|player)?\/(\d+)/)
+    const draftId = draftIdMatch ? draftIdMatch[1] : ''
+
+    if (!draftId) {
+      throw new Error('Failed to extract draft ID from server response')
+    }
+
+    // Generate links using browser location to support both local and production environments
+    // This handles the /v2 subpath automatically
+    const baseUrl = window.location.origin + window.location.pathname.replace(/\/draft\/create\/?$/, '')
+    
     draftLinks.value = {
-      host: hostLink,
-      player: playerLink,
-      spectator: spectatorLink,
+      host: `${baseUrl}/draft/host/${draftId}`,
+      player: `${baseUrl}/draft/player/${draftId}`,
+      spectator: `${baseUrl}/draft/${draftId}`,
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'An error occurred'
