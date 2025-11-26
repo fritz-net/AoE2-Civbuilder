@@ -450,33 +450,12 @@ const canProceed = computed(() => {
 
 // Compute which steps have valid data and should be accessible
 const accessibleSteps = computed(() => {
-  const accessible: number[] = []
-  
-  // Step 0 (Basic Info) is always accessible
-  accessible.push(0)
+  const accessible: number[] = [0] // Step 0 (Basic Info) is always accessible
   
   // Step 0 is valid if we have a civ name
   if (civConfig.alias && civConfig.alias.length > 0) {
-    // Step 1 (Civ Bonuses) is accessible if step 0 is valid
-    accessible.push(1)
-    
-    // Step 2 (Unique Unit) is always accessible after step 0
-    accessible.push(2)
-    
-    // Step 3 (Castle Tech) is always accessible after step 0
-    accessible.push(3)
-    
-    // Step 4 (Imperial Tech) is always accessible after step 0
-    accessible.push(4)
-    
-    // Step 5 (Team Bonus) is always accessible after step 0
-    accessible.push(5)
-    
-    // Step 6 (Tech Tree) is always accessible after step 0
-    accessible.push(6)
-    
-    // Step 7 (Review) is always accessible after step 0
-    accessible.push(7)
+    // All subsequent steps are accessible once step 0 is valid
+    accessible.push(...Array.from({ length: stepLabels.length - 1 }, (_, i) => i + 1))
   }
   
   return accessible
