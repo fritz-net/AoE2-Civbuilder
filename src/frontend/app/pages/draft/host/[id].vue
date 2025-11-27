@@ -356,7 +356,8 @@ const handleSaveTechTree = () => {
 }
 
 // Handle Done button from TechTree component
-const handleTechTreeDone = (tree: number[][], points: number) => {
+const handleTechTreeDone = (tree: number[][], _points: number) => {
+  // points parameter is passed by TechTree but we only need to save the tree
   civConfig.value.tree = tree
   if (playerNumber.value >= 0) {
     updateTree(playerNumber.value, tree)

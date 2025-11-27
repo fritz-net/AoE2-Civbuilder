@@ -161,7 +161,7 @@ const orderedPlayers = computed(() => {
 
 // Get the current player data (the one viewing this board)
 const currentPlayerData = computed(() => {
-  if (props.myPlayerIndex >= 0 && props.myPlayerIndex < props.players.length) {
+  if (props.myPlayerIndex >= 0 && props.players && props.myPlayerIndex < props.players.length) {
     return props.players[props.myPlayerIndex]
   }
   return null
