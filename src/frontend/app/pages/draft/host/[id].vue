@@ -139,7 +139,10 @@
     <!-- Phase 5: Creating Mod -->
     <div v-else-if="currentPhase === 5" class="creating-phase">
       <h1 class="phase-title">Creating Mod...</h1>
-      <div class="loading-spinner"></div>
+      <div class="creating-phase-box">
+        <div class="loading-spinner"></div>
+        <p class="creating-text">Please wait while your civilization mod is being generated...</p>
+      </div>
     </div>
 
     <!-- Phase 6: Download -->
@@ -885,6 +888,25 @@ onUnmounted(() => {
 }
 
 .waiting-text {
+  color: #f0e6d2;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  text-align: center;
+  max-width: 500px;
+}
+
+/* Creating phase box (for better contrast with loading spinner) */
+.creating-phase-box {
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border: 3px solid hsl(52, 100%, 50%);
+  border-radius: 8px;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  max-width: 600px;
+}
+
+.creating-text {
   color: #f0e6d2;
   font-size: 1.2rem;
   margin-top: 2rem;
