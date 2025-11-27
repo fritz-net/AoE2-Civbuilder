@@ -95,7 +95,10 @@
     <div 
       v-show="hoveredCard || tooltipText" 
       class="help-tooltip"
-      :class="hoveredCard ? `rarity-border-${hoveredCard.rarity || 0}` : ''"
+      :class="[
+        hoveredCard ? `rarity-border-${hoveredCard.rarity || 0}` : '',
+        hoveredUnitStats ? 'unit-stats-tooltip' : ''
+      ]"
       :style="tooltipStyle"
     >
       <div class="help-content">
@@ -103,7 +106,114 @@
           <span :class="'rarity-text rarity-' + (hoveredCard.rarity || 0)">
             {{ rarityNames[hoveredCard.rarity || 0] }}
           </span>
-          <p class="card-description">{{ hoveredCard.description || hoveredCard.name }}</p>
+          
+          <!-- Show unit name for unique units -->
+          <div v-if="hoveredUnitStats" class="tooltip-name">{{ hoveredCard.name }}</div>
+          
+          <!-- Unit stats display for unique units -->
+          <div v-if="hoveredUnitStats" class="tooltip-unit-stats">
+            <!-- Unit graphic -->
+            <img 
+              :src="getUnitGraphicUrl(hoveredCard.id)" 
+              class="unit-graphic"
+              :alt="hoveredCard.name"
+            />
+            
+            <!-- Cost with icons -->
+            <div class="unit-stats-row">
+              <span class="stat-label">Cost:</span>
+              <span class="stat-value">
+                <template v-if="hoveredUnitStats.cost[0] > 0">
+                  <img :src="getStatIconUrl('food')" class="stat-icon" title="Food" />{{ hoveredUnitStats.cost[0] }}
+                </template>
+                <template v-if="hoveredUnitStats.cost[1] > 0">
+                  <img :src="getStatIconUrl('wood')" class="stat-icon" title="Wood" />{{ hoveredUnitStats.cost[1] }}
+                </template>
+                <template v-if="hoveredUnitStats.cost[2] > 0">
+                  <img :src="getStatIconUrl('stone')" class="stat-icon" title="Stone" />{{ hoveredUnitStats.cost[2] }}
+                </template>
+                <template v-if="hoveredUnitStats.cost[3] > 0">
+                  <img :src="getStatIconUrl('gold')" class="stat-icon" title="Gold" />{{ hoveredUnitStats.cost[3] }}
+                </template>
+              </span>
+            </div>
+            
+            <!-- HP -->
+            <div class="unit-stats-row">
+              <span class="stat-label">HP:</span>
+              <span class="stat-value">
+                <img :src="getStatIconUrl('hp')" class="stat-icon" title="Hit Points" />
+                {{ formatStatPair(hoveredUnitStats.hp) }}
+              </span>
+            </div>
+            
+            <!-- Attack -->
+            <div class="unit-stats-row">
+              <span class="stat-label">Attack:</span>
+              <span class="stat-value">
+                <img :src="getAttackIcon(hoveredUnitStats)" class="stat-icon" title="Attack" />
+                {{ getBaseAttack(hoveredUnitStats.attacks.basic) }} / {{ getBaseAttack(hoveredUnitStats.attacks.elite) }}
+              </span>
+            </div>
+            
+            <!-- Attack Speed (reload time) -->
+            <div class="unit-stats-row">
+              <span class="stat-label">Attack Speed:</span>
+              <span class="stat-value">
+                <img :src="getStatIconUrl('reloadTime')" class="stat-icon" title="Attack Speed" />
+                {{ formatStatPair(hoveredUnitStats.reload) }}s
+              </span>
+            </div>
+            
+            <!-- Range (only show if > 0) -->
+            <div class="unit-stats-row" v-if="hoveredUnitStats.range[0] > 0">
+              <span class="stat-label">Range:</span>
+              <span class="stat-value">
+                <img :src="getStatIconUrl('range')" class="stat-icon" title="Range" />
+                {{ formatStatPair(hoveredUnitStats.range) }}
+              </span>
+            </div>
+            
+            <!-- Movement Speed -->
+            <div class="unit-stats-row">
+              <span class="stat-label">Speed:</span>
+              <span class="stat-value">
+                <img :src="getStatIconUrl('movementSpeed')" class="stat-icon" title="Movement Speed" />
+                {{ formatStatPair(hoveredUnitStats.speed) }}
+              </span>
+            </div>
+            
+            <!-- Armor -->
+            <div class="unit-stats-row">
+              <span class="stat-label">Armor:</span>
+              <span class="stat-value">
+                <img :src="getStatIconUrl('armor')" class="stat-icon" title="Melee Armor" />
+                <img :src="getStatIconUrl('range-armor')" class="stat-icon" title="Pierce Armor" />
+                {{ formatArmorStat(hoveredUnitStats.armors.basic[0], hoveredUnitStats.armors.elite[0]) }} / 
+                {{ formatArmorStat(hoveredUnitStats.armors.basic[1], hoveredUnitStats.armors.elite[1]) }}
+              </span>
+            </div>
+            
+            <!-- Attack bonuses -->
+            <div v-if="formatAttackBonuses(hoveredUnitStats.attacks.elite).length > 0" class="attack-bonuses">
+              <div class="stat-label">Attack Bonuses:</div>
+              <div 
+                v-for="(bonus, index) in formatAttackBonuses(hoveredUnitStats.attacks.elite)" 
+                :key="index"
+                class="attack-bonus"
+              >
+                {{ bonus }}
+              </div>
+            </div>
+            
+            <!-- Special ability -->
+            <div v-if="hoveredUnitStats.special" class="unit-special">
+              <strong>Special:</strong> {{ hoveredUnitStats.special }}
+            </div>
+          </div>
+          
+          <!-- Regular description for non-unit cards -->
+          <p v-else class="card-description">{{ hoveredCard.description || hoveredCard.name }}</p>
         </div>
         <div v-else-if="tooltipText" class="tooltip-inner">
           <p class="card-description">{{ tooltipText }}</p>
@@ -120,6 +230,7 @@ import DraftSidebar from './DraftSidebar.vue'
 import TimerCountdown from './TimerCountdown.vue'
 import { rarityNames } from '~/composables/useBonusData'
 import { renderFlagOnCanvas } from '~/composables/useFlagRenderer'
+import { unitStats, formatAttackBonuses, getBaseAttack, type UnitStats } from '~/composables/useUnitStats'
 import type { DraftPlayer } from '~/composables/useDraft'
 
 interface DisplayCard {
@@ -247,6 +358,56 @@ const tooltipStyle = computed(() => {
     top: `${mousePosition.value.y + offset}px`,
   }
 })
+
+// Get unit stats for unique unit cards (type 1)
+const hoveredUnitStats = computed((): UnitStats | null => {
+  if (!hoveredCard.value) return null
+  // Type 1 = unique units
+  if (hoveredCard.value.type !== 1) return null
+  
+  const stats = unitStats[hoveredCard.value.id]
+  return stats || null
+})
+
+// Helper functions for unit stats display
+function formatStatPair(values: number[]): string {
+  if (values.length === 1) return values[0].toString()
+  if (values.length === 2 && values[0] === values[1]) return values[0].toString()
+  return `${values[0]} / ${values[1]}`
+}
+
+function formatArmorStat(basic: number, elite: number): string {
+  if (basic === elite) return basic.toString()
+  return `${basic}/${elite}`
+}
+
+function getUnitGraphicUrl(unitId: number): string {
+  return `/img/unitgraphics/uu_${unitId}.png`
+}
+
+function getStatIconUrl(stat: string): string {
+  const iconMap: Record<string, string> = {
+    'food': 'food.png',
+    'wood': 'wood.png',
+    'stone': 'stone.png',
+    'gold': 'gold.png',
+    'hp': 'hp.png',
+    'meleeAttack': 'attack-melee.png',
+    'pierceAttack': 'attack-pierce.png',
+    'range': 'range.png',
+    'reloadTime': 'reload-time.png',
+    'movementSpeed': 'movement-speed.png',
+    'armor': 'armor-melee.png',
+    'range-armor': 'armor-pierce.png',
+  }
+  return `/aoe2techtree/img/${iconMap[stat] || 'hp.png'}`
+}
+
+function getAttackIcon(stats: UnitStats): string {
+  // Check if the unit has pierce damage (ranged) by looking for class 3 in attacks
+  const hasPierceDamage = stats.attacks.basic.some(([classId]) => classId === 3)
+  return getStatIconUrl(hasPierceDamage ? 'pierceAttack' : 'meleeAttack')
+}
 
 // Draw flag on canvas for a player using the shared flag renderer
 const drawFlag = (canvas: HTMLCanvasElement, palette: number[]) => {
@@ -604,5 +765,85 @@ onMounted(() => {
   .bonuses-sidebar {
     display: none;
   }
+}
+
+/* Unit stats tooltip styles */
+.unit-stats-tooltip {
+  max-width: 450px;
+}
+
+.tooltip-name {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: hsl(52, 100%, 50%);
+  margin-bottom: 0.5rem;
+}
+
+.tooltip-unit-stats {
+  margin-top: 0.5rem;
+}
+
+.unit-graphic {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 0.75rem;
+  display: block;
+  image-rendering: pixelated;
+  border: 2px solid rgba(255, 204, 0, 0.4);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.unit-stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid rgba(255, 204, 0, 0.2);
+}
+
+.unit-stats-row:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  color: rgba(255, 204, 0, 0.8);
+  font-size: 0.85rem;
+  min-width: 100px;
+}
+
+.stat-value {
+  color: #f0e6d2;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stat-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
+.attack-bonuses {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 204, 0, 0.3);
+}
+
+.attack-bonus {
+  color: #f0e6d2;
+  font-size: 0.8rem;
+  padding: 0.1rem 0;
+}
+
+.unit-special {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 204, 0, 0.3);
+  color: #4ade80;
+  font-size: 0.85rem;
+  font-style: italic;
 }
 </style>
