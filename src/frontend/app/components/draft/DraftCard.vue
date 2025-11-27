@@ -41,6 +41,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { getFrameUrl } from '~/composables/useBonusData'
 
 interface DraftCard {
   id: number
@@ -84,7 +85,6 @@ const cardStyle = computed(() => ({
 }))
 
 const rarityTexts = ['Ordinary', 'Distinguished', 'Superior', 'Epic', 'Legendary']
-const rarityCssClasses = ['common', 'uncommon', 'rare', 'epic', 'legendary']
 
 const rarity = computed(() => props.card.rarity ?? 0)
 
@@ -105,11 +105,8 @@ const imageUrl = computed(() => {
   return `/img/compressedcards/${prefix}_${props.card.id}_v${version}.jpg`
 })
 
-// Frame URL based on rarity (matches BonusItem.vue)
-const frameUrl = computed(() => {
-  const rarityClass = rarityCssClasses[rarity.value] || 'common'
-  return `/img/frames/frame_${rarityClass}.png`
-})
+// Frame URL based on rarity - use shared utility from useBonusData
+const frameUrl = computed(() => getFrameUrl(rarity.value))
 
 const handleClick = () => {
   if (props.selectable && !props.hidden) {

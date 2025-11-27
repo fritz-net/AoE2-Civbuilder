@@ -21,15 +21,15 @@ export function renderFlagOnCanvas(
   height: number,
   symbolBasePath: string = '/img/symbols'
 ): void {
+  // Clear canvas first to ensure clean state
+  ctx.clearRect(0, 0, width, height)
+  
   if (!palette || palette.length < 8) {
     // Draw a default gray flag if palette is invalid
     ctx.fillStyle = '#808080'
     ctx.fillRect(0, 0, width, height)
     return
   }
-
-  // Clear canvas
-  ctx.clearRect(0, 0, width, height)
 
   // Get colors from palette
   const color1 = colours[palette[0]] || [128, 128, 128]
