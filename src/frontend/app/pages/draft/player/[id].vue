@@ -104,8 +104,10 @@
       <template v-if="isWaitingPhase3 || currentPlayer?.ready === 1">
         <div class="waiting-phase">
           <h1 class="phase-title">Waiting For Players</h1>
-          <div class="loading-spinner"></div>
-          <p class="waiting-text">Your tech tree has been saved. Waiting for other players...</p>
+          <div class="waiting-phase-box">
+            <div class="loading-spinner"></div>
+            <p class="waiting-text">Your tech tree has been saved. Waiting for other players...</p>
+          </div>
         </div>
       </template>
       
@@ -897,6 +899,16 @@ onUnmounted(() => {
   justify-content: center;
   min-height: 60vh;
   padding: 2rem;
+}
+
+.waiting-phase-box {
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border: 3px solid hsl(52, 100%, 50%);
+  border-radius: 8px;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  max-width: 600px;
 }
 
 .waiting-text {

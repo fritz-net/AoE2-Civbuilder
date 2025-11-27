@@ -45,24 +45,6 @@
 
       <!-- Cards board -->
       <div class="cards-board">
-        <!-- Fill/Reroll toolbar (only shown when it's your turn and there are empty slots) -->
-        <div v-if="isMyTurn && hasEmptySlots" class="board-toolbar">
-          <button 
-            class="toolbar-btn refill-btn" 
-            @click="$emit('refill')"
-            title="Fill empty card slots with new cards"
-          >
-            Refill
-          </button>
-          <button 
-            class="toolbar-btn clear-btn" 
-            @click="$emit('clear')"
-            title="Remove all cards and get a fresh set"
-          >
-            Reroll
-          </button>
-        </div>
-        
         <div class="cards-container">
           <DraftCard
             v-for="(card, index) in displayCards"
@@ -78,6 +60,26 @@
             @unhover="handleCardUnhover"
           />
         </div>
+        
+        <!-- Fill/Reroll toolbar at bottom (only shown when it's your turn and there are empty slots) -->
+        <div v-if="isMyTurn && hasEmptySlots" class="board-toolbar">
+          <button 
+            class="toolbar-btn refill-btn" 
+            @click="$emit('refill')"
+            @mouseenter="handleToolbarHover('Fill empty card slots with new cards')"
+            @mouseleave="handleToolbarUnhover"
+          >
+            Refill
+          </button>
+          <button 
+            class="toolbar-btn clear-btn" 
+            @click="$emit('clear')"
+            @mouseenter="handleToolbarHover('Remove all cards and get a fresh set')"
+            @mouseleave="handleToolbarUnhover"
+          >
+            Reroll
+          </button>
+        </div>
       </div>
       
       <!-- Bonuses sidebar (shows currently selected bonuses) -->
@@ -91,8 +93,9 @@
     
     <!-- Mouse-following help tooltip -->
     <div 
-      v-show="hoveredCard" 
+      v-show="hoveredCard || tooltipText" 
       class="help-tooltip"
+      :class="hoveredCard ? `rarity-border-${hoveredCard.rarity || 0}` : ''"
       :style="tooltipStyle"
     >
       <div class="help-content">
@@ -101,6 +104,9 @@
             {{ rarityNames[hoveredCard.rarity || 0] }}
           </span>
           <p class="card-description">{{ hoveredCard.description || hoveredCard.name }}</p>
+        </div>
+        <div v-else-if="tooltipText" class="tooltip-inner">
+          <p class="card-description">{{ tooltipText }}</p>
         </div>
       </div>
     </div>
@@ -151,6 +157,7 @@ const emit = defineEmits<{
 }>()
 
 const hoveredCard = ref<DisplayCard | null>(null)
+const tooltipText = ref<string | null>(null)
 const flagCanvasRefs = ref<Map<number, HTMLCanvasElement>>(new Map())
 const mousePosition = ref({ x: 0, y: 0 })
 
@@ -270,6 +277,14 @@ const handleCardHover = (card: DisplayCard) => {
 
 const handleCardUnhover = () => {
   hoveredCard.value = null
+}
+
+const handleToolbarHover = (text: string) => {
+  tooltipText.value = text
+}
+
+const handleToolbarUnhover = () => {
+  tooltipText.value = null
 }
 
 const handleTimerComplete = () => {
@@ -411,45 +426,52 @@ onMounted(() => {
   min-height: 400px;
 }
 
-/* Mouse-following tooltip */
+/* Mouse-following tooltip - matches /build style with black background and colored border */
 .help-tooltip {
   position: fixed;
   z-index: 1000;
   pointer-events: none;
-  max-width: 400px;
-  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.98), rgba(101, 67, 33, 0.98));
+  max-width: 350px;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.95);
   border: 2px solid hsl(52, 100%, 50%);
   border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
+/* Rarity border colors */
+.rarity-border-0 { border-color: #b0b0b0; } /* Ordinary - Gray */
+.rarity-border-1 { border-color: #4ade80; } /* Distinguished - Green */
+.rarity-border-2 { border-color: #60a5fa; } /* Superior - Blue */
+.rarity-border-3 { border-color: #c084fc; } /* Epic - Purple */
+.rarity-border-4 { border-color: #fbbf24; } /* Legendary - Orange */
+
 .help-content {
-  color: #f0e6d2;
+  color: hsl(52, 100%, 50%);
 }
 
 .tooltip-inner {
-  text-align: center;
+  text-align: left;
 }
 
 .rarity-text {
   display: block;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
+  margin-bottom: 0.25rem;
 }
 
-.rarity-0 { color: #808080; } /* Ordinary - Gray */
-.rarity-1 { color: #00ff00; } /* Distinguished - Green */
-.rarity-2 { color: #0070ff; } /* Superior - Blue */
-.rarity-3 { color: #a335ee; } /* Epic - Purple */
-.rarity-4 { color: #ff8000; } /* Legendary - Orange */
+.rarity-0 { color: #b0b0b0; } /* Ordinary - Gray */
+.rarity-1 { color: #4ade80; } /* Distinguished - Green */
+.rarity-2 { color: #60a5fa; } /* Superior - Blue */
+.rarity-3 { color: #c084fc; } /* Epic - Purple */
+.rarity-4 { color: #fbbf24; } /* Legendary - Orange */
 
 .card-description {
   margin: 0;
-  line-height: 1.5;
-  font-size: 0.95rem;
+  line-height: 1.4;
+  font-size: 1rem;
+  color: hsl(52, 100%, 50%);
 }
 
 @media (max-width: 1024px) {

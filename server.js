@@ -93,22 +93,36 @@ app.get(path.join(routeSubdir, "CHANGELOG.md"), (req, res) => {
 	});
 });
 
+// Static file configuration for all paths
+const staticOptions = {
+	maxAge: "1y", // Cache images for a year
+	immutable: false, // Allow query string versioning to work
+	etag: true, // Enable cache revalidation
+	lastModified: true, // Allow Last-Modified-based revalidation
+	setHeaders: (res, path) => {
+		if (path.endsWith(".png") || path.endsWith(".jpg")) {
+			res.set("Cache-Control", "public, must-revalidate, max-age=31536000");
+		} else {
+			res.set("Cache-Control", "no-cache, must-revalidate");
+		}
+	},
+};
+
+// Serve static files at configured route (e.g., /civbuilder)
 app.use(
 	routeSubdir,
-	express.static(path.join(__dirname, "/public"), {
-		maxAge: "1y", // Cache images for a year
-		immutable: false, // Allow query string versioning to work
-		etag: true, // Enable cache revalidation
-		lastModified: true, // Allow Last-Modified-based revalidation
-		setHeaders: (res, path) => {
-			if (path.endsWith(".png") || path.endsWith(".jpg")) {
-				res.set("Cache-Control", "public, must-revalidate, max-age=31536000");
-			} else {
-				res.set("Cache-Control", "no-cache, must-revalidate");
-			}
-		},
-	})
+	express.static(path.join(__dirname, "/public"), staticOptions)
 );
+
+// Also serve static files at root / for legacy references
+if (routeSubdir !== "/") {
+	app.use("/", express.static(path.join(__dirname, "/public"), staticOptions));
+	console.log(`[Static] Files available at both ${routeSubdir} and / (root)`);
+}
+
+// Also serve at /v2 for Vue UI references to /v2/img/...
+app.use("/v2", express.static(path.join(__dirname, "/public"), staticOptions));
+console.log("[Static] Files also available at /v2 (for Vue UI)");
 
 // Mount router at the configured routeSubdir (e.g., /civbuilder for legacy UI)
 app.use(routeSubdir, router);
