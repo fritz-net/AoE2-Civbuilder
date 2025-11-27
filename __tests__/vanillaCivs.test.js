@@ -231,9 +231,9 @@ describe('Vanilla Civs JSON Files', () => {
       if (error.code !== null && error.code !== undefined) {
         exitCode = error.code;
       } else if (error.signal) {
-        // Convert signal name to number (e.g., SIGSEGV = 11, so 128 + 11 = 139)
-        const signalMap = { 'SIGKILL': 9, 'SIGABRT': 6, 'SIGSEGV': 11, 'SIGTERM': 15 };
-        const signalNum = signalMap[error.signal] || 1;
+        // Convert signal name to number using os.constants.signals
+        // Exit code for signals is 128 + signal number
+        const signalNum = os.constants.signals[error.signal] || 1;
         exitCode = 128 + signalNum;
       } else {
         exitCode = 1;
