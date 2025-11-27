@@ -63,11 +63,30 @@
       </div>
     </div>
 
-    <!-- Phase 3: Complete -->
-    <div v-else-if="currentPhase === 3" class="complete-spectator">
+    <!-- Phase 3: Tech Tree Customization -->
+    <div v-else-if="currentPhase === 3" class="setup-spectator">
+      <h1 class="phase-title">Tech Tree Customization</h1>
+      <div class="spectator-content">
+        <div class="loading-spinner"></div>
+        <p>Players are customizing their tech trees...</p>
+        <p class="hint">The mod will be created once all players finish.</p>
+      </div>
+    </div>
+
+    <!-- Phase 5: Creating Mod -->
+    <div v-else-if="currentPhase === 5" class="setup-spectator">
+      <h1 class="phase-title">Creating Mod...</h1>
+      <div class="spectator-content">
+        <div class="loading-spinner"></div>
+        <p>The mod is being created. Please wait...</p>
+      </div>
+    </div>
+
+    <!-- Phase 6: Complete -->
+    <div v-else-if="currentPhase === 6" class="complete-spectator">
       <h1 class="complete-title">Draft Complete!</h1>
       <div class="complete-content">
-        <p>All players have finished selecting their civilizations.</p>
+        <p>All players have finished and the mod has been created!</p>
         
         <!-- Show all players' final civilizations -->
         <div class="final-civilizations">
@@ -88,6 +107,11 @@
                   :height="100"
                   class="flag-canvas"
                 ></canvas>
+                <!-- Show UU if available -->
+                <div v-if="getPlayerUU(player)" class="uu-preview">
+                  <span class="uu-label">Unique Unit:</span>
+                  <span class="uu-name">{{ getPlayerUU(player) }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -174,6 +198,16 @@ const displayCards = computed(() => {
   })
 })
 
+// Get player's unique unit name
+const getPlayerUU = (player: any) => {
+  if (!player?.bonuses || !player.bonuses[1] || player.bonuses[1].length === 0) {
+    return null
+  }
+  const uuId = player.bonuses[1][0]
+  const uuCards = getBonusCards('uu')
+  return uuCards[uuId]?.name || null
+}
+
 const setFlagCanvas = (canvas: HTMLCanvasElement | null, playerIndex: number) => {
   if (canvas) {
     flagCanvasRefs.value.set(playerIndex, canvas)
@@ -187,7 +221,8 @@ const handleViewPlayer = (playerIndex: number) => {
 }
 
 const goHome = () => {
-  router.push('/v2')
+  // Navigate to home page - use navigateTo for proper Nuxt routing
+  navigateTo('/')
 }
 
 onMounted(async () => {
@@ -416,12 +451,32 @@ onUnmounted(() => {
 
 .civ-preview {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .flag-canvas {
   border-radius: 4px;
   border: 2px solid rgba(255, 204, 0, 0.3);
+}
+
+.uu-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.uu-label {
+  color: hsl(52, 100%, 50%);
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.uu-name {
+  color: #f0e6d2;
+  font-size: 0.9rem;
 }
 
 .home-button {
