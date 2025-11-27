@@ -269,6 +269,10 @@ const emit = defineEmits<{
   (e: 'update:points', points: number): void
 }>()
 
+// Constants for Pasture building management
+const PASTURE_BUILDING_ID = 1889
+const BUILDINGS_ARRAY_INDEX = 1
+
 // Refs
 const techtreeRef = ref<HTMLDivElement | null>(null)
 const svgRef = ref<SVGSVGElement | null>(null)
@@ -414,10 +418,8 @@ onMounted(async () => {
   }
   
   // Handle initial showPastures state - add Pasture to buildings if needed
-  const PASTURE_ID = 1889
-  const buildingsIndex = 1
-  if (props.showPastures && !localtree.value[buildingsIndex].includes(PASTURE_ID)) {
-    localtree.value[buildingsIndex].push(PASTURE_ID)
+  if (props.showPastures && !localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
+    localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
     emit('update:tree', localtree.value)
   }
   
@@ -437,10 +439,9 @@ watch(() => props.initialTree, (newTree) => {
     localtree.value = JSON.parse(JSON.stringify(newTree))
     
     // Ensure Pasture is included/excluded based on showPastures prop
-    const PASTURE_ID = 1889
-    const buildingsIndex = 1
-    if (props.showPastures && !localtree.value[buildingsIndex].includes(PASTURE_ID)) {
-      localtree.value[buildingsIndex].push(PASTURE_ID)
+    if (props.showPastures && !localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
+      localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
+      emit('update:tree', localtree.value)
     }
     
     // Recalculate points when tree is loaded from props
@@ -456,22 +457,18 @@ watch(() => props.initialTree, (newTree) => {
 watch(() => props.showPastures, (newShowPastures) => {
   tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: newShowPastures })
   
-  // Update localtree to include/exclude Pasture building (1889)
-  // Pasture building ID is 1889, buildings are in localtree[1]
-  const PASTURE_ID = 1889
-  const buildingsIndex = 1
-  
+  // Update localtree to include/exclude Pasture building
   if (newShowPastures) {
     // Add Pasture to buildings if not already present
-    if (!localtree.value[buildingsIndex].includes(PASTURE_ID)) {
-      localtree.value[buildingsIndex].push(PASTURE_ID)
+    if (!localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
+      localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
       emit('update:tree', localtree.value)
     }
   } else {
     // Remove Pasture from buildings if present
-    const index = localtree.value[buildingsIndex].indexOf(PASTURE_ID)
+    const index = localtree.value[BUILDINGS_ARRAY_INDEX].indexOf(PASTURE_BUILDING_ID)
     if (index !== -1) {
-      localtree.value[buildingsIndex].splice(index, 1)
+      localtree.value[BUILDINGS_ARRAY_INDEX].splice(index, 1)
       emit('update:tree', localtree.value)
     }
   }
