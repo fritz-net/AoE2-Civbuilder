@@ -1,5 +1,5 @@
 <template>
-  <div class="draft-board">
+  <div class="draft-board" @mousemove="handleMouseMove">
     <!-- Header -->
     <div class="board-header">
       <div class="phase-info">
@@ -59,17 +59,21 @@
             @unhover="handleCardUnhover"
           />
         </div>
-
-        <!-- Help box for card details -->
-        <div v-show="hoveredCard" class="help-box">
-          <div class="help-content">
-            <slot name="card-details" :card="hoveredCard">
-              <div v-if="hoveredCard">
-                <h3>{{ hoveredCard.name }}</h3>
-                <p>{{ hoveredCard.description }}</p>
-              </div>
-            </slot>
-          </div>
+      </div>
+    </div>
+    
+    <!-- Mouse-following help tooltip -->
+    <div 
+      v-show="hoveredCard" 
+      class="help-tooltip"
+      :style="tooltipStyle"
+    >
+      <div class="help-content">
+        <div v-if="hoveredCard" class="tooltip-inner">
+          <span :class="'rarity-text rarity-' + (hoveredCard.rarity || 0)">
+            {{ rarityTexts[hoveredCard.rarity || 0] }}
+          </span>
+          <p class="card-description">{{ hoveredCard.description || hoveredCard.name }}</p>
         </div>
       </div>
     </div>
@@ -112,6 +116,9 @@ const emit = defineEmits<{
 
 const hoveredCard = ref<DisplayCard | null>(null)
 const flagCanvasRefs = ref<Map<number, HTMLCanvasElement>>(new Map())
+const mousePosition = ref({ x: 0, y: 0 })
+
+const rarityTexts = ['Ordinary', 'Distinguished', 'Superior', 'Epic', 'Legendary']
 
 // Ordered players based on draft order
 const orderedPlayers = computed(() => {
@@ -149,12 +156,25 @@ const cardMargin = computed(() => {
   return 0.3
 })
 
+// Tooltip positioning - follows mouse
+const tooltipStyle = computed(() => {
+  const offset = 15 // pixels from cursor
+  return {
+    left: `${mousePosition.value.x + offset}px`,
+    top: `${mousePosition.value.y + offset}px`,
+  }
+})
+
 const setFlagCanvas = (canvas: HTMLCanvasElement | null, playerIndex: number) => {
   if (canvas) {
     flagCanvasRefs.value.set(playerIndex, canvas)
     // TODO: Draw flag using player's flag_palette
     // This would integrate with the flag drawing logic from FlagCreator
   }
+}
+
+const handleMouseMove = (event: MouseEvent) => {
+  mousePosition.value = { x: event.clientX, y: event.clientY }
 }
 
 const handleCardSelect = (card: DisplayCard) => {
@@ -184,7 +204,7 @@ onMounted(() => {
 .draft-board {
   width: 100%;
   min-height: 100vh;
-  background: url('/img/draftbackground.jpg') center/cover;
+  background: url('/v2/img/draftbackground.jpg') center/cover;
   display: flex;
   flex-direction: column;
 }
@@ -310,29 +330,45 @@ onMounted(() => {
   min-height: 400px;
 }
 
-.help-box {
-  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.95), rgba(101, 67, 33, 0.95));
+/* Mouse-following tooltip */
+.help-tooltip {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  max-width: 400px;
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.98), rgba(101, 67, 33, 0.98));
   border: 2px solid hsl(52, 100%, 50%);
   border-radius: 8px;
-  padding: 1.5rem;
-  margin-top: auto;
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.6);
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
 }
 
 .help-content {
   color: #f0e6d2;
-  max-height: 200px;
-  overflow-y: auto;
 }
 
-.help-content h3 {
-  color: hsl(52, 100%, 50%);
-  margin: 0 0 0.5rem 0;
+.tooltip-inner {
+  text-align: center;
 }
 
-.help-content p {
+.rarity-text {
+  display: block;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.rarity-0 { color: #808080; } /* Ordinary - Gray */
+.rarity-1 { color: #00ff00; } /* Distinguished - Green */
+.rarity-2 { color: #0070ff; } /* Superior - Blue */
+.rarity-3 { color: #a335ee; } /* Epic - Purple */
+.rarity-4 { color: #ff8000; } /* Legendary - Orange */
+
+.card-description {
   margin: 0;
   line-height: 1.5;
+  font-size: 0.95rem;
 }
 
 @media (max-width: 1024px) {

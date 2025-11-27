@@ -174,6 +174,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDraft } from '~/composables/useDraft'
+import { useBonusData, type BonusType } from '~/composables/useBonusData'
 import type { CivConfig } from '~/composables/useCivData'
 import DraftLobby from '~/components/draft/DraftLobby.vue'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
@@ -214,6 +215,8 @@ const {
   cleanup,
 } = useDraft()
 
+const { getBonusCards, getBonusImageUrl, rarityNames } = useBonusData()
+
 // Civ configuration for setup phase
 const civConfig = ref<CivConfig>({
   alias: '',
@@ -237,16 +240,43 @@ const techTreePoints = computed(() => {
   return draft.value?.preset.points || 250
 })
 
+// Map round type to bonus type for card data lookup
+const roundTypeToBonusType = (roundType: number): BonusType => {
+  const types: BonusType[] = ['civ', 'uu', 'castle', 'imp', 'team']
+  return types[roundType] || 'civ'
+}
+
 const displayCards = computed(() => {
   if (!draft.value) return []
   
-  return draft.value.gamestate.cards.map((cardId, index) => ({
-    id: cardId,
-    type: currentTurn.value?.roundType || 0,
-    hidden: cardId === -1,
-    name: `Card ${cardId}`,
-    description: 'Card description',
-  }))
+  const roundType = currentTurn.value?.roundType || 0
+  const bonusType = roundTypeToBonusType(roundType)
+  const allCards = getBonusCards(bonusType)
+  
+  return draft.value.gamestate.cards.map((cardId, index) => {
+    if (cardId === -1) {
+      return {
+        id: cardId,
+        type: roundType,
+        hidden: true,
+        name: '',
+        description: '',
+        rarity: 0,
+        imageVersion: 0,
+      }
+    }
+    
+    const cardData = allCards[cardId]
+    return {
+      id: cardId,
+      type: roundType,
+      hidden: false,
+      name: cardData?.name || `Card ${cardId}`,
+      description: cardData?.description || '',
+      rarity: cardData?.rarity || 0,
+      imageVersion: cardData?.imageVersion || 0,
+    }
+  })
 })
 
 const handleJoin = async () => {
@@ -316,10 +346,10 @@ const handleSaveTechTree = () => {
 
 const handleSelectCard = (card: any) => {
   if (draft.value && currentTurn.value?.isMyTurn) {
-    const cardIndex = draft.value.gamestate.cards.indexOf(card.id)
-    if (cardIndex >= 0) {
-      selectCard(cardIndex, draft.value.gamestate.turn)
-    }
+    // Send the actual card ID (pick), not the position in array
+    // The server expects: socket.emit('end turn', roomID, pick, client_turn)
+    // where pick is the card ID (e.g., 245 for bonus card 245)
+    selectCard(card.id, draft.value.gamestate.turn)
   }
 }
 

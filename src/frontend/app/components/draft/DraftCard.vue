@@ -87,12 +87,13 @@ const cardTitle = computed(() => {
 
 const imageUrl = computed(() => {
   // Generate image URL based on card type and id
-  // Images are in /img/compressedcards/ with format: {prefix}_{cardIndex}_v{version}.jpg
+  // Images are in /v2/img/compressedcards/ with format: {prefix}_{cardIndex}_v{version}.jpg
+  // Nuxt serves static files from /public at the baseURL (/v2)
   const prefixes = ['bonus', 'uu', 'castle', 'imp', 'team']
   const prefix = prefixes[props.card.type] ?? 'bonus'
   // Default to version 0 for images
   const version = props.card.imageVersion ?? 0
-  return `/img/compressedcards/${prefix}_${props.card.id}_v${version}.jpg`
+  return `/v2/img/compressedcards/${prefix}_${props.card.id}_v${version}.jpg`
 })
 
 const handleClick = () => {
