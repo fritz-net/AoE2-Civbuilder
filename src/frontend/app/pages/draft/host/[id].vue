@@ -792,7 +792,20 @@ onUnmounted(() => {
 
 .techtree-fullscreen .tech-tree-full {
   flex: 1;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+}
+
+/* Ensure TechTree fullscreen mode works in draft context */
+.techtree-fullscreen :deep(.techtree-container.is-maximized) {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  min-height: 100vh;
+  height: 100vh;
 }
 
 .techtree-container {
