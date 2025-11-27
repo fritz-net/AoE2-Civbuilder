@@ -60,25 +60,26 @@ const props = defineProps<{
 
 // Extract bonuses from player data
 // Player bonuses array structure: [civ bonuses[], unique units[], castle techs[], imp techs[], team bonuses[]]
+// TODO: Improve by importing card_descriptions from common.js to show actual bonus text
+// For now, showing card IDs as placeholders
 const civBonuses = computed(() => {
   if (!props.player?.bonuses?.[0]) return []
-  // Just show the card IDs for now - ideally would show descriptions
-  return props.player.bonuses[0].map(id => `Bonus #${id}`)
+  return props.player.bonuses[0].map((id: number) => `Selected Bonus #${id}`)
 })
 
 const uniqueUnit = computed(() => {
   if (!props.player?.bonuses?.[1]?.length) return null
-  return `Unit #${props.player.bonuses[1][0]}`
+  return `Selected Unit #${props.player.bonuses[1][0]}`
 })
 
 const castleTech = computed(() => {
   if (!props.player?.bonuses?.[2]?.length) return null
-  return `Tech #${props.player.bonuses[2][0]}`
+  return `Castle Tech #${props.player.bonuses[2][0]}`
 })
 
 const imperialTech = computed(() => {
   if (!props.player?.bonuses?.[3]?.length) return null
-  return `Tech #${props.player.bonuses[3][0]}`
+  return `Imperial Tech #${props.player.bonuses[3][0]}`
 })
 
 const teamBonus = computed(() => {

@@ -261,29 +261,6 @@ const displayCards = computed(() => {
   }))
 })
 
-// Compute selected bonuses for sidebar
-const selectedBonuses = computed(() => {
-  if (!currentPlayer.value) {
-    return {
-      civBonuses: [],
-      uniqueUnit: null,
-      castleTech: null,
-      imperialTech: null,
-      teamBonus: null,
-    }
-  }
-
-  const bonuses = currentPlayer.value.bonuses || [[], [], [], [], []]
-  
-  return {
-    civBonuses: bonuses[0]?.map((b: any) => `Bonus ${b}`) || [],
-    uniqueUnit: bonuses[1]?.[0] ? `Unit ${bonuses[1][0]}` : null,
-    castleTech: bonuses[2]?.[0] ? `Tech ${bonuses[2][0]}` : null,
-    imperialTech: bonuses[3]?.[0] ? `Tech ${bonuses[3][0]}` : null,
-    teamBonus: bonuses[4]?.[0] ? `Bonus ${bonuses[4][0]}` : null,
-  }
-})
-
 const handleJoin = async () => {
   if (!playerName.value.trim()) return
   

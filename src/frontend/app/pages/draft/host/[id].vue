@@ -137,7 +137,7 @@
             &emsp;&emsp;B) Type = Data Mod,<br>
             &emsp;&emsp;C) Tags = Data Mod,<br>
             &emsp;&emsp;D) Images = thumbnail.jpg found in extracted folder,<br>
-            &emsp;&emsp;E) Zip File Upload = [id]-data.zip found in extracted folder,<br>
+            &emsp;&emsp;E) Zip File Upload = {{ draft?.id || 'your-draft' }}-data.zip found in extracted folder,<br>
             &emsp;&emsp;F) Please credit me or the website!<br><br>
             5. Submit the data mod, and go to Mods → Submit a Mod again to publish the UI Mod<br><br>
             6. Fill out the form as you wish with the following specifications:<br>
@@ -145,7 +145,7 @@
             &emsp;&emsp;B) Type = User Interface,<br>
             &emsp;&emsp;C) Tags = User Interface,<br>
             &emsp;&emsp;D) Images = thumbnail.jpg,<br>
-            &emsp;&emsp;E) Zip File Upload = [id]-ui.zip found in extracted folder,<br>
+            &emsp;&emsp;E) Zip File Upload = {{ draft?.id || 'your-draft' }}-ui.zip found in extracted folder,<br>
             &emsp;&emsp;F) Please credit me or the website!<br><br>
             7. Submit the UI mod, go to Mods → My Mods, and share the links with the other players!
           </p>

@@ -1,4 +1,4 @@
-import { test, expect, Page, BrowserContext, Download } from '@playwright/test';
+import { test, expect, Page, BrowserContext } from '@playwright/test';
 
 /**
  * E2E tests for complete Draft Mode flow
