@@ -41,6 +41,7 @@ interface DraftCard {
   type: number // 0: civ bonus, 1: unique unit, 2: castle tech, 3: imperial tech, 4: team bonus
   rarity?: number // 0: common, 1: uncommon, 2: rare, 3: epic, 4: legendary
   name?: string
+  imageVersion?: number // Version of the card image (for cache busting)
 }
 
 const props = withDefaults(defineProps<{
@@ -86,9 +87,12 @@ const cardTitle = computed(() => {
 
 const imageUrl = computed(() => {
   // Generate image URL based on card type and id
-  const baseUrl = '/img/cards'
-  const typePrefix = ['bonus', 'uu', 'tech', 'tech', 'team'][props.card.type] || 'bonus'
-  return `${baseUrl}/${typePrefix}_${props.card.id}.png`
+  // Images are in /img/compressedcards/ with format: {prefix}_{cardIndex}_v{version}.jpg
+  const prefixes = ['bonus', 'uu', 'castle', 'imp', 'team']
+  const prefix = prefixes[props.card.type] ?? 'bonus'
+  // Default to version 0 for images
+  const version = props.card.imageVersion ?? 0
+  return `/img/compressedcards/${prefix}_${props.card.id}_v${version}.jpg`
 })
 
 const handleClick = () => {
