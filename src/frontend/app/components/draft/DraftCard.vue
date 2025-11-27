@@ -12,23 +12,28 @@
     @mouseenter="$emit('hover', card)"
     @mouseleave="$emit('unhover')"
   >
-    <div class="card-border" :class="`rarity-${rarity}`">
-      <div class="card-image">
-        <img
-          v-if="imageUrl && !imageError"
-          :src="imageUrl"
-          :alt="cardTitle"
-          @error="onImageError"
-        />
-        <div v-else class="card-placeholder">
-          {{ cardTitle }}
-        </div>
-      </div>
-      <div v-if="showTitle" class="card-title">
+    <div class="card-inner">
+      <!-- Card Image -->
+      <img
+        v-if="imageUrl && !imageError"
+        :src="imageUrl"
+        :alt="cardTitle"
+        class="card-image"
+        @error="onImageError"
+      />
+      <div v-else class="card-placeholder">
         {{ cardTitle }}
       </div>
-      <div v-if="rarity && showRarity" class="card-rarity">
-        {{ rarityText }}
+      
+      <!-- Fancy Frame (rarity border) -->
+      <img 
+        :src="frameUrl" 
+        class="card-frame"
+      />
+      
+      <!-- Card title overlay (for better visibility) -->
+      <div v-if="showTitle" class="card-title-overlay">
+        {{ cardTitle }}
       </div>
     </div>
   </div>
@@ -79,6 +84,7 @@ const cardStyle = computed(() => ({
 }))
 
 const rarityTexts = ['Ordinary', 'Distinguished', 'Superior', 'Epic', 'Legendary']
+const rarityCssClasses = ['common', 'uncommon', 'rare', 'epic', 'legendary']
 
 const rarity = computed(() => props.card.rarity ?? 0)
 
@@ -97,6 +103,12 @@ const imageUrl = computed(() => {
   // Default to version 0 for images
   const version = props.card.imageVersion ?? 0
   return `/img/compressedcards/${prefix}_${props.card.id}_v${version}.jpg`
+})
+
+// Frame URL based on rarity (matches BonusItem.vue)
+const frameUrl = computed(() => {
+  const rarityClass = rarityCssClasses[rarity.value] || 'common'
+  return `/img/frames/frame_${rarityClass}.png`
 })
 
 const handleClick = () => {
@@ -146,103 +158,77 @@ const onImageError = () => {
   z-index: 10;
 }
 
-.card-selectable:not(.card-hidden):not(.card-disabled):hover .card-border {
-  filter: brightness(150%);
-  box-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
+.card-selectable:not(.card-hidden):not(.card-disabled):hover .card-inner {
+  filter: brightness(130%);
 }
 
-.card-selected .card-border {
-  border-color: #00ff00;
+.card-selected .card-inner {
   box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
 }
 
-.card-border {
+.card-selected .card-frame {
+  filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.8));
+}
+
+.card-inner {
+  position: relative;
   width: 100%;
   height: 100%;
-  border: 3px solid;
-  border-radius: 8px;
+  border-radius: 4px;
   overflow: hidden;
-  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
   transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Rarity colors */
-.rarity-0 {
-  border-color: #808080; /* Common - Gray */
-}
-
-.rarity-1 {
-  border-color: #00ff00; /* Uncommon - Green */
-}
-
-.rarity-2 {
-  border-color: #0070ff; /* Rare - Blue */
-}
-
-.rarity-3 {
-  border-color: #a335ee; /* Epic - Purple */
-}
-
-.rarity-4 {
-  border-color: #ff8000; /* Legendary - Orange */
 }
 
 .card-image {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.3);
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.card-image img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+.card-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: filter 0.2s ease;
 }
 
 .card-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
   color: #f0e6d2;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   text-align: center;
   padding: 0.5rem;
   word-wrap: break-word;
 }
 
-.card-title {
-  background: rgba(0, 0, 0, 0.7);
+.card-title-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.6) 60%, transparent 100%);
   color: #f0e6d2;
-  font-size: 0.7rem;
-  padding: 0.25rem;
+  font-size: 0.65rem;
+  padding: 0.5rem 0.25rem 0.25rem;
   text-align: center;
-  border-top: 1px solid rgba(255, 204, 0, 0.3);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.card-rarity {
-  background: rgba(0, 0, 0, 0.8);
-  color: hsl(52, 100%, 50%);
-  font-size: 0.6rem;
-  padding: 0.15rem;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: bold;
+  pointer-events: none;
 }
 
 @media (max-width: 768px) {
-  .card-title {
-    font-size: 0.6rem;
-  }
-
-  .card-rarity {
-    font-size: 0.5rem;
+  .card-title-overlay {
+    font-size: 0.55rem;
   }
 }
 </style>
