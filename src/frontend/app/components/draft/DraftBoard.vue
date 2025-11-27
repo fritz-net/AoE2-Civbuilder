@@ -280,7 +280,7 @@ onMounted(() => {
 .draft-board {
   width: 100%;
   min-height: 100vh;
-  background: url('/v2/img/draftbackground.jpg') center/cover;
+  background: url('/img/draftbackground.jpg') center/cover;
   display: flex;
   flex-direction: column;
 }

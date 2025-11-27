@@ -127,7 +127,7 @@
               v-model="civConfig.tree"
               :points-available="techTreePoints"
               :editable="true"
-              relative-path="/v2/aoe2techtree"
+              relative-path="/aoe2techtree"
               @done="handleTechTreeDone"
             />
           </div>

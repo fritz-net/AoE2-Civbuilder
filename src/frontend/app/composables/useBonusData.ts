@@ -59,13 +59,13 @@ export const imagePrefix: Record<BonusType, string> = {
 }
 
 /**
- * Get the base URL for assets (handles Nuxt baseURL)
+ * Get the base URL for assets (handles static assets from /public)
  * @returns The base URL prefix for image assets
  */
 function getAssetBaseUrl(): string {
-  // In Nuxt, assets in /public are served at the baseURL
-  // The baseURL is /v2/ so images in /public/img become /v2/img
-  return '/v2'
+  // Static assets (images, etc.) are served from the main /public folder
+  // at the root path, not from Nuxt's /v2 path
+  return ''
 }
 
 /**
