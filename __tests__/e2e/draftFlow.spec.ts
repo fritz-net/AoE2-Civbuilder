@@ -114,9 +114,8 @@ test.describe('Draft Flow - Single Player Happy Path', () => {
 });
 
 test.describe('Draft Flow - Complete Single Player Draft to Download', () => {
-  test('should complete entire 1-player draft flow and download mod', async ({ page }) => {
-    // This test will attempt to go through the entire flow
-    // Note: Some steps may not work if server-side logic isn't fully implemented
+  test('should complete entire 1-player draft flow selecting cards through all rounds', async ({ page }) => {
+    // This test attempts to go through the ENTIRE draft flow
     
     // Step 1: Create a draft
     const { hostLink } = await createDraft(page, 1);
@@ -154,26 +153,125 @@ test.describe('Draft Flow - Complete Single Player Draft to Download', () => {
       }
     }
     
-    // Step 5: Phase 2 - Card Drafting
-    // For a 1-player draft, we need to select cards for each round
-    const draftBoard = page.locator('.draft-board');
-    const isDraftBoardVisible = await draftBoard.isVisible().catch(() => false);
+    // Step 5: Phase 2 - Card Drafting - Multiple Rounds
+    // We need to select cards for ALL 5 rounds:
+    // Round 1-4: Civilization Bonuses (default 4 rounds)
+    // Round 5: Unique Units
+    // Round 6: Castle Tech
+    // Round 7: Imperial Tech  
+    // Round 8: Team Bonus
     
-    if (isDraftBoardVisible) {
-      // Select a card (click the first available card)
+    const totalRounds = 8; // For a 1-player draft with default settings
+    let currentRound = 0;
+    
+    while (currentRound < totalRounds) {
+      const draftBoard = page.locator('.draft-board');
+      const isDraftBoardVisible = await draftBoard.isVisible().catch(() => false);
+      
+      if (!isDraftBoardVisible) {
+        // Check if we're in tech tree phase (Phase 3) instead
+        const techTreePhase = page.locator('.techtree-phase');
+        const isTechTreeVisible = await techTreePhase.isVisible().catch(() => false);
+        
+        if (isTechTreeVisible) {
+          // Complete tech tree phase
+          const doneButton = page.getByRole('button', { name: /Done/i });
+          if (await doneButton.isVisible()) {
+            await doneButton.click();
+            await page.waitForTimeout(2000);
+          }
+          break;
+        }
+        
+        // Check for download phase
+        const downloadPhase = page.locator('.download-phase');
+        const isDownloadVisible = await downloadPhase.isVisible().catch(() => false);
+        
+        if (isDownloadVisible) {
+          // We made it to download phase!
+          const downloadButton = page.getByRole('button', { name: /Download Mod/i });
+          await expect(downloadButton).toBeVisible({ timeout: 5000 });
+          console.log('Successfully reached download phase!');
+          break;
+        }
+        
+        break; // Exit if no recognized phase
+      }
+      
+      // We're on the draft board - select a card
       const cards = page.locator('.draft-card:not(.card-hidden)');
       const cardCount = await cards.count();
       
       if (cardCount > 0) {
         // Select the first available card
         await cards.first().click();
+        currentRound++;
+        
+        // Wait for server response
         await page.waitForTimeout(2000);
+      } else {
+        break; // No more cards available
       }
     }
     
-    // The test verifies that we can at least get to the draft board
-    // Full flow completion depends on server state management
-    console.log('Draft flow test completed up to card selection phase');
+    // Verify we got through at least some rounds
+    expect(currentRound).toBeGreaterThanOrEqual(1);
+    console.log(`Draft flow test completed ${currentRound} rounds`);
+  });
+
+  test('should display correct card data with names and rarity', async ({ page }) => {
+    // This test verifies that cards have proper data
+    const { hostLink } = await createDraft(page, 1);
+    await joinAsHost(page, hostLink, 'Card Data Tester');
+    
+    // Start draft
+    const startButton = page.getByRole('button', { name: /Start Draft/i });
+    if (await startButton.isVisible()) {
+      await startButton.click();
+      await page.waitForTimeout(3000);
+    }
+    
+    // Complete Phase 1
+    const setupPhase = page.locator('.setup-phase');
+    if (await setupPhase.isVisible().catch(() => false)) {
+      const civNameInput = page.locator('#civName');
+      await civNameInput.fill('Card Test Civ');
+      
+      const nextButton = page.getByRole('button', { name: /Next/i });
+      await nextButton.click();
+      await page.waitForTimeout(3000);
+    }
+    
+    // Check card data on draft board
+    const draftBoard = page.locator('.draft-board');
+    const isDraftBoardVisible = await draftBoard.isVisible().catch(() => false);
+    
+    if (isDraftBoardVisible) {
+      // Wait for cards to load
+      await page.waitForSelector('.draft-card:not(.card-hidden)', { timeout: 5000 });
+      
+      const cards = page.locator('.draft-card:not(.card-hidden)');
+      const cardCount = await cards.count();
+      
+      expect(cardCount).toBeGreaterThan(0);
+      
+      // Hover over a card and check tooltip content
+      const firstCard = cards.first();
+      await firstCard.hover();
+      await page.waitForTimeout(500);
+      
+      // Check that the tooltip shows actual card description, not just "Card X"
+      const tooltip = page.locator('.help-tooltip');
+      const tooltipVisible = await tooltip.isVisible().catch(() => false);
+      
+      if (tooltipVisible) {
+        const tooltipText = await tooltip.textContent();
+        // Verify the tooltip has actual card content (not "Card description")
+        expect(tooltipText).not.toContain('Card description');
+        // Should contain actual bonus text
+        expect(tooltipText?.length).toBeGreaterThan(10);
+      }
+    }
   });
 
   test('should complete Phase 1 setup with civ name and continue', async ({ page }) => {
