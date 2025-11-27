@@ -276,9 +276,6 @@ const drawFlag = (canvas: HTMLCanvasElement, palette: number[]) => {
   ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
   ctx.fillRect(0, 0, width, height)
   
-  // Scale for smaller canvas (85x85 vs 256x256)
-  const scale = width / 256
-  
   // Draw division pattern
   switch (division) {
     case 0:
@@ -350,6 +347,8 @@ const setFlagCanvas = (canvas: HTMLCanvasElement | null, playerIndex: number) =>
 }
 
 // Watch for player changes to update flags
+// Deep watch is intentional as player flag_palette can change at various points
+// (e.g., after Phase 1 when players submit their civ info)
 watch(() => props.players, () => {
   nextTick(() => {
     flagCanvasRefs.value.forEach((canvas, playerIndex) => {
