@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.3.0...v1.4.0) (2025-11-26)
+
+
+### Features
+
+* Implement mod creation in Vue/Nuxt UI with drag-and-drop, E2E tests, download page, and optimized CI/CD pipeline ([#104](https://github.com/fritz-net/AoE2-Civbuilder/issues/104)) ([7b872fb](https://github.com/fritz-net/AoE2-Civbuilder/commit/7b872fbd5a3e16011d376601e9b7437fd73c7b57))
+
+
+### Bug Fixes
+
+* changelog parser to recognize release-please format ([#103](https://github.com/fritz-net/AoE2-Civbuilder/issues/103)) ([f8b1c1d](https://github.com/fritz-net/AoE2-Civbuilder/commit/f8b1c1d8c2cd91e444b225d4ad012140dfae9d6e))
+* new UI flag creator displays symbol numbers instead of actual symbol images ([#110](https://github.com/fritz-net/AoE2-Civbuilder/issues/110)) ([61792ed](https://github.com/fritz-net/AoE2-Civbuilder/commit/61792ed3e43f202b0d6f93fed8d656a7a562ffa8))
+
 ## [1.3.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.2.1...v1.3.0) (2025-11-26)
 
 

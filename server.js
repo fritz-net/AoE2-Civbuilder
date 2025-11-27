@@ -93,33 +93,35 @@ app.get(path.join(routeSubdir, "CHANGELOG.md"), (req, res) => {
 	});
 });
 
-app.use(
-	routeSubdir,
-	express.static(path.join(__dirname, "/public"), {
-		maxAge: "1y", // Cache images for a year
-		immutable: false, // Allow query string versioning to work
-		etag: true, // Enable cache revalidation
-		lastModified: true, // Allow Last-Modified-based revalidation
-		setHeaders: (res, path) => {
-			if (path.endsWith(".png") || path.endsWith(".jpg")) {
-				res.set("Cache-Control", "public, must-revalidate, max-age=31536000");
-			} else {
-				res.set("Cache-Control", "no-cache, must-revalidate");
-			}
-		},
-	})
-);
+// Static file configuration
+const staticOptions = {
+	maxAge: "1y", // Cache images for a year
+	immutable: false, // Allow query string versioning to work
+	etag: true, // Enable cache revalidation
+	lastModified: true, // Allow Last-Modified-based revalidation
+	setHeaders: (res, filePath) => {
+		if (filePath.endsWith(".png") || filePath.endsWith(".jpg")) {
+			res.set("Cache-Control", "public, must-revalidate, max-age=31536000");
+		} else {
+			res.set("Cache-Control", "no-cache, must-revalidate");
+		}
+	},
+};
+
+// Serve static files at the routeSubdir (e.g., /civbuilder for legacy UI)
+app.use(routeSubdir, express.static(path.join(__dirname, "/public"), staticOptions));
 
 // Mount router at the configured routeSubdir (e.g., /civbuilder for legacy UI)
 app.use(routeSubdir, router);
 
-// Also mount router at root for Vue UI (which is at /v2)
-// This ensures API endpoints work for both:
-// - Legacy UI can use /civbuilder/create
-// - Vue UI can use /create
+// Also mount router and static files at root for Vue UI (which is at /v2)
+// This ensures API endpoints and static assets work for both:
+// - Legacy UI can use /civbuilder/create and /civbuilder/css/styles.css
+// - Vue UI can use /create and /css/styles.css
 if (routeSubdir !== "/") {
+	app.use("/", express.static(path.join(__dirname, "/public"), staticOptions));
 	app.use("/", router);
-	console.log(`[API] Routes available at both ${routeSubdir} and / (for Vue UI)`);
+	console.log(`[API] Routes and static files available at both ${routeSubdir} and / (for Vue UI)`);
 }
 
 app.use(zip());
