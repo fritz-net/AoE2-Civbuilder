@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 interface DraftCard {
   id: number
@@ -106,6 +106,11 @@ const handleClick = () => {
 }
 
 const imageError = ref(false)
+
+// Reset imageError when card changes (e.g., after reroll)
+watch(() => props.card.id, () => {
+  imageError.value = false
+})
 
 const onImageError = () => {
   // On error, show placeholder instead of hiding image
