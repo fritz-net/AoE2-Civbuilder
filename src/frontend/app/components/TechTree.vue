@@ -684,9 +684,21 @@ function enableCaret(caretId: string) {
   const id = idID(caretId)
   
   if (!localtree.value[type].includes(id)) {
-    localtree.value[type].push(id)
     const techCost = getCaretCost(caretId)
+    
+    // Prevent going negative - check if we have enough points
+    if (techtreePoints.value < techCost) {
+      // Not enough points to enable this caret
+      return
+    }
+    
+    localtree.value[type].push(id)
     techtreePoints.value -= techCost
+    
+    // Ensure we never go negative (safety check)
+    if (techtreePoints.value < 0) {
+      techtreePoints.value = 0
+    }
   }
   
   // Enable linked carets
@@ -765,7 +777,9 @@ function handleFill() {
       280, 8, 182, 55, 279, 278, 221, 203, 202, 17, 23, 15, 48, 12, 13, 14,
     ],
   ]
-  techtreePoints.value = calculatePoints()
+  // Calculate remaining points: total points - points spent
+  const usedPoints = calculatePoints()
+  techtreePoints.value = Math.max(0, props.points - usedPoints) // Ensure non-negative
   emit('update:tree', localtree.value)
   emit('update:points', techtreePoints.value)
 }
