@@ -119,7 +119,7 @@ import DraftCard from './DraftCard.vue'
 import DraftSidebar from './DraftSidebar.vue'
 import TimerCountdown from './TimerCountdown.vue'
 import { rarityNames } from '~/composables/useBonusData'
-import { colours } from '~/composables/useCivData'
+import { renderFlagOnCanvas } from '~/composables/useFlagRenderer'
 import type { DraftPlayer } from '~/composables/useDraft'
 
 interface DisplayCard {
@@ -248,91 +248,14 @@ const tooltipStyle = computed(() => {
   }
 })
 
-// Draw flag on canvas for a player
+// Draw flag on canvas for a player using the shared flag renderer
 const drawFlag = (canvas: HTMLCanvasElement, palette: number[]) => {
   const ctx = canvas.getContext('2d')
-  if (!ctx || !palette || palette.length < 8) {
-    // Draw a default gray flag if palette is invalid
-    if (ctx) {
-      ctx.fillStyle = '#808080'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-    }
-    return
-  }
+  if (!ctx) return
   
-  const width = canvas.width
-  const height = canvas.height
-  
-  // Clear canvas
-  ctx.clearRect(0, 0, width, height)
-  
-  // Get colors from palette
-  const color1 = colours[palette[0]] || [128, 128, 128]
-  const color2 = colours[palette[1]] || [128, 128, 128]
-  const color3 = colours[palette[2]] || [128, 128, 128]
-  const division = palette[5] || 0
-  
-  // Draw base color
-  ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
-  ctx.fillRect(0, 0, width, height)
-  
-  // Draw division pattern
-  switch (division) {
-    case 0:
-      // Solid - already filled
-      break
-    case 1:
-      // Halves split vertically
-      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(width / 2, 0, width / 2, height)
-      break
-    case 2:
-      // Halves split horizontally
-      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(0, height / 2, width, height / 2)
-      break
-    case 3:
-      // Thirds split vertically
-      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(width / 3, 0, width / 3, height)
-      ctx.fillStyle = `rgb(${color3[0]}, ${color3[1]}, ${color3[2]})`
-      ctx.fillRect(2 * width / 3, 0, width / 3, height)
-      break
-    case 4:
-      // Thirds split horizontally
-      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(0, height / 3, width, height / 3)
-      ctx.fillStyle = `rgb(${color3[0]}, ${color3[1]}, ${color3[2]})`
-      ctx.fillRect(0, 2 * height / 3, width, height / 3)
-      break
-    case 5:
-      // Quarters - opposite corners same color
-      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(0, height / 2, width / 2, height / 2)
-      ctx.fillRect(width / 2, 0, width / 2, height / 2)
-      break
-    case 7:
-    case 8:
-      // Diagonal halves
-      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.beginPath()
-      if (division === 7) {
-        ctx.moveTo(0, 0)
-        ctx.lineTo(width, height)
-        ctx.lineTo(0, height)
-      } else {
-        ctx.moveTo(width, 0)
-        ctx.lineTo(0, height)
-        ctx.lineTo(width, height)
-      }
-      ctx.closePath()
-      ctx.fill()
-      break
-    default:
-      // For other patterns, just show two colors
-      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
-      ctx.fillRect(width / 2, 0, width / 2, height)
-  }
+  // Use the full flag renderer with symbols and overlays
+  // Symbol images are served from /img/symbols/ by the main server
+  renderFlagOnCanvas(ctx, palette, canvas.width, canvas.height, '/img/symbols')
 }
 
 const setFlagCanvas = (canvas: HTMLCanvasElement | null, playerIndex: number) => {
