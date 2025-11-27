@@ -11,9 +11,9 @@
         Combine Civilizations
       </button>
       
-      <button class="action-button" @click="goToCreateDraft">
+      <NuxtLink to="/draft/create" class="action-button">
         Create Draft
-      </button>
+      </NuxtLink>
     </div>
   </div>
 </template>
@@ -23,11 +23,6 @@ const router = useRouter()
 
 const goToCombine = () => {
   router.push('/combine')
-}
-
-const goToCreateDraft = () => {
-  // TODO: Implement create draft page
-  alert('Create Draft - Coming soon in Vue3 version!')
 }
 </script>
 

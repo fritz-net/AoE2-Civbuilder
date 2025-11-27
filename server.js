@@ -93,14 +93,14 @@ app.get(path.join(routeSubdir, "CHANGELOG.md"), (req, res) => {
 	});
 });
 
-// Static file configuration
+// Static file configuration for all paths
 const staticOptions = {
 	maxAge: "1y", // Cache images for a year
 	immutable: false, // Allow query string versioning to work
 	etag: true, // Enable cache revalidation
 	lastModified: true, // Allow Last-Modified-based revalidation
-	setHeaders: (res, filePath) => {
-		if (filePath.endsWith(".png") || filePath.endsWith(".jpg")) {
+	setHeaders: (res, path) => {
+		if (path.endsWith(".png") || path.endsWith(".jpg")) {
 			res.set("Cache-Control", "public, must-revalidate, max-age=31536000");
 		} else {
 			res.set("Cache-Control", "no-cache, must-revalidate");
@@ -108,8 +108,21 @@ const staticOptions = {
 	},
 };
 
-// Serve static files at the routeSubdir (e.g., /civbuilder for legacy UI)
-app.use(routeSubdir, express.static(path.join(__dirname, "/public"), staticOptions));
+// Serve static files at configured route (e.g., /civbuilder)
+app.use(
+	routeSubdir,
+	express.static(path.join(__dirname, "/public"), staticOptions)
+);
+
+// Also serve static files at root / for legacy references
+if (routeSubdir !== "/") {
+	app.use("/", express.static(path.join(__dirname, "/public"), staticOptions));
+	console.log(`[Static] Files available at both ${routeSubdir} and / (root)`);
+}
+
+// Also serve at /v2 for Vue UI references to /v2/img/...
+app.use("/v2", express.static(path.join(__dirname, "/public"), staticOptions));
+console.log("[Static] Files also available at /v2 (for Vue UI)");
 
 // Mount router at the configured routeSubdir (e.g., /civbuilder for legacy UI)
 app.use(routeSubdir, router);
@@ -132,7 +145,9 @@ integrateNuxt(app);
 
 function os_func() {
 	this.execCommand = function (cmd, callback, failure) {
-		exec(cmd, (error, stdout, stderr) => {
+		// Always execute commands from the app directory to enable parallel execution
+		// This avoids using process.chdir() which is not safe for concurrent requests
+		exec(cmd, { cwd: __dirname }, (error, stdout, stderr) => {
 			if (error) {
 				console.log(`stdout: ${stdout}`);
 				console.error(`exec error: ${error}`);
@@ -346,24 +361,16 @@ function reshuffleCards(draft) {
 	return available_bonuses;
 }
 
-const chToTmpDir = (req, res, next) => {
-	console.log(`[${req.body.seed}]: changing directory to temp: ${tempdir}`);
-	process.chdir(tempdir);
-	next();
-};
-
-const chToAppDir = (req, res, next) => {
-	console.log(`[${req.body.seed}]: changing directory to app: ${__dirname}`);
-	process.chdir(__dirname);
-	next();
-};
+// Note: chToTmpDir and chToAppDir have been removed.
+// All commands now use { cwd: __dirname } option to enable parallel execution.
+// Using process.chdir() is not safe for concurrent requests as it changes global state.
 
 const createModFolder = (req, res, next) => {
 	console.log(`[${req.body.seed}]: creating mod folder`);
 	if (req.body.civs === "false") {
-		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${__dirname} 0`);
+		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${__dirname} 0`, { cwd: __dirname });
 	} else {
-		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${__dirname} 1`);
+		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${__dirname} 1`, { cwd: __dirname });
 	}
 	next();
 };
@@ -584,16 +591,16 @@ const writeIconsJson = async (req, res, next) => {
 		if (civs[i]["flag_palette"][0] == -1) {
 			//Secret password unlocked a vanilla flag
 			if (civName == "berber" || civName == "inca") {
-				execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}s.png`);
+				execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}s.png`, { cwd: __dirname });
 			} else {
-				execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}.png`);
+				execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}.png`, { cwd: __dirname });
 			}
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}.png`);
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_hover.png`);
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_pressed.png`);
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}.png`);
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_hover.png`);
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_pressed.png`);
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}.png`, { cwd: __dirname });
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_hover.png`, { cwd: __dirname });
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_pressed.png`, { cwd: __dirname });
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}.png`, { cwd: __dirname });
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_hover.png`, { cwd: __dirname });
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_pressed.png`, { cwd: __dirname });
 			blankOthers = true;
 		} else if (civs[i]["customFlag"] && civs[i]["customFlagData"]) {
 			// Load in custom image for flag
@@ -860,12 +867,12 @@ router.get("/build", function (req, res) {
 	// res.sendFile(__dirname + "/public/html/donation.html");
 });
 
-router.post("/random", chToAppDir, createModFolder, createCivIcons, copyCivIcons, generateJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
+router.post("/random", createModFolder, createCivIcons, copyCivIcons, generateJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
 	console.log(`[${req.body.seed}]: Completed generation!`);
 	res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
 });
 
-router.post("/create", chToAppDir, createModFolder, writeIconsJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
+router.post("/create", createModFolder, writeIconsJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
 	console.log(`[${req.body.seed}]: Completed generation!`);
 	res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
 });
@@ -944,6 +951,20 @@ router.get("/draft/:id", checkCookies, authenticateDraft, function (req, res) {
 		res.cookie("playerNumber", -1);
 		res.cookie("draftID", req.params.id);
 		res.sendFile(__dirname + "/public/html/draft.html");
+	}
+});
+
+// API endpoint to get draft data as JSON for Vue UI
+router.get("/api/draft/:id", checkCookies, authenticateDraft, function (req, res) {
+	if (req.authenticated == 0) {
+		res.status(404).json({ error: "Draft does not exist" });
+	} else {
+		const draft = getDraft(req.params.id);
+		if (draft === -1) {
+			res.status(404).json({ error: "Draft does not exist" });
+		} else {
+			res.json(draft);
+		}
 	}
 });
 

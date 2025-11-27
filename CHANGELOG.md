@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.4.0...v1.5.0) (2025-11-27)
+
+
+### Features
+
+* add draft mode to Nuxt/Vue3 UI ([#108](https://github.com/fritz-net/AoE2-Civbuilder/issues/108)) ([6f876fa](https://github.com/fritz-net/AoE2-Civbuilder/commit/6f876fa9ce8b4474ca56b010ece44b9b4bb5f6a6))
+
+
+### Bug Fixes
+
+* legacy UI 404s by serving static files at root when router is dual-mounted ([#115](https://github.com/fritz-net/AoE2-Civbuilder/issues/115)) ([efbc064](https://github.com/fritz-net/AoE2-Civbuilder/commit/efbc064b58f46cb9d4ab895e380f1de31c1f4bb4))
+
 ## [1.4.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.3.0...v1.4.0) (2025-11-26)
 
 
