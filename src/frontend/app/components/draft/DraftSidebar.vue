@@ -1,15 +1,15 @@
 <template>
   <div class="draft-sidebar">
     <div class="sidebar-header">
-      <h3>{{ playerName || 'Your Civilization' }}</h3>
+      <h3>{{ player?.alias || player?.name || 'Your Civilization' }}</h3>
     </div>
 
     <div class="sidebar-content">
       <!-- Civilization Bonuses -->
-      <div v-if="bonuses.civBonuses.length > 0" class="bonus-section">
+      <div v-if="civBonuses.length > 0" class="bonus-section">
         <h4 class="section-title">Civilization Bonuses</h4>
         <ul class="bonus-list">
-          <li v-for="(bonus, index) in bonuses.civBonuses" :key="index" class="bonus-item">
+          <li v-for="(bonus, index) in civBonuses" :key="index" class="bonus-item">
             <span class="bonus-bullet">•</span>
             <span class="bonus-text">{{ bonus }}</span>
           </li>
@@ -17,27 +17,27 @@
       </div>
 
       <!-- Unique Unit -->
-      <div v-if="bonuses.uniqueUnit" class="bonus-section">
+      <div v-if="uniqueUnit" class="bonus-section">
         <h4 class="section-title">Unique Unit</h4>
-        <div class="bonus-highlight">{{ bonuses.uniqueUnit }}</div>
+        <div class="bonus-highlight">{{ uniqueUnit }}</div>
       </div>
 
       <!-- Castle Age Tech -->
-      <div v-if="bonuses.castleTech" class="bonus-section">
+      <div v-if="castleTech" class="bonus-section">
         <h4 class="section-title">Castle Age Tech</h4>
-        <div class="bonus-highlight">{{ bonuses.castleTech }}</div>
+        <div class="bonus-highlight">{{ castleTech }}</div>
       </div>
 
       <!-- Imperial Age Tech -->
-      <div v-if="bonuses.imperialTech" class="bonus-section">
+      <div v-if="imperialTech" class="bonus-section">
         <h4 class="section-title">Imperial Age Tech</h4>
-        <div class="bonus-highlight">{{ bonuses.imperialTech }}</div>
+        <div class="bonus-highlight">{{ imperialTech }}</div>
       </div>
 
       <!-- Team Bonus -->
-      <div v-if="bonuses.teamBonus" class="bonus-section">
+      <div v-if="teamBonus" class="bonus-section">
         <h4 class="section-title">Team Bonus</h4>
-        <div class="bonus-highlight">{{ bonuses.teamBonus }}</div>
+        <div class="bonus-highlight">{{ teamBonus }}</div>
       </div>
 
       <!-- Empty state -->
@@ -51,27 +51,48 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-
-interface DraftSidebarBonuses {
-  civBonuses: string[]
-  uniqueUnit: string | null
-  castleTech: string | null
-  imperialTech: string | null
-  teamBonus: string | null
-}
+import type { DraftPlayer } from '~/composables/useDraft'
 
 const props = defineProps<{
-  playerName?: string
-  bonuses: DraftSidebarBonuses
+  player?: DraftPlayer | null
+  showBonuses?: boolean
 }>()
+
+// Extract bonuses from player data
+// Player bonuses array structure: [civ bonuses[], unique units[], castle techs[], imp techs[], team bonuses[]]
+const civBonuses = computed(() => {
+  if (!props.player?.bonuses?.[0]) return []
+  // Just show the card IDs for now - ideally would show descriptions
+  return props.player.bonuses[0].map(id => `Bonus #${id}`)
+})
+
+const uniqueUnit = computed(() => {
+  if (!props.player?.bonuses?.[1]?.length) return null
+  return `Unit #${props.player.bonuses[1][0]}`
+})
+
+const castleTech = computed(() => {
+  if (!props.player?.bonuses?.[2]?.length) return null
+  return `Tech #${props.player.bonuses[2][0]}`
+})
+
+const imperialTech = computed(() => {
+  if (!props.player?.bonuses?.[3]?.length) return null
+  return `Tech #${props.player.bonuses[3][0]}`
+})
+
+const teamBonus = computed(() => {
+  if (!props.player?.bonuses?.[4]?.length) return null
+  return `Team Bonus #${props.player.bonuses[4][0]}`
+})
 
 const isEmpty = computed(() => {
   return (
-    props.bonuses.civBonuses.length === 0 &&
-    !props.bonuses.uniqueUnit &&
-    !props.bonuses.castleTech &&
-    !props.bonuses.imperialTech &&
-    !props.bonuses.teamBonus
+    civBonuses.value.length === 0 &&
+    !uniqueUnit.value &&
+    !castleTech.value &&
+    !imperialTech.value &&
+    !teamBonus.value
   )
 })
 </script>

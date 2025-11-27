@@ -31,11 +31,11 @@
       @toggle-ready="handleToggleReady"
     />
 
-    <!-- Phase 1: Flag & Tech Tree Setup -->
+    <!-- Phase 1: Flag, Architecture, Language, Civ Name (NO Tech Tree) -->
     <div v-else-if="currentPhase === 1" class="setup-phase">
       <h1 class="phase-title">Customize Your Civilization</h1>
       
-      <div class="setup-container">
+      <div class="setup-container single-column">
         <!-- Flag Creator -->
         <div class="setup-section">
           <h2>Flag & Basic Info</h2>
@@ -44,6 +44,9 @@
             v-model:custom-flag="civConfig.customFlag"
             v-model:custom-flag-data="civConfig.customFlagData"
           />
+          
+          <ArchitectureSelector v-model="civConfig.architecture" />
+          <LanguageSelector v-model="civConfig.language" />
           
           <div class="civ-name-input">
             <label for="civName">Civilization Name</label>
@@ -55,24 +58,11 @@
               maxlength="30"
             />
           </div>
-
-          <ArchitectureSelector v-model="civConfig.architecture" />
-          <LanguageSelector v-model="civConfig.language" />
-        </div>
-
-        <!-- Tech Tree -->
-        <div class="setup-section tech-tree-section">
-          <h2>Tech Tree ({{ techTreePoints }} points available)</h2>
-          <TechTree
-            v-model="civConfig.tree"
-            :points-available="techTreePoints"
-            :editable="true"
-          />
         </div>
       </div>
 
-      <button class="next-button" @click="handleSaveSetup">
-        Continue to Draft
+      <button class="next-button" @click="handleSaveCivInfo">
+        Next
       </button>
     </div>
 
@@ -91,15 +81,76 @@
       @view-player="handleViewPlayer"
     />
 
-    <!-- Phase 3: Complete -->
-    <div v-else-if="currentPhase === 3" class="complete-phase">
-      <h1 class="complete-title">Draft Complete!</h1>
-      <div class="complete-content">
-        <p>All players have finished selecting their civilizations.</p>
-        <p>Download your mod to play the game!</p>
+    <!-- Phase 3: Tech Tree (after drafting, shows selected bonuses in sidebar) -->
+    <div v-else-if="currentPhase === 3" class="techtree-phase">
+      <h1 class="phase-title">Waiting For Players</h1>
+      
+      <div class="techtree-container">
+        <!-- Sidebar with selected bonuses -->
+        <DraftSidebar
+          v-if="currentPlayer"
+          :player="currentPlayer"
+          :show-bonuses="true"
+        />
+        
+        <!-- Tech Tree -->
+        <div class="tech-tree-section">
+          <TechTree
+            v-model="civConfig.tree"
+            :points-available="techTreePoints"
+            :editable="currentPlayer?.ready === 0"
+          />
+          
+          <button 
+            v-if="currentPlayer?.ready === 0" 
+            class="next-button" 
+            @click="handleSaveTechTree"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 5: Creating Mod -->
+    <div v-else-if="currentPhase === 5" class="creating-phase">
+      <h1 class="phase-title">Creating Mod...</h1>
+      <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Phase 6: Download -->
+    <div v-else-if="currentPhase === 6" class="download-phase">
+      <h1 class="phase-title">Mod Created!</h1>
+      <div class="download-content">
         <button class="download-button" @click="handleDownload">
           Download Mod
         </button>
+        
+        <div class="instructions-box">
+          <p class="instructions-title"><b>Publication Instructions:</b></p>
+          <p class="instructions-text">
+            1. Click "Download Mod" and extract the .zip file<br><br>
+            2. Log-in to ageofempires.com<br><br>
+            3. Go to Mods → Submit a Mod<br><br>
+            4. Fill out the form as you wish with the following specifications:<br>
+            &emsp;&emsp;A) Game = Age of Empires II DE,<br>
+            &emsp;&emsp;B) Type = Data Mod,<br>
+            &emsp;&emsp;C) Tags = Data Mod,<br>
+            &emsp;&emsp;D) Images = thumbnail.jpg found in extracted folder,<br>
+            &emsp;&emsp;E) Zip File Upload = [id]-data.zip found in extracted folder,<br>
+            &emsp;&emsp;F) Please credit me or the website!<br><br>
+            5. Submit the data mod, and go to Mods → Submit a Mod again to publish the UI Mod<br><br>
+            6. Fill out the form as you wish with the following specifications:<br>
+            &emsp;&emsp;A) Game = Age of Empires II DE,<br>
+            &emsp;&emsp;B) Type = User Interface,<br>
+            &emsp;&emsp;C) Tags = User Interface,<br>
+            &emsp;&emsp;D) Images = thumbnail.jpg,<br>
+            &emsp;&emsp;E) Zip File Upload = [id]-ui.zip found in extracted folder,<br>
+            &emsp;&emsp;F) Please credit me or the website!<br><br>
+            7. Submit the UI mod, go to Mods → My Mods, and share the links with the other players!
+          </p>
+        </div>
+        
         <button class="home-button" @click="goHome">
           Return Home
         </button>
@@ -126,6 +177,7 @@ import { useDraft } from '~/composables/useDraft'
 import type { CivConfig } from '~/composables/useCivData'
 import DraftLobby from '~/components/draft/DraftLobby.vue'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
+import DraftSidebar from '~/components/draft/DraftSidebar.vue'
 import FlagCreator from '~/components/FlagCreator.vue'
 import ArchitectureSelector from '~/components/ArchitectureSelector.vue'
 import LanguageSelector from '~/components/LanguageSelector.vue'
@@ -242,9 +294,9 @@ const handleToggleReady = () => {
   }
 }
 
-const handleSaveSetup = () => {
+// Phase 1: Save civ info (flag, architecture, language, civ name) - NO tech tree
+const handleSaveCivInfo = () => {
   if (playerNumber.value >= 0) {
-    // Update civ info with the correct parameters matching server expectations
     updateCivInfo(
       playerNumber.value,
       civConfig.value.alias,
@@ -252,7 +304,12 @@ const handleSaveSetup = () => {
       civConfig.value.architecture,
       civConfig.value.language
     )
-    // Also update tech tree separately
+  }
+}
+
+// Phase 3: Save tech tree (after card drafting)
+const handleSaveTechTree = () => {
+  if (playerNumber.value >= 0) {
     updateTree(playerNumber.value, civConfig.value.tree as number[][])
   }
 }
@@ -272,8 +329,23 @@ const handleViewPlayer = (playerIndex: number) => {
 }
 
 const handleDownload = () => {
-  // TODO: Trigger mod download
-  console.log('Download mod')
+  if (!draft.value) return
+  
+  // Create a form and submit it to trigger download (like legacy code)
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = '/download'
+  form.style.display = 'none'
+  
+  const input = document.createElement('input')
+  input.type = 'hidden'
+  input.name = 'draftID'
+  input.value = draft.value.id
+  
+  form.appendChild(input)
+  document.body.appendChild(form)
+  form.submit()
+  document.body.removeChild(form)
 }
 
 const goHome = () => {
@@ -612,6 +684,91 @@ onUnmounted(() => {
 
   .setup-section {
     padding: 1rem;
+  }
+}
+
+/* Single column setup (Phase 1 - no tech tree) */
+.setup-container.single-column {
+  grid-template-columns: 1fr;
+  max-width: 600px;
+  margin: 0 auto 2rem;
+}
+
+/* Tech tree phase (Phase 3) */
+.techtree-phase {
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.techtree-container {
+  display: flex;
+  gap: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.techtree-container .tech-tree-section {
+  flex: 1;
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border: 3px solid hsl(52, 100%, 50%);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+/* Creating phase (Phase 5) */
+.creating-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 2rem;
+}
+
+/* Download phase (Phase 6) */
+.download-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.download-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 800px;
+  width: 100%;
+}
+
+.instructions-box {
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border: 3px solid hsl(52, 100%, 50%);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  width: 100%;
+}
+
+.instructions-title {
+  color: hsl(52, 100%, 50%);
+  font-size: 1.3rem;
+  margin: 0 0 1rem 0;
+}
+
+.instructions-text {
+  color: #f0e6d2;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 1024px) {
+  .techtree-container {
+    flex-direction: column;
   }
 }
 </style>
