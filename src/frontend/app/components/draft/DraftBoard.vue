@@ -71,7 +71,7 @@
       <div class="help-content">
         <div v-if="hoveredCard" class="tooltip-inner">
           <span :class="'rarity-text rarity-' + (hoveredCard.rarity || 0)">
-            {{ rarityTexts[hoveredCard.rarity || 0] }}
+            {{ rarityNames[hoveredCard.rarity || 0] }}
           </span>
           <p class="card-description">{{ hoveredCard.description || hoveredCard.name }}</p>
         </div>
@@ -84,6 +84,7 @@
 import { ref, computed, onMounted } from 'vue'
 import DraftCard from './DraftCard.vue'
 import TimerCountdown from './TimerCountdown.vue'
+import { rarityNames } from '~/composables/useBonusData'
 import type { DraftPlayer } from '~/composables/useDraft'
 
 interface DisplayCard {
@@ -117,8 +118,6 @@ const emit = defineEmits<{
 const hoveredCard = ref<DisplayCard | null>(null)
 const flagCanvasRefs = ref<Map<number, HTMLCanvasElement>>(new Map())
 const mousePosition = ref({ x: 0, y: 0 })
-
-const rarityTexts = ['Ordinary', 'Distinguished', 'Superior', 'Epic', 'Legendary']
 
 // Ordered players based on draft order
 const orderedPlayers = computed(() => {

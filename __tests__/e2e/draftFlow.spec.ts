@@ -154,14 +154,15 @@ test.describe('Draft Flow - Complete Single Player Draft to Download', () => {
     }
     
     // Step 5: Phase 2 - Card Drafting - Multiple Rounds
-    // We need to select cards for ALL 5 rounds:
-    // Round 1-4: Civilization Bonuses (default 4 rounds)
+    // We need to select cards for ALL rounds:
+    // Round 1-4: Civilization Bonuses (default 4 rounds per preset.rounds)
     // Round 5: Unique Units
     // Round 6: Castle Tech
     // Round 7: Imperial Tech  
     // Round 8: Team Bonus
-    
-    const totalRounds = 8; // For a 1-player draft with default settings
+    // Total rounds = preset.rounds (4) + 4 (UU, castle, imp, team) = 8 for 1-player draft
+    // For N players: Total turns = (preset.rounds * N) + (4 * N) = N * (preset.rounds + 4)
+    const totalRounds = 8; // For a 1-player draft with default 4 bonus rounds
     let currentRound = 0;
     
     while (currentRound < totalRounds) {

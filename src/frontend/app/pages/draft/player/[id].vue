@@ -186,7 +186,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDraft } from '~/composables/useDraft'
-import { useBonusData, type BonusType } from '~/composables/useBonusData'
+import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
 import type { CivConfig } from '~/composables/useCivData'
 import DraftLobby from '~/components/draft/DraftLobby.vue'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
@@ -251,12 +251,6 @@ const civConfig = ref<CivConfig>({
 const techTreePoints = computed(() => {
   return draft.value?.preset.points || 250
 })
-
-// Map round type to bonus type for card data lookup
-const roundTypeToBonusType = (roundType: number): BonusType => {
-  const types: BonusType[] = ['civ', 'uu', 'castle', 'imp', 'team']
-  return types[roundType] || 'civ'
-}
 
 const displayCards = computed(() => {
   if (!draft.value) return []

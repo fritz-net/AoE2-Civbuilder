@@ -28,6 +28,16 @@ export const numCards = {
   team: 80
 }
 
+/**
+ * Map round type index to bonus type
+ * @param roundType - The draft round type (0-4)
+ * @returns The corresponding BonusType
+ */
+export function roundTypeToBonusType(roundType: number): BonusType {
+  const types: BonusType[] = ['civ', 'uu', 'castle', 'imp', 'team']
+  return types[roundType] || 'civ'
+}
+
 // Maximum selections per bonus type
 // maxUniqueSelections: how many different bonuses can be selected
 // maxTotalSelections: total count including multipliers (null = no limit on total)
