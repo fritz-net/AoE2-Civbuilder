@@ -57,9 +57,9 @@
           <button 
             class="toolbar-btn clear-btn" 
             @click="$emit('clear')"
-            title="Remove all cards from the board"
+            title="Remove all cards and get a fresh set"
           >
-            Clear
+            Reroll
           </button>
         </div>
         

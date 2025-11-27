@@ -33,8 +33,8 @@
 
     <!-- Phase 1: Flag, Architecture, Language, Civ Name (NO Tech Tree) -->
     <div v-else-if="currentPhase === 1" class="setup-phase">
-      <!-- Show form when player hasn't submitted yet -->
-      <template v-if="currentPlayer?.ready === 0">
+      <!-- Show form when player hasn't submitted yet and not waiting -->
+      <template v-if="!isWaitingPhase1 && currentPlayer?.ready === 0">
         <h1 class="phase-title">Customize Your Civilization</h1>
         
         <div class="setup-container single-column">
@@ -96,35 +96,39 @@
 
     <!-- Phase 3: Tech Tree (after drafting, shows selected bonuses in sidebar) -->
     <div v-else-if="currentPhase === 3" class="techtree-phase">
-      <h1 class="phase-title">Waiting For Players</h1>
+      <!-- Show waiting screen if done with tech tree -->
+      <template v-if="isWaitingPhase3 || currentPlayer?.ready === 1">
+        <div class="waiting-phase">
+          <h1 class="phase-title">Waiting For Players</h1>
+          <div class="loading-spinner"></div>
+          <p class="waiting-text">Your tech tree has been saved. Waiting for other players...</p>
+        </div>
+      </template>
       
-      <div class="techtree-container">
-        <!-- Sidebar with selected bonuses -->
-        <DraftSidebar
-          v-if="currentPlayer"
-          :player="currentPlayer"
-          :show-bonuses="true"
-        />
+      <!-- Show tech tree if not done yet -->
+      <template v-else>
+        <h1 class="phase-title">Tech Tree</h1>
         
-        <!-- Tech Tree -->
-        <div class="tech-tree-section">
-          <TechTree
-            v-model="civConfig.tree"
-            :points-available="techTreePoints"
-            :editable="currentPlayer?.ready === 0"
-            relative-path="/v2/aoe2techtree"
-            @done="handleTechTreeDone"
+        <div class="techtree-fullscreen">
+          <!-- Sidebar with selected bonuses -->
+          <DraftSidebar
+            v-if="currentPlayer"
+            :player="currentPlayer"
+            :show-bonuses="true"
           />
           
-          <button 
-            v-if="currentPlayer?.ready === 0" 
-            class="next-button" 
-            @click="handleSaveTechTree"
-          >
-            Done
-          </button>
+          <!-- Tech Tree - fills remaining space -->
+          <div class="tech-tree-full">
+            <TechTree
+              v-model="civConfig.tree"
+              :points-available="techTreePoints"
+              :editable="true"
+              relative-path="/v2/aoe2techtree"
+              @done="handleTechTreeDone"
+            />
+          </div>
         </div>
-      </div>
+      </template>
     </div>
 
     <!-- Phase 5: Creating Mod -->
@@ -207,6 +211,10 @@ const draftId = computed(() => route.params.id as string)
 const needsToJoin = ref(true)
 const playerName = ref('')
 const isJoining = ref(false)
+
+// Local waiting state (for Phase 1 and Phase 3 transitions)
+const isWaitingPhase1 = ref(false)
+const isWaitingPhase3 = ref(false)
 
 const {
   draft,
@@ -338,6 +346,9 @@ const handleToggleReady = () => {
 // Phase 1: Save civ info (flag, architecture, language, civ name) - NO tech tree
 const handleSaveCivInfo = () => {
   if (playerNumber.value >= 0) {
+    // Immediately show waiting screen (optimistic update like legacy code)
+    isWaitingPhase1.value = true
+    
     updateCivInfo(
       playerNumber.value,
       civConfig.value.alias,
@@ -351,6 +362,9 @@ const handleSaveCivInfo = () => {
 // Phase 3: Save tech tree (after card drafting)
 const handleSaveTechTree = () => {
   if (playerNumber.value >= 0) {
+    // Immediately show waiting screen (optimistic update like legacy code)
+    isWaitingPhase3.value = true
+    
     updateTree(playerNumber.value, civConfig.value.tree as number[][])
   }
 }
@@ -360,6 +374,9 @@ const handleTechTreeDone = (tree: number[][], _points: number) => {
   // points parameter is passed by TechTree but we only need to save the tree
   civConfig.value.tree = tree
   if (playerNumber.value >= 0) {
+    // Immediately show waiting screen (optimistic update like legacy code)
+    isWaitingPhase3.value = true
+    
     updateTree(playerNumber.value, tree)
   }
 }
@@ -407,7 +424,8 @@ const handleDownload = () => {
 }
 
 const goHome = () => {
-  router.push('/v2')
+  // Navigate to home page - use navigateTo for proper Nuxt routing
+  navigateTo('/')
 }
 
 // Helper to get cookie value
@@ -754,7 +772,19 @@ onUnmounted(() => {
 /* Tech tree phase (Phase 3) */
 .techtree-phase {
   min-height: 100vh;
-  padding: 2rem;
+  padding: 0;
+}
+
+/* Fullscreen tech tree layout */
+.techtree-fullscreen {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.techtree-fullscreen .tech-tree-full {
+  flex: 1;
+  overflow: hidden;
 }
 
 .techtree-container {

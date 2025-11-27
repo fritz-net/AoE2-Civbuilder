@@ -33,8 +33,8 @@
 
     <!-- Phase 1: Flag, Architecture, Language, Civ Name (NO Tech Tree) -->
     <div v-else-if="currentPhase === 1" class="setup-phase">
-      <!-- If player is ready, show waiting screen -->
-      <div v-if="currentPlayer?.ready === 1" class="waiting-screen">
+      <!-- If player is ready or waiting, show waiting screen -->
+      <div v-if="isWaitingPhase1 || currentPlayer?.ready === 1" class="waiting-screen">
         <h1 class="waiting-title">Waiting For Players</h1>
         <div class="waiting-content">
           <div class="loading-spinner"></div>
@@ -99,59 +99,64 @@
 
     <!-- Phase 3: Tech Tree (after drafting, shows selected bonuses in sidebar) -->
     <div v-else-if="currentPhase === 3" class="techtree-phase">
-      <h1 class="phase-title">Waiting For Players</h1>
+      <!-- Show waiting screen if done with tech tree -->
+      <template v-if="isWaitingPhase3 || currentPlayer?.ready === 1">
+        <div class="waiting-phase">
+          <h1 class="phase-title">Waiting For Players</h1>
+          <div class="loading-spinner"></div>
+          <p class="waiting-text">Your tech tree has been saved. Waiting for other players...</p>
+        </div>
+      </template>
       
-      <div class="techtree-container">
-        <!-- Sidebar with selected bonuses -->
-        <DraftSidebar
-          v-if="currentPlayer"
-          :player="currentPlayer"
-          :show-bonuses="true"
-        />
+      <!-- Show tech tree if not done yet -->
+      <template v-else>
+        <h1 class="phase-title">Tech Tree</h1>
         
-        <!-- Tech Tree -->
-        <div class="tech-tree-section">
-          <TechTree
-            v-model="civConfig.tree"
-            :points-available="techTreePoints"
-            :editable="currentPlayer?.ready === 0"
-            relative-path="/v2/aoe2techtree"
-            @done="handleTechTreeDone"
+        <div class="techtree-fullscreen">
+          <!-- Sidebar with selected bonuses -->
+          <DraftSidebar
+            v-if="currentPlayer"
+            :player="currentPlayer"
+            :show-bonuses="true"
           />
           
-          <button 
-            v-if="currentPlayer?.ready === 0" 
-            class="next-button" 
-            @click="handleSaveTechTree"
-          >
-            Done
-          </button>
+          <!-- Tech Tree - fills remaining space -->
+          <div class="tech-tree-full">
+            <TechTree
+              v-model="civConfig.tree"
+              :points-available="techTreePoints"
+              :editable="true"
+              relative-path="/v2/aoe2techtree"
+              @done="handleTechTreeDone"
+            />
+          </div>
         </div>
-      </div>
+      </template>
     </div>
 
     <!-- Phase 5: Creating Mod -->
     <div v-else-if="currentPhase === 5" class="creating-phase">
       <h1 class="phase-title">Creating Mod...</h1>
       <div class="loading-spinner"></div>
+      <p class="creating-text">The host is creating the mod. Please wait...</p>
     </div>
 
     <!-- Phase 6: Download -->
     <div v-else-if="currentPhase === 6" class="download-phase">
       <h1 class="phase-title">Mod Created!</h1>
       <div class="download-content">
+        <p class="download-info">The host has created the mod. You can download it below:</p>
+        
         <button class="download-button" @click="handleDownload">
           Download Mod
         </button>
         
         <div class="instructions-box">
-          <p class="instructions-title"><b>Publication Instructions:</b></p>
+          <p class="instructions-title"><b>Note:</b></p>
           <p class="instructions-text">
-            1. Click "Download Mod" and extract the .zip file<br><br>
-            2. Log-in to ageofempires.com<br><br>
-            3. Go to Mods → Submit a Mod<br><br>
-            4. Fill out the form and submit both data and UI mods<br><br>
-            5. Share the mod links with other players!
+            The host will publish the mod to ageofempires.com.<br><br>
+            Once published, they will share the mod link with you.<br><br>
+            Subscribe to both the Data Mod and UI Mod to play!
           </p>
         </div>
         
@@ -196,6 +201,10 @@ const draftId = computed(() => route.params.id as string)
 const needsToJoin = ref(true)
 const playerName = ref('')
 const isJoining = ref(false)
+
+// Local waiting state (for Phase 1 and Phase 3 transitions)
+const isWaitingPhase1 = ref(false)
+const isWaitingPhase3 = ref(false)
 
 const {
   draft,
@@ -330,6 +339,9 @@ const handleToggleReady = () => {
 // Phase 1: Save civ info (flag, architecture, language, civ name) - NO tech tree
 const handleSaveCivInfo = () => {
   if (playerNumber.value >= 0) {
+    // Immediately show waiting screen (optimistic update like legacy code)
+    isWaitingPhase1.value = true
+    
     updateCivInfo(
       playerNumber.value,
       civConfig.value.alias,
@@ -343,6 +355,9 @@ const handleSaveCivInfo = () => {
 // Phase 3: Save tech tree (after card drafting)
 const handleSaveTechTree = () => {
   if (playerNumber.value >= 0) {
+    // Immediately show waiting screen (optimistic update like legacy code)
+    isWaitingPhase3.value = true
+    
     updateTree(playerNumber.value, civConfig.value.tree as number[][])
   }
 }
@@ -352,6 +367,9 @@ const handleTechTreeDone = (tree: number[][], _points: number) => {
   // points parameter is passed by TechTree but we only need to save the tree
   civConfig.value.tree = tree
   if (playerNumber.value >= 0) {
+    // Immediately show waiting screen (optimistic update like legacy code)
+    isWaitingPhase3.value = true
+    
     updateTree(playerNumber.value, tree)
   }
 }
@@ -399,7 +417,8 @@ const handleDownload = () => {
 }
 
 const goHome = () => {
-  router.push('/v2')
+  // Navigate to home page - use navigateTo for proper Nuxt routing
+  navigateTo('/')
 }
 
 // Helper to get cookie value
@@ -838,7 +857,19 @@ onUnmounted(() => {
 /* Tech tree phase (Phase 3) */
 .techtree-phase {
   min-height: 100vh;
-  padding: 2rem;
+  padding: 0;
+}
+
+/* Fullscreen tech tree layout */
+.techtree-fullscreen {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.techtree-fullscreen .tech-tree-full {
+  flex: 1;
+  overflow: hidden;
 }
 
 .techtree-container {
@@ -857,6 +888,24 @@ onUnmounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
+/* Waiting phase */
+.waiting-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.waiting-text {
+  color: #f0e6d2;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  text-align: center;
+  max-width: 500px;
+}
+
 /* Creating phase (Phase 5) */
 .creating-phase {
   display: flex;
@@ -867,6 +916,13 @@ onUnmounted(() => {
   padding: 2rem;
 }
 
+.creating-text {
+  color: #f0e6d2;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  text-align: center;
+}
+
 /* Download phase (Phase 6) */
 .download-phase {
   display: flex;
@@ -874,6 +930,13 @@ onUnmounted(() => {
   align-items: center;
   min-height: 100vh;
   padding: 2rem;
+}
+
+.download-info {
+  color: #f0e6d2;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
 .download-content {
