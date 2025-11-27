@@ -116,7 +116,6 @@ const isEmpty = computed(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
   /* Limit width for long bonus text */
   width: 280px;
-  max-width: 280px;
   min-width: 250px;
   flex-shrink: 0;
 }

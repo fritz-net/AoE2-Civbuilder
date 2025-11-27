@@ -217,13 +217,20 @@ const getPlayerUU = (player: any) => {
 // Draw flag on canvas using player's flag_palette
 const drawFlag = (canvas: HTMLCanvasElement, palette: number[]) => {
   const ctx = canvas.getContext('2d')
-  if (!ctx || !palette || palette.length < 6) return
-
+  if (!ctx) return
+  
   const width = canvas.width
   const height = canvas.height
   
-  // Clear canvas
+  // Clear canvas first
   ctx.clearRect(0, 0, width, height)
+  
+  // If palette is invalid, draw a default gray flag
+  if (!palette || palette.length < 6) {
+    ctx.fillStyle = 'rgb(128, 128, 128)'
+    ctx.fillRect(0, 0, width, height)
+    return
+  }
   
   // Get colors from palette
   const color1 = colours[palette[0]] || [128, 128, 128]
