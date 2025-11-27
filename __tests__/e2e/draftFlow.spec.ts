@@ -561,3 +561,54 @@ test.describe('Draft Flow - TechTree Phase', () => {
     expect(defaultPoints).toBe(expectedPoints.toString());
   });
 });
+
+test.describe('Draft Flow - Flag Rendering', () => {
+  test('should display FlagCreator canvas in Phase 1 setup', async ({ page }) => {
+    const { hostLink } = await createDraft(page, 1);
+    await joinAsHost(page, hostLink, 'Flag Tester');
+    
+    // Start draft
+    const startButton = page.getByRole('button', { name: /Start Draft/i });
+    if (await startButton.isVisible()) {
+      await startButton.click();
+      await page.waitForTimeout(3000);
+    }
+    
+    // Verify Phase 1 has flag creator
+    const setupPhase = page.locator('.setup-phase');
+    if (await setupPhase.isVisible().catch(() => false)) {
+      // Look for flag canvas in FlagCreator component
+      const flagCanvas = page.locator('.flag-canvas');
+      const flagCreator = page.locator('.flag-creator');
+      
+      // Either the canvas or the component should be visible
+      const isFlagVisible = await flagCanvas.isVisible().catch(() => false) ||
+                           await flagCreator.isVisible().catch(() => false);
+      
+      expect(isFlagVisible).toBe(true);
+    }
+  });
+
+  test('should have flag controls in Phase 1 setup', async ({ page }) => {
+    const { hostLink } = await createDraft(page, 1);
+    await joinAsHost(page, hostLink, 'Flag Controls Tester');
+    
+    // Start draft
+    const startButton = page.getByRole('button', { name: /Start Draft/i });
+    if (await startButton.isVisible()) {
+      await startButton.click();
+      await page.waitForTimeout(3000);
+    }
+    
+    // Verify Phase 1 has flag controls
+    const setupPhase = page.locator('.setup-phase');
+    if (await setupPhase.isVisible().catch(() => false)) {
+      // Look for flag control buttons (< and > for cycling colors)
+      const navButtons = page.locator('.nav-btn, .flag-control-row button');
+      const buttonCount = await navButtons.count();
+      
+      // Should have navigation buttons for flag customization
+      expect(buttonCount).toBeGreaterThan(0);
+    }
+  });
+});
