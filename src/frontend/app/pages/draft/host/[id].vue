@@ -394,7 +394,6 @@ onUnmounted(() => {
 <style scoped>
 .draft-host-page {
   min-height: 100vh;
-  background: url('/img/aoe2background.jpg') center/cover;
 }
 
 /* Join Form Styles */

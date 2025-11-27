@@ -185,7 +185,6 @@ onUnmounted(() => {
 <style scoped>
 .draft-spectator-page {
   min-height: 100vh;
-  background: url('/img/aoe2background.jpg') center/cover;
 }
 
 .spectator-lobby {
