@@ -269,6 +269,10 @@ const emit = defineEmits<{
   (e: 'update:points', points: number): void
 }>()
 
+// Constants for Pasture building management
+const PASTURE_BUILDING_ID = 1889
+const BUILDINGS_ARRAY_INDEX = 1
+
 // Refs
 const techtreeRef = ref<HTMLDivElement | null>(null)
 const svgRef = ref<SVGSVGElement | null>(null)
@@ -412,6 +416,13 @@ onMounted(async () => {
   if (props.initialTree) {
     localtree.value = JSON.parse(JSON.stringify(props.initialTree))
   }
+  
+  // Handle initial showPastures state - add Pasture to buildings if needed
+  if (props.showPastures && !localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
+    localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
+    emit('update:tree', localtree.value)
+  }
+  
   if (typeof window !== 'undefined') {
     window.addEventListener('resize', handleResize)
   }
@@ -426,6 +437,13 @@ onUnmounted(() => {
 watch(() => props.initialTree, (newTree) => {
   if (newTree) {
     localtree.value = JSON.parse(JSON.stringify(newTree))
+    
+    // Ensure Pasture is included/excluded based on showPastures prop
+    if (props.showPastures && !localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
+      localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
+      emit('update:tree', localtree.value)
+    }
+    
     // Recalculate points when tree is loaded from props
     if (data.value && props.editable) {
       const usedPoints = calculatePoints()
@@ -435,9 +453,25 @@ watch(() => props.initialTree, (newTree) => {
   }
 }, { deep: true })
 
-// Watch for showPastures prop changes to rebuild the tree
+// Watch for showPastures prop changes to rebuild the tree and update localtree
 watch(() => props.showPastures, (newShowPastures) => {
   tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: newShowPastures })
+  
+  // Update localtree to include/exclude Pasture building
+  if (newShowPastures) {
+    // Add Pasture to buildings if not already present
+    if (!localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
+      localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
+      emit('update:tree', localtree.value)
+    }
+  } else {
+    // Remove Pasture from buildings if present
+    const index = localtree.value[BUILDINGS_ARRAY_INDEX].indexOf(PASTURE_BUILDING_ID)
+    if (index !== -1) {
+      localtree.value[BUILDINGS_ARRAY_INDEX].splice(index, 1)
+      emit('update:tree', localtree.value)
+    }
+  }
 })
 
 // Methods
