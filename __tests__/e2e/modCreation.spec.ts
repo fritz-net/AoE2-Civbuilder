@@ -286,3 +286,164 @@ test.describe('Home Page Navigation', () => {
     await expect(page.getByRole('heading', { name: /Create Your Civilization/i })).toBeVisible();
   });
 });
+
+// Pasture bonus filter text - used to find bonus 105 in the UI
+const PASTURE_BONUS_FILTER_TEXT = 'Economic upgrades cost -33%';
+
+test.describe('Build Page - Pasture Bonus Detection', () => {
+  test('should show pasture techs in techtree when bonus 105 is selected', async ({ page }) => {
+    await page.goto('/v2/build');
+    
+    // Fill in civilization name
+    const civNameInput = page.getByPlaceholder(/Enter civilization name/i);
+    await civNameInput.fill('PastureCiv');
+    
+    // Click Next to go to Civ Bonuses step
+    await page.getByRole('button', { name: /Next →/i }).click();
+    
+    // Should be on Civ Bonuses step
+    await expect(page.getByRole('heading', { name: /Civilization Bonuses/i })).toBeVisible();
+    
+    // Search for the pasture bonus (Economic upgrades cost -33% food)
+    const filterInput = page.getByPlaceholder(/e.g. "Infantry", "Archer"/i);
+    await filterInput.fill(PASTURE_BONUS_FILTER_TEXT);
+    
+    // Wait for filter to apply by checking if the bonus card is visible
+    const bonusCard = page.locator('.bonus-card').first();
+    await expect(bonusCard).toBeVisible();
+    
+    // Click on the bonus card to select it
+    await bonusCard.click();
+    
+    // Navigate to Tech Tree step (need to go through remaining steps)
+    // Step 3: Unique Unit
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Unique Unit/i })).toBeVisible();
+    
+    // Step 4: Castle Tech
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Castle Age Unique Tech/i })).toBeVisible();
+    
+    // Step 5: Imperial Tech
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Imperial Age Unique Tech/i })).toBeVisible();
+    
+    // Step 6: Team Bonus
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Team Bonus/i })).toBeVisible();
+    
+    // Step 7: Tech Tree
+    await page.getByRole('button', { name: /Next →/i }).click();
+    
+    // Wait for the techtree to load by checking for the techtree-area element
+    const techtreeArea = page.locator('.techtree-area');
+    await expect(techtreeArea).toBeVisible();
+    
+    // Check for Pasture building in the techtree
+    const pastureElement = page.locator('text=Pasture');
+    await expect(pastureElement).toBeVisible();
+    
+    // Check for Domestication tech (first pasture tech)
+    const domesticationElement = page.locator('text=Domestication');
+    await expect(domesticationElement).toBeVisible();
+  });
+
+  test('should show farm techs in techtree when bonus 105 is NOT selected', async ({ page }) => {
+    await page.goto('/v2/build');
+    
+    // Fill in civilization name
+    const civNameInput = page.getByPlaceholder(/Enter civilization name/i);
+    await civNameInput.fill('FarmCiv');
+    
+    // Navigate directly to Tech Tree step without selecting pasture bonus
+    // Step 1 -> Step 2 (Civ Bonuses)
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Civilization Bonuses/i })).toBeVisible();
+    
+    // Step 2 -> Step 3 (don't select pasture bonus)
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Unique Unit/i })).toBeVisible();
+    
+    // Step 3 -> Step 4
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Castle Age Unique Tech/i })).toBeVisible();
+    
+    // Step 4 -> Step 5
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Imperial Age Unique Tech/i })).toBeVisible();
+    
+    // Step 5 -> Step 6
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Team Bonus/i })).toBeVisible();
+    
+    // Step 6 -> Step 7 (Tech Tree)
+    await page.getByRole('button', { name: /Next →/i }).click();
+    
+    // Wait for the techtree to load by checking for the techtree-area element
+    const techtreeArea = page.locator('.techtree-area');
+    await expect(techtreeArea).toBeVisible();
+    
+    // Check for Farm building in the techtree
+    const farmElement = page.locator('text=Farm');
+    await expect(farmElement).toBeVisible();
+    
+    // Check for Horse Collar tech (first farm tech)
+    const horseCollarElement = page.locator('text=Horse Collar').or(page.locator('text=HorseCollar'));
+    await expect(horseCollarElement).toBeVisible();
+  });
+
+  test('should update techtree when pasture bonus is removed', async ({ page }) => {
+    await page.goto('/v2/build');
+    
+    // Fill in civilization name
+    const civNameInput = page.getByPlaceholder(/Enter civilization name/i);
+    await civNameInput.fill('ToggleCiv');
+    
+    // Click Next to go to Civ Bonuses step
+    await page.getByRole('button', { name: /Next →/i }).click();
+    
+    // Search for and select the pasture bonus
+    const filterInput = page.getByPlaceholder(/e.g. "Infantry", "Archer"/i);
+    await filterInput.fill(PASTURE_BONUS_FILTER_TEXT);
+    
+    // Wait for filter to apply by checking if the bonus card is visible
+    const bonusCard = page.locator('.bonus-card').first();
+    await expect(bonusCard).toBeVisible();
+    
+    // Click on the bonus card to select it
+    await bonusCard.click();
+    
+    // Verify bonus is selected (counter shows 1)
+    await expect(page.getByText(/1\/6 unique/i)).toBeVisible();
+    
+    // Click the bonus again to deselect it
+    await bonusCard.click();
+    
+    // Verify bonus is deselected (counter shows 0)
+    await expect(page.getByText(/0\/6 unique/i)).toBeVisible();
+    
+    // Navigate to Tech Tree step by clicking through remaining steps
+    // Use explicit waits for each step header
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Unique Unit/i })).toBeVisible();
+    
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Castle Age Unique Tech/i })).toBeVisible();
+    
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Imperial Age Unique Tech/i })).toBeVisible();
+    
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Team Bonus/i })).toBeVisible();
+    
+    await page.getByRole('button', { name: /Next →/i }).click();
+    
+    // Wait for the techtree to load by checking for the techtree-area element
+    const techtreeArea = page.locator('.techtree-area');
+    await expect(techtreeArea).toBeVisible();
+    
+    // Check for Farm building in the techtree
+    const farmElement = page.locator('text=Farm');
+    await expect(farmElement).toBeVisible();
+  });
+});

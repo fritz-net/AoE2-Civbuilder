@@ -529,9 +529,9 @@ export function getConnections(showPastures: boolean = false): [string, string][
 
   // Add farm/pasture specific connections based on showPastures option
   if (showPastures) {
-    // Pasture tech connections - connected to Pasture building, not Mill
-    // Pasture is independent, not connected to Mill
-    connections.push([b(PASTURE), t(DOMESTICATION)])
+    // Pasture tech connections - connected to Mill (like farm techs)
+    // Pasture building itself is in Dark Age and independent (no connections)
+    connections.push([b(MILL), t(DOMESTICATION)])
     connections.push([t(DOMESTICATION), t(PASTORALISM)])
     connections.push([t(PASTORALISM), t(TRANSHUMANCE)])
   } else {
@@ -836,17 +836,17 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   // Farm lane (or Pasture lane if showPastures is enabled)
   if (showPastures) {
     // When showPastures is enabled, Pasture replaces Farm
-    // Pasture has its own lane with pasture techs
+    // Pasture building is in Dark Age and independent (no tech connections)
     const pasturelane = createLane()
-    pasturelane.rows.dark_1.push(building(PASTURE))
-    pasturelane.rows.feudal_1.push(tech(DOMESTICATION))
-    pasturelane.rows.castle_1.push(tech(PASTORALISM))
-    pasturelane.rows.imperial_1.push(tech(TRANSHUMANCE))
+    pasturelane.rows.dark_2.push(building(PASTURE))
     tree.lanes.push(pasturelane)
 
-    // Mill lane - just the mill building for market connection, no farm techs
+    // Mill lane with pasture techs (Mill is connected to pasture techs)
     const milllane = createLane()
     milllane.rows.dark_1.push(building(MILL))
+    milllane.rows.feudal_1.push(tech(DOMESTICATION))
+    milllane.rows.castle_1.push(tech(PASTORALISM))
+    milllane.rows.imperial_1.push(tech(TRANSHUMANCE))
     tree.lanes.push(milllane)
   } else {
     // Default: Farm lane
