@@ -15,7 +15,7 @@
     <div class="card-border" :class="`rarity-${rarity}`">
       <div class="card-image">
         <img
-          v-if="imageUrl"
+          v-if="imageUrl && !imageError"
           :src="imageUrl"
           :alt="cardTitle"
           @error="onImageError"
@@ -35,7 +35,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 interface DraftCard {
   id: number
@@ -105,10 +105,11 @@ const handleClick = () => {
   }
 }
 
-const onImageError = (event: Event) => {
-  // Hide broken image
-  const img = event.target as HTMLImageElement
-  img.style.display = 'none'
+const imageError = ref(false)
+
+const onImageError = () => {
+  // On error, show placeholder instead of hiding image
+  imageError.value = true
 }
 </script>
 

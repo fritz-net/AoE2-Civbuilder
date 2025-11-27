@@ -142,10 +142,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDraft } from '~/composables/useDraft'
 import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
+import { colours } from '~/composables/useCivData'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
 
 const route = useRoute()
@@ -213,12 +214,86 @@ const getPlayerUU = (player: any) => {
   return uuCards[uuId]?.name || null
 }
 
+// Draw flag on canvas using player's flag_palette
+const drawFlag = (canvas: HTMLCanvasElement, palette: number[]) => {
+  const ctx = canvas.getContext('2d')
+  if (!ctx || !palette || palette.length < 6) return
+
+  const width = canvas.width
+  const height = canvas.height
+  
+  // Clear canvas
+  ctx.clearRect(0, 0, width, height)
+  
+  // Get colors from palette
+  const color1 = colours[palette[0]] || [128, 128, 128]
+  const color2 = colours[palette[1]] || [128, 128, 128]
+  const color3 = colours[palette[2]] || [128, 128, 128]
+  const division = palette[5] || 0
+  
+  // Draw base color
+  ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
+  ctx.fillRect(0, 0, width, height)
+  
+  // Draw division pattern (simplified for small preview)
+  switch (division) {
+    case 1: // Halves split vertically
+      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
+      ctx.fillRect(width / 2, 0, width / 2, height)
+      break
+    case 2: // Halves split horizontally
+      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
+      ctx.fillRect(0, height / 2, width, height / 2)
+      break
+    case 3: // Thirds split vertically
+      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
+      ctx.fillRect(width / 3, 0, width / 3, height)
+      ctx.fillStyle = `rgb(${color3[0]}, ${color3[1]}, ${color3[2]})`
+      ctx.fillRect((width * 2) / 3, 0, width / 3, height)
+      break
+    case 4: // Thirds split horizontally
+      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
+      ctx.fillRect(0, height / 3, width, height / 3)
+      ctx.fillStyle = `rgb(${color3[0]}, ${color3[1]}, ${color3[2]})`
+      ctx.fillRect(0, (height * 2) / 3, width, height / 3)
+      break
+    case 5: // Quarters
+      ctx.fillStyle = `rgb(${color2[0]}, ${color2[1]}, ${color2[2]})`
+      ctx.fillRect(0, height / 2, width / 2, height / 2)
+      ctx.fillRect(width / 2, 0, width / 2, height / 2)
+      break
+    default:
+      // Solid color - already drawn
+      break
+  }
+}
+
 const setFlagCanvas = (canvas: HTMLCanvasElement | null, playerIndex: number) => {
   if (canvas) {
     flagCanvasRefs.value.set(playerIndex, canvas)
-    // TODO: Draw flag using player's flag_palette
+    // Draw flag using player's flag_palette
+    const player = draft.value?.players?.[playerIndex]
+    if (player?.flag_palette) {
+      nextTick(() => {
+        drawFlag(canvas, player.flag_palette)
+      })
+    }
   }
 }
+
+// Watch for draft changes to redraw flags
+watch(() => draft.value?.players, (players) => {
+  if (players) {
+    nextTick(() => {
+      flagCanvasRefs.value.forEach((canvas, index) => {
+        const player = players[index]
+        if (player?.flag_palette) {
+          drawFlag(canvas, player.flag_palette)
+        }
+      })
+    })
+  }
+}, { deep: true })
 
 const handleViewPlayer = (playerIndex: number) => {
   // TODO: Show modal with player's tech tree and selected bonuses

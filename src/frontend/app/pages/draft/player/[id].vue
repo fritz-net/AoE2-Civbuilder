@@ -36,7 +36,7 @@
       <!-- If player is ready or waiting, show waiting screen -->
       <div v-if="isWaitingPhase1 || currentPlayer?.ready === 1" class="waiting-screen">
         <h1 class="waiting-title">Waiting For Players</h1>
-        <div class="waiting-content">
+        <div class="waiting-phase-box">
           <div class="loading-spinner"></div>
           <p>Other players are still customizing their civilizations...</p>
         </div>
@@ -140,8 +140,10 @@
     <!-- Phase 5: Creating Mod -->
     <div v-else-if="currentPhase === 5" class="creating-phase">
       <h1 class="phase-title">Creating Mod...</h1>
-      <div class="loading-spinner"></div>
-      <p class="creating-text">The host is creating the mod. Please wait...</p>
+      <div class="waiting-phase-box">
+        <div class="loading-spinner"></div>
+        <p class="creating-text">The host is creating the mod. Please wait...</p>
+      </div>
     </div>
 
     <!-- Phase 6: Download -->
