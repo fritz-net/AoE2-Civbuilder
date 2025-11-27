@@ -198,8 +198,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useDraft } from '~/composables/useDraft'
 import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
 import type { CivConfig } from '~/composables/useCivData'
@@ -414,6 +414,9 @@ const handleClear = () => {
 const handleDownload = () => {
   if (!draft.value) return
   
+  // Allow navigation after download initiated
+  allowNavigation.value = true
+  
   // Create a form and submit it to trigger download (like legacy code)
   const form = document.createElement('form')
   form.method = 'POST'
@@ -432,8 +435,61 @@ const handleDownload = () => {
 }
 
 const goHome = () => {
+  // Set flag to allow navigation without warning
+  allowNavigation.value = true
   // Navigate to home page - use navigateTo for proper Nuxt routing
   navigateTo('/')
+}
+
+// Flag to allow navigation after intentional exit (e.g., goHome button, download complete)
+const allowNavigation = ref(false)
+
+// Check if draft is in progress (phases 0-5, not yet downloaded in phase 6)
+const isDraftInProgress = computed(() => {
+  if (!draft.value) return false
+  // Phase 0-5 are active phases, phase 6 is download (completed)
+  return draft.value.gamestate.phase >= 0 && draft.value.gamestate.phase < 6
+})
+
+// Prevent accidental navigation away from draft in progress
+onBeforeRouteLeave((to, from, next) => {
+  // Always allow if explicitly allowed (e.g., from goHome button or after download)
+  if (allowNavigation.value) {
+    next()
+    return
+  }
+  
+  // If draft is in progress, warn before leaving
+  if (isDraftInProgress.value) {
+    const answer = window.confirm(
+      'You are still in an active draft session. Are you sure you want to leave?\n\nLeaving will disconnect you from the draft.'
+    )
+    if (!answer) {
+      next(false)
+      return
+    }
+  }
+  next()
+})
+
+// Also protect against browser close/refresh during active draft
+if (typeof window !== 'undefined') {
+  const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    if (isDraftInProgress.value && !allowNavigation.value) {
+      event.preventDefault()
+      // Modern browsers require returnValue to be set for the prompt to show
+      event.returnValue = 'You are still in an active draft session. Are you sure you want to leave?'
+      return event.returnValue
+    }
+  }
+  
+  onMounted(() => {
+    window.addEventListener('beforeunload', handleBeforeUnload)
+  })
+  
+  onUnmounted(() => {
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+  })
 }
 
 // Helper to get cookie value
