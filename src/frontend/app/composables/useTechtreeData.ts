@@ -148,6 +148,7 @@ export const MINING_CAMP = 584
 export const OUTPOST = 598
 export const TOWN_CENTER_2 = 621
 export const PALISADE_GATE = 792
+export const PASTURE = 1889
 
 // Unit IDs
 export const ARCHER = 4
@@ -302,6 +303,11 @@ export const ARSON = 602
 export const ARROWSLITS = 608
 export const GAMBESONS = 875
 
+// Pasture Tech IDs (for CIV_BONUS_105)
+export const TRANSHUMANCE = 1012 // 3. Pastures tech / Grazing Grasslands
+export const PASTORALISM = 1013 // 2. Pastures tech / Enclosures
+export const DOMESTICATION = 1014 // 1. Pastures tech / Livestock Husbandry
+
 export const locales: Record<string, string> = {
   en: 'English',
   zh: '简体中文',
@@ -330,6 +336,7 @@ export const unclickableCarets = [
   'building_584',
   'building_562',
   'building_68',
+  'building_1889', // PASTURE - should be enabled by default like Mill
   'tech_408',
 ]
 

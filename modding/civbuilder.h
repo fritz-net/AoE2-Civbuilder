@@ -18,7 +18,7 @@
 #include "enums/unit_ids.h"
 #include "enums/tech_ids.h"
 #include "enums/uu_ids.h"
-#include "enums/tech_ids.h"
+#include "enums/effect_ids.h"
 #include "CivBonusEnum.h"
 
 using namespace std;

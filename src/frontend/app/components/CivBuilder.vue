@@ -160,6 +160,7 @@
         :relative-path="techtreePath"
         :sidebar-content="sidebarContent"
         :sidebar-title="civConfig.alias || 'Custom Civilization'"
+        :show-pastures="showPasturesInTechtree"
         @done="handleTechtreeDone"
         @update:tree="handleTechtreeUpdate"
         @update:points="handlePointsUpdate"
@@ -440,6 +441,18 @@ ${bonusList || '<li>No bonuses selected</li>'}
 <h3>Team Bonus</h3>
 ${teamBonusHtml || '<p>No team bonus selected</p>'}
 `
+})
+
+// CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES is "Pastures replace Farms and Mill upgrades"
+// When this bonus is selected, we should show Pasture building and pasture techs instead of Farm and farm techs
+const PASTURES_BONUS_ID = 356
+
+const showPasturesInTechtree = computed(() => {
+  // Check if bonus 356 is selected in civ bonuses
+  return selectedCivBonuses.value.some(entry => {
+    const bonusId = Array.isArray(entry) ? entry[0] : entry
+    return bonusId === PASTURES_BONUS_ID
+  })
 })
 
 const canProceed = computed(() => {

@@ -42,6 +42,7 @@ import {
   OUTPOST,
   TOWN_CENTER_2,
   PALISADE_GATE,
+  PASTURE,
   // Unit IDs
   ARCHER,
   HAND_CANNONEER,
@@ -192,6 +193,9 @@ import {
   ARSON,
   ARROWSLITS,
   GAMBESONS,
+  TRANSHUMANCE,
+  PASTORALISM,
+  DOMESTICATION,
 } from './useTechtreeData'
 
 let techtreeData: TechtreeData | null = null
@@ -366,7 +370,7 @@ function t(techId: number): string {
   return 'tech_' + techId
 }
 
-export function getConnections(): [string, string][] {
+export function getConnections(showPastures: boolean = false): [string, string][] {
   const connections: [string, string][] = [
     [b(ARCHERY_RANGE), u(ARCHER)],
     [u(ARCHER), u(CROSSBOWMAN)],
@@ -500,10 +504,6 @@ export function getConnections(): [string, string][] {
     [t(COINAGE), t(BANKING)],
     [b(MARKET), u(TRADE_CART)],
     [b(MILL), b(MARKET)],
-    [b(MILL), t(HORSE_COLLAR)],
-    [t(HORSE_COLLAR), t(HEAVY_PLOW)],
-    [t(HEAVY_PLOW), t(CROP_ROTATION)],
-    [b(MILL), b(FARM)],
     [b(ARCHERY_RANGE), t(PARTHIAN_TACTICS)],
     [b(ARCHERY_RANGE), u(HAND_CANNONEER)],
     [b(BARRACKS), t(SQUIRES)],
@@ -527,6 +527,21 @@ export function getConnections(): [string, string][] {
     [b(DOCK), u(CANNON_GALLEON)],
   ]
 
+  // Add farm/pasture specific connections based on showPastures option
+  if (showPastures) {
+    // Pasture tech connections - connected to Mill (like farm techs)
+    // Pasture building itself is in Dark Age and independent (no connections)
+    connections.push([b(MILL), t(DOMESTICATION)])
+    connections.push([t(DOMESTICATION), t(PASTORALISM)])
+    connections.push([t(PASTORALISM), t(TRANSHUMANCE)])
+  } else {
+    // Farm tech connections (default)
+    connections.push([b(MILL), t(HORSE_COLLAR)])
+    connections.push([t(HORSE_COLLAR), t(HEAVY_PLOW)])
+    connections.push([t(HEAVY_PLOW), t(CROP_ROTATION)])
+    connections.push([b(MILL), b(FARM)])
+  }
+
   return connections.map(([from, to]) => [formatId(from), formatId(to)])
 }
 
@@ -549,7 +564,12 @@ export function setTechtreeData(data: TechtreeData): void {
   techtreeData = data
 }
 
-export function getDefaultTree(windowHeight: number = 600): Tree {
+export interface TreeOptions {
+  showPastures?: boolean // Show pasture building and techs instead of farm techs
+}
+
+export function getDefaultTree(windowHeight: number = 600, options: TreeOptions = {}): Tree {
+  const { showPastures = false } = options
   const tree: Tree = {
     offsets: {
       dark_1: 0,
@@ -813,19 +833,38 @@ export function getDefaultTree(windowHeight: number = 600): Tree {
   marketlane.rows.imperial_1.push(tech(GUILDS))
   tree.lanes.push(marketlane)
 
-  const farmlane = createLane()
-  farmlane.rows.dark_2.push(building(FARM))
-  tree.lanes.push(farmlane)
+  // Farm lane (or Pasture lane if showPastures is enabled)
+  if (showPastures) {
+    // When showPastures is enabled, Pasture replaces Farm
+    // Pasture building is in Dark Age and independent (no tech connections)
+    const pasturelane = createLane()
+    pasturelane.rows.dark_2.push(building(PASTURE))
+    tree.lanes.push(pasturelane)
 
-  const milllane = createLane()
-  milllane.rows.dark_1.push(building(MILL))
-  milllane.rows.feudal_1.push(tech(HORSE_COLLAR))
-  milllane.rows.castle_1.push(tech(HEAVY_PLOW))
-  milllane.rows.imperial_1.push(tech(CROP_ROTATION))
-  tree.lanes.push(milllane)
+    // Mill lane with pasture techs (Mill is connected to pasture techs)
+    const milllane = createLane()
+    milllane.rows.dark_1.push(building(MILL))
+    milllane.rows.feudal_1.push(tech(DOMESTICATION))
+    milllane.rows.castle_1.push(tech(PASTORALISM))
+    milllane.rows.imperial_1.push(tech(TRANSHUMANCE))
+    tree.lanes.push(milllane)
+  } else {
+    // Default: Farm lane
+    const farmlane = createLane()
+    farmlane.rows.dark_2.push(building(FARM))
+    tree.lanes.push(farmlane)
+
+    // Mill lane with farm techs
+    const milllane = createLane()
+    milllane.rows.dark_1.push(building(MILL))
+    milllane.rows.feudal_1.push(tech(HORSE_COLLAR))
+    milllane.rows.castle_1.push(tech(HEAVY_PLOW))
+    milllane.rows.imperial_1.push(tech(CROP_ROTATION))
+    tree.lanes.push(milllane)
+  }
 
   // Update positions
-  const connections = getConnections()
+  const connections = getConnections(showPastures)
   let x = tree.padding + tree.offset_x
   for (let i = 0; i < tree.lanes.length; i++) {
     tree.lanes[i].x = x
