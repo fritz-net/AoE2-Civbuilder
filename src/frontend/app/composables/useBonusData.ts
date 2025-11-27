@@ -28,6 +28,16 @@ export const numCards = {
   team: 80
 }
 
+/**
+ * Map round type index to bonus type
+ * @param roundType - The draft round type (0-4)
+ * @returns The corresponding BonusType
+ */
+export function roundTypeToBonusType(roundType: number): BonusType {
+  const types: BonusType[] = ['civ', 'uu', 'castle', 'imp', 'team']
+  return types[roundType] || 'civ'
+}
+
 // Maximum selections per bonus type
 // maxUniqueSelections: how many different bonuses can be selected
 // maxTotalSelections: total count including multipliers (null = no limit on total)
@@ -49,13 +59,13 @@ export const imagePrefix: Record<BonusType, string> = {
 }
 
 /**
- * Get the base URL for assets (handles Nuxt baseURL)
+ * Get the base URL for assets (handles static assets from /public)
  * @returns The base URL prefix for image assets
  */
 function getAssetBaseUrl(): string {
-  // In Nuxt, assets in /public are served at the baseURL
-  // The baseURL is /v2/ so images in /public/img become /v2/img
-  return '/v2'
+  // Static assets (images, etc.) are served from the main /public folder
+  // at the root path, not from Nuxt's /v2 path
+  return ''
 }
 
 /**

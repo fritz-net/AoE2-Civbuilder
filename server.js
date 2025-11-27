@@ -93,14 +93,14 @@ app.get(path.join(routeSubdir, "CHANGELOG.md"), (req, res) => {
 	});
 });
 
-// Static file configuration
+// Static file configuration for all paths
 const staticOptions = {
 	maxAge: "1y", // Cache images for a year
 	immutable: false, // Allow query string versioning to work
 	etag: true, // Enable cache revalidation
 	lastModified: true, // Allow Last-Modified-based revalidation
-	setHeaders: (res, filePath) => {
-		if (filePath.endsWith(".png") || filePath.endsWith(".jpg")) {
+	setHeaders: (res, path) => {
+		if (path.endsWith(".png") || path.endsWith(".jpg")) {
 			res.set("Cache-Control", "public, must-revalidate, max-age=31536000");
 		} else {
 			res.set("Cache-Control", "no-cache, must-revalidate");
@@ -108,8 +108,21 @@ const staticOptions = {
 	},
 };
 
-// Serve static files at the routeSubdir (e.g., /civbuilder for legacy UI)
-app.use(routeSubdir, express.static(path.join(__dirname, "/public"), staticOptions));
+// Serve static files at configured route (e.g., /civbuilder)
+app.use(
+	routeSubdir,
+	express.static(path.join(__dirname, "/public"), staticOptions)
+);
+
+// Also serve static files at root / for legacy references
+if (routeSubdir !== "/") {
+	app.use("/", express.static(path.join(__dirname, "/public"), staticOptions));
+	console.log(`[Static] Files available at both ${routeSubdir} and / (root)`);
+}
+
+// Also serve at /v2 for Vue UI references to /v2/img/...
+app.use("/v2", express.static(path.join(__dirname, "/public"), staticOptions));
+console.log("[Static] Files also available at /v2 (for Vue UI)");
 
 // Mount router at the configured routeSubdir (e.g., /civbuilder for legacy UI)
 app.use(routeSubdir, router);
@@ -938,6 +951,20 @@ router.get("/draft/:id", checkCookies, authenticateDraft, function (req, res) {
 		res.cookie("playerNumber", -1);
 		res.cookie("draftID", req.params.id);
 		res.sendFile(__dirname + "/public/html/draft.html");
+	}
+});
+
+// API endpoint to get draft data as JSON for Vue UI
+router.get("/api/draft/:id", checkCookies, authenticateDraft, function (req, res) {
+	if (req.authenticated == 0) {
+		res.status(404).json({ error: "Draft does not exist" });
+	} else {
+		const draft = getDraft(req.params.id);
+		if (draft === -1) {
+			res.status(404).json({ error: "Draft does not exist" });
+		} else {
+			res.json(draft);
+		}
 	}
 });
 
