@@ -45,6 +45,24 @@
 
       <!-- Cards board -->
       <div class="cards-board">
+        <!-- Fill/Reroll toolbar (only shown when it's your turn and there are empty slots) -->
+        <div v-if="isMyTurn && hasEmptySlots" class="board-toolbar">
+          <button 
+            class="toolbar-btn refill-btn" 
+            @click="$emit('refill')"
+            title="Fill empty card slots with new cards"
+          >
+            Refill
+          </button>
+          <button 
+            class="toolbar-btn clear-btn" 
+            @click="$emit('clear')"
+            title="Remove all cards from the board"
+          >
+            Clear
+          </button>
+        </div>
+        
         <div class="cards-container">
           <DraftCard
             v-for="(card, index) in displayCards"
@@ -53,6 +71,7 @@
             :size="cardSize"
             :margin="cardMargin"
             :selectable="isMyTurn && !card.hidden"
+            :disabled="!isMyTurn"
             :hidden="card.hidden"
             @select="handleCardSelect"
             @hover="handleCardHover"
@@ -60,6 +79,14 @@
           />
         </div>
       </div>
+      
+      <!-- Bonuses sidebar (shows currently selected bonuses) -->
+      <DraftSidebar
+        v-if="currentPlayerData"
+        :player="currentPlayerData"
+        :show-bonuses="true"
+        class="bonuses-sidebar"
+      />
     </div>
     
     <!-- Mouse-following help tooltip -->
@@ -83,6 +110,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import DraftCard from './DraftCard.vue'
+import DraftSidebar from './DraftSidebar.vue'
 import TimerCountdown from './TimerCountdown.vue'
 import { rarityNames } from '~/composables/useBonusData'
 import type { DraftPlayer } from '~/composables/useDraft'
@@ -105,14 +133,18 @@ const props = withDefaults(defineProps<{
   cards: DisplayCard[]
   isMyTurn: boolean
   timerDuration?: number
+  myPlayerIndex?: number // The player viewing this board
 }>(), {
   timerDuration: 0,
+  myPlayerIndex: -1,
 })
 
 const emit = defineEmits<{
   (e: 'select-card', card: DisplayCard): void
   (e: 'view-player', playerIndex: number): void
   (e: 'timer-complete'): void
+  (e: 'refill'): void
+  (e: 'clear'): void
 }>()
 
 const hoveredCard = ref<DisplayCard | null>(null)
@@ -125,6 +157,19 @@ const orderedPlayers = computed(() => {
     ...props.players[index],
     index,
   }))
+})
+
+// Get the current player data (the one viewing this board)
+const currentPlayerData = computed(() => {
+  if (props.myPlayerIndex >= 0 && props.myPlayerIndex < props.players.length) {
+    return props.players[props.myPlayerIndex]
+  }
+  return null
+})
+
+// Check if there are empty slots (cards with id -1)
+const hasEmptySlots = computed(() => {
+  return props.cards.some(card => card.id === -1)
 })
 
 // Display cards with computed properties
@@ -408,6 +453,69 @@ onMounted(() => {
 
   .cards-container {
     padding: 0.5rem;
+  }
+}
+
+/* Bonuses sidebar */
+.bonuses-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  max-height: calc(100vh - 150px);
+  overflow-y: auto;
+}
+
+/* Board toolbar for Fill/Reroll buttons */
+.board-toolbar {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.toolbar-btn {
+  padding: 0.5rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  color: hsl(52, 100%, 50%);
+}
+
+.toolbar-btn:hover {
+  background: hsl(52, 100%, 50%);
+  color: #1a0f0a;
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
+}
+
+.refill-btn {
+  border-color: #4CAF50;
+  color: #4CAF50;
+}
+
+.refill-btn:hover {
+  background: #4CAF50;
+  color: white;
+}
+
+.clear-btn {
+  border-color: #f44336;
+  color: #f44336;
+}
+
+.clear-btn:hover {
+  background: #f44336;
+  color: white;
+}
+
+@media (max-width: 1200px) {
+  .bonuses-sidebar {
+    display: none;
   }
 }
 </style>

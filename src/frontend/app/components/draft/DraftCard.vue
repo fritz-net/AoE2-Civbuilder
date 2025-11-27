@@ -4,7 +4,8 @@
     :class="{
       'card-selectable': selectable,
       'card-selected': selected,
-      'card-hidden': hidden
+      'card-hidden': hidden,
+      'card-disabled': disabled && !hidden
     }"
     :style="cardStyle"
     @click="handleClick"
@@ -51,6 +52,7 @@ const props = withDefaults(defineProps<{
   selectable?: boolean
   selected?: boolean
   hidden?: boolean
+  disabled?: boolean // Grey out the card when not player's turn
   showTitle?: boolean
   showRarity?: boolean
 }>(), {
@@ -59,6 +61,7 @@ const props = withDefaults(defineProps<{
   selectable: true,
   selected: false,
   hidden: false,
+  disabled: false,
   showTitle: true,
   showRarity: true,
 })
@@ -122,12 +125,22 @@ const onImageError = (event: Event) => {
   pointer-events: none;
 }
 
-.card-selectable:not(.card-hidden):hover {
+/* Disabled state - greyed out when not player's turn */
+.card-disabled {
+  filter: brightness(35%);
+  cursor: not-allowed;
+}
+
+.card-disabled:hover {
+  transform: none;
+}
+
+.card-selectable:not(.card-hidden):not(.card-disabled):hover {
   transform: scale(1.05);
   z-index: 10;
 }
 
-.card-selectable:not(.card-hidden):hover .card-border {
+.card-selectable:not(.card-hidden):not(.card-disabled):hover .card-border {
   filter: brightness(150%);
   box-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
 }

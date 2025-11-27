@@ -80,31 +80,21 @@
 
     <!-- Phase 2: Draft Cards -->
     <div v-else-if="currentPhase === 2 && draft" class="draft-phase">
-      <div class="draft-layout">
-        <!-- Main draft board -->
-        <div class="draft-main">
-          <DraftBoard
-            :phase-title="roundTypeName"
-            :round-number="(currentTurn?.roundType || 0) + 1"
-            :players="draft.players"
-            :player-order="draft.gamestate.order"
-            :current-player-index="currentTurn?.playerNum || 0"
-            :cards="displayCards"
-            :is-my-turn="currentTurn?.isMyTurn || false"
-            :timer-duration="0"
-            @select-card="handleSelectCard"
-            @view-player="handleViewPlayer"
-          />
-        </div>
-
-        <!-- Sidebar showing selected bonuses -->
-        <div class="draft-sidebar-container">
-          <DraftSidebar
-            :player="currentPlayer"
-            :show-bonuses="true"
-          />
-        </div>
-      </div>
+      <DraftBoard
+        :phase-title="roundTypeName"
+        :round-number="(currentTurn?.roundType || 0) + 1"
+        :players="draft.players"
+        :player-order="draft.gamestate.order"
+        :current-player-index="currentTurn?.playerNum || 0"
+        :cards="displayCards"
+        :is-my-turn="currentTurn?.isMyTurn || false"
+        :my-player-index="playerNumber"
+        :timer-duration="0"
+        @select-card="handleSelectCard"
+        @view-player="handleViewPlayer"
+        @refill="handleRefill"
+        @clear="handleClear"
+      />
     </div>
 
     <!-- Phase 3: Tech Tree (after drafting, shows selected bonuses in sidebar) -->
@@ -125,6 +115,8 @@
             v-model="civConfig.tree"
             :points-available="techTreePoints"
             :editable="currentPlayer?.ready === 0"
+            relative-path="/v2/aoe2techtree"
+            @done="handleTechTreeDone"
           />
           
           <button 
@@ -223,6 +215,8 @@ const {
   updateTree,
   updateCivInfo,
   selectCard,
+  refillCards,
+  clearCards,
   setupSocketListeners,
   cleanup,
 } = useDraft()
@@ -353,6 +347,14 @@ const handleSaveTechTree = () => {
   }
 }
 
+// Handle Done button from TechTree component
+const handleTechTreeDone = (tree: number[][], points: number) => {
+  civConfig.value.tree = tree
+  if (playerNumber.value >= 0) {
+    updateTree(playerNumber.value, tree)
+  }
+}
+
 const handleSelectCard = (card: any) => {
   if (draft.value && currentTurn.value?.isMyTurn) {
     // Send the actual card ID (pick), not the position in array
@@ -365,6 +367,14 @@ const handleSelectCard = (card: any) => {
 const handleViewPlayer = (playerIndex: number) => {
   // TODO: Show player's tech tree with their selected bonuses
   console.log('View player:', playerIndex)
+}
+
+const handleRefill = () => {
+  refillCards()
+}
+
+const handleClear = () => {
+  clearCards()
 }
 
 const handleDownload = () => {

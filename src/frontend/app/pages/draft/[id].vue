@@ -116,6 +116,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDraft } from '~/composables/useDraft'
+import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
 
 const route = useRoute()
@@ -136,18 +137,41 @@ const {
   cleanup,
 } = useDraft()
 
+const { getBonusCards, getBonusImageUrl, rarityNames } = useBonusData()
+
 const flagCanvasRefs = ref<Map<number, HTMLCanvasElement>>(new Map())
 
 const displayCards = computed(() => {
   if (!draft.value) return []
   
-  return draft.value.gamestate.cards.map((cardId, index) => ({
-    id: cardId,
-    type: currentTurn.value?.roundType || 0,
-    hidden: cardId === -1,
-    name: `Card ${cardId}`,
-    description: 'Card description',
-  }))
+  const roundType = currentTurn.value?.roundType || 0
+  const bonusType = roundTypeToBonusType(roundType)
+  const allCards = getBonusCards(bonusType)
+  
+  return draft.value.gamestate.cards.map((cardId, index) => {
+    if (cardId === -1) {
+      return {
+        id: cardId,
+        type: roundType,
+        hidden: true,
+        name: '',
+        description: '',
+        rarity: 0,
+        imageVersion: 0,
+      }
+    }
+    
+    const cardData = allCards[cardId]
+    return {
+      id: cardId,
+      type: roundType,
+      hidden: false,
+      name: cardData?.name || `Card ${cardId}`,
+      description: cardData?.description || '',
+      rarity: cardData?.rarity || 0,
+      imageVersion: cardData?.imageVersion || 0,
+    }
+  })
 })
 
 const setFlagCanvas = (canvas: HTMLCanvasElement | null, playerIndex: number) => {

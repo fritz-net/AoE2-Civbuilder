@@ -33,37 +33,47 @@
 
     <!-- Phase 1: Flag, Architecture, Language, Civ Name (NO Tech Tree) -->
     <div v-else-if="currentPhase === 1" class="setup-phase">
-      <h1 class="phase-title">Customize Your Civilization</h1>
-      
-      <div class="setup-container single-column">
-        <!-- Flag Creator -->
-        <div class="setup-section">
-          <h2>Flag & Basic Info</h2>
-          <FlagCreator
-            v-model="civConfig.flag_palette"
-            v-model:custom-flag="civConfig.customFlag"
-            v-model:custom-flag-data="civConfig.customFlagData"
-          />
-          
-          <ArchitectureSelector v-model="civConfig.architecture" />
-          <LanguageSelector v-model="civConfig.language" />
-          
-          <div class="civ-name-input">
-            <label for="civName">Civilization Name</label>
-            <input
-              id="civName"
-              v-model="civConfig.alias"
-              type="text"
-              placeholder="Enter civilization name"
-              maxlength="30"
+      <!-- Show form when player hasn't submitted yet -->
+      <template v-if="currentPlayer?.ready === 0">
+        <h1 class="phase-title">Customize Your Civilization</h1>
+        
+        <div class="setup-container single-column">
+          <!-- Flag Creator -->
+          <div class="setup-section">
+            <h2>Flag & Basic Info</h2>
+            <FlagCreator
+              v-model="civConfig.flag_palette"
+              v-model:custom-flag="civConfig.customFlag"
+              v-model:custom-flag-data="civConfig.customFlagData"
             />
+            
+            <ArchitectureSelector v-model="civConfig.architecture" />
+            <LanguageSelector v-model="civConfig.language" />
+            
+            <div class="civ-name-input">
+              <label for="civName">Civilization Name</label>
+              <input
+                id="civName"
+                v-model="civConfig.alias"
+                type="text"
+                placeholder="Enter civilization name"
+                maxlength="30"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <button class="next-button" @click="handleSaveCivInfo">
-        Next
-      </button>
+        <button class="next-button" @click="handleSaveCivInfo">
+          Next
+        </button>
+      </template>
+      
+      <!-- Show waiting screen after submitting -->
+      <div v-else class="waiting-phase">
+        <h1 class="phase-title">Waiting For Players</h1>
+        <div class="loading-spinner"></div>
+        <p class="waiting-text">Your civilization info has been saved. Waiting for other players to complete their setup...</p>
+      </div>
     </div>
 
     <!-- Phase 2: Draft Cards -->
@@ -76,9 +86,12 @@
       :current-player-index="currentTurn?.playerNum || 0"
       :cards="displayCards"
       :is-my-turn="currentTurn?.isMyTurn || false"
+      :my-player-index="playerNumber"
       :timer-duration="0"
       @select-card="handleSelectCard"
       @view-player="handleViewPlayer"
+      @refill="handleRefill"
+      @clear="handleClear"
     />
 
     <!-- Phase 3: Tech Tree (after drafting, shows selected bonuses in sidebar) -->
@@ -99,6 +112,8 @@
             v-model="civConfig.tree"
             :points-available="techTreePoints"
             :editable="currentPlayer?.ready === 0"
+            relative-path="/v2/aoe2techtree"
+            @done="handleTechTreeDone"
           />
           
           <button 
@@ -211,6 +226,8 @@ const {
   updateTree,
   updateCivInfo,
   selectCard,
+  refillCards,
+  clearCards,
   setupSocketListeners,
   cleanup,
 } = useDraft()
@@ -338,6 +355,14 @@ const handleSaveTechTree = () => {
   }
 }
 
+// Handle Done button from TechTree component
+const handleTechTreeDone = (tree: number[][], points: number) => {
+  civConfig.value.tree = tree
+  if (playerNumber.value >= 0) {
+    updateTree(playerNumber.value, tree)
+  }
+}
+
 const handleSelectCard = (card: any) => {
   if (draft.value && currentTurn.value?.isMyTurn) {
     // Send the actual card ID (pick), not the position in array
@@ -350,6 +375,14 @@ const handleSelectCard = (card: any) => {
 const handleViewPlayer = (playerIndex: number) => {
   // TODO: Show player's tech tree with their selected bonuses
   console.log('View player:', playerIndex)
+}
+
+const handleRefill = () => {
+  refillCards()
+}
+
+const handleClear = () => {
+  clearCards()
 }
 
 const handleDownload = () => {
@@ -793,5 +826,23 @@ onUnmounted(() => {
   .techtree-container {
     flex-direction: column;
   }
+}
+
+/* Waiting phase */
+.waiting-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.waiting-text {
+  color: #f0e6d2;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+  text-align: center;
+  max-width: 500px;
 }
 </style>
