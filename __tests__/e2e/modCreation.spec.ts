@@ -305,7 +305,8 @@ test.describe('Build Page - Pasture Bonus Detection', () => {
     await expect(page.getByRole('heading', { name: /Civilization Bonuses/i })).toBeVisible();
     
     // Search for the pasture bonus (Pastures replace Farms and Mill upgrades)
-    const filterInput = page.getByPlaceholder(/e.g. "Infantry", "Archer"/i);
+    // Use first() since all BonusSelectorGrid components have this placeholder
+    const filterInput = page.getByPlaceholder(/e.g. "Infantry", "Archer"/i).first();
     await filterInput.fill(PASTURE_BONUS_FILTER_TEXT);
     
     // Wait for filter to apply by checking if the bonus card is visible
@@ -335,17 +336,85 @@ test.describe('Build Page - Pasture Bonus Detection', () => {
     // Step 7: Tech Tree
     await page.getByRole('button', { name: /Next →/i }).click();
     
-    // Wait for the techtree to load by checking for the techtree-area element
-    const techtreeArea = page.locator('.techtree-area');
-    await expect(techtreeArea).toBeVisible();
+    // Wait for the techtree to load by checking for the techtree-container element
+    const techtreeContainer = page.locator('.techtree-container');
+    await expect(techtreeContainer).toBeVisible();
     
-    // Check for Pasture building in the techtree
-    const pastureElement = page.locator('text=Pasture');
-    await expect(pastureElement).toBeVisible();
+    // Wait a moment for the techtree to fully render
+    await page.waitForTimeout(500);
+    
+    // Check for Pasture building in the techtree SVG
+    // The Pasture node is in the SVG but may need scrolling to be in view
+    const pastureNode = page.locator('.techtree-svg g.node').filter({ hasText: 'Pasture' }).first();
+    await pastureNode.scrollIntoViewIfNeeded();
+    await expect(pastureNode).toBeVisible();
+    
+    // Verify Pasture is enabled (not crossed out) - check that it doesn't have a .cross image on it
+    // The cross image should not be visible on the Pasture node
+    // When enabled, the cross image has a v-if that hides it
+    const crossOnPasture = pastureNode.locator('image.cross');
+    await expect(crossOnPasture).not.toBeVisible();
     
     // Check for Domestication tech (first pasture tech)
-    const domesticationElement = page.locator('text=Domestication');
-    await expect(domesticationElement).toBeVisible();
+    const domesticationNode = page.locator('.techtree-svg g.node').filter({ hasText: 'Domestication' }).first();
+    await domesticationNode.scrollIntoViewIfNeeded();
+    await expect(domesticationNode).toBeVisible();
+  });
+
+  test('should show Pasture as enabled (no cross) when pasture bonus is selected', async ({ page }) => {
+    await page.goto('/v2/build');
+    
+    // Fill in civilization name
+    const civNameInput = page.getByPlaceholder(/Enter civilization name/i);
+    await civNameInput.fill('PastureEnabledCiv');
+    
+    // Click Next to go to Civ Bonuses step
+    await page.getByRole('button', { name: /Next →/i }).click();
+    
+    // Should be on Civ Bonuses step
+    await expect(page.getByRole('heading', { name: /Civilization Bonuses/i })).toBeVisible();
+    
+    // Search for the pasture bonus (Pastures replace Farms and Mill upgrades)
+    const filterInput = page.getByPlaceholder(/e.g. "Infantry", "Archer"/i).first();
+    await filterInput.fill(PASTURE_BONUS_FILTER_TEXT);
+    
+    // Wait for filter to apply by checking if the bonus card is visible
+    const bonusCard = page.locator('.bonus-card').first();
+    await expect(bonusCard).toBeVisible();
+    
+    // Click on the bonus card to select it
+    await bonusCard.click();
+    
+    // Navigate through all steps to Tech Tree
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Unique Unit/i })).toBeVisible();
+    
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Castle Age Unique Tech/i })).toBeVisible();
+    
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Imperial Age Unique Tech/i })).toBeVisible();
+    
+    await page.getByRole('button', { name: /Next →/i }).click();
+    await expect(page.getByRole('heading', { name: /Team Bonus/i })).toBeVisible();
+    
+    await page.getByRole('button', { name: /Next →/i }).click();
+    
+    // Wait for the techtree to load
+    const techtreeContainer = page.locator('.techtree-container');
+    await expect(techtreeContainer).toBeVisible();
+    
+    // Wait a moment for the techtree to fully render
+    await page.waitForTimeout(500);
+    
+    // Find the Pasture node in the SVG
+    const pastureNode = page.locator('.techtree-svg g.node').filter({ hasText: 'Pasture' }).first();
+    await pastureNode.scrollIntoViewIfNeeded();
+    await expect(pastureNode).toBeVisible();
+    
+    // Verify Pasture is enabled - no cross image should be visible
+    const crossOnPasture = pastureNode.locator('image.cross');
+    await expect(crossOnPasture).not.toBeVisible();
   });
 
   test('should show farm techs in techtree when bonus 356 is NOT selected', async ({ page }) => {
@@ -379,17 +448,24 @@ test.describe('Build Page - Pasture Bonus Detection', () => {
     // Step 6 -> Step 7 (Tech Tree)
     await page.getByRole('button', { name: /Next →/i }).click();
     
-    // Wait for the techtree to load by checking for the techtree-area element
-    const techtreeArea = page.locator('.techtree-area');
-    await expect(techtreeArea).toBeVisible();
+    // Wait for the techtree to load by checking for the techtree-container element
+    const techtreeContainer = page.locator('.techtree-container');
+    await expect(techtreeContainer).toBeVisible();
     
-    // Check for Farm building in the techtree
-    const farmElement = page.locator('text=Farm');
-    await expect(farmElement).toBeVisible();
+    // Wait a moment for the techtree to fully render
+    await page.waitForTimeout(500);
+    
+    // Check for Farm building in the techtree SVG
+    // The Farm node is in the SVG but may need scrolling to be in view
+    const farmNode = page.locator('.techtree-svg g.node').filter({ hasText: 'Farm' }).first();
+    // Scroll the element into view first
+    await farmNode.scrollIntoViewIfNeeded();
+    await expect(farmNode).toBeVisible();
     
     // Check for Horse Collar tech (first farm tech)
-    const horseCollarElement = page.locator('text=Horse Collar').or(page.locator('text=HorseCollar'));
-    await expect(horseCollarElement).toBeVisible();
+    const horseCollarNode = page.locator('.techtree-svg g.node').filter({ hasText: 'Horse' }).first();
+    await horseCollarNode.scrollIntoViewIfNeeded();
+    await expect(horseCollarNode).toBeVisible();
   });
 
   test('should update techtree when pasture bonus is removed', async ({ page }) => {
@@ -403,7 +479,8 @@ test.describe('Build Page - Pasture Bonus Detection', () => {
     await page.getByRole('button', { name: /Next →/i }).click();
     
     // Search for and select the pasture bonus
-    const filterInput = page.getByPlaceholder(/e.g. "Infantry", "Archer"/i);
+    // Use first() since all BonusSelectorGrid components have this placeholder
+    const filterInput = page.getByPlaceholder(/e.g. "Infantry", "Archer"/i).first();
     await filterInput.fill(PASTURE_BONUS_FILTER_TEXT);
     
     // Wait for filter to apply by checking if the bonus card is visible
@@ -438,12 +515,18 @@ test.describe('Build Page - Pasture Bonus Detection', () => {
     
     await page.getByRole('button', { name: /Next →/i }).click();
     
-    // Wait for the techtree to load by checking for the techtree-area element
-    const techtreeArea = page.locator('.techtree-area');
-    await expect(techtreeArea).toBeVisible();
+    // Wait for the techtree to load by checking for the techtree-container element
+    const techtreeContainer = page.locator('.techtree-container');
+    await expect(techtreeContainer).toBeVisible();
     
-    // Check for Farm building in the techtree
-    const farmElement = page.locator('text=Farm');
-    await expect(farmElement).toBeVisible();
+    // Wait a moment for the techtree to fully render
+    await page.waitForTimeout(500);
+    
+    // Check for Farm building in the techtree SVG
+    // The Farm node is in the SVG but may need scrolling to be in view
+    const farmNode = page.locator('.techtree-svg g.node').filter({ hasText: 'Farm' }).first();
+    // Scroll the element into view first
+    await farmNode.scrollIntoViewIfNeeded();
+    await expect(farmNode).toBeVisible();
   });
 });

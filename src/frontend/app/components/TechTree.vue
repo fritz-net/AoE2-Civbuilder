@@ -412,6 +412,15 @@ onMounted(async () => {
   if (props.initialTree) {
     localtree.value = JSON.parse(JSON.stringify(props.initialTree))
   }
+  
+  // Handle initial showPastures state - add Pasture to buildings if needed
+  const PASTURE_ID = 1889
+  const buildingsIndex = 1
+  if (props.showPastures && !localtree.value[buildingsIndex].includes(PASTURE_ID)) {
+    localtree.value[buildingsIndex].push(PASTURE_ID)
+    emit('update:tree', localtree.value)
+  }
+  
   if (typeof window !== 'undefined') {
     window.addEventListener('resize', handleResize)
   }
@@ -426,6 +435,14 @@ onUnmounted(() => {
 watch(() => props.initialTree, (newTree) => {
   if (newTree) {
     localtree.value = JSON.parse(JSON.stringify(newTree))
+    
+    // Ensure Pasture is included/excluded based on showPastures prop
+    const PASTURE_ID = 1889
+    const buildingsIndex = 1
+    if (props.showPastures && !localtree.value[buildingsIndex].includes(PASTURE_ID)) {
+      localtree.value[buildingsIndex].push(PASTURE_ID)
+    }
+    
     // Recalculate points when tree is loaded from props
     if (data.value && props.editable) {
       const usedPoints = calculatePoints()
@@ -435,9 +452,29 @@ watch(() => props.initialTree, (newTree) => {
   }
 }, { deep: true })
 
-// Watch for showPastures prop changes to rebuild the tree
+// Watch for showPastures prop changes to rebuild the tree and update localtree
 watch(() => props.showPastures, (newShowPastures) => {
   tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: newShowPastures })
+  
+  // Update localtree to include/exclude Pasture building (1889)
+  // Pasture building ID is 1889, buildings are in localtree[1]
+  const PASTURE_ID = 1889
+  const buildingsIndex = 1
+  
+  if (newShowPastures) {
+    // Add Pasture to buildings if not already present
+    if (!localtree.value[buildingsIndex].includes(PASTURE_ID)) {
+      localtree.value[buildingsIndex].push(PASTURE_ID)
+      emit('update:tree', localtree.value)
+    }
+  } else {
+    // Remove Pasture from buildings if present
+    const index = localtree.value[buildingsIndex].indexOf(PASTURE_ID)
+    if (index !== -1) {
+      localtree.value[buildingsIndex].splice(index, 1)
+      emit('update:tree', localtree.value)
+    }
+  }
 })
 
 // Methods
