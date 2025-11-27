@@ -52,39 +52,45 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { DraftPlayer } from '~/composables/useDraft'
+import { getBonusCards, type BonusType } from '~/composables/useBonusData'
 
 const props = defineProps<{
   player?: DraftPlayer | null
   showBonuses?: boolean
 }>()
 
-// Extract bonuses from player data
+// Helper to get bonus name by type and ID
+function getBonusName(type: BonusType, id: number): string {
+  const cards = getBonusCards(type)
+  const card = cards[id]
+  return card?.name || `Unknown ${type} #${id}`
+}
+
+// Extract bonuses from player data with proper names
 // Player bonuses array structure: [civ bonuses[], unique units[], castle techs[], imp techs[], team bonuses[]]
-// TODO: Improve by importing card_descriptions from common.js to show actual bonus text
-// For now, showing card IDs as placeholders
 const civBonuses = computed(() => {
   if (!props.player?.bonuses?.[0]) return []
-  return props.player.bonuses[0].map((id: number) => `Selected Bonus #${id}`)
+  return props.player.bonuses[0].map((id: number) => getBonusName('civ', id))
 })
 
 const uniqueUnit = computed(() => {
   if (!props.player?.bonuses?.[1]?.length) return null
-  return `Selected Unit #${props.player.bonuses[1][0]}`
+  return getBonusName('uu', props.player.bonuses[1][0])
 })
 
 const castleTech = computed(() => {
   if (!props.player?.bonuses?.[2]?.length) return null
-  return `Castle Tech #${props.player.bonuses[2][0]}`
+  return getBonusName('castle', props.player.bonuses[2][0])
 })
 
 const imperialTech = computed(() => {
   if (!props.player?.bonuses?.[3]?.length) return null
-  return `Imperial Tech #${props.player.bonuses[3][0]}`
+  return getBonusName('imp', props.player.bonuses[3][0])
 })
 
 const teamBonus = computed(() => {
   if (!props.player?.bonuses?.[4]?.length) return null
-  return `Team Bonus #${props.player.bonuses[4][0]}`
+  return getBonusName('team', props.player.bonuses[4][0])
 })
 
 const isEmpty = computed(() => {
