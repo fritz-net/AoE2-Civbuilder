@@ -88,6 +88,7 @@
       :is-my-turn="currentTurn?.isMyTurn || false"
       :my-player-index="playerNumber"
       :timer-duration="0"
+      :highlighted="draft.gamestate.highlighted || []"
       @select-card="handleSelectCard"
       @view-player="handleViewPlayer"
       @refill="handleRefill"

@@ -99,7 +99,7 @@
               @click="handleViewPlayer(index)"
             >
               <h3>{{ player.alias || `Player ${index + 1}` }}</h3>
-              <p class="player-name">{{ player.name }}</p>
+              <p class="player-name-small">{{ player.name }}</p>
               <div class="civ-preview">
                 <canvas
                   :ref="(el) => setFlagCanvas(el as HTMLCanvasElement, index)"
@@ -117,9 +117,14 @@
           </div>
         </div>
 
-        <button class="home-button" @click="goHome">
-          Return Home
-        </button>
+        <div class="action-buttons">
+          <button class="download-button" @click="handleDownload">
+            Download Mod
+          </button>
+          <button class="home-button" @click="goHome">
+            Return Home
+          </button>
+        </div>
       </div>
     </div>
 
@@ -218,6 +223,26 @@ const setFlagCanvas = (canvas: HTMLCanvasElement | null, playerIndex: number) =>
 const handleViewPlayer = (playerIndex: number) => {
   // TODO: Show modal with player's tech tree and selected bonuses
   console.log('View player:', playerIndex)
+}
+
+const handleDownload = () => {
+  if (!draft.value) return
+  
+  // Create a form and submit it to trigger download (like legacy code)
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = '/download'
+  form.style.display = 'none'
+  
+  const input = document.createElement('input')
+  input.type = 'hidden'
+  input.name = 'draftID'
+  input.value = draft.value.id
+  
+  form.appendChild(input)
+  document.body.appendChild(form)
+  form.submit()
+  document.body.removeChild(form)
 }
 
 const goHome = () => {
@@ -479,8 +504,21 @@ onUnmounted(() => {
   font-size: 0.9rem;
 }
 
-.home-button {
+.player-name-small {
+  color: #f0e6d2;
+  font-size: 0.9rem;
+  margin: 0.25rem 0;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
   margin-top: 2rem;
+}
+
+.download-button,
+.home-button {
   padding: 1rem 2rem;
   font-size: 1.2rem;
   font-weight: bold;
@@ -492,6 +530,7 @@ onUnmounted(() => {
   transition: all 0.2s ease;
 }
 
+.download-button:hover,
 .home-button:hover {
   background: hsl(52, 100%, 50%);
   color: #1a0f0a;

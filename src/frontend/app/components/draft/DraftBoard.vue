@@ -70,8 +70,8 @@
             :card="card"
             :size="cardSize"
             :margin="cardMargin"
-            :selectable="isMyTurn && !card.hidden"
-            :disabled="!isMyTurn"
+            :selectable="isCardSelectable(index)"
+            :disabled="isCardDisabled(index)"
             :hidden="card.hidden"
             @select="handleCardSelect"
             @hover="handleCardHover"
@@ -122,6 +122,7 @@ interface DisplayCard {
   name?: string
   description?: string
   hidden?: boolean
+  index?: number  // Position in the cards array (for highlighted check)
 }
 
 const props = withDefaults(defineProps<{
@@ -134,9 +135,11 @@ const props = withDefaults(defineProps<{
   isMyTurn: boolean
   timerDuration?: number
   myPlayerIndex?: number // The player viewing this board
+  highlighted?: number[] // Array of card indices that can be selected (selection limit)
 }>(), {
   timerDuration: 0,
   myPlayerIndex: -1,
+  highlighted: () => [],
 })
 
 const emit = defineEmits<{
@@ -174,11 +177,39 @@ const hasEmptySlots = computed(() => {
 
 // Display cards with computed properties
 const displayCards = computed(() => {
-  return props.cards.map(card => ({
+  return props.cards.map((card, index) => ({
     ...card,
+    index, // Add index for highlighted check
     hidden: card.id === -1 || card.hidden,
   }))
 })
+
+// Check if a card is selectable (respects highlighted array like legacy code)
+const isCardSelectable = (index: number): boolean => {
+  if (!props.isMyTurn) return false
+  if (props.cards[index]?.id === -1) return false
+  
+  // If highlighted array is empty, all visible cards are selectable
+  if (!props.highlighted || props.highlighted.length === 0) {
+    return true
+  }
+  
+  // If highlighted array has values, only those indices are selectable
+  return props.highlighted.includes(index)
+}
+
+// Check if a card should be disabled (greyed out)
+const isCardDisabled = (index: number): boolean => {
+  if (!props.isMyTurn) return true
+  if (props.cards[index]?.id === -1) return true
+  
+  // If highlighted array has values and this card isn't in it, disable it
+  if (props.highlighted && props.highlighted.length > 0 && !props.highlighted.includes(index)) {
+    return true
+  }
+  
+  return false
+}
 
 // Card sizing based on number of cards
 const cardSize = computed(() => {
@@ -222,7 +253,8 @@ const handleMouseMove = (event: MouseEvent) => {
 }
 
 const handleCardSelect = (card: DisplayCard) => {
-  if (props.isMyTurn && !card.hidden) {
+  const index = card.index ?? -1
+  if (props.isMyTurn && !card.hidden && isCardSelectable(index)) {
     emit('select-card', card)
   }
 }
