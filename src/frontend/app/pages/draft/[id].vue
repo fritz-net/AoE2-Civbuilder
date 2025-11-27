@@ -228,6 +228,13 @@ const handleViewPlayer = (playerIndex: number) => {
 const handleDownload = () => {
   if (!draft.value) return
   
+  // Validate that draft ID is a safe numeric string (server-generated ID)
+  const draftId = draft.value.id
+  if (!/^\d+$/.test(draftId)) {
+    console.error('Invalid draft ID format')
+    return
+  }
+  
   // Create a form and submit it to trigger download (like legacy code)
   const form = document.createElement('form')
   form.method = 'POST'
@@ -237,7 +244,7 @@ const handleDownload = () => {
   const input = document.createElement('input')
   input.type = 'hidden'
   input.name = 'draftID'
-  input.value = draft.value.id
+  input.value = draftId
   
   form.appendChild(input)
   document.body.appendChild(form)

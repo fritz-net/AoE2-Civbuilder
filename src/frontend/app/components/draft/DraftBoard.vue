@@ -253,8 +253,13 @@ const handleMouseMove = (event: MouseEvent) => {
 }
 
 const handleCardSelect = (card: DisplayCard) => {
-  const index = card.index ?? -1
-  if (props.isMyTurn && !card.hidden && isCardSelectable(index)) {
+  // Card must have a valid index to be selected
+  if (typeof card.index !== 'number' || card.index < 0) {
+    console.error('Card selection attempted without valid index')
+    return
+  }
+  
+  if (props.isMyTurn && !card.hidden && isCardSelectable(card.index)) {
     emit('select-card', card)
   }
 }
