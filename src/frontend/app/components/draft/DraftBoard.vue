@@ -66,7 +66,7 @@
           <button 
             class="toolbar-btn refill-btn" 
             @click="$emit('refill')"
-            @mouseenter="handleToolbarHover('Fill empty card slots with new cards')"
+            @mouseenter="handleToolbarHover(`Fill ${emptySlotCount} empty card slot${emptySlotCount !== 1 ? 's' : ''} with new cards`)"
             @mouseleave="handleToolbarUnhover"
           >
             Refill
@@ -74,7 +74,7 @@
           <button 
             class="toolbar-btn clear-btn" 
             @click="$emit('clear')"
-            @mouseenter="handleToolbarHover('Remove all cards and get a fresh set')"
+            @mouseenter="handleToolbarHover(`Clear all ${visibleCardCount} visible cards and get a fresh set`)"
             @mouseleave="handleToolbarUnhover"
           >
             Reroll
@@ -292,6 +292,16 @@ const currentPlayerData = computed(() => {
 // Check if there are empty slots (cards with id -1)
 const hasEmptySlots = computed(() => {
   return props.cards.some(card => card.id === -1)
+})
+
+// Count of empty slots for tooltip
+const emptySlotCount = computed(() => {
+  return props.cards.filter(card => card.id === -1).length
+})
+
+// Count of visible cards for tooltip
+const visibleCardCount = computed(() => {
+  return props.cards.filter(card => card.id !== -1).length
 })
 
 // Display cards with computed properties

@@ -2,8 +2,18 @@
   <div class="techtree-container" :class="{ 'is-maximized': isMaximized }" :style="containerStyle">
     <div class="techtree-toolbar" :style="toolbarStyle">
       <div class="points">{{ pointsLabel }}: {{ techtreePoints }}</div>
-      <button v-if="editable" class="toolbar-btn" @click="handleFill">Fill</button>
-      <button v-if="editable" class="toolbar-btn" @click="handleReset">Reset</button>
+      <button 
+        v-if="editable" 
+        class="toolbar-btn" 
+        @click="handleFill"
+        :title="fillButtonTooltip"
+      >Fill</button>
+      <button 
+        v-if="editable" 
+        class="toolbar-btn" 
+        @click="handleReset"
+        :title="resetButtonTooltip"
+      >Reset</button>
       <button class="toolbar-btn primary" @click="handleDone">{{ doneButtonText }}</button>
     </div>
 
@@ -379,6 +389,19 @@ const ageIcons = computed(() => {
 const pointsLabel = computed(() => props.editable ? 'Points Remaining' : 'Points Spent')
 
 const doneButtonText = computed(() => 'Done')
+
+// Tooltip texts for Fill and Reset buttons
+const fillButtonTooltip = computed(() => {
+  if (!data.value) return 'Fill all available techs and units'
+  const totalTechs = allCarets.value.filter(c => !unclickableCarets.includes(c.id) && !isEnabled(c.id)).length
+  return `Fill all empty tech slots (${totalTechs} remaining techs)`
+})
+
+const resetButtonTooltip = computed(() => {
+  if (!data.value) return 'Clear all selections and reset to default'
+  const selectedTechs = allCarets.value.filter(c => isEnabled(c.id) && !['tech_22', 'tech_101', 'tech_102', 'tech_103', 'tech_408'].includes(c.id)).length
+  return `Reset to default tech tree (clear ${selectedTechs} selections)`
+})
 
 // Format sidebar content with bold quantifiers
 const formattedSidebarContent = computed(() => {
