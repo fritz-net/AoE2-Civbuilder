@@ -287,11 +287,11 @@ test.describe('Home Page Navigation', () => {
   });
 });
 
-// Pasture bonus filter text - used to find bonus 105 in the UI
-const PASTURE_BONUS_FILTER_TEXT = 'Economic upgrades cost -33%';
+// Pasture bonus filter text - used to find bonus 356 (Pastures replace Farms) in the UI
+const PASTURE_BONUS_FILTER_TEXT = 'Pastures replace Farms';
 
 test.describe('Build Page - Pasture Bonus Detection', () => {
-  test('should show pasture techs in techtree when bonus 105 is selected', async ({ page }) => {
+  test('should show pasture techs in techtree when bonus 356 is selected', async ({ page }) => {
     await page.goto('/v2/build');
     
     // Fill in civilization name
@@ -304,7 +304,7 @@ test.describe('Build Page - Pasture Bonus Detection', () => {
     // Should be on Civ Bonuses step
     await expect(page.getByRole('heading', { name: /Civilization Bonuses/i })).toBeVisible();
     
-    // Search for the pasture bonus (Economic upgrades cost -33% food)
+    // Search for the pasture bonus (Pastures replace Farms and Mill upgrades)
     const filterInput = page.getByPlaceholder(/e.g. "Infantry", "Archer"/i);
     await filterInput.fill(PASTURE_BONUS_FILTER_TEXT);
     
@@ -348,7 +348,7 @@ test.describe('Build Page - Pasture Bonus Detection', () => {
     await expect(domesticationElement).toBeVisible();
   });
 
-  test('should show farm techs in techtree when bonus 105 is NOT selected', async ({ page }) => {
+  test('should show farm techs in techtree when bonus 356 is NOT selected', async ({ page }) => {
     await page.goto('/v2/build');
     
     // Fill in civilization name

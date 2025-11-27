@@ -443,12 +443,12 @@ ${teamBonusHtml || '<p>No team bonus selected</p>'}
 `
 })
 
-// CIV_BONUS_105 (index 105) is "Economic upgrades cost -33% food and available one age earlier"
+// CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES is "Pastures replace Farms and Mill upgrades"
 // When this bonus is selected, we should show Pasture building and pasture techs instead of Farm and farm techs
-const PASTURES_BONUS_ID = 105
+const PASTURES_BONUS_ID = 356
 
 const showPasturesInTechtree = computed(() => {
-  // Check if bonus 105 is selected in civ bonuses
+  // Check if bonus 356 is selected in civ bonuses
   return selectedCivBonuses.value.some(entry => {
     const bonusId = Array.isArray(entry) ? entry[0] : entry
     return bonusId === PASTURES_BONUS_ID
