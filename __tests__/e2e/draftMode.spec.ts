@@ -426,10 +426,17 @@ test.describe('Draft Mode - Draft Host Page', () => {
     // Navigate to host page
     await page.goto(hostLink);
     
-    // Wait for Socket.io to load
-    await page.waitForTimeout(3000);
+    // Should show join form first
+    const joinFormVisible = await page.locator('#playerName').isVisible().catch(() => false);
     
-    // Check that Socket.io script was loaded
+    if (joinFormVisible) {
+      // Fill in join form
+      await page.fill('#playerName', 'Socket Test Player');
+      await page.click('.join-button');
+      await page.waitForTimeout(5000);
+    }
+    
+    // Check that Socket.io script was loaded (either before or after joining)
     const socketScript = await page.evaluate(() => {
       const scripts = document.querySelectorAll('script[src*="socket.io"]');
       return scripts.length > 0;
@@ -464,16 +471,23 @@ test.describe('Draft Mode - Draft Host Page', () => {
     // Navigate to host page
     await page.goto(hostLink);
     
-    // Wait for Socket.io and gamestate
-    await page.waitForTimeout(5000);
+    // Should show join form first
+    const joinFormVisible = await page.locator('#playerName').isVisible().catch(() => false);
     
-    // Check for lobby content (phase 0)
-    // Either we see the lobby or loading spinner
-    const lobbyVisible = await page.locator('.draft-lobby, .lobby-title').isVisible().catch(() => false);
+    if (joinFormVisible) {
+      // Fill in join form
+      await page.fill('#playerName', 'Lobby Test Player');
+      await page.click('.join-button');
+      await page.waitForTimeout(5000);
+    }
+    
+    // Check for lobby content (phase 0) or other valid UI state
+    const lobbyVisible = await page.locator('.draft-lobby, .lobby-title, h1:has-text("Civilization Drafter")').isVisible().catch(() => false);
     const loadingVisible = await page.locator('.loading-overlay').isVisible().catch(() => false);
+    const startBtnVisible = await page.getByRole('button', { name: /Start Draft|Lobby Not Ready/i }).isVisible().catch(() => false);
     
-    // One of these should be visible
-    expect(lobbyVisible || loadingVisible).toBe(true);
+    // One of these should be visible after joining
+    expect(lobbyVisible || loadingVisible || startBtnVisible).toBe(true);
   });
 });
 

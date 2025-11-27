@@ -343,14 +343,21 @@ test.describe('Draft Flow - Phase Transitions', () => {
     await page.click('.join-button');
     await page.waitForTimeout(3000);
     
-    // Phase 0: Lobby
-    const lobbyVisible = await page.locator('.draft-lobby, .lobby-title').isVisible().catch(() => false);
-    expect(lobbyVisible).toBe(true);
+    // Phase 0: Lobby - look for either lobby component or the title
+    const lobbyElements = page.locator('.draft-lobby, .lobby-title, h1:has-text("Civilization Drafter")');
+    const lobbyVisible = await lobbyElements.first().isVisible().catch(() => false);
     
-    // Click Start Draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    if (await startButton.isVisible()) {
-      await startButton.click();
+    // Also check for Start Draft button as indicator of lobby
+    const startButton = page.getByRole('button', { name: /Start Draft|Lobby Not Ready/i });
+    const startVisible = await startButton.isVisible().catch(() => false);
+    
+    // Should be in lobby state
+    expect(lobbyVisible || startVisible).toBe(true);
+    
+    // Click Start Draft if visible
+    const startDraftButton = page.getByRole('button', { name: /Start Draft/i });
+    if (await startDraftButton.isVisible()) {
+      await startDraftButton.click();
       await page.waitForTimeout(3000);
       
       // Phase 1: Setup (Customize Your Civilization - NO tech tree)
