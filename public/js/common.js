@@ -151,7 +151,7 @@ const card_descriptions = [
 		["+5 Monk hit points for each Monastery technology", 3, -15, 0],
 		["Start with +1 villager, but -50 food", 1, -16, 0],
 		["Cavalry Archers cost -10% Castle, -20% Imperial Age", 2, -17, 0],
-		["Ranged Soldiers, Infantry, and Warships cost -50% wood", 2, -18, 0],
+		["Ranged Soldiers and Infantry cost -50% wood, Warships cost -20% wood", 2, -18, 0],
 		["Archer armor upgrades free", 1, -18, 0],
 		["Can train Turtle Ships in docks", 0, -18, 0],
 		["Can recruit Longboats from docks", 2, -11, 0],

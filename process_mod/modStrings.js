@@ -144,7 +144,7 @@ const civBonusStrings = [
 	"+5 Monk hit points for each Monastery technology",
 	"Start with +1 villager, but -50 food",
 	"Cavalry Archers cost -10% Castle, -20% Imperial Age",
-	"Ranged Soldiers, Infantry, and Warships cost -50% wood",
+	"Ranged Soldiers and Infantry cost -50% wood, Warships cost -20% wood",
 	"Archer armor upgrades free",
 	"Can train Turtle Ships in docks",
 	"Can recruit Longboats from docks",
