@@ -272,6 +272,8 @@ const hoveredCard = ref<DisplayCard | null>(null)
 const tooltipText = ref<string | null>(null)
 const flagCanvasRefs = ref<Map<number, HTMLCanvasElement>>(new Map())
 const mousePosition = ref({ x: 0, y: 0 })
+// Cache rendered flag palettes to prevent flickering on re-renders
+const renderedFlagPalettes = ref<Map<number, string>>(new Map())
 
 // Ordered players based on draft order
 const orderedPlayers = computed(() => {
@@ -420,13 +422,23 @@ function getAttackIcon(stats: UnitStats): string {
 }
 
 // Draw flag on canvas for a player using the shared flag renderer
-const drawFlag = (canvas: HTMLCanvasElement, palette: number[]) => {
+const drawFlag = (canvas: HTMLCanvasElement, palette: number[], playerIndex: number) => {
   const ctx = canvas.getContext('2d')
   if (!ctx) return
+  
+  // Create a cache key from the palette to prevent unnecessary re-renders
+  const paletteKey = palette.join(',')
+  const cachedKey = renderedFlagPalettes.value.get(playerIndex)
+  
+  // Skip rendering if palette hasn't changed
+  if (cachedKey === paletteKey) return
   
   // Use the full flag renderer with symbols and overlays
   // Symbol images are served from /img/symbols/ by the main server
   renderFlagOnCanvas(ctx, palette, canvas.width, canvas.height, '/img/symbols')
+  
+  // Cache the rendered palette
+  renderedFlagPalettes.value.set(playerIndex, paletteKey)
 }
 
 const setFlagCanvas = (canvas: HTMLCanvasElement | null, playerIndex: number) => {
@@ -435,20 +447,19 @@ const setFlagCanvas = (canvas: HTMLCanvasElement | null, playerIndex: number) =>
     // Draw flag immediately if we have player data
     const player = props.players[playerIndex]
     if (player?.flag_palette) {
-      drawFlag(canvas, player.flag_palette)
+      drawFlag(canvas, player.flag_palette, playerIndex)
     }
   }
 }
 
 // Watch for player changes to update flags
-// Deep watch is intentional as player flag_palette can change at various points
-// (e.g., after Phase 1 when players submit their civ info)
+// Only redraw if palette actually changed (checked in drawFlag)
 watch(() => props.players, () => {
   nextTick(() => {
     flagCanvasRefs.value.forEach((canvas, playerIndex) => {
       const player = props.players[playerIndex]
       if (player?.flag_palette) {
-        drawFlag(canvas, player.flag_palette)
+        drawFlag(canvas, player.flag_palette, playerIndex)
       }
     })
   })

@@ -861,6 +861,106 @@ test.describe('Draft Flow - TechTree Fill Button', () => {
       }
     }
   });
+  
+  test('should fill techs only up to available points', async ({ page }) => {
+    // Test that Fill button respects point limits
+    await page.goto('/v2/build');
+    await page.waitForTimeout(2000);
+    
+    // Navigate to tech tree step
+    const steps = page.locator('.stepper-step');
+    const stepCount = await steps.count();
+    
+    for (let i = 0; i < stepCount; i++) {
+      const step = steps.nth(i);
+      const stepText = await step.textContent();
+      if (stepText?.includes('Tech') || i === 4) {
+        await step.click();
+        await page.waitForTimeout(1000);
+        break;
+      }
+    }
+    
+    // Check if TechTree is visible
+    const techTree = page.locator('.techtree-container');
+    if (await techTree.isVisible().catch(() => false)) {
+      const pointsText = page.locator('.points');
+      
+      // Click Fill button
+      const fillButton = page.getByRole('button', { name: /Fill/i });
+      if (await fillButton.isVisible()) {
+        await fillButton.click();
+        await page.waitForTimeout(1000);
+        
+        // Get points after fill
+        const newPointsStr = await pointsText.textContent();
+        const newPointsMatch = newPointsStr?.match(/(-?\d+)/);
+        const newPoints = newPointsMatch ? parseInt(newPointsMatch[1], 10) : 0;
+        
+        // Points should be >= 0 (fill should not exceed available points)
+        expect(newPoints).toBeGreaterThanOrEqual(0);
+        
+        // Points should be low (close to 0) after fill maxes out techs
+        expect(newPoints).toBeLessThanOrEqual(50);
+      }
+    }
+  });
+  
+  test('should not allow selecting techs when points are at 0', async ({ page }) => {
+    // Test that clicking techs does nothing when no points remain
+    await page.goto('/v2/build');
+    await page.waitForTimeout(2000);
+    
+    // Navigate to tech tree step
+    const steps = page.locator('.stepper-step');
+    const stepCount = await steps.count();
+    
+    for (let i = 0; i < stepCount; i++) {
+      const step = steps.nth(i);
+      const stepText = await step.textContent();
+      if (stepText?.includes('Tech') || i === 4) {
+        await step.click();
+        await page.waitForTimeout(1000);
+        break;
+      }
+    }
+    
+    // Check if TechTree is visible
+    const techTree = page.locator('.techtree-container');
+    if (await techTree.isVisible().catch(() => false)) {
+      const pointsText = page.locator('.points');
+      
+      // Click Fill to use up all points
+      const fillButton = page.getByRole('button', { name: /Fill/i });
+      if (await fillButton.isVisible()) {
+        await fillButton.click();
+        await page.waitForTimeout(1000);
+        
+        // Get points after fill
+        const pointsAfterFillStr = await pointsText.textContent();
+        const pointsAfterFillMatch = pointsAfterFillStr?.match(/(-?\d+)/);
+        const pointsAfterFill = pointsAfterFillMatch ? parseInt(pointsAfterFillMatch[1], 10) : 0;
+        
+        // Try clicking a disabled tech (if points are low/0)
+        // The points should not go negative
+        const disabledNodes = page.locator('.node .cross');
+        const disabledCount = await disabledNodes.count();
+        
+        if (disabledCount > 0 && pointsAfterFill < 10) {
+          // Try to enable a disabled tech by clicking near it
+          await disabledNodes.first().click({ force: true });
+          await page.waitForTimeout(500);
+          
+          // Points should not have gone negative
+          const finalPointsStr = await pointsText.textContent();
+          const finalPointsMatch = finalPointsStr?.match(/(-?\d+)/);
+          const finalPoints = finalPointsMatch ? parseInt(finalPointsMatch[1], 10) : 0;
+          
+          expect(finalPoints).toBeGreaterThanOrEqual(0);
+        }
+      }
+    }
+  });
 });
 
 test.describe('Draft Flow - Navigation Protection', () => {
