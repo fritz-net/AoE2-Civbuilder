@@ -493,7 +493,7 @@ var uniqueCastleStrings = [
 	"Madrasah (Monks return 50 gold when killed)",
 	"First Crusade (Each Town Center (maxiumum 5) spawns a one-time batch of 5 of your Unique Unit; units are more resistant to conversion)",
 	"Orthodoxy (Monk units +3/+3P armor)",
-	"Inquisition (Monk convert faster)",
+	"Inquisition (Monks and Missionaries convert faster; Missionaries +1 range)",
 	"Silk Armor (Light Cavalry, Steppe Lancers and Cavalry Archers receive +1/+1P armor)",
 	"Ironclad (Siege units extra melee armor)",
 	"Sipahi (Cavalry Archers +20 HP)",

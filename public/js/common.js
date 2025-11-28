@@ -591,7 +591,7 @@ const card_descriptions = [
 		["Madrasah (Monks return 50 gold when killed) [200F 100G]", 0, 1, 0],
 		["First Crusade (Each Town Center (maxiumum 5) spawns a one-time batch of 5 of your Unique Unit; units are more resistant to conversion) [400F 300G]", 3, -37, 0],
 		["Orthodoxy (Monk units +3/+3P armor) [200F 300G]", 1, 1, 0],
-		["Inquisition (Monk convert faster) [100F 300G]", 1, -14, 0],
+		["Inquisition (Monks and Missionaries convert faster; Missionaries +1 range) [100F 300G]", 1, -14, 0],
 		["Silk Armor (Light Cavalry, Steppe Lancers and Cavalry Archers receive +1/+1P armor) [400W 300G]", 1, -33, 0],
 		["Ironclad (Siege units extra melee armor) [400W 350G]", 1, -4, 0],
 		["Sipahi (Cavalry Archers +20 HP) [350F 150G]", 2, -10, 0],
