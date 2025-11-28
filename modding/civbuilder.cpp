@@ -4721,10 +4721,10 @@ void Civbuilder::createCivBonuses() {
     this->civBonuses[CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES] = {
         TECH_C_BONUS_PASTURES,
 
-        // TODO tbd: maybe we should set them only via techtree? cause currently they are free tech points
-        TECH_TRANSHUMANCE, 
-        TECH_PASTORALISM,
-        TECH_DOMESTICATION
+        // set via techtree, cause currently they are free tech points
+        //TECH_TRANSHUMANCE, 
+        //TECH_PASTORALISM,
+        //TECH_DOMESTICATION
     };
     // TODO (do) we need to disable farm techs???
     // TODO (de) pastures need mill as requirement??? - no - kithans can do it without mill too
