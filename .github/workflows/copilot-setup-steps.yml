@@ -38,7 +38,7 @@ jobs:
      - name: Install apt packages
        run: |
          sudo apt-get update
-         sudo apt-get install -y build-essential cmake git g++ python3-pip libssl-dev libcurl4-openssl-dev zlib1g-dev pkg-config libboost-all-dev liblz4-dev libbz2-dev
+         sudo apt-get install -y build-essential cmake git g++ python3-pip libssl-dev libcurl4-openssl-dev zlib1g-dev pkg-config libboost-all-dev liblz4-dev libbz2-dev libjsoncpp-dev
 
      - name: Set up Node.js
        uses: actions/setup-node@v4
