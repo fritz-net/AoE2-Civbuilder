@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.5.0...v1.6.0) (2025-11-28)
+
+
+### Features
+
+* enable parallel cpp tool execution in node.js backend ([#113](https://github.com/fritz-net/AoE2-Civbuilder/issues/113)) ([e32193d](https://github.com/fritz-net/AoE2-Civbuilder/commit/e32193d94cfd8a238fd888fcfdd0fb02ceada556))
+
+
+### Bug Fixes
+
+* domestication for pastures one age earlier; fix pastures in techtree ([#118](https://github.com/fritz-net/AoE2-Civbuilder/issues/118)) ([4469b28](https://github.com/fritz-net/AoE2-Civbuilder/commit/4469b28fc66ce78ed0bea06dbe8379b2bec7b3ce))
+* return to home links in draft view ([fb069ed](https://github.com/fritz-net/AoE2-Civbuilder/commit/fb069edac783ad26dff08b3aea23f02332ab68b5))
+
 ## [1.5.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.4.0...v1.5.0) (2025-11-27)
 
 
