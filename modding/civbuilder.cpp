@@ -3430,28 +3430,40 @@ void Civbuilder::createCivBonuses() {
     this->civBonuses[CIV_BONUS_220_MELEE_CAVALRY_GAIN_2_BONUS_DAMAGE_VS_SKIRMISHERS] = {877};
 
     // Pasture upgrades earlier
-    this->df->Techs[1014].RequiredTechs.push_back(758);
+    // this does not work cause we are likly not burgundians
+    //this->df->Techs[TECH_DOMESTICATION].RequiredTechs.push_back(TECH_FEUDAL_ECO_TECH_REQUIREMENT);
+
+    t = Tech();
+    t.Name = "Domestication requirement";
+    t.Civ = 99;
+    t.RequiredTechs.push_back(TECH_DARK_AGE);
+    t.RequiredTechs.push_back(TECH_C_BONUS_PASTURES/* enable pastures c-bonus*/);
+    t.RequiredTechCount = 2;
+    setResearchLocation(t, -1, 0, 0);
+    this->df->Techs.push_back(t);
+    this->df->Techs[TECH_DOMESTICATION].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
+    this->civBonuses[CIV_BONUS_105_ECONOMIC_UPGRADES_COST_33_FOOD_AND_AVAILABLE].push_back((int)(this->df->Techs.size() - 1));
 
     t = Tech();
     t.Name = "Pastoralism requirement";
     t.Civ = 99;
-    t.RequiredTechs.push_back(101);
-    t.RequiredTechs.push_back(1014);
+    t.RequiredTechs.push_back(TECH_FEUDAL_AGE);
+    t.RequiredTechs.push_back(TECH_DOMESTICATION);
     t.RequiredTechCount = 2;
     setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
-    this->df->Techs[1013].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
+    this->df->Techs[TECH_PASTORALISM].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
     this->civBonuses[CIV_BONUS_105_ECONOMIC_UPGRADES_COST_33_FOOD_AND_AVAILABLE].push_back((int)(this->df->Techs.size() - 1));
 
     t = Tech();
     t.Name = "Transhumance requirement";
     t.Civ = 99;
-    t.RequiredTechs.push_back(102);
+    t.RequiredTechs.push_back(TECH_CASTLE_AGE);
     t.RequiredTechs.push_back(1013);
     t.RequiredTechCount = 2;
     setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
-    this->df->Techs[1012].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
+    this->df->Techs[TECH_TRANSHUMANCE].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
     this->civBonuses[CIV_BONUS_105_ECONOMIC_UPGRADES_COST_33_FOOD_AND_AVAILABLE].push_back((int)(this->df->Techs.size() - 1));
 
     // Barracks upgrades earlier
@@ -4702,13 +4714,21 @@ void Civbuilder::createCivBonuses() {
     this->civBonuses[CIV_BONUS_355_CAN_RECRUIT_GRENADIERS] = {TECH_GRENADIER_MAKE_AVAIL};
 
     // Pastures
-    this->df->Effects[1008].EffectCommands.push_back(createEC(102, -1, -1, -1, 216));
+
+    // disable farms
+    this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_FARMS_MAKE_AVAIL)); // 102 = disable tech
+    // enable pastures + its techs
     this->civBonuses[CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES] = {
-        TECH_C_BONUS_PASTURES, 
+        TECH_C_BONUS_PASTURES,
+
+        // TODO tbd: maybe we should set them only via techtree? cause currently they are free tech points
         TECH_TRANSHUMANCE, 
-        TECH_PASTORALISM, 
+        TECH_PASTORALISM,
         TECH_DOMESTICATION
     };
+    // TODO (do) we need to disable farm techs???
+    // TODO (de) pastures need mill as requirement??? - no - kithans can do it without mill too
+    //this->df->Techs[TECH_C_BONUS_PASTURES].RequiredTechs[2] = TECH_MILL_MAKE_AVAIL;
 
     // Shepherds and Herders generate +10% additional food
     this->civBonuses[CIV_BONUS_357_SHEPHERDS_AND_HERDERS_GENERATE_10_ADDITIONAL_FOOD] = {TECH_RESERVED_20};

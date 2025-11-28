@@ -7,12 +7,19 @@
  * 
  * Each vanilla civ JSON is converted to the internal data.json format and
  * then processed through the C++ create-data-mod tool to generate a DAT file.
+ * 
+ * Tests run in parallel using async execFile for maximum throughput.
  */
 
-const { execFileSync } = require('child_process');
+const { execFile } = require('child_process');
+const { promisify } = require('util');
 const fs = require('fs');
+const fsp = fs.promises;
 const path = require('path');
 const os = require('os');
+
+// Promisify execFile for async/await usage
+const execFileAsync = promisify(execFile);
 
 // Load constants once at module level
 const { numBonuses, numBasicTechs, indexDictionary } = require('../process_mod/constants.js');
@@ -145,8 +152,9 @@ describe('Vanilla Civs JSON Files', () => {
 
   /**
    * Test helper that runs create-data-mod with a vanilla civ JSON
+   * Uses async execFile for non-blocking parallel execution
    */
-  function testVanillaCiv(civFileName) {
+  async function testVanillaCiv(civFileName) {
     const civFilePath = path.join(vanillaCivsDir, civFileName);
     
     // Skip if executable doesn't exist
@@ -155,7 +163,7 @@ describe('Vanilla Civs JSON Files', () => {
     }
 
     // Create a temporary directory for this specific test
-    const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'civbuilder-vanilla-test-'));
+    const testDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'civbuilder-vanilla-test-'));
     
     let stdout, stderr;
     let exitCode = 0;
@@ -163,35 +171,47 @@ describe('Vanilla Civs JSON Files', () => {
     
     try {
       // Read and convert vanilla civ JSON to data.json format
-      vanillaCivData = JSON.parse(fs.readFileSync(civFilePath, 'utf8'));
+      const civFileContent = await fsp.readFile(civFilePath, 'utf8');
+      vanillaCivData = JSON.parse(civFileContent);
       const dataJson = convertVanillaCivToDataJson(vanillaCivData);
       
       // Write data.json to temp directory
       testDataPath = path.join(testDir, 'data.json');
-      fs.writeFileSync(testDataPath, JSON.stringify(dataJson, null, 2));
+      await fsp.writeFile(testDataPath, JSON.stringify(dataJson, null, 2));
       
       // Output paths
       outputDatPath = path.join(testDir, 'empires2_x2_p1.dat');
       outputAiConfigPath = path.join(testDir, 'aiconfig.json');
 
-      // Run create-data-mod
+      // Run create-data-mod asynchronously (non-blocking)
       const args = [testDataPath, vanillaDatPath, outputDatPath, outputAiConfigPath];
 
-      stdout = execFileSync(createDataModPath, args, {
+      const result = await execFileAsync(createDataModPath, args, {
         encoding: 'utf8',
         cwd: projectRoot,
         timeout: 30000, // 30 second timeout
       });
+      stdout = result.stdout;
+      stderr = result.stderr;
       
       // Check if output files exist and get their stats BEFORE cleanup
-      const outputDatExists = fs.existsSync(outputDatPath);
-      const outputAiConfigExists = fs.existsSync(outputAiConfigPath);
-      const datSize = outputDatExists ? fs.statSync(outputDatPath).size : 0;
+      let outputDatExists = false;
+      let outputAiConfigExists = false;
+      let datSize = 0;
+      
+      try {
+        const datStats = await fsp.stat(outputDatPath);
+        outputDatExists = true;
+        datSize = datStats.size;
+      } catch (e) { /* file doesn't exist */ }
+      
+      try {
+        await fsp.stat(outputAiConfigPath);
+        outputAiConfigExists = true;
+      } catch (e) { /* file doesn't exist */ }
       
       // Clean up test directory
-      if (fs.existsSync(testDir)) {
-        fs.rmSync(testDir, { recursive: true, force: true });
-      }
+      await fsp.rm(testDir, { recursive: true, force: true });
       
       return {
         exitCode,
@@ -205,12 +225,24 @@ describe('Vanilla Civs JSON Files', () => {
     } catch (error) {
       stderr = error.stderr || error.message;
       stdout = error.stdout || '';
-      exitCode = error.status !== null ? error.status : (error.signal ? 139 : 1);
+      // For promisified execFile:
+      // - error.code is the exit code when process exits normally
+      // - error.code is null when killed by signal (use signal number + 128)
+      if (error.code !== null && error.code !== undefined) {
+        exitCode = error.code;
+      } else if (error.signal) {
+        // Convert signal name to number using os.constants.signals
+        // Exit code for signals is 128 + signal number
+        const signalNum = os.constants.signals[error.signal] || 1;
+        exitCode = 128 + signalNum;
+      } else {
+        exitCode = 1;
+      }
       
       // Clean up test directory on error
-      if (fs.existsSync(testDir)) {
-        fs.rmSync(testDir, { recursive: true, force: true });
-      }
+      try {
+        await fsp.rm(testDir, { recursive: true, force: true });
+      } catch (e) { /* ignore cleanup errors */ }
       
       return {
         exitCode,
@@ -224,11 +256,12 @@ describe('Vanilla Civs JSON Files', () => {
     }
   }
 
-  // Generate a test case for each vanilla civ JSON file
-  // Use describe.each with test.concurrent to run tests in parallel
-  describe.each(vanillaCivFiles)('Vanilla Civ: %s', (civFileName) => {
-    test.concurrent(`should successfully process ${civFileName}`, () => {
-      const result = testVanillaCiv(civFileName);
+  // Generate all test cases in a single describe block for maximum parallelism
+  // Using it.concurrent.each pattern for true parallel execution
+  it.concurrent.each(vanillaCivFiles)(
+    'should successfully process %s',
+    async (civFileName) => {
+      const result = await testVanillaCiv(civFileName);
       
       // Skip if executable not built
       if (result.skipped) {
@@ -258,6 +291,7 @@ describe('Vanilla Civs JSON Files', () => {
 
       // Output files should have content
       expect(result.datSize).toBeGreaterThan(0);
-    }, 60000); // 60 second timeout per test
-  });
+    },
+    60000 // 60 second timeout per test
+  );
 });

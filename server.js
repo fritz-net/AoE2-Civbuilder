@@ -145,7 +145,9 @@ integrateNuxt(app);
 
 function os_func() {
 	this.execCommand = function (cmd, callback, failure) {
-		exec(cmd, (error, stdout, stderr) => {
+		// Always execute commands from the app directory to enable parallel execution
+		// This avoids using process.chdir() which is not safe for concurrent requests
+		exec(cmd, { cwd: __dirname }, (error, stdout, stderr) => {
 			if (error) {
 				console.log(`stdout: ${stdout}`);
 				console.error(`exec error: ${error}`);
@@ -359,24 +361,16 @@ function reshuffleCards(draft) {
 	return available_bonuses;
 }
 
-const chToTmpDir = (req, res, next) => {
-	console.log(`[${req.body.seed}]: changing directory to temp: ${tempdir}`);
-	process.chdir(tempdir);
-	next();
-};
-
-const chToAppDir = (req, res, next) => {
-	console.log(`[${req.body.seed}]: changing directory to app: ${__dirname}`);
-	process.chdir(__dirname);
-	next();
-};
+// Note: chToTmpDir and chToAppDir have been removed.
+// All commands now use { cwd: __dirname } option to enable parallel execution.
+// Using process.chdir() is not safe for concurrent requests as it changes global state.
 
 const createModFolder = (req, res, next) => {
 	console.log(`[${req.body.seed}]: creating mod folder`);
 	if (req.body.civs === "false") {
-		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${__dirname} 0`);
+		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${__dirname} 0`, { cwd: __dirname });
 	} else {
-		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${__dirname} 1`);
+		execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${req.body.seed} ${__dirname} 1`, { cwd: __dirname });
 	}
 	next();
 };
@@ -597,16 +591,16 @@ const writeIconsJson = async (req, res, next) => {
 		if (civs[i]["flag_palette"][0] == -1) {
 			//Secret password unlocked a vanilla flag
 			if (civName == "berber" || civName == "inca") {
-				execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}s.png`);
+				execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}s.png`, { cwd: __dirname });
 			} else {
-				execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}.png`);
+				execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/menu/civs/${civName}.png`, { cwd: __dirname });
 			}
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}.png`);
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_hover.png`);
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_pressed.png`);
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}.png`);
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_hover.png`);
-			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_pressed.png`);
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}.png`, { cwd: __dirname });
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_hover.png`, { cwd: __dirname });
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/widgetui/textures/ingame/icons/civ_techtree_buttons/menu_techtree_${civName}_pressed.png`, { cwd: __dirname });
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}.png`, { cwd: __dirname });
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_hover.png`, { cwd: __dirname });
+			execSync(`cp ./public/vanillaFiles/vanillaCivs/flag_${civs[i]["flag_palette"][1]}.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-data/resources/_common/wpfg/resources/civ_techtree/menu_techtree_${civName}_pressed.png`, { cwd: __dirname });
 			blankOthers = true;
 		} else if (civs[i]["customFlag"] && civs[i]["customFlagData"]) {
 			// Load in custom image for flag
@@ -873,12 +867,12 @@ router.get("/build", function (req, res) {
 	// res.sendFile(__dirname + "/public/html/donation.html");
 });
 
-router.post("/random", chToAppDir, createModFolder, createCivIcons, copyCivIcons, generateJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
+router.post("/random", createModFolder, createCivIcons, copyCivIcons, generateJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
 	console.log(`[${req.body.seed}]: Completed generation!`);
 	res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
 });
 
-router.post("/create", chToAppDir, createModFolder, writeIconsJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
+router.post("/create", createModFolder, writeIconsJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
 	console.log(`[${req.body.seed}]: Completed generation!`);
 	res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
 });

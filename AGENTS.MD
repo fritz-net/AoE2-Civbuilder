@@ -53,9 +53,8 @@ The project has two parallel frontends:
 - Test helpers: `__tests__/helpers/`
 
 **E2E Tests for Vue/Nuxt UI**
-- Not yet implemented
-- Future location: likely `src/frontend/tests/` or `__tests__/e2e/`
-- should use playwright
+- uses playwright and locally installed chromium
+- location: likely `src/frontend/tests/` or `__tests__/e2e/`
 
 ### Tools and Utilities
 

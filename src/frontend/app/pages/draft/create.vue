@@ -236,11 +236,11 @@ const copyLink = async (linkType: 'host' | 'player' | 'spectator') => {
 
 const closeModal = () => {
   draftLinks.value = null
-  router.push('/v2')
+  router.push('/draft')
 }
 
 const goBack = () => {
-  router.push('/v2')
+  router.push('/')
 }
 </script>
 

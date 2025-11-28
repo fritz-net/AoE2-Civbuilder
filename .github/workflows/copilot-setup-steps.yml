@@ -1,0 +1,67 @@
+# Copilot Setup Steps - https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/use-copilot-agents/coding-agent/customize-the-agent-environment#preinstalling-tools-or-dependencies-in-copilots-environment
+name: "Copilot Setup Steps"
+on:
+ workflow_dispatch:
+ push:
+   paths:
+     - .github/workflows/copilot-setup-steps.yml
+ pull_request:
+   paths:
+     - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+ # The job MUST be called copilot-setup-steps for Copilot to pick it up
+ copilot-setup-steps:
+   runs-on: ubuntu-latest
+   # Grant the minimal permissions required for setup. If you do not check out the code here,
+   # Copilot will check out the repository after the steps complete.
+   permissions:
+     contents: read
+   steps:
+     - name: Checkout code (with submodules)
+       uses: actions/checkout@v5
+       with:
+         submodules: recursive
+         fetch-depth: 0
+
+     - name: Init submodules
+       run: |
+         # Initialize and update submodules so modding/genieutils is present for the build
+         git submodule update --init --recursive || true
+         # Try shallow fetch if the above didn't populate the submodule
+         if [ ! -f modding/genieutils/CMakeLists.txt ]; then
+           echo "genieutils submodule not found, attempting a shallow update" >&2
+           git submodule update --init --recursive --depth 1 || true
+         fi
+         echo "Submodule init complete"
+
+     - name: Install apt packages
+       run: |
+         sudo apt-get update
+         sudo apt-get install -y build-essential cmake git g++ python3-pip libssl-dev libcurl4-openssl-dev zlib1g-dev pkg-config libboost-all-dev liblz4-dev libbz2-dev liblzma-dev libjsoncpp-dev
+
+     - name: Set up Node.js
+       uses: actions/setup-node@v4
+       with:
+         node-version: "20"
+         cache: "npm"
+
+     - name: Install JavaScript dependencies
+       run: |
+         npm ci
+         if [ -d src/frontend ]; then
+           cd src/frontend
+           npm ci
+         fi
+
+     - name: Install Playwright dependency
+       run: |
+         npm i -D playwright
+         # chromium is already present per user note; only install browsers if needed
+         # npx playwright install --with-deps
+
+     - name: Build C++ backend (if available)
+       run: |
+         cd modding
+         chmod +x ./scripts/build.sh || true
+         ./scripts/build.sh
