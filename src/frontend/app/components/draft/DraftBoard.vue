@@ -233,6 +233,15 @@ import { renderFlagOnCanvas } from '~/composables/useFlagRenderer'
 import { unitStats, formatAttackBonuses, getBaseAttack, type UnitStats } from '~/composables/useUnitStats'
 import type { DraftPlayer } from '~/composables/useDraft'
 
+const config = useRuntimeConfig()
+
+// Derive base path for techtree assets
+const techtreeBasePath = computed(() => {
+  const baseURL = config.app.baseURL || '/v2/'
+  const parentPath = baseURL.replace(/\/v2\/?$/, '') || '/'
+  return parentPath.replace(/\/$/, '') + '/aoe2techtree'
+})
+
 interface DisplayCard {
   id: number
   type: number
@@ -412,7 +421,7 @@ function getStatIconUrl(stat: string): string {
     'armor': 'armor-melee.png',
     'range-armor': 'armor-pierce.png',
   }
-  return `/aoe2techtree/img/${iconMap[stat] || 'hp.png'}`
+  return `${techtreeBasePath.value}/img/${iconMap[stat] || 'hp.png'}`
 }
 
 function getAttackIcon(stats: UnitStats): string {

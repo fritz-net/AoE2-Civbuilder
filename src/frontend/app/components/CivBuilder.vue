@@ -323,7 +323,15 @@ const isRestoring = ref(true)  // Start as true to prevent autosave until initia
 const techTreeRef = ref<any>(null)
 
 // Tech tree state
-const techtreePath = '/civbuilder/aoe2techtree'
+// Derive techtree path from runtime config - use parent of /v2/ base URL
+const config = useRuntimeConfig()
+const techtreePath = computed(() => {
+  const baseURL = config.app.baseURL || '/v2/'
+  // Strip /v2/ suffix to get parent path, then append aoe2techtree
+  const parentPath = baseURL.replace(/\/v2\/?$/, '') || '/'
+  // Ensure no trailing slash on parent path, then append /aoe2techtree
+  return parentPath.replace(/\/$/, '') + '/aoe2techtree'
+})
 const techtreePoints = ref(100)
 const techtreePointsRemaining = ref(100)
 

@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+const config = useRuntimeConfig()
 const techTreeRef = ref<any>(null)
 
 const initialTree = ref([
@@ -25,8 +26,13 @@ const initialTree = ref([
 ])
 
 const startingPoints = ref(100)
-// The aoe2techtree assets are served from the main Express server at /civbuilder/aoe2techtree
-const relativePath = '/civbuilder/aoe2techtree'
+// Derive techtree path from runtime config - use parent of /v2/ base URL
+const relativePath = computed(() => {
+  const baseURL = config.app.baseURL || '/v2/'
+  // Strip /v2/ suffix to get parent path, then append aoe2techtree
+  const parentPath = baseURL.replace(/\/v2\/?$/, '') || '/'
+  return parentPath.replace(/\/$/, '') + '/aoe2techtree'
+})
 
 const sidebarTitle = 'Custom Civilization'
 

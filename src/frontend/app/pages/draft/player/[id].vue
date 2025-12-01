@@ -129,7 +129,7 @@
               v-model="civConfig.tree"
               :points="techTreePoints"
               :editable="true"
-              relative-path="/aoe2techtree"
+              :relative-path="techtreePath"
               @done="handleTechTreeDone"
             />
           </div>
@@ -198,9 +198,17 @@ import ArchitectureSelector from '~/components/ArchitectureSelector.vue'
 import LanguageSelector from '~/components/LanguageSelector.vue'
 import TechTree from '~/components/TechTree.vue'
 
+const config = useRuntimeConfig()
 const route = useRoute()
 const router = useRouter()
 const draftId = computed(() => route.params.id as string)
+
+// Derive techtree path from runtime config
+const techtreePath = computed(() => {
+  const baseURL = config.app.baseURL || '/v2/'
+  const parentPath = baseURL.replace(/\/v2\/?$/, '') || '/'
+  return parentPath.replace(/\/$/, '') + '/aoe2techtree'
+})
 
 // Join form state
 const needsToJoin = ref(true)
