@@ -792,10 +792,11 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Castle Tech
-			if (civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length != 0) {
+				if (civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length != 0) {
 				var castletechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length; j++) {
-					castletechs.push(extractBonusId(civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH][j], `castle tech for civ ${i}`));
+					// Preserve the original entry so multipliers ([id, copies]) are kept for the C++ builder
+					castletechs.push(civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH][j]);
 				}
 				mod_data.castletech.push(castletechs);
 			} else {
@@ -806,7 +807,8 @@ const writeIconsJson = async (req, res, next) => {
 			if (civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length != 0) {
 				var imptechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length; j++) {
-					imptechs.push(extractBonusId(civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH][j], `imp tech for civ ${i}`));
+					// Preserve [id, multiplier] tuples when provided
+					imptechs.push(civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH][j]);
 				}
 				mod_data.imptech.push(imptechs);
 			} else {
@@ -825,7 +827,8 @@ const writeIconsJson = async (req, res, next) => {
 			var civBonuses = [];
 			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.CIV] && Array.isArray(civs[i]["bonuses"][BONUS_INDEX.CIV])) {
 				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.CIV].length; j++) {
-					civBonuses.push(extractBonusId(civs[i]["bonuses"][BONUS_INDEX.CIV][j], `civ bonus for civ ${i}`));
+					// Keep multiplier tuples intact (e.g. [id, copies]) so the C++ builder can multiply effects
+					civBonuses.push(civs[i]["bonuses"][BONUS_INDEX.CIV][j]);
 				}
 			}
 			mod_data.civ_bonus.push(civBonuses);
@@ -833,7 +836,7 @@ const writeIconsJson = async (req, res, next) => {
 			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.TEAM] && civs[i]["bonuses"][BONUS_INDEX.TEAM].length != 0) {
 				var team_bonuses = [];
 				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.TEAM].length; j++) {
-					team_bonuses.push(extractBonusId(civs[i]["bonuses"][BONUS_INDEX.TEAM][j], `team bonus for civ ${i}`));
+					team_bonuses.push(civs[i]["bonuses"][BONUS_INDEX.TEAM][j]);
 				}
 				mod_data.team_bonus.push(team_bonuses);
 			} else {
@@ -1170,7 +1173,8 @@ function draftIO(io) {
 							//Castle Tech
 							var castletechs = [];
 							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][2] && draft["players"][i]["bonuses"][2][0] !== undefined) {
-								castletechs.push(extractBonusId(draft["players"][i]["bonuses"][2][0], "castle tech"));
+								// Preserve [id, multiplier] tuples when written to mod_data
+								castletechs.push(draft["players"][i]["bonuses"][2][0]);
 							} else {
 								castletechs.push(0);
 							}
@@ -1178,7 +1182,7 @@ function draftIO(io) {
 							//Imp Tech
 							var imptechs = [];
 							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][3] && draft["players"][i]["bonuses"][3][0] !== undefined) {
-								imptechs.push(extractBonusId(draft["players"][i]["bonuses"][3][0], "imp tech"));
+								imptechs.push(draft["players"][i]["bonuses"][3][0]);
 							} else {
 								imptechs.push(0);
 							}
@@ -1194,7 +1198,7 @@ function draftIO(io) {
 							var civBonuses = [];
 							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][0] && Array.isArray(draft["players"][i]["bonuses"][0])) {
 								for (var j = 0; j < draft["players"][i]["bonuses"][0].length; j++) {
-									civBonuses.push(extractBonusId(draft["players"][i]["bonuses"][0][j], "civ bonus"));
+									civBonuses.push(draft["players"][i]["bonuses"][0][j]);
 								}
 							}
 							mod_data.civ_bonus.push(civBonuses);
@@ -1202,7 +1206,7 @@ function draftIO(io) {
 							mod_data.language.push(draft["players"][i]["language"]);
 							var team_bonuses = [];
 							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][4] && draft["players"][i]["bonuses"][4][0] !== undefined) {
-								team_bonuses.push(extractBonusId(draft["players"][i]["bonuses"][4][0], "team bonus"));
+								team_bonuses.push(draft["players"][i]["bonuses"][4][0]);
 							} else {
 								team_bonuses.push(0);
 							}
