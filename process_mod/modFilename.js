@@ -12,9 +12,10 @@ const path = require('path');
  * @param {string} projectRoot - Path to project root directory
  * @returns {string} - Version string (e.g., "1.6.2")
  * 
- * Note: This function reads from the "." key in the manifest file, which represents
- * the root package. If your manifest structure is different, you may need to adjust
- * the key used to retrieve the version.
+ * Note: This function reads from the "." key in the manifest file. In release-please's
+ * monorepo configuration, the "." key represents the root package at the repository root.
+ * For non-monorepo projects or different configurations, you may need to adjust the key
+ * used to retrieve the version. See: https://github.com/googleapis/release-please/blob/main/docs/manifest-releaser.md
  */
 function getVersion(projectRoot) {
   try {

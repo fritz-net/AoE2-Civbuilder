@@ -1102,8 +1102,16 @@ function draftIO(io) {
 				fs.writeFileSync(`${tempdir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
 				io.in(roomID).emit("set gamestate", draft);
 
-				//Create the mod
-				//Welcome to callback hell because I wasted $1800 on a web-dev class where the professor was seemingly incapable of answering a single question
+				// Create the mod by executing a series of steps:
+				// 1. Create mod folder structure
+				// 2. Generate civ icons
+				// 3. Generate data.json
+				// 4. Write language strings
+				// 5. Write unit icons
+				// 6. Write tech tree and civilizations JSON
+				// 7. Create DAT file
+				// 8. Zip the mod
+				
 				//Create Mod Folder
 				osUtil.execCommand(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${draft["id"]} ${__dirname} 1`, function () {
 					//Create Civ Icons
@@ -1268,14 +1276,18 @@ function draftIO(io) {
 											osUtil.execCommand(`./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`, function () {
 												// Copy JSON files to mod folder for user reference
 												try {
-													// Copy the draft configuration JSON
 													const sourcePath = path.join(tempdir, 'drafts', `${draft["id"]}.json`);
 													const destPath = path.join(__dirname, 'modding', 'requested_mods', draft["id"], 'draft-config.json');
-													fs.copyFileSync(sourcePath, destPath);
-													// data.json is already there, just note it will be included
-													console.log(`[${draft["id"]}]: Added draft-config.json and data.json to mod folder`);
+													
+													// Check if source file exists before copying
+													if (!fs.existsSync(sourcePath)) {
+														console.error(`[${draft["id"]}]: Source draft JSON not found at ${sourcePath}`);
+													} else {
+														fs.copyFileSync(sourcePath, destPath);
+														console.log(`[${draft["id"]}]: Added draft-config.json and data.json to mod folder`);
+													}
 												} catch (error) {
-													console.error(`[${draft["id"]}]: Error copying JSON files:`, error);
+													console.error(`[${draft["id"]}]: Error copying JSON files from ${error.path || 'unknown path'}:`, error.message);
 												}
 												
 												//Zip Files with new filename format
