@@ -23,17 +23,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 
-const config = useRuntimeConfig()
 const changelogHtml = ref('')
 const loading = ref(true)
 const error = ref(false)
-
-// Get the base path for API calls (parent of /v2/)
-// e.g., /v2/ -> / or /civbuilder/v2/ -> /civbuilder/
-const apiBasePath = computed(() => {
-  const baseURL = config.app.baseURL || '/v2/'
-  return baseURL.replace(/\/v2\/?$/, '') || '/'
-})
 
 // Internal sections to ignore
 const IGNORED_SECTIONS = ['Reverts', 'Performance Improvements', 'Code Refactoring', 'Documentation', 'Styles', 'Tests', 'Build System', 'Continuous Integration', 'Chores']
@@ -162,8 +154,9 @@ function parseChangelogMarkdown(markdown: string): string {
 
 onMounted(async () => {
   try {
-    // Use dynamic base path derived from app config
-    const changelogUrl = `${apiBasePath.value}CHANGELOG.md`
+    // CHANGELOG.md is always served at /civbuilder/CHANGELOG.md by the server
+    // regardless of the Nuxt app baseURL configuration
+    const changelogUrl = '/civbuilder/CHANGELOG.md'
     const response = await fetch(changelogUrl)
     if (!response.ok) {
       throw new Error('Failed to load changelog')
