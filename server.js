@@ -22,6 +22,7 @@ const { createCivilizationsJson } = require("./process_mod/createCivilizationsJs
 const commonJs = require("./public/js/common.js");
 const { integrateNuxt } = require("./nuxt-integration.js");
 const { BONUS_INDEX } = require("./src/shared/bonusConstants.js");
+const { generateModFilename, generateModFilenameNoExt } = require("./process_mod/modFilename.js");
 
 console.log("Starting server...");
 
@@ -542,12 +543,17 @@ const writeAIFiles = (req, res, next) => {
 
 const zipModFolder = (req, res, next) => {
 	console.log(`[${req.body.seed}]: Zipping folder...`);
+	
+	// Generate new filename with version, datetime, and hex
+	const newFilename = generateModFilenameNoExt(__dirname);
+	req.modFilename = newFilename; // Store for download route
+	
 	if (req.body.civs === "false") {
-		osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 0`, function () {
+		osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 0 ${newFilename}`, function () {
 			next();
 		});
 	} else {
-		osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 1`, function () {
+		osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 1 ${newFilename}`, function () {
 			next();
 		});
 	}
@@ -872,12 +878,14 @@ router.get("/build", function (req, res) {
 
 router.post("/random", createModFolder, createCivIcons, copyCivIcons, generateJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
 	console.log(`[${req.body.seed}]: Completed generation!`);
-	res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
+	const filename = req.modFilename || req.body.seed;
+	res.download(__dirname + "/modding/requested_mods/" + filename + ".zip");
 });
 
 router.post("/create", createModFolder, writeIconsJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
 	console.log(`[${req.body.seed}]: Completed generation!`);
-	res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
+	const filename = req.modFilename || req.body.seed;
+	res.download(__dirname + "/modding/requested_mods/" + filename + ".zip");
 });
 
 router.post("/setCookie", (req, res) => {
@@ -972,7 +980,10 @@ router.get("/api/draft/:id", checkCookies, authenticateDraft, function (req, res
 });
 
 router.post("/download", (req, res) => {
-	res.download(__dirname + "/modding/requested_mods/" + req.body.draftID + ".zip");
+	// Try to load draft to get the stored filename
+	const draft = getDraft(req.body.draftID);
+	const filename = (draft && draft.modFilename) ? draft.modFilename : req.body.draftID;
+	res.download(__dirname + "/modding/requested_mods/" + filename + ".zip");
 });
 
 function draftIO(io) {
@@ -1256,8 +1267,10 @@ function draftIO(io) {
 										osUtil.execCommand(command, function () {
 											//Write Dat File
 											osUtil.execCommand(`./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`, function () {
-												//Zip Files
-												osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${draft["id"]} 1`, function () {
+												//Zip Files with new filename format
+												const newFilename = generateModFilenameNoExt(__dirname);
+												draft["modFilename"] = newFilename; // Store filename in draft for download
+												osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${draft["id"]} 1 ${newFilename}`, function () {
 													draft["gamestate"]["phase"] = 6;
 													fs.writeFileSync(`${tempdir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
 													io.in(roomID).emit("set gamestate", draft);
