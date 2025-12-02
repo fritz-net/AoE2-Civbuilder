@@ -81,8 +81,8 @@ app.get(path.join(routeSubdir, "js/common.js"), (req, res) => {
 	});
 });
 
-// Serve changelog
-app.get(path.join(routeSubdir, "CHANGELOG.md"), (req, res) => {
+// Helper function to serve changelog
+const serveChangelog = (req, res) => {
 	const changelogPath = path.join(__dirname, "CHANGELOG.md");
 	fs.readFile(changelogPath, "utf8", (err, data) => {
 		if (err) {
@@ -91,7 +91,21 @@ app.get(path.join(routeSubdir, "CHANGELOG.md"), (req, res) => {
 		}
 		res.type("text/plain").send(data);
 	});
-});
+};
+
+// Serve changelog at all relevant paths to support different configurations
+// 1. At the configured routeSubdir (e.g., /civbuilder/CHANGELOG.md)
+app.get(path.join(routeSubdir, "CHANGELOG.md"), serveChangelog);
+
+// 2. At root for Vue UI and direct access
+if (routeSubdir !== "/") {
+	app.get("/CHANGELOG.md", serveChangelog);
+	console.log("[Changelog] Available at both", path.join(routeSubdir, "CHANGELOG.md"), "and /CHANGELOG.md");
+}
+
+// 3. At /v2 for Vue UI references
+app.get("/v2/CHANGELOG.md", serveChangelog);
+console.log("[Changelog] Also available at /v2/CHANGELOG.md");
 
 // Static file configuration for all paths
 const staticOptions = {
