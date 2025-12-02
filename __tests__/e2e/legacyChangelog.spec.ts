@@ -34,8 +34,11 @@ test.describe('Legacy UI - Changelog Display', () => {
     // Click the updates button
     await page.click('#updates');
     
-    // Wait for changelog to load
-    await page.waitForTimeout(3000);
+    // Wait for changelog content to be loaded (not just "Loading...")
+    await page.waitForFunction(() => {
+      const text = document.querySelector('#instructionstext')?.textContent || '';
+      return text.length > 1000 && text.includes('•') && !text.includes('Loading changelog...');
+    }, { timeout: 10000 });
     
     // Get the changelog text
     const changelogText = await page.locator('#instructionstext').textContent();
@@ -63,8 +66,11 @@ test.describe('Legacy UI - Changelog Display', () => {
     // Click the updates button
     await page.click('#updates');
     
-    // Wait for changelog to load
-    await page.waitForTimeout(3000);
+    // Wait for changelog content with links to be loaded
+    await page.waitForFunction(() => {
+      const html = document.querySelector('#instructionstext')?.innerHTML || '';
+      return html.includes('github.com');
+    }, { timeout: 10000 });
     
     // Get the inner HTML to check for links
     const changelogHtml = await page.locator('#instructionstext').innerHTML();
@@ -85,7 +91,12 @@ test.describe('Legacy UI - Changelog Display', () => {
     
     await page.goto('/civbuilder');
     await page.click('#updates');
-    await page.waitForTimeout(3000);
+    
+    // Wait for the changelog fetch to complete
+    await page.waitForFunction(() => {
+      const text = document.querySelector('#instructionstext')?.textContent || '';
+      return !text.includes('Loading changelog...');
+    }, { timeout: 10000 });
     
     // Should have fetched the changelog
     expect(requestUrls.length).toBeGreaterThan(0);
@@ -97,7 +108,12 @@ test.describe('Legacy UI - Changelog Display', () => {
   test('should not show error when loading changelog', async ({ page }) => {
     await page.goto('/civbuilder');
     await page.click('#updates');
-    await page.waitForTimeout(3000);
+    
+    // Wait for changelog to load
+    await page.waitForFunction(() => {
+      const text = document.querySelector('#instructionstext')?.textContent || '';
+      return text.length > 1000 && !text.includes('Loading changelog...');
+    }, { timeout: 10000 });
     
     const changelogText = await page.locator('#instructionstext').textContent();
     
