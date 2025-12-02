@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.6.1...v1.6.2) (2025-12-02)
+
+
+### Bug Fixes
+
+* draft mode issues in Nuxt/Vue UI ([#120](https://github.com/fritz-net/AoE2-Civbuilder/issues/120)) ([5f47fad](https://github.com/fritz-net/AoE2-Civbuilder/commit/5f47fad8321c11ab1959dfe14753a78052cdf31f))
+
 ## [1.6.1](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.6.0...v1.6.1) (2025-11-29)
 
 
