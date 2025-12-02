@@ -1104,9 +1104,8 @@ function draftIO(io) {
 
 				//Create the mod
 				//Welcome to callback hell because I wasted $1800 on a web-dev class where the professor was seemingly incapable of answering a single question
-				//process.chdir(tempdir);
 				//Create Mod Folder
-				osUtil.execCommand(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${draft["id"]} ${tempdir} 1`, function () {
+				osUtil.execCommand(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${draft["id"]} ${__dirname} 1`, function () {
 					//Create Civ Icons
 					for (var i = 0; i < numPlayers; i++) {
 						var civName = nameArr[i];
@@ -1267,6 +1266,19 @@ function draftIO(io) {
 										osUtil.execCommand(command, function () {
 											//Write Dat File
 											osUtil.execCommand(`./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`, function () {
+												// Copy JSON files to mod folder for user reference
+												try {
+													// Copy the draft configuration JSON
+													fs.copyFileSync(
+														`${tempdir}/drafts/${draft["id"]}.json`,
+														`./modding/requested_mods/${draft["id"]}/draft-config.json`
+													);
+													// data.json is already there, just note it will be included
+													console.log(`[${draft["id"]}]: Added draft-config.json and data.json to mod folder`);
+												} catch (error) {
+													console.error(`[${draft["id"]}]: Error copying JSON files:`, error);
+												}
+												
 												//Zip Files with new filename format
 												const newFilename = generateModFilenameNoExt(__dirname);
 												draft["modFilename"] = newFilename; // Store filename in draft for download

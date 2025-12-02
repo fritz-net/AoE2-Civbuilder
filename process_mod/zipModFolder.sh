@@ -14,7 +14,22 @@ then
     zip -r ../$1-data.zip resources -qq
     cd ..
     mv ./$1-data/thumbnail.jpg ./thumbnail.jpg
-    zip ../$ZIPNAME.zip $1-data.zip thumbnail.jpg -qq
+    
+    # Include JSON files if they exist
+    JSON_FILES=""
+    if [ -f ./data.json ]; then
+        JSON_FILES="$JSON_FILES data.json"
+    fi
+    if [ -f ./draft-config.json ]; then
+        JSON_FILES="$JSON_FILES draft-config.json"
+    fi
+    
+    if [ -n "$JSON_FILES" ]; then
+        zip ../$ZIPNAME.zip $1-data.zip thumbnail.jpg $JSON_FILES -qq
+    else
+        zip ../$ZIPNAME.zip $1-data.zip thumbnail.jpg -qq
+    fi
+    
     cd ..
     rm -r $1
     cd ..
@@ -28,7 +43,22 @@ else
     zip -r ../$1-ui.zip resources widgetui -qq
     cd ..
     mv ./$1-ui/thumbnail.jpg ./thumbnail.jpg
-    zip ../$ZIPNAME.zip $1-data.zip $1-ui.zip thumbnail.jpg -qq
+    
+    # Include JSON files if they exist
+    JSON_FILES=""
+    if [ -f ./data.json ]; then
+        JSON_FILES="$JSON_FILES data.json"
+    fi
+    if [ -f ./draft-config.json ]; then
+        JSON_FILES="$JSON_FILES draft-config.json"
+    fi
+    
+    if [ -n "$JSON_FILES" ]; then
+        zip ../$ZIPNAME.zip $1-data.zip $1-ui.zip thumbnail.jpg $JSON_FILES -qq
+    else
+        zip ../$ZIPNAME.zip $1-data.zip $1-ui.zip thumbnail.jpg -qq
+    fi
+    
     cd ..
     rm -r $1
     cd ..
