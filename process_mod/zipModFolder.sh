@@ -7,6 +7,10 @@
 # Use custom filename if provided, otherwise use draft id
 ZIPNAME=${3:-$1}
 
+# Sanitize ZIPNAME to prevent path traversal or invalid characters
+# Only allow alphanumeric, dash, underscore, and dot
+ZIPNAME=$(echo "$ZIPNAME" | sed 's/[^a-zA-Z0-9._-]/_/g')
+
 if [[ $2 -eq 0 ]]
 then
     rm -f ./modding/requested_mods/$ZIPNAME.zip

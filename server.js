@@ -1269,10 +1269,9 @@ function draftIO(io) {
 												// Copy JSON files to mod folder for user reference
 												try {
 													// Copy the draft configuration JSON
-													fs.copyFileSync(
-														`${tempdir}/drafts/${draft["id"]}.json`,
-														`./modding/requested_mods/${draft["id"]}/draft-config.json`
-													);
+													const sourcePath = path.join(tempdir, 'drafts', `${draft["id"]}.json`);
+													const destPath = path.join(__dirname, 'modding', 'requested_mods', draft["id"], 'draft-config.json');
+													fs.copyFileSync(sourcePath, destPath);
 													// data.json is already there, just note it will be included
 													console.log(`[${draft["id"]}]: Added draft-config.json and data.json to mod folder`);
 												} catch (error) {

@@ -11,11 +11,16 @@ const path = require('path');
  * Reads the version from .release-please-manifest.json
  * @param {string} projectRoot - Path to project root directory
  * @returns {string} - Version string (e.g., "1.6.2")
+ * 
+ * Note: This function reads from the "." key in the manifest file, which represents
+ * the root package. If your manifest structure is different, you may need to adjust
+ * the key used to retrieve the version.
  */
 function getVersion(projectRoot) {
   try {
     const manifestPath = path.join(projectRoot, '.release-please-manifest.json');
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    // The "." key represents the root package in release-please manifests
     return manifest['.'] || '0.0.0';
   } catch (error) {
     console.error('Error reading version from .release-please-manifest.json:', error);
