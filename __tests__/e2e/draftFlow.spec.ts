@@ -1,39 +1,19 @@
 import { test, expect, Page, BrowserContext } from '@playwright/test';
+import { 
+  createDraft, 
+  joinAsHost, 
+  startDraft, 
+  completeSetupPhase,
+  completeCardDrafting,
+  completeTechTreePhase
+} from './helpers/draftHelpers';
 
 /**
  * E2E tests for complete Draft Mode flow
  * Tests the entire happy path from creation to download
+ * 
+ * Note: Using centralized helpers from draftHelpers.ts for common operations
  */
-
-// Helper to create a draft and get links
-async function createDraft(page: Page, numPlayers: number = 1) {
-  await page.goto('/v2/draft/create');
-  
-  const numPlayersInput = page.locator('#numPlayers');
-  await numPlayersInput.fill(numPlayers.toString());
-  
-  const startButton = page.getByRole('button', { name: /Start Draft/i });
-  await startButton.click();
-  
-  // Wait for modal with links
-  await page.waitForSelector('.modal-overlay', { timeout: 10000 });
-  
-  // Get all links
-  const hostLink = await page.locator('#hostLink').inputValue();
-  const playerLink = await page.locator('#playerLink').inputValue();
-  const spectatorLink = await page.locator('#spectatorLink').inputValue();
-  
-  return { hostLink, playerLink, spectatorLink };
-}
-
-// Helper to join a draft as host
-async function joinAsHost(page: Page, hostLink: string, playerName: string) {
-  await page.goto(hostLink);
-  await page.waitForSelector('#playerName', { timeout: 10000 });
-  await page.fill('#playerName', playerName);
-  await page.click('.join-button');
-  await page.waitForTimeout(3000);
-}
 
 // Helper to wait for phase transition
 async function waitForPhase(page: Page, phaseSelector: string, timeout: number = 10000) {
@@ -70,30 +50,20 @@ test.describe('Draft Flow - Single Player Happy Path', () => {
     // Step 1: Create a draft
     const { hostLink } = await createDraft(page, 1);
     
-    // Step 2: Join as host
-    await page.goto(hostLink);
-    await page.waitForSelector('#playerName', { timeout: 10000 });
-    await page.fill('#playerName', 'Solo Drafter');
-    await page.click('.join-button');
-    await page.waitForTimeout(3000);
+    // Step 2: Join as host using helper
+    await joinAsHost(page, hostLink, 'Solo Drafter');
     
-    // Step 3: Click Start Draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    if (await startButton.isVisible()) {
-      await startButton.click();
-      
-      // Wait for phase transition
-      await page.waitForTimeout(2000);
-      
-      // Step 4: Verify setup phase (customize civilization)
-      const setupPhase = page.locator('.setup-phase, .phase-title:has-text("Customize"), h1:has-text("Customize")');
-      const isSetupVisible = await setupPhase.isVisible().catch(() => false);
-      
-      if (isSetupVisible) {
-        // Verify civ name input is present (no tech tree in this phase)
-        const civNameInput = page.locator('#civName');
-        await expect(civNameInput).toBeVisible({ timeout: 5000 });
-      }
+    // Step 3: Start draft using helper
+    await startDraft(page);
+    
+    // Step 4: Verify setup phase (customize civilization)
+    const setupPhase = page.locator('.setup-phase, .phase-title:has-text("Customize"), h1:has-text("Customize")');
+    const isSetupVisible = await setupPhase.isVisible().catch(() => false);
+    
+    if (isSetupVisible) {
+      // Verify civ name input is present (no tech tree in this phase)
+      const civNameInput = page.locator('#civName');
+      await expect(civNameInput).toBeVisible({ timeout: 5000 });
     }
   });
 
@@ -566,13 +536,7 @@ test.describe('Draft Flow - Flag Rendering', () => {
   test('should display FlagCreator canvas in Phase 1 setup', async ({ page }) => {
     const { hostLink } = await createDraft(page, 1);
     await joinAsHost(page, hostLink, 'Flag Tester');
-    
-    // Start draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    if (await startButton.isVisible()) {
-      await startButton.click();
-      await page.waitForTimeout(3000);
-    }
+    await startDraft(page);
     
     // Verify Phase 1 has flag creator
     const setupPhase = page.locator('.setup-phase');
@@ -592,13 +556,7 @@ test.describe('Draft Flow - Flag Rendering', () => {
   test('should have flag controls in Phase 1 setup', async ({ page }) => {
     const { hostLink } = await createDraft(page, 1);
     await joinAsHost(page, hostLink, 'Flag Controls Tester');
-    
-    // Start draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    if (await startButton.isVisible()) {
-      await startButton.click();
-      await page.waitForTimeout(3000);
-    }
+    await startDraft(page);
     
     // Verify Phase 1 has flag controls
     const setupPhase = page.locator('.setup-phase');
@@ -615,24 +573,8 @@ test.describe('Draft Flow - Flag Rendering', () => {
   test('should display player flags in Phase 2 card selection', async ({ page }) => {
     const { hostLink } = await createDraft(page, 1);
     await joinAsHost(page, hostLink, 'Flag Phase2 Tester');
-    
-    // Start draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    if (await startButton.isVisible()) {
-      await startButton.click();
-      await page.waitForTimeout(3000);
-    }
-    
-    // Complete Phase 1 (setup)
-    const setupPhase = page.locator('.setup-phase');
-    if (await setupPhase.isVisible().catch(() => false)) {
-      const civNameInput = page.locator('#civName');
-      await civNameInput.fill('Flag Test Civ');
-      
-      const nextButton = page.getByRole('button', { name: /Next/i });
-      await nextButton.click();
-      await page.waitForTimeout(3000);
-    }
+    await startDraft(page);
+    await completeSetupPhase(page, 'Flag Test Civ');
     
     // Wait for Phase 2 (card drafting)
     const draftBoard = page.locator('.draft-board');
@@ -651,24 +593,8 @@ test.describe('Draft Flow - Card Images', () => {
   test('should show card images after reroll', async ({ page }) => {
     const { hostLink } = await createDraft(page, 1);
     await joinAsHost(page, hostLink, 'Reroll Tester');
-    
-    // Start draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    if (await startButton.isVisible()) {
-      await startButton.click();
-      await page.waitForTimeout(3000);
-    }
-    
-    // Complete Phase 1 (setup)
-    const setupPhase = page.locator('.setup-phase');
-    if (await setupPhase.isVisible().catch(() => false)) {
-      const civNameInput = page.locator('#civName');
-      await civNameInput.fill('Reroll Test Civ');
-      
-      const nextButton = page.getByRole('button', { name: /Next/i });
-      await nextButton.click();
-      await page.waitForTimeout(3000);
-    }
+    await startDraft(page);
+    await completeSetupPhase(page, 'Reroll Test Civ');
     
     // Wait for Phase 2 (card drafting)
     const draftBoard = page.locator('.draft-board');
@@ -765,24 +691,8 @@ test.describe('Draft Flow - TechTree Fill Button', () => {
     // This test verifies that pressing Fill in the tech tree does not result in negative points
     const { hostLink } = await createDraft(page, 1);
     await joinAsHost(page, hostLink, 'Fill Test Player');
-    
-    // Start draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    if (await startButton.isVisible()) {
-      await startButton.click();
-      await page.waitForTimeout(3000);
-    }
-    
-    // Complete Phase 1 (setup)
-    const setupPhase = page.locator('.setup-phase');
-    if (await setupPhase.isVisible().catch(() => false)) {
-      const civNameInput = page.locator('#civName');
-      await civNameInput.fill('Fill Button Test');
-      
-      const nextButton = page.getByRole('button', { name: /Next/i });
-      await nextButton.click();
-      await page.waitForTimeout(3000);
-    }
+    await startDraft(page);
+    await completeSetupPhase(page, 'Fill Button Test');
     
     // Complete draft rounds to get to Phase 3 (TechTree)
     // For simplicity, we'll navigate to build mode to test the TechTree component

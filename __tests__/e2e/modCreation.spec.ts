@@ -733,7 +733,7 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       draftId = await completeFullDraft(page, 1, 'E2E Test Player', 'DraftE2ECiv');
       
       // Wait for the mod to be created by the server
-      await page.waitForTimeout(5000);
+      await page.waitForTimeout(10000);
       
       // Find the zip file created by the server
       const modsFiles = fs.readdirSync(modsDir);

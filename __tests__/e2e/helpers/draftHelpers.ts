@@ -161,7 +161,7 @@ export async function completeFullDraft(
   await completeSetupPhase(page, civName);
   await completeCardDrafting(page);
   await completeTechTreePhase(page);
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(10000);
   
   return draftId;
 }
