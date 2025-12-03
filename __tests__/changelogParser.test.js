@@ -25,7 +25,7 @@ describe('Changelog Parser', () => {
     const VERSION_PATTERN = /^## \[([^\]]+)\](?:\([^)]+\))? \((\d{4}-\d{2}-\d{2})\)/;
     const VERSION_PATTERN_UNRELEASED = /^## \[Unreleased\]/i;
     const SECTION_PATTERN = /^### /;
-    const BULLET_PATTERN = /^- /;
+    const BULLET_PATTERN = /^[-*] /; // Match both - and * for bullets
     const SKIP_PATTERNS = [
       /^# Changelog/,
       /^All notable changes/,
