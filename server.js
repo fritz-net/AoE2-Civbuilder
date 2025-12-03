@@ -1284,7 +1284,32 @@ function draftIO(io) {
 														console.error(`[${draft["id"]}]: Source draft JSON not found at ${sourcePath}`);
 													} else {
 														fs.copyFileSync(sourcePath, destPath);
-														console.log(`[${draft["id"]}]: Added draft-config.json and data.json to mod folder`);
+														
+														// Create individual civ JSON files for each player (for combine compatibility)
+														draft["players"].forEach((player, index) => {
+															const civJson = {
+																alias: player.alias || `Civ${index + 1}`,
+																description: player.description || '',
+																flag_palette: player.flag_palette,
+																tree: player.tree,
+																bonuses: player.bonuses,
+																architecture: player.architecture,
+																language: player.language,
+																wonder: player.wonder,
+																castle: player.castle,
+																customFlag: player.customFlag || false,
+																customFlagData: player.customFlagData || ''
+															};
+															
+															// Create filename based on player alias, sanitized for filesystem
+															const safeName = (player.alias || `Civ${index + 1}`)
+																.replace(/[^a-zA-Z0-9_-]/g, '_')
+																.substring(0, 50);
+															const civFilePath = path.join(__dirname, 'modding', 'requested_mods', draft["id"], `${safeName}.json`);
+															fs.writeFileSync(civFilePath, JSON.stringify(civJson, null, 2));
+														});
+														
+														console.log(`[${draft["id"]}]: Added draft-config.json, data.json, and ${draft["players"].length} individual civ JSON file(s) to mod folder`);
 													}
 												} catch (error) {
 													console.error(`[${draft["id"]}]: Error copying JSON files from ${error.path || 'unknown path'}:`, error.message);
