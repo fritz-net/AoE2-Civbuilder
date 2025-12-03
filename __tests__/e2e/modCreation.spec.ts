@@ -530,3 +530,193 @@ test.describe('Build Page - Pasture Bonus Detection', () => {
     await expect(farmNode).toBeVisible();
   });
 });
+
+test.describe('Draft JSON Compatibility with Combine Page', () => {
+  test('should accept draft JSON player format in combine page', async ({ page }) => {
+    await page.goto('/v2/combine');
+    
+    // Create a temporary draft JSON file with player data
+    const testDir = path.join(__dirname, '../../__tests__/fixtures');
+    const draftJsonPath = path.join(testDir, 'test-draft-player.json');
+    
+    // Create test fixture directory if it doesn't exist
+    if (!fs.existsSync(testDir)) {
+      fs.mkdirSync(testDir, { recursive: true });
+    }
+    
+    // Create a player JSON in draft format that should be compatible with CivConfig
+    const draftPlayerJson = {
+      alias: 'DraftTestCiv',
+      description: 'A civilization from draft mode',
+      flag_palette: [3, 4, 5, 6, 7, 3, 3, 3],
+      tree: [
+        [13, 17, 21, 74, 545, 539, 331, 125, 83, 128, 440],
+        [12, 45, 49, 50, 68, 70, 72, 79, 82, 84, 87, 101, 103, 104, 109, 199, 209, 276, 562, 584, 598, 621, 792],
+        [22, 101, 102, 103, 408]
+      ],
+      bonuses: [[], [], [], [], []],
+      architecture: 1,
+      language: 0,
+      wonder: 0,
+      castle: 0,
+      customFlag: false,
+      customFlagData: ''
+    };
+    
+    // Write the test JSON file
+    fs.writeFileSync(draftJsonPath, JSON.stringify(draftPlayerJson, null, 2));
+    
+    try {
+      // Upload the draft player JSON file to combine page
+      const fileInput = page.locator('input[type="file"]');
+      await fileInput.setInputFiles(draftJsonPath);
+      
+      // Wait for file to be processed
+      await page.waitForTimeout(500);
+      
+      // Verify the civilization was loaded successfully
+      await expect(page.getByText(/Loaded Civilizations \(1\)/i)).toBeVisible();
+      await expect(page.getByText('DraftTestCiv')).toBeVisible();
+      await expect(page.getByText('A civilization from draft mode')).toBeVisible();
+      
+      // Verify create button is enabled
+      const createButton = page.getByRole('button', { name: /Create Combined Mod/i });
+      await expect(createButton).toBeEnabled();
+    } finally {
+      // Clean up test file
+      if (fs.existsSync(draftJsonPath)) {
+        fs.unlinkSync(draftJsonPath);
+      }
+    }
+  });
+
+  test('should handle multiple draft JSON players in combine page', async ({ page }) => {
+    await page.goto('/v2/combine');
+    
+    const testDir = path.join(__dirname, '../../__tests__/fixtures');
+    
+    // Create test fixture directory if it doesn't exist
+    if (!fs.existsSync(testDir)) {
+      fs.mkdirSync(testDir, { recursive: true });
+    }
+    
+    // Create two draft player JSON files
+    const player1Path = path.join(testDir, 'draft-player-1.json');
+    const player2Path = path.join(testDir, 'draft-player-2.json');
+    
+    const player1Json = {
+      alias: 'DraftCiv1',
+      description: 'First draft civ',
+      flag_palette: [3, 4, 5, 6, 7, 3, 3, 3],
+      tree: [[13, 17, 21], [12, 45, 49], [22, 101, 102]],
+      bonuses: [[], [], [], [], []],
+      architecture: 1,
+      language: 0,
+      wonder: 0,
+      castle: 0,
+      customFlag: false,
+      customFlagData: ''
+    };
+    
+    const player2Json = {
+      alias: 'DraftCiv2',
+      description: 'Second draft civ',
+      flag_palette: [2, 3, 4, 5, 6, 3, 3, 4],
+      tree: [[13, 17], [12, 45], [22, 101]],
+      bonuses: [[], [], [], [], []],
+      architecture: 2,
+      language: 10,
+      wonder: 1,
+      castle: 1,
+      customFlag: false,
+      customFlagData: ''
+    };
+    
+    fs.writeFileSync(player1Path, JSON.stringify(player1Json, null, 2));
+    fs.writeFileSync(player2Path, JSON.stringify(player2Json, null, 2));
+    
+    try {
+      // Upload both draft player JSON files
+      const fileInput = page.locator('input[type="file"]');
+      await fileInput.setInputFiles([player1Path, player2Path]);
+      
+      // Wait for files to be processed
+      await page.waitForTimeout(500);
+      
+      // Verify both civilizations were loaded
+      await expect(page.getByText(/Loaded Civilizations \(2\)/i)).toBeVisible();
+      await expect(page.getByText('DraftCiv1')).toBeVisible();
+      await expect(page.getByText('DraftCiv2')).toBeVisible();
+      
+      // Verify descriptions
+      await expect(page.getByText('First draft civ')).toBeVisible();
+      await expect(page.getByText('Second draft civ')).toBeVisible();
+      
+      // Verify create button is enabled
+      const createButton = page.getByRole('button', { name: /Create Combined Mod/i });
+      await expect(createButton).toBeEnabled();
+    } finally {
+      // Clean up test files
+      if (fs.existsSync(player1Path)) fs.unlinkSync(player1Path);
+      if (fs.existsSync(player2Path)) fs.unlinkSync(player2Path);
+    }
+  });
+
+  test('should handle mix of vanilla and draft JSON files', async ({ page }) => {
+    await page.goto('/v2/combine');
+    
+    const testDir = path.join(__dirname, '../../__tests__/fixtures');
+    
+    // Create test fixture directory if it doesn't exist
+    if (!fs.existsSync(testDir)) {
+      fs.mkdirSync(testDir, { recursive: true });
+    }
+    
+    // Create a draft player JSON
+    const draftPlayerPath = path.join(testDir, 'draft-civ-mixed.json');
+    const draftPlayerJson = {
+      alias: 'DraftMixedCiv',
+      description: 'Draft civ mixed with vanilla',
+      flag_palette: [3, 4, 5, 6, 7, 3, 3, 3],
+      tree: [[13, 17, 21], [12, 45, 49], [22, 101, 102]],
+      bonuses: [[], [], [], [], []],
+      architecture: 1,
+      language: 0,
+      wonder: 0,
+      castle: 0,
+      customFlag: false,
+      customFlagData: ''
+    };
+    
+    fs.writeFileSync(draftPlayerPath, JSON.stringify(draftPlayerJson, null, 2));
+    
+    // Also use a vanilla civ
+    const britonsPath = path.join(VANILLA_CIVS_DIR, 'Britons.json');
+    
+    try {
+      // Check vanilla file exists
+      expect(fs.existsSync(britonsPath)).toBeTruthy();
+      
+      // Upload both files (vanilla + draft)
+      const fileInput = page.locator('input[type="file"]');
+      await fileInput.setInputFiles([britonsPath, draftPlayerPath]);
+      
+      // Wait for files to be processed
+      await page.waitForTimeout(500);
+      
+      // Verify both civilizations were loaded
+      await expect(page.getByText(/Loaded Civilizations \(2\)/i)).toBeVisible();
+      await expect(page.getByText('Britons')).toBeVisible();
+      await expect(page.getByText('DraftMixedCiv')).toBeVisible();
+      
+      // Verify create button is enabled
+      const createButton = page.getByRole('button', { name: /Create Combined Mod/i });
+      await expect(createButton).toBeEnabled();
+    } finally {
+      // Clean up test file
+      if (fs.existsSync(draftPlayerPath)) {
+        fs.unlinkSync(draftPlayerPath);
+      }
+    }
+  });
+});
