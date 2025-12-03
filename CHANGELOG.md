@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.6.2...v1.7.0) (2025-12-03)
+
+
+### Features
+
+* added dat for update-162286 ([#136](https://github.com/fritz-net/AoE2-Civbuilder/issues/136)) ([c603827](https://github.com/fritz-net/AoE2-Civbuilder/commit/c603827b13babe97a3d3f008113756568b37f193))
+
+
+### Bug Fixes
+
+* CHANGELOG.md routing and parser for legacy and Nuxt UIs across all path configurations ([#131](https://github.com/fritz-net/AoE2-Civbuilder/issues/131)) ([c1e451d](https://github.com/fritz-net/AoE2-Civbuilder/commit/c1e451d0d6f176b948c38ffafa6215630e9a1b56))
+
 ## [1.6.2](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.6.1...v1.6.2) (2025-12-02)
 
 
