@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import * as path from 'path';
 import * as fs from 'fs';
+import { execSync } from 'child_process';
 
 /**
  * E2E tests for Vue UI Mod Creation
@@ -721,9 +722,9 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
   });
 
   test('should extract JSON from actual draft zip and use in combine', async ({ page }) => {
-    const { execSync } = require('child_process');
     const projectRoot = path.join(__dirname, '../..');
     const modsDir = path.join(projectRoot, 'modding', 'requested_mods');
+    // testId is internally generated with Date.now() - safe for shell commands
     const testId = 'test-draft-e2e-' + Date.now();
     const extractDir = path.join(modsDir, `${testId}-extracted`);
     
