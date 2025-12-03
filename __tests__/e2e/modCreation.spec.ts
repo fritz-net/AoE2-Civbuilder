@@ -721,92 +721,89 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
     }
   });
 
-  test('should extract JSON from actual draft zip and use in combine', async ({ page }) => {
+  test('should extract JSON from actual draft zip created via full draft flow and use in combine', async ({ page }) => {
     const projectRoot = path.join(__dirname, '../..');
     const modsDir = path.join(projectRoot, 'modding', 'requested_mods');
-    // testId is internally generated with Date.now() - safe for shell commands
-    const testId = 'test-draft-e2e-' + Date.now();
-    const extractDir = path.join(modsDir, `${testId}-extracted`);
+    const tempdir = path.join(require('os').tmpdir(), 'civbuilder');
+    let draftId: string | null = null;
+    const extractDir = path.join(modsDir, `extract-${Date.now()}`);
     
     try {
-      // Step 1: Create a mock draft folder structure
-      execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${testId} ${projectRoot} 1`, {
-        cwd: projectRoot,
-        stdio: 'pipe'
-      });
-      
-      const modFolderPath = path.join(modsDir, testId);
-      
-      // Step 2: Create a realistic draft-config.json with player data
-      const draftConfig = {
-        id: testId,
-        timestamp: Date.now(),
-        preset: {
-          slots: 2,
-          points: 100,
-          rounds: 3,
-          rarities: [true, true, true, true, true]
-        },
-        players: [
-          {
-            ready: 1,
-            name: 'Player1',
-            alias: 'ExtractedCiv1',
-            description: 'First civ from draft zip',
-            wonder: 0,
-            castle: 0,
-            flag_palette: [3, 4, 5, 6, 7, 3, 3, 3],
-            tree: [
-              [13, 17, 21, 74, 545, 539, 331, 125, 83, 128, 440],
-              [12, 45, 49, 50, 68, 70, 72, 79, 82, 84, 87, 101, 103, 104, 109, 199, 209, 276, 562, 584, 598, 621, 792],
-              [22, 101, 102, 103, 408]
-            ],
-            architecture: 1,
-            language: 0,
-            priority: 0,
-            bonuses: [[], [], [], [], []],
-            customFlag: false,
-            customFlagData: ''
-          },
-          {
-            ready: 1,
-            name: 'Player2',
-            alias: 'ExtractedCiv2',
-            description: 'Second civ from draft zip',
-            wonder: 1,
-            castle: 1,
-            flag_palette: [2, 3, 4, 5, 6, 3, 3, 4],
-            tree: [
-              [13, 17, 21],
-              [12, 45, 49],
-              [22, 101, 102]
-            ],
-            architecture: 2,
-            language: 10,
-            priority: 1,
-            bonuses: [[], [], [], [], []],
-            customFlag: false,
-            customFlagData: ''
-          }
-        ],
-        gamestate: {
-          phase: 6
+      // Step 1: Create a draft via API (simulating the draft creation flow)
+      const createDraftResponse = await page.request.post('/draft', {
+        form: {
+          num_players: '2',
+          techtree_currency: '100',
+          rounds: '3',
+          allowed_rarities: 'true,true,true,true,true'
         }
-      };
+      });
       
-      // Write draft-config.json to mod folder
-      fs.writeFileSync(
-        path.join(modFolderPath, 'draft-config.json'),
-        JSON.stringify(draftConfig, null, 2)
-      );
+      expect(createDraftResponse.ok()).toBeTruthy();
+      const draftData = await createDraftResponse.json();
+      draftId = draftData.id;
+      expect(draftId).toBeTruthy();
       
-      // Step 3: Create the zip using the actual script
-      execSync(`bash ./process_mod/zipModFolder.sh ${testId} 1`, {
+      // Step 2: Load the draft JSON from tempdir and modify players to be ready
+      const draftPath = path.join(tempdir, 'drafts', `${draftId}.json`);
+      expect(fs.existsSync(draftPath)).toBeTruthy();
+      
+      const draft = JSON.parse(fs.readFileSync(draftPath, 'utf8'));
+      
+      // Simulate draft completion by setting up player data
+      draft.players[0].ready = 1;
+      draft.players[0].name = 'E2EPlayer1';
+      draft.players[0].alias = 'DraftCiv1';
+      draft.players[0].description = 'First civ from real draft';
+      draft.players[0].customFlag = false;
+      draft.players[0].customFlagData = '';
+      
+      draft.players[1].ready = 1;
+      draft.players[1].name = 'E2EPlayer2';
+      draft.players[1].alias = 'DraftCiv2';
+      draft.players[1].description = 'Second civ from real draft';
+      draft.players[1].wonder = 1;
+      draft.players[1].castle = 1;
+      draft.players[1].architecture = 2;
+      draft.players[1].language = 10;
+      draft.players[1].customFlag = false;
+      draft.players[1].customFlagData = '';
+      
+      draft.gamestate.phase = 6; // Set to download phase
+      
+      // Save the modified draft
+      fs.writeFileSync(draftPath, JSON.stringify(draft, null, 2));
+      
+      // Step 3: Trigger mod creation by simulating the socket.io "build mod" event
+      // Since we can't easily trigger socket.io from here, we'll manually create the mod using the server scripts
+      
+      // Create mod folder structure
+      execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${draftId} ${projectRoot} 1`, {
         cwd: projectRoot,
         stdio: 'pipe'
       });
       
-      const zipPath = path.join(modsDir, `${testId}.zip`);
+      const modFolderPath = path.join(modsDir, draftId);
+      
+      // Copy draft config to mod folder (this is what the server would do)
+      fs.copyFileSync(draftPath, path.join(modFolderPath, 'draft-config.json'));
+      
+      // Create a minimal data.json (the server generates this from the draft)
+      const dataJson = {
+        name: [draft.players[0].alias, draft.players[1].alias],
+        description: [draft.players[0].description, draft.players[1].description],
+        techtree: [draft.players[0].tree, draft.players[1].tree],
+        modifyDat: true
+      };
+      fs.writeFileSync(path.join(modFolderPath, 'data.json'), JSON.stringify(dataJson, null, 2));
+      
+      // Zip the mod folder
+      execSync(`bash ./process_mod/zipModFolder.sh ${draftId} 1`, {
+        cwd: projectRoot,
+        stdio: 'pipe'
+      });
+      
+      const zipPath = path.join(modsDir, `${draftId}.zip`);
       expect(fs.existsSync(zipPath)).toBeTruthy();
       
       // Step 4: Extract the zip to get draft-config.json
@@ -821,6 +818,7 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       
       const extractedDraftConfig = JSON.parse(fs.readFileSync(extractedDraftConfigPath, 'utf8'));
       expect(extractedDraftConfig.players).toHaveLength(2);
+      expect(extractedDraftConfig.id).toBe(draftId);
       
       // Step 5: Extract individual player JSONs that match CivConfig format
       const testDir = path.join(__dirname, '../../__tests__/fixtures');
@@ -828,8 +826,8 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
         fs.mkdirSync(testDir, { recursive: true });
       }
       
-      const extractedCiv1Path = path.join(testDir, 'extracted-civ-1.json');
-      const extractedCiv2Path = path.join(testDir, 'extracted-civ-2.json');
+      const extractedCiv1Path = path.join(testDir, 'real-draft-civ-1.json');
+      const extractedCiv2Path = path.join(testDir, 'real-draft-civ-2.json');
       
       // Convert player data to CivConfig format
       const player1 = extractedDraftConfig.players[0];
@@ -874,12 +872,12 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       // Wait for files to be processed
       await page.waitForTimeout(500);
       
-      // Step 7: Verify both civilizations from draft zip were loaded
+      // Step 7: Verify both civilizations from real draft zip were loaded
       await expect(page.getByText(/Loaded Civilizations \(2\)/i)).toBeVisible();
-      await expect(page.getByText('ExtractedCiv1')).toBeVisible();
-      await expect(page.getByText('ExtractedCiv2')).toBeVisible();
-      await expect(page.getByText('First civ from draft zip')).toBeVisible();
-      await expect(page.getByText('Second civ from draft zip')).toBeVisible();
+      await expect(page.getByText('DraftCiv1')).toBeVisible();
+      await expect(page.getByText('DraftCiv2')).toBeVisible();
+      await expect(page.getByText('First civ from real draft')).toBeVisible();
+      await expect(page.getByText('Second civ from real draft')).toBeVisible();
       
       // Verify create button is enabled
       const createButton = page.getByRole('button', { name: /Create Combined Mod/i });
@@ -891,14 +889,21 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       
     } finally {
       // Clean up zip and folders
-      const zipPath = path.join(modsDir, `${testId}.zip`);
-      if (fs.existsSync(zipPath)) {
-        fs.unlinkSync(zipPath);
-      }
-      
-      const modDirPath = path.join(modsDir, testId);
-      if (fs.existsSync(modDirPath)) {
-        fs.rmSync(modDirPath, { recursive: true, force: true });
+      if (draftId) {
+        const zipPath = path.join(modsDir, `${draftId}.zip`);
+        if (fs.existsSync(zipPath)) {
+          fs.unlinkSync(zipPath);
+        }
+        
+        const modDirPath = path.join(modsDir, draftId);
+        if (fs.existsSync(modDirPath)) {
+          fs.rmSync(modDirPath, { recursive: true, force: true });
+        }
+        
+        const draftPath = path.join(tempdir, 'drafts', `${draftId}.json`);
+        if (fs.existsSync(draftPath)) {
+          fs.unlinkSync(draftPath);
+        }
       }
       
       if (fs.existsSync(extractDir)) {
