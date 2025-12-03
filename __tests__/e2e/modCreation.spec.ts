@@ -743,16 +743,21 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       
       while (Date.now() - startTime < maxWaitTime) {
         const modsFiles = fs.readdirSync(modsDir);
-        zipFile = modsFiles.find(f => f.includes(draftId!) && f.endsWith('.zip'));
+        const foundZipFile = modsFiles.find(f => f.includes(draftId!) && f.endsWith('.zip'));
         
-        if (!zipFile) {
-          zipFile = `${draftId}.zip`;
+        if (foundZipFile) {
+          zipFile = foundZipFile;
+          zipPath = path.join(modsDir, zipFile);
+          // File found, wait a bit more for it to be fully written
+          await page.waitForTimeout(1000);
+          break;
         }
         
-        zipPath = path.join(modsDir, zipFile);
-        
-        if (fs.existsSync(zipPath)) {
-          // File found, wait a bit more for it to be fully written
+        // Also check for default filename
+        const defaultZipPath = path.join(modsDir, `${draftId}.zip`);
+        if (fs.existsSync(defaultZipPath)) {
+          zipFile = `${draftId}.zip`;
+          zipPath = defaultZipPath;
           await page.waitForTimeout(1000);
           break;
         }
