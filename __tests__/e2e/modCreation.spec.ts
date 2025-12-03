@@ -723,6 +723,8 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
   });
 
   test('should extract JSON from actual draft zip created via full draft flow and use in combine', async ({ page }) => {
+    test.setTimeout(90000); // Extend timeout for this comprehensive test
+    
     const projectRoot = path.join(__dirname, '../..');
     const modsDir = path.join(projectRoot, 'modding', 'requested_mods');
     let draftId: string | null = null;
@@ -732,24 +734,33 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       // Complete full draft using helper function
       draftId = await completeFullDraft(page, 1, 'E2E Test Player', 'DraftE2ECiv');
       
-      // Wait for the mod to be created by the server
-      await page.waitForTimeout(10000);
+      // Wait for the zip file to be created by the server (with retries)
+      let zipPath: string | null = null;
+      let zipFile: string | null = null;
+      const maxWaitTime = 30000; // 30 seconds max
+      const checkInterval = 1000; // Check every second
+      const startTime = Date.now();
       
-      // Find the zip file created by the server
-      const modsFiles = fs.readdirSync(modsDir);
-      let zipFile = modsFiles.find(f => f.includes(draftId!) && f.endsWith('.zip'));
-      
-      if (!zipFile) {
-        zipFile = `${draftId}.zip`;
+      while (Date.now() - startTime < maxWaitTime) {
+        const modsFiles = fs.readdirSync(modsDir);
+        zipFile = modsFiles.find(f => f.includes(draftId!) && f.endsWith('.zip'));
+        
+        if (!zipFile) {
+          zipFile = `${draftId}.zip`;
+        }
+        
+        zipPath = path.join(modsDir, zipFile);
+        
+        if (fs.existsSync(zipPath)) {
+          // File found, wait a bit more for it to be fully written
+          await page.waitForTimeout(1000);
+          break;
+        }
+        
+        await page.waitForTimeout(checkInterval);
       }
       
-      const zipPath = path.join(modsDir, zipFile);
-      
-      if (!fs.existsSync(zipPath)) {
-        await page.waitForTimeout(10000);
-      }
-      
-      expect(fs.existsSync(zipPath)).toBeTruthy();
+      expect(fs.existsSync(zipPath!)).toBeTruthy();
       
       // Extract the zip
       fs.mkdirSync(extractDir, { recursive: true });
