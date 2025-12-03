@@ -734,35 +734,30 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       // Complete full draft using helper function
       draftId = await completeFullDraft(page, 1, 'E2E Test Player', 'DraftE2ECiv');
       
-      // Wait for the zip file to be created by the server (with retries)
+      // Wait for the download button to appear (indicates phase 6 - mod creation complete)
+      await page.waitForSelector('.download-button', { timeout: 45000 });
+      
+      // Give server a moment to ensure file is fully written
+      await page.waitForTimeout(2000);
+      
+      // Now find the zip file
       let zipPath: string | null = null;
       let zipFile: string | null = null;
-      const maxWaitTime = 30000; // 30 seconds max
-      const checkInterval = 1000; // Check every second
-      const startTime = Date.now();
       
-      while (Date.now() - startTime < maxWaitTime) {
-        const modsFiles = fs.readdirSync(modsDir);
-        const foundZipFile = modsFiles.find(f => f.includes(draftId!) && f.endsWith('.zip'));
-        
-        if (foundZipFile) {
-          zipFile = foundZipFile;
-          zipPath = path.join(modsDir, zipFile);
-          // File found, wait a bit more for it to be fully written
-          await page.waitForTimeout(1000);
-          break;
-        }
-        
-        // Also check for default filename
+      // Look for zip file with the new filename format or fallback to draft ID
+      const modsFiles = fs.readdirSync(modsDir);
+      const foundZipFile = modsFiles.find(f => f.includes(draftId!) && f.endsWith('.zip'));
+      
+      if (foundZipFile) {
+        zipFile = foundZipFile;
+        zipPath = path.join(modsDir, zipFile);
+      } else {
+        // Fallback to default filename
         const defaultZipPath = path.join(modsDir, `${draftId}.zip`);
         if (fs.existsSync(defaultZipPath)) {
           zipFile = `${draftId}.zip`;
           zipPath = defaultZipPath;
-          await page.waitForTimeout(1000);
-          break;
         }
-        
-        await page.waitForTimeout(checkInterval);
       }
       
       expect(fs.existsSync(zipPath!)).toBeTruthy();
