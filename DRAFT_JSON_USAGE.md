@@ -98,30 +98,57 @@ If you're comfortable with JavaScript, you can use this script to automatically 
 
 ```javascript
 const fs = require('fs');
+const path = require('path');
 
-// Read draft-config.json
-const draft = JSON.parse(fs.readFileSync('draft-config.json', 'utf8'));
-
-// Extract each player as a separate file
-draft.players.forEach((player, index) => {
-  const civ = {
-    alias: player.alias,
-    description: player.description,
-    flag_palette: player.flag_palette,
-    tree: player.tree,
-    bonuses: player.bonuses,
-    architecture: player.architecture,
-    language: player.language,
-    wonder: player.wonder,
-    castle: player.castle,
-    customFlag: player.customFlag || false,
-    customFlagData: player.customFlagData || ''
-  };
+try {
+  // Read draft-config.json
+  const draftPath = 'draft-config.json';
   
-  const filename = `${player.alias || 'civ' + index}.json`;
-  fs.writeFileSync(filename, JSON.stringify(civ, null, 2));
-  console.log(`Extracted: ${filename}`);
-});
+  if (!fs.existsSync(draftPath)) {
+    console.error('Error: draft-config.json not found');
+    process.exit(1);
+  }
+  
+  const draftContent = fs.readFileSync(draftPath, 'utf8');
+  const draft = JSON.parse(draftContent);
+  
+  // Validate structure
+  if (!draft.players || !Array.isArray(draft.players)) {
+    console.error('Error: Invalid draft JSON - missing or invalid players array');
+    process.exit(1);
+  }
+  
+  // Extract each player as a separate file
+  draft.players.forEach((player, index) => {
+    const civ = {
+      alias: player.alias,
+      description: player.description,
+      flag_palette: player.flag_palette,
+      tree: player.tree,
+      bonuses: player.bonuses,
+      architecture: player.architecture,
+      language: player.language,
+      wonder: player.wonder,
+      castle: player.castle,
+      customFlag: player.customFlag || false,
+      customFlagData: player.customFlagData || ''
+    };
+    
+    // Sanitize filename to remove unsafe characters
+    const safeName = (player.alias || `civ${index}`)
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .substring(0, 50); // Limit length
+    const filename = `${safeName}.json`;
+    
+    fs.writeFileSync(filename, JSON.stringify(civ, null, 2));
+    console.log(`✓ Extracted: ${filename}`);
+  });
+  
+  console.log(`\n✅ Successfully extracted ${draft.players.length} civilization(s)`);
+} catch (error) {
+  console.error('Error:', error.message);
+  process.exit(1);
+}
 ```
 
 ## Notes
