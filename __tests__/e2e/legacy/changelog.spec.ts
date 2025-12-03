@@ -3,6 +3,10 @@ import { test, expect } from '@playwright/test';
 /**
  * E2E tests for the Legacy UI Changelog display
  */
+
+// Minimum expected changelog length to verify content loaded
+const MIN_CHANGELOG_LENGTH = 1000;
+
 test.describe('Legacy UI - Changelog Display', () => {
   test('should load legacy home page successfully', async ({ page }) => {
     await page.goto('/civbuilder');
@@ -35,10 +39,10 @@ test.describe('Legacy UI - Changelog Display', () => {
     await page.click('#updates');
     
     // Wait for changelog content to be loaded (not just "Loading...")
-    await page.waitForFunction(() => {
+    await page.waitForFunction((minLength) => {
       const text = document.querySelector('#instructionstext')?.textContent || '';
-      return text.length > 1000 && text.includes('•') && !text.includes('Loading changelog...');
-    }, { timeout: 10000 });
+      return text.length > minLength && text.includes('•') && !text.includes('Loading changelog...');
+    }, MIN_CHANGELOG_LENGTH, { timeout: 10000 });
     
     // Get the changelog text
     const changelogText = await page.locator('#instructionstext').textContent();
@@ -57,7 +61,7 @@ test.describe('Legacy UI - Changelog Display', () => {
     expect(changelogText).toContain('•');
     
     // Verify content length (should be substantial if properly loaded)
-    expect(changelogText.length).toBeGreaterThan(1000);
+    expect(changelogText.length).toBeGreaterThan(MIN_CHANGELOG_LENGTH);
   });
 
   test('should parse markdown links in changelog', async ({ page }) => {
@@ -110,10 +114,10 @@ test.describe('Legacy UI - Changelog Display', () => {
     await page.click('#updates');
     
     // Wait for changelog to load
-    await page.waitForFunction(() => {
+    await page.waitForFunction((minLength) => {
       const text = document.querySelector('#instructionstext')?.textContent || '';
-      return text.length > 1000 && !text.includes('Loading changelog...');
-    }, { timeout: 10000 });
+      return text.length > minLength && !text.includes('Loading changelog...');
+    }, MIN_CHANGELOG_LENGTH, { timeout: 10000 });
     
     const changelogText = await page.locator('#instructionstext').textContent();
     
@@ -121,7 +125,7 @@ test.describe('Legacy UI - Changelog Display', () => {
     expect(changelogText).not.toContain('Failed to load changelog');
     
     // Should have actual content
-    expect(changelogText.length).toBeGreaterThan(1000);
+    expect(changelogText.length).toBeGreaterThan(MIN_CHANGELOG_LENGTH);
     expect(changelogText).toContain('•');
   });
 });

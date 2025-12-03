@@ -3,6 +3,10 @@ import { test, expect } from '@playwright/test';
 /**
  * E2E tests for the Updates/Changelog page
  */
+
+// Minimum expected changelog length to verify content loaded
+const MIN_CHANGELOG_LENGTH = 1000;
+
 test.describe('Updates Page - Changelog Display', () => {
   test('should load updates page successfully', async ({ page }) => {
     await page.goto('/v2/updates');
@@ -100,7 +104,7 @@ test.describe('Updates Page - Changelog Display', () => {
     
     // Verify it's not empty or just loading
     expect(changelogText).toBeTruthy();
-    expect(changelogText!.length).toBeGreaterThan(1000);
+    expect(changelogText!.length).toBeGreaterThan(MIN_CHANGELOG_LENGTH);
     
     // Verify it contains version numbers
     expect(changelogText).toMatch(/v\d+\.\d+\.\d+/);
