@@ -745,7 +745,8 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       let zipFile: string | null = null;
       
       // Look for zip file with the new filename format or fallback to draft ID
-      const modsFiles = fs.readdirSync(modsDir).filter(f => f.endsWith('.zip'));
+      const allFiles = fs.readdirSync(modsDir);
+      const modsFiles = allFiles.filter(f => f.endsWith('.zip'));
       const foundZipFile = modsFiles.find(f => f.includes(draftId!));
       
       if (foundZipFile) {
@@ -761,14 +762,17 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
           // If not found by draft ID, use the most recently created zip file
           // (This handles the case where filename format changed to timestamp-based)
           if (modsFiles.length > 0) {
-            const zipFiles = modsFiles.map(f => ({
-              name: f,
-              path: path.join(modsDir, f),
-              mtime: fs.statSync(path.join(modsDir, f)).mtime
-            }));
-            zipFiles.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
-            zipFile = zipFiles[0].name;
-            zipPath = zipFiles[0].path;
+            const zipFilesWithStats = modsFiles.map(f => {
+              const fullPath = path.join(modsDir, f);
+              return {
+                name: f,
+                path: fullPath,
+                mtime: fs.statSync(fullPath).mtime
+              };
+            });
+            zipFilesWithStats.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+            zipFile = zipFilesWithStats[0].name;
+            zipPath = zipFilesWithStats[0].path;
           }
         }
       }
