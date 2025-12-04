@@ -100,7 +100,7 @@ export async function completeCardDrafting(page: Page, maxRounds: number = 20): 
     const isDraftBoardVisible = await draftBoard.isVisible().catch(() => false);
     
     if (isDraftBoardVisible) {
-      const cards = page.locator('.draft-card:not(.card-disabled)');
+      const cards = page.locator('.draft-card:not(.card-disabled):not(.card-hidden)');
       const cardCount = await cards.count();
       
       if (cardCount > 0) {
