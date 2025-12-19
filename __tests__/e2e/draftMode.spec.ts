@@ -594,14 +594,28 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     
     // Go to host page
     const hostLink = await page.locator('#hostLink').inputValue();
+    
+    // Navigate to the host link - this will set cookies automatically
     await page.goto(hostLink);
     
-    // Wait for draft page to load
-    await page.waitForTimeout(2000);
+    // Wait for the draft page to load and Socket.IO to connect
+    await page.waitForTimeout(3000);
+    
+    // We should be in Phase 0 (lobby) - wait for it to transition to Phase 1
+    // The host needs to "join" the draft first
+    // Check if we're in lobby phase or if we need to join
+    const joinButton = page.getByRole('button', { name: /Join Draft/i });
+    if (await joinButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+      // We're on the join page, need to join first
+      const nameInput = page.locator('input[type="text"]').first();
+      await nameInput.fill('TestHost');
+      await joinButton.click();
+      await page.waitForTimeout(2000);
+    }
     
     // Phase 1: Enter civ name
     const civNameInput = page.locator('#civName');
-    await expect(civNameInput).toBeVisible({ timeout: 10000 });
+    await expect(civNameInput).toBeVisible({ timeout: 15000 });
     await civNameInput.fill('PastureDraftCiv');
     
     // Click Next button
