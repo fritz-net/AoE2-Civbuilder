@@ -203,6 +203,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useDraft } from '~/composables/useDraft'
 import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
+import { PASTURES_BONUS_ID } from '~/composables/useCivConstants'
 import type { CivConfig } from '~/composables/useCivData'
 import DraftLobby from '~/components/draft/DraftLobby.vue'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
@@ -281,10 +282,6 @@ const civConfig = ref<CivConfig>({
 const techTreePoints = computed(() => {
   return draft.value?.preset.points || 250
 })
-
-// CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES is "Pastures replace Farms and Mill upgrades"
-// When this bonus is selected, we should show Pasture building and pasture techs instead of Farm and farm techs
-const PASTURES_BONUS_ID = 356
 
 const showPasturesInTechtree = computed(() => {
   // Check if bonus 356 is selected in civ bonuses (bonuses[0] array)
