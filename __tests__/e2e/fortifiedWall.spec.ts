@@ -209,7 +209,7 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
   });
 
   test.describe('Visual Verification Tests', () => {
-    test('should take screenshot showing initial disabled state', async ({ page }) => {
+    test('should take screenshot showing initial disabled state', async ({ page }, testInfo) => {
       await page.goto('/v2/build');
       
       // Wait for page and tech tree to load
@@ -224,10 +224,10 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
       await fortifiedWallNode.scrollIntoViewIfNeeded();
       
       // Take a screenshot for manual verification
-      await page.screenshot({ path: 'test-results/fortified-wall-disabled.png', fullPage: false });
+      await page.screenshot({ path: testInfo.outputPath('fortified-wall-disabled.png'), fullPage: false });
     });
 
-    test('should take screenshot showing enabled state after clicking', async ({ page }) => {
+    test('should take screenshot showing enabled state after clicking', async ({ page }, testInfo) => {
       await page.goto('/v2/build');
       
       await page.waitForTimeout(2000);
@@ -245,7 +245,7 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
       await fortifiedWallNode.scrollIntoViewIfNeeded();
       
       // Take a screenshot
-      await page.screenshot({ path: 'test-results/fortified-wall-enabled.png', fullPage: false });
+      await page.screenshot({ path: testInfo.outputPath('fortified-wall-enabled.png'), fullPage: false });
     });
   });
 });
