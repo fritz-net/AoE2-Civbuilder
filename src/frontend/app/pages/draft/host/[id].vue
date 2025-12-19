@@ -284,7 +284,7 @@ const techTreePoints = computed(() => {
 })
 
 const showPasturesInTechtree = computed(() => {
-  // Check if bonus 356 is selected in civ bonuses (bonuses[0] array)
+  // Check if PASTURES_BONUS_ID is selected in civ bonuses (bonuses[0] array)
   if (!currentPlayer.value?.bonuses?.[0]) return false
   return currentPlayer.value.bonuses[0].includes(PASTURES_BONUS_ID)
 })
