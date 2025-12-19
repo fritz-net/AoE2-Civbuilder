@@ -883,6 +883,7 @@ onUnmounted(() => {
 .techtree-fullscreen .tech-tree-full {
   flex: 1;
   overflow: hidden;
+  width: 100%;
 }
 
 .techtree-container {

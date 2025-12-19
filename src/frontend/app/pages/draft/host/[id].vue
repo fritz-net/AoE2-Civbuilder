@@ -858,6 +858,7 @@ onUnmounted(() => {
   flex: 1;
   overflow: visible;
   position: relative;
+  width: 100%;
 }
 
 /* Ensure TechTree fullscreen mode works in draft context */

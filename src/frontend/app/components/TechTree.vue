@@ -1240,30 +1240,34 @@ defineExpose({
 .helptext {
   position: absolute;
   width: 300px;
-  background-color: #f5e6c8;
-  border: 2px solid #4d3617;
-  padding: 0.4rem;
+  background: rgba(0, 0, 0, 0.95);
+  border: 2px solid hsl(52, 100%, 50%);
+  padding: 0.75rem 1rem;
   font-size: 10pt;
   z-index: 100;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  color: hsl(52, 100%, 50%);
 }
 
 .helptext :deep(p) {
   margin-top: 0;
   margin-bottom: 15px;
+  color: #f0e6d2;
 }
 
 .helptext :deep(h3) {
   font-family: sans-serif;
   font-size: 9pt;
   text-transform: uppercase;
-  color: #4d3617;
+  color: hsl(52, 100%, 50%);
   margin: 2px 10px 0 0;
   float: left;
 }
 
 .helptext :deep(.helptext__heading) {
   font-weight: bold;
+  color: hsl(52, 100%, 50%);
 }
 
 @media (max-width: 900px) {
