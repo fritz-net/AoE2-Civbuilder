@@ -129,6 +129,7 @@
               :points="techTreePoints"
               :editable="true"
               :relative-path="techtreePath"
+              :show-pastures="showPasturesInTechtree"
               @done="handleTechTreeDone"
             />
           </div>
@@ -279,6 +280,16 @@ const civConfig = ref<CivConfig>({
 
 const techTreePoints = computed(() => {
   return draft.value?.preset.points || 250
+})
+
+// CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES is "Pastures replace Farms and Mill upgrades"
+// When this bonus is selected, we should show Pasture building and pasture techs instead of Farm and farm techs
+const PASTURES_BONUS_ID = 356
+
+const showPasturesInTechtree = computed(() => {
+  // Check if bonus 356 is selected in civ bonuses (bonuses[0] array)
+  if (!currentPlayer.value?.bonuses?.[0]) return false
+  return currentPlayer.value.bonuses[0].includes(PASTURES_BONUS_ID)
 })
 
 const displayCards = computed(() => {
