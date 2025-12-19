@@ -403,7 +403,7 @@ function formatArmorStat(basic: number, elite: number): string {
 }
 
 function getUnitGraphicUrl(unitId: number): string {
-  return `/img/unitgraphics/uu_${unitId}.jpg`
+  return `/v2/img/unitgraphics/uu_${unitId}.jpg`
 }
 
 function getStatIconUrl(stat: string): string {
@@ -421,7 +421,7 @@ function getStatIconUrl(stat: string): string {
     'armor': 'armor.png',
     'range-armor': 'range-armor.png',
   }
-  return `/img/staticons/${iconMap[stat] || 'hp.png'}`
+  return `/v2/img/staticons/${iconMap[stat] || 'hp.png'}`
 }
 
 function getAttackIcon(stats: UnitStats): string {
