@@ -569,26 +569,112 @@ test.describe('Draft Mode - Draft Spectator Page', () => {
 });
 
 test.describe('Draft Mode - Pasture Bonus Detection', () => {
-  test('should pass showPastures prop to TechTree when bonus 356 is selected', async ({ page }) => {
-    // This test validates that the code change is present and correct
-    // It checks that the draft pages have the logic to compute showPastures from player bonuses
-    // Full integration testing requires backend server (Socket.IO) which is not available in unit tests
+  test('should show pasture building and techs when pasture bonus is selected in draft', async ({ page }) => {
+    // This test creates a draft with pasture bonus forced into first roll, selects it, and verifies tech tree
     
     await page.goto('/v2/draft/create');
     
-    // Verify the draft creation page loads (this ensures the app is running)
-    await expect(page).toHaveURL(/.*\/draft\/create/);
-    await expect(page.getByRole('heading', { name: /Create Draft/i })).toBeVisible();
+    // Set up draft with single player and pasture bonus (356) in first roll
+    const numPlayersInput = page.locator('#numPlayers');
+    await numPlayersInput.fill('1');
     
-    // The actual logic is tested by:
-    // 1. Code review ensuring showPasturesInTechtree computed property exists in both draft pages
-    // 2. Existing modCreation.spec.ts tests that verify the TechTree component responds correctly to showPastures prop
-    // 3. The showPastures logic is identical to the one in CivBuilder.vue which already has tests
+    // Expand advanced options
+    await page.locator('summary').filter({ hasText: 'Advanced Options' }).click();
     
-    // This test serves as documentation that the feature was implemented
-    // The implementation can be verified by checking:
-    // - src/frontend/app/pages/draft/host/[id].vue contains showPasturesInTechtree computed property
-    // - src/frontend/app/pages/draft/player/[id].vue contains showPasturesInTechtree computed property
-    // - Both pass :show-pastures="showPasturesInTechtree" to TechTree component
+    // Set required first roll to include pasture bonus (356)
+    const requiredFirstRollInput = page.locator('#requiredFirstRoll');
+    await requiredFirstRollInput.fill('356');
+    
+    // Create draft
+    const startDraftButton = page.getByRole('button', { name: /Start Draft/i });
+    await startDraftButton.click();
+    
+    // Wait for draft creation modal
+    await page.waitForSelector('.modal-overlay', { timeout: 10000 });
+    
+    // Go to host page
+    const hostLink = await page.locator('#hostLink').inputValue();
+    await page.goto(hostLink);
+    
+    // Wait for draft page to load
+    await page.waitForTimeout(2000);
+    
+    // Phase 1: Enter civ name
+    const civNameInput = page.locator('#civName');
+    await expect(civNameInput).toBeVisible({ timeout: 10000 });
+    await civNameInput.fill('PastureDraftCiv');
+    
+    // Click Next button
+    const nextButton = page.getByRole('button', { name: /Next/i });
+    await nextButton.click();
+    
+    // Wait for Phase 2 (card drafting)
+    await page.waitForTimeout(2000);
+    
+    // Look for the pasture bonus card and select it
+    // The card should be visible with text "Pastures replace Farms"
+    const pastureCard = page.locator('.draft-card').filter({ hasText: /Pastures replace Farms/i }).first();
+    await expect(pastureCard).toBeVisible({ timeout: 10000 });
+    await pastureCard.click();
+    
+    // Wait for the card to be selected and turn to proceed
+    await page.waitForTimeout(1000);
+    
+    // The player should now have the pasture bonus selected
+    // Since we have 1 player with 4 bonuses per player (default rounds=4), after selecting the first bonus,
+    // we need to continue the draft. For a single player, they pick all cards.
+    // Let's complete the rest of the draft by clicking any available cards
+    
+    // Complete the rest of the rounds (rounds * slots - 1 already picked = 3 more picks)
+    for (let i = 0; i < 3; i++) {
+      await page.waitForTimeout(500);
+      // Click the first available card
+      const firstCard = page.locator('.draft-card').not('.draft-card--picked').first();
+      if (await firstCard.isVisible()) {
+        await firstCard.click();
+        await page.waitForTimeout(500);
+      }
+    }
+    
+    // Phase 3: Tech tree should now be visible
+    await page.waitForTimeout(2000);
+    
+    // Check that we're in Phase 3 (tech tree phase)
+    const phaseTitle = page.getByRole('heading', { name: /Tech Tree/i });
+    await expect(phaseTitle).toBeVisible({ timeout: 15000 });
+    
+    // Verify the sidebar shows the pasture bonus
+    const sidebar = page.locator('.draft-sidebar');
+    await expect(sidebar).toBeVisible();
+    await expect(sidebar).toContainText(/Pastures replace Farms/i);
+    
+    // Now check the tech tree for pasture building and techs
+    const techtreeSvg = page.locator('.techtree-svg');
+    await expect(techtreeSvg).toBeVisible();
+    
+    // Check for Pasture building node (should be visible)
+    const pastureNode = techtreeSvg.locator('g.node').filter({ hasText: 'Pasture' }).first();
+    await pastureNode.scrollIntoViewIfNeeded();
+    await expect(pastureNode).toBeVisible({ timeout: 5000 });
+    
+    // Verify Pasture is enabled (no cross image)
+    const crossOnPasture = pastureNode.locator('image.cross');
+    await expect(crossOnPasture).not.toBeVisible();
+    
+    // Check for pasture tech: Domestication (first pasture tech)
+    const domesticationNode = techtreeSvg.locator('g.node').filter({ hasText: /Domestication|Livestock Husbandry/i }).first();
+    await domesticationNode.scrollIntoViewIfNeeded();
+    await expect(domesticationNode).toBeVisible({ timeout: 5000 });
+    
+    // Verify farm techs are NOT visible or are crossed out
+    // (Farm should not be in the tree when pastures are enabled)
+    const farmNodes = techtreeSvg.locator('g.node').filter({ hasText: /^Farm$/ });
+    const farmCount = await farmNodes.count();
+    if (farmCount > 0) {
+      // If farm is shown, it should have a cross
+      const farmNode = farmNodes.first();
+      const crossOnFarm = farmNode.locator('image.cross');
+      await expect(crossOnFarm).toBeVisible();
+    }
   });
 });
