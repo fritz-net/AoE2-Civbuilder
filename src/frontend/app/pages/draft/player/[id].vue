@@ -89,10 +89,11 @@
         :cards="displayCards"
         :is-my-turn="currentTurn?.isMyTurn || false"
         :my-player-index="playerNumber"
-        :timer-duration="0"
+        :timer-duration="draft.preset.timer_enabled && !draft.gamestate.timer_paused ? draft.gamestate.timer_remaining : 0"
         :highlighted="draft.gamestate.highlighted || []"
         @select-card="handleSelectCard"
         @view-player="handleViewPlayer"
+        @timer-complete="handleTimerComplete"
         @refill="handleRefill"
         @clear="handleClear"
       />
@@ -239,6 +240,7 @@ const {
   selectCard,
   refillCards,
   clearCards,
+  notifyTimerExpired,
   setupSocketListeners,
   cleanup,
 } = useDraft()
@@ -407,6 +409,13 @@ const handleRefill = () => {
 
 const handleClear = () => {
   clearCards()
+}
+
+const handleTimerComplete = () => {
+  if (draft.value && currentTurn.value?.isMyTurn) {
+    // Notify server that timer expired
+    notifyTimerExpired(draft.value.gamestate.turn)
+  }
 }
 
 const handleDownload = () => {

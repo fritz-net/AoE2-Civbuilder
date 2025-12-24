@@ -11,6 +11,8 @@ export interface DraftPreset {
   points: number
   rarities: Record<string, boolean>
   cards: number[]
+  timer_enabled: boolean
+  timer_duration: number
 }
 
 export interface DraftPlayer {
@@ -35,6 +37,9 @@ export interface DraftGameState {
   order: number[]
   cards: number[]
   deck: number[]
+  timer_paused: boolean
+  timer_remaining: number
+  timer_last_update: number | null
 }
 
 export interface Draft {
@@ -254,6 +259,24 @@ export const useDraft = () => {
     socket.value.emit('clear', draft.value.id)
   }
 
+  // Timer control - pause (host only)
+  const pauseTimer = () => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('pause timer', draft.value.id)
+  }
+
+  // Timer control - resume (host only)
+  const resumeTimer = () => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('resume timer', draft.value.id)
+  }
+
+  // Timer expired - notify server
+  const notifyTimerExpired = (turn: number) => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('timer expired', draft.value.id, turn)
+  }
+
   // Setup socket listeners
   const setupSocketListeners = () => {
     if (!socket.value) return
@@ -313,6 +336,9 @@ export const useDraft = () => {
     getPrivateGamestate,
     refillCards,
     clearCards,
+    pauseTimer,
+    resumeTimer,
+    notifyTimerExpired,
     setupSocketListeners,
     cleanup,
   }
