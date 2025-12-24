@@ -54,9 +54,13 @@
         <div class="faq-content">
           <p>
             If you want to battle against vanilla civilizations or mix them with your custom civs, 
-            you can download all vanilla civilization JSON files from the <NuxtLink to="/combine" class="inline-link">Combine Civilizations</NuxtLink> page 
-            by clicking the "Get Vanilla Civs" button.
+            download all vanilla civilization JSON files here:
           </p>
+          <div class="download-button-wrapper">
+            <button class="download-vanilla-btn" @click="handleDownloadVanilla">
+              ⬇️ Download Vanilla Civs
+            </button>
+          </div>
           <p>
             <strong>Best practices for combining vanilla and custom civilizations:</strong>
           </p>
@@ -132,7 +136,20 @@
 </template>
 
 <script setup lang="ts">
-// Help page - no additional logic needed
+function handleDownloadVanilla() {
+  // Create a form and submit it to download the vanilla civs zip
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = '/vanilla'
+  form.style.display = 'none'
+  document.body.appendChild(form)
+  try {
+    form.submit()
+  } finally {
+    // Clean up the form element
+    document.body.removeChild(form)
+  }
+}
 </script>
 
 <style scoped>
@@ -237,6 +254,31 @@
   border-left: 4px solid hsl(52, 100%, 50%);
   border-radius: 4px;
   margin-top: 1.5rem;
+}
+
+.download-button-wrapper {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.download-vanilla-btn {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background: linear-gradient(to bottom, rgba(30, 80, 120, 0.9), rgba(20, 60, 90, 0.9));
+  color: hsl(52, 100%, 50%);
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.download-vanilla-btn:hover {
+  background: linear-gradient(to bottom, rgba(40, 100, 140, 0.95), rgba(30, 80, 120, 0.95));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
 }
 
 .inline-link {
