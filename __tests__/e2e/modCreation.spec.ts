@@ -723,7 +723,7 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
   });
 
   test('should extract JSON from actual draft zip created via full draft flow and use in combine', async ({ page }) => {
-    test.setTimeout(90000); // Extend timeout for this comprehensive test
+    test.setTimeout(120000); // Extend timeout for this comprehensive test (draft + mod creation + extraction)
     
     const projectRoot = path.join(__dirname, '../..');
     const modsDir = path.join(projectRoot, 'modding', 'requested_mods');
@@ -735,7 +735,9 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       draftId = await completeFullDraft(page, 1, 'E2E Test Player', 'DraftE2ECiv');
       
       // Wait for the download button to appear (indicates phase 6 - mod creation complete)
-      await page.waitForSelector('.download-button', { timeout: 45000 });
+      // Increased timeout to 60s as mod creation involves: folder setup, icon generation,
+      // JSON creation, DAT file compilation (C++), and zipping - which can be slow in CI
+      await page.waitForSelector('.download-button', { timeout: 60000 });
       
       // Give server a moment to ensure file is fully written
       await page.waitForTimeout(2000);
