@@ -604,11 +604,13 @@ onUnmounted(() => {
 <style scoped>
 .draft-host-page {
   min-height: 100vh;
+  width: 100vw;
 }
 
 /* Override default layout padding for draft pages */
 :global(.content) {
   padding: 0 !important;
+  width: 100vw;
 }
 
 /* Join Form Styles */
@@ -911,6 +913,7 @@ onUnmounted(() => {
 /* Tech tree phase (Phase 3) */
 .techtree-phase {
   height: 100vh;
+  width: 100vw;
   padding: 0;
   overflow: hidden;
 }
