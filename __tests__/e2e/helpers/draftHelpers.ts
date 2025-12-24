@@ -94,28 +94,50 @@ export async function completeSetupPhase(page: Page, civName: string) {
  */
 export async function completeCardDrafting(page: Page, maxRounds: number = 20): Promise<number> {
   let rounds = 0;
+  let noCardRounds = 0; // Track consecutive rounds with no cards
   console.log('[completeCardDrafting] Starting card drafting...');
   
   while (rounds < maxRounds) {
     const draftBoard = page.locator('.draft-board');
     const isDraftBoardVisible = await draftBoard.isVisible().catch(() => false);
     
-    if (isDraftBoardVisible) {
-      const cards = page.locator('.card:not(.card-disabled)');
-      const cardCount = await cards.count();
-      
-      if (cardCount > 0) {
-        await cards.first().click();
-        await page.waitForTimeout(1500);
-        rounds++;
-        console.log(`[completeCardDrafting] Completed round ${rounds}`);
-      } else {
-        await page.waitForTimeout(1000);
-        rounds++;
-      }
-    } else {
+    if (!isDraftBoardVisible) {
       console.log(`[completeCardDrafting] Draft board no longer visible after ${rounds} rounds`);
       break;
+    }
+    
+    const cards = page.locator('.card:not(.card-disabled)');
+    const cardCount = await cards.count();
+    
+    if (cardCount > 0) {
+      await cards.first().click();
+      await page.waitForTimeout(1500);
+      rounds++;
+      noCardRounds = 0; // Reset counter when we find cards
+      console.log(`[completeCardDrafting] Completed round ${rounds}`);
+    } else {
+      noCardRounds++;
+      console.log(`[completeCardDrafting] No clickable cards available (attempt ${noCardRounds})`);
+      
+      // If we've had no cards for multiple checks, the drafting might be complete
+      // Wait a bit longer for phase transition
+      if (noCardRounds >= 3) {
+        console.log('[completeCardDrafting] No cards for 3+ attempts, waiting for phase transition...');
+        await page.waitForTimeout(3000);
+        
+        // Check again if draft board is still visible
+        const stillVisible = await draftBoard.isVisible().catch(() => false);
+        if (!stillVisible) {
+          console.log('[completeCardDrafting] Draft board disappeared, drafting complete');
+          break;
+        }
+        
+        // If still visible after 3 attempts, something is wrong - break to avoid infinite loop
+        console.log('[completeCardDrafting] Draft board still visible after no cards - breaking');
+        break;
+      }
+      
+      await page.waitForTimeout(2000);
     }
   }
   
@@ -130,12 +152,34 @@ export async function completeCardDrafting(page: Page, maxRounds: number = 20): 
 export async function completeTechTreePhase(page: Page) {
   console.log('[completeTechTreePhase] Starting tech tree phase completion...');
   
+  // First check what phase we're actually in
+  const currentURL = page.url();
+  console.log(`[completeTechTreePhase] Current URL: ${currentURL}`);
+  
+  // Check for different phase indicators
+  const draftBoard = await page.locator('.draft-board').isVisible().catch(() => false);
+  const techTreePhase = await page.locator('.techtree-phase').isVisible().catch(() => false);
+  const creatingPhase = await page.locator('.creating-phase').isVisible().catch(() => false);
+  const downloadPhase = await page.locator('.download-phase').isVisible().catch(() => false);
+  
+  console.log(`[completeTechTreePhase] Phase visibility: draft-board=${draftBoard}, techtree=${techTreePhase}, creating=${creatingPhase}, download=${downloadPhase}`);
+  
+  // If we're already in creating or download phase, we're done
+  if (creatingPhase) {
+    console.log('[completeTechTreePhase] Already in creating phase (Phase 5)');
+    return;
+  }
+  if (downloadPhase) {
+    console.log('[completeTechTreePhase] Already in download phase (Phase 6)');
+    return;
+  }
+  
   // Wait for tech tree phase to be visible (Phase 3 in drafts)
-  const techTreePhase = page.locator('.techtree-phase');
+  const techTreePhaseLocator = page.locator('.techtree-phase');
   
   try {
     console.log('[completeTechTreePhase] Waiting for tech tree phase to be visible...');
-    await techTreePhase.waitFor({ state: 'visible', timeout: 15000 });
+    await techTreePhaseLocator.waitFor({ state: 'visible', timeout: 15000 });
     console.log('[completeTechTreePhase] Tech tree phase is visible');
     
     // Wait a moment for any animations or state updates
