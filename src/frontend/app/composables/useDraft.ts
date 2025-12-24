@@ -102,12 +102,19 @@ export const useDraft = () => {
     return names[turn.roundType] || ''
   })
 
-  // Timer duration computed property
+  // Timer duration computed property (current remaining time)
   const timerDuration = computed(() => {
     if (!draft.value) return 0
     if (!draft.value.preset.timer_enabled) return 0
     // Return remaining time even when paused so timer display stays visible
     return draft.value.gamestate.timer_remaining
+  })
+
+  // Timer max duration (for progress bar calculation)
+  const timerMaxDuration = computed(() => {
+    if (!draft.value) return 0
+    if (!draft.value.preset.timer_enabled) return 0
+    return draft.value.preset.timer_duration
   })
 
   // Timer paused state
@@ -354,6 +361,7 @@ export const useDraft = () => {
     currentTurn,
     roundTypeName,
     timerDuration,
+    timerMaxDuration,
     isTimerPaused,
     initSocket,
     loadDraft,

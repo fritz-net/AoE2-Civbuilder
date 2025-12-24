@@ -12,6 +12,7 @@
         v-if="timerDuration > 0"
         ref="timerRef"
         :duration="timerDuration"
+        :max-duration="timerMaxDuration"
         :auto-start="!timerPaused"
         :show-progress="true"
         @complete="handleTimerComplete"
@@ -262,11 +263,13 @@ const props = withDefaults(defineProps<{
   cards: DisplayCard[]
   isMyTurn: boolean
   timerDuration?: number
+  timerMaxDuration?: number
   timerPaused?: boolean
   myPlayerIndex?: number // The player viewing this board
   highlighted?: number[] // Array of card indices that can be selected (selection limit)
 }>(), {
   timerDuration: 0,
+  timerMaxDuration: 0,
   timerPaused: false,
   myPlayerIndex: -1,
   highlighted: () => [],

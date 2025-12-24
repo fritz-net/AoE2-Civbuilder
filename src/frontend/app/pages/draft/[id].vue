@@ -46,6 +46,7 @@
         :cards="displayCards"
         :is-my-turn="false"
         :timer-duration="timerDuration"
+        :timer-max-duration="timerMaxDuration"
         :timer-paused="isTimerPaused"
         @view-player="handleViewPlayer"
       >
@@ -162,6 +163,7 @@ const {
   currentTurn,
   roundTypeName,
   timerDuration,
+  timerMaxDuration,
   isTimerPaused,
   initSocket,
   loadDraft,
