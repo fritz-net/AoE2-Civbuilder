@@ -1462,11 +1462,24 @@ function draftIO(io) {
 				return;
 			}
 			
-			// Select a random available card
+			// Select a random available card from highlighted indices
 			var availableCards = [];
-			for (var i = 0; i < draft["gamestate"]["cards"].length; i++) {
-				if (draft["gamestate"]["cards"][i] !== -1) {
-					availableCards.push(draft["gamestate"]["cards"][i]);
+			var highlighted = draft["gamestate"]["highlighted"] || [];
+			
+			// If highlighted is empty, all non-(-1) cards are available
+			if (highlighted.length === 0) {
+				for (var i = 0; i < draft["gamestate"]["cards"].length; i++) {
+					if (draft["gamestate"]["cards"][i] !== -1) {
+						availableCards.push(draft["gamestate"]["cards"][i]);
+					}
+				}
+			} else {
+				// Only select from highlighted card indices
+				for (var i = 0; i < highlighted.length; i++) {
+					var cardIndex = highlighted[i];
+					if (cardIndex < draft["gamestate"]["cards"].length && draft["gamestate"]["cards"][cardIndex] !== -1) {
+						availableCards.push(draft["gamestate"]["cards"][cardIndex]);
+					}
 				}
 			}
 			
@@ -1476,7 +1489,7 @@ function draftIO(io) {
 			}
 			
 			var randomPick = availableCards[Math.floor(Math.random() * availableCards.length)];
-			console.log(`Timer expired, auto-selecting card: ${randomPick}`);
+			console.log(`Timer expired, auto-selecting card: ${randomPick} from ${availableCards.length} available cards`);
 			
 			// Process the pick using the same helper function
 			processCardPick(draft, randomPick);

@@ -97,9 +97,18 @@ const resume = () => {
 }
 
 // Watch for duration changes
-watch(() => props.duration, (newDuration) => {
-  if (!isRunning.value) {
+watch(() => props.duration, (newDuration, oldDuration) => {
+  // Always update timeRemaining when duration changes from server
+  // This handles page reload and turn changes
+  if (newDuration !== oldDuration) {
     timeRemaining.value = newDuration
+    // If it was running and should auto-start, restart it
+    if (isRunning.value && props.autoStart) {
+      stop()
+      start()
+    } else if (!isRunning.value && props.autoStart) {
+      start()
+    }
   }
 })
 

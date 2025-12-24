@@ -78,27 +78,27 @@
       </div>
     </div>
 
-    <!-- Timer Control Panel (Host only, during Phase 2) -->
-    <div v-if="currentPhase === 2 && draft && draft.preset.timer_enabled && isHost" class="timer-controls">
-      <button 
-        v-if="!draft.gamestate.timer_paused" 
-        @click="handlePauseTimer" 
-        class="timer-control-btn pause-btn"
-      >
-        ⏸ Pause Timer
-      </button>
-      <button 
-        v-else 
-        @click="handleResumeTimer" 
-        class="timer-control-btn resume-btn"
-      >
-        ▶ Resume Timer
-      </button>
-    </div>
-
     <!-- Phase 2: Draft Cards -->
-    <DraftBoard
-      v-else-if="currentPhase === 2 && draft"
+    <div v-if="currentPhase === 2 && draft">
+      <!-- Timer Control Panel (Host only, during Phase 2) -->
+      <div v-if="draft.preset.timer_enabled && isHost" class="timer-controls">
+        <button 
+          v-if="!draft.gamestate.timer_paused" 
+          @click="handlePauseTimer" 
+          class="timer-control-btn pause-btn"
+        >
+          ⏸ Pause Timer
+        </button>
+        <button 
+          v-else 
+          @click="handleResumeTimer" 
+          class="timer-control-btn resume-btn"
+        >
+          ▶ Resume Timer
+        </button>
+      </div>
+
+      <DraftBoard
       :phase-title="roundTypeName"
       :round-number="(currentTurn?.roundType || 0) + 1"
       :players="draft.players"
@@ -116,6 +116,7 @@
       @refill="handleRefill"
       @clear="handleClear"
     />
+    </div>
 
     <!-- Phase 3: Tech Tree (after drafting, shows selected bonuses in sidebar) -->
     <div v-else-if="currentPhase === 3" class="techtree-phase">
