@@ -10,8 +10,9 @@
       <!-- Timer (if enabled) -->
       <TimerCountdown
         v-if="timerDuration > 0"
+        ref="timerRef"
         :duration="timerDuration"
-        :auto-start="isMyTurn && !timerPaused"
+        :auto-start="!timerPaused"
         :show-progress="true"
         @complete="handleTimerComplete"
       />
