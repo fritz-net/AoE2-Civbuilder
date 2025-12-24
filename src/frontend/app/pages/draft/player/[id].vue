@@ -130,6 +130,7 @@
               :points="techTreePoints"
               :editable="true"
               :relative-path="techtreePath"
+              :show-pastures="showPasturesInTechtree"
               @done="handleTechTreeDone"
             />
           </div>
@@ -189,6 +190,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDraft } from '~/composables/useDraft'
 import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
+import { PASTURES_BONUS_ID } from '~/composables/useCivConstants'
 import type { CivConfig } from '~/composables/useCivData'
 import DraftLobby from '~/components/draft/DraftLobby.vue'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
@@ -266,6 +268,12 @@ const civConfig = ref<CivConfig>({
 
 const techTreePoints = computed(() => {
   return draft.value?.preset.points || 250
+})
+
+const showPasturesInTechtree = computed(() => {
+  // Check if PASTURES_BONUS_ID is selected in civ bonuses (bonuses[0] array)
+  if (!currentPlayer.value?.bonuses?.[0]) return false
+  return currentPlayer.value.bonuses[0].includes(PASTURES_BONUS_ID)
 })
 
 const displayCards = computed(() => {

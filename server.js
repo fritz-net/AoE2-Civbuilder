@@ -220,6 +220,11 @@ const createDraft = (req, res, next) => {
 	preset["points"] = parseInt(req.body.techtree_currency, 10);
 	preset["rounds"] = parseInt(req.body.rounds, 10);
 	preset["rarities"] = available_rarities;
+	// Number of cards to show per roll (default 3 if not specified)
+	preset["cards_per_roll"] = req.body.cards_per_roll ? parseInt(req.body.cards_per_roll, 10) : 3;
+	// Optional: Force specific bonuses to appear in first roll (for testing)
+	// Expected format: comma-separated bonus IDs like "356,123" or empty string
+	preset["required_first_roll"] = req.body.required_first_roll ? req.body.required_first_roll.split(",").map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id)) : [];
 	draft["preset"] = preset;
 
 	let players = [];
@@ -1051,10 +1056,26 @@ function draftIO(io) {
 				}
 
 				//Distribute the first set of civ bonus cards
-				for (var i = 0; i < (draft["preset"]["rounds"] - 1) * numPlayers + 30; i++) {
-					var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
-					draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][0][rand]);
-					draft["gamestate"]["available_cards"][0].splice(rand, 1);
+				// First, add any required cards for testing
+				if (draft["preset"]["required_first_roll"] && draft["preset"]["required_first_roll"].length > 0) {
+					for (var reqCard of draft["preset"]["required_first_roll"]) {
+						// Check if card is available
+						var cardIndex = draft["gamestate"]["available_cards"][0].indexOf(reqCard);
+						if (cardIndex !== -1) {
+							draft["gamestate"]["cards"].push(reqCard);
+							draft["gamestate"]["available_cards"][0].splice(cardIndex, 1);
+						}
+					}
+				}
+				
+				// Then fill the rest randomly
+				var cardsNeeded = (draft["preset"]["rounds"] - 1) * numPlayers + 30 - draft["gamestate"]["cards"].length;
+				for (var i = 0; i < cardsNeeded; i++) {
+					if (draft["gamestate"]["available_cards"][0].length > 0) {
+						var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
+						draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][0][rand]);
+						draft["gamestate"]["available_cards"][0].splice(rand, 1);
+					}
 				}
 
 				//Give each player a ranking based off how many techtree points they spent
@@ -1376,9 +1397,13 @@ function draftIO(io) {
 		socket.on("clear", (roomID) => {
 			let draft = getDraft(roomID);
 			var numPlayers = draft["preset"]["slots"];
+			var cardsPerRoll = draft["preset"]["cards_per_roll"] || 3;
 
-			//Clear out cards and highlight the first three
-			draft["gamestate"]["highlighted"] = [0, 1, 2];
+			//Clear out cards and highlight based on cards_per_roll setting
+			draft["gamestate"]["highlighted"] = [];
+			for (var i = 0; i < cardsPerRoll; i++) {
+				draft["gamestate"]["highlighted"].push(i);
+			}
 			var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
 			for (var i = 0; i < draft["gamestate"]["cards"].length; i++) {
 				if (draft["gamestate"]["available_cards"][roundType].length <= 0) {

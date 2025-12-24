@@ -288,6 +288,7 @@
 import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { createDefaultCiv, architectures, languages, wonders, type CivConfig } from '~/composables/useCivData'
 import { getBonusCards, maxSelections as bonusMaxSelections } from '~/composables/useBonusData'
+import { PASTURES_BONUS_ID } from '~/composables/useCivConstants'
 import { BONUS_INDEX } from '~/../../shared/bonusConstants'
 
 const props = withDefaults(defineProps<{
@@ -450,10 +451,6 @@ ${bonusList || '<li>No bonuses selected</li>'}
 ${teamBonusHtml || '<p>No team bonus selected</p>'}
 `
 })
-
-// CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES is "Pastures replace Farms and Mill upgrades"
-// When this bonus is selected, we should show Pasture building and pasture techs instead of Farm and farm techs
-const PASTURES_BONUS_ID = 356
 
 const showPasturesInTechtree = computed(() => {
   // Check if bonus 356 is selected in civ bonuses
