@@ -94,6 +94,7 @@ export async function completeSetupPhase(page: Page, civName: string) {
  */
 export async function completeCardDrafting(page: Page, maxRounds: number = 20): Promise<number> {
   let rounds = 0;
+  console.log('[completeCardDrafting] Starting card drafting...');
   
   while (rounds < maxRounds) {
     const draftBoard = page.locator('.draft-board');
@@ -107,15 +108,18 @@ export async function completeCardDrafting(page: Page, maxRounds: number = 20): 
         await cards.first().click();
         await page.waitForTimeout(1500);
         rounds++;
+        console.log(`[completeCardDrafting] Completed round ${rounds}`);
       } else {
         await page.waitForTimeout(1000);
         rounds++;
       }
     } else {
+      console.log(`[completeCardDrafting] Draft board no longer visible after ${rounds} rounds`);
       break;
     }
   }
   
+  console.log(`[completeCardDrafting] Draft flow test completed ${rounds} rounds`);
   return rounds;
 }
 
@@ -124,15 +128,35 @@ export async function completeCardDrafting(page: Page, maxRounds: number = 20): 
  * @param page - Playwright page object
  */
 export async function completeTechTreePhase(page: Page) {
-  const techTreePhase = page.locator('.techtree-phase, #techTree');
-  const isTechTreeVisible = await techTreePhase.isVisible().catch(() => false);
+  console.log('[completeTechTreePhase] Starting tech tree phase completion...');
   
-  if (isTechTreeVisible) {
+  // Wait for tech tree phase to be visible (Phase 3 in drafts)
+  const techTreePhase = page.locator('.techtree-phase');
+  
+  try {
+    console.log('[completeTechTreePhase] Waiting for tech tree phase to be visible...');
+    await techTreePhase.waitFor({ state: 'visible', timeout: 15000 });
+    console.log('[completeTechTreePhase] Tech tree phase is visible');
+    
+    // Wait a moment for any animations or state updates
+    await page.waitForTimeout(2000);
+    
+    // Wait for the Done button to be visible and clickable
     const doneButton = page.getByRole('button', { name: /Done/i });
-    if (await doneButton.isVisible()) {
-      await doneButton.click();
-      await page.waitForTimeout(3000);
-    }
+    console.log('[completeTechTreePhase] Waiting for Done button to be visible...');
+    await doneButton.waitFor({ state: 'visible', timeout: 15000 });
+    console.log('[completeTechTreePhase] Done button is visible, clicking...');
+    
+    await doneButton.click();
+    console.log('[completeTechTreePhase] Done button clicked');
+    
+    // Wait for the click to be processed and socket event to be sent
+    await page.waitForTimeout(3000);
+    console.log('[completeTechTreePhase] Completed tech tree phase');
+  } catch (error) {
+    console.log('[completeTechTreePhase] Error:', error.message);
+    console.log('[completeTechTreePhase] Tech tree phase or Done button not found - may already be complete or phase skipped');
+    // Don't throw - phase might be skipped or already complete
   }
 }
 
