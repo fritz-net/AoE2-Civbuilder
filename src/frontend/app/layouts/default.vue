@@ -10,7 +10,6 @@
       
       <!-- GitHub Bug Tracker Link -->
       <a :href="githubUrl" target="_blank" rel="noopener noreferrer" class="nav-button github-link">
-        <img :src="githubIconSrc" alt="Report bugs on GitHub" class="github-icon" />
         Bug Tracker
       </a>
     </nav>
@@ -169,24 +168,14 @@ const showNavigation = computed(() => {
 
 /* GitHub Bug Tracker Link - greyish color scheme */
 .github-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: linear-gradient(to bottom, rgba(100, 100, 100, 0.9), rgba(70, 70, 70, 0.9));
+  background: linear-gradient(to bottom, rgba(100, 100, 100, 0.7), rgba(70, 70, 70, 0.7));
   color: #d0d0d0;
   border: 2px solid #999;
 }
 
 .github-link:hover {
-  background: linear-gradient(to bottom, rgba(120, 120, 120, 0.9), rgba(90, 90, 90, 0.9));
+  background: linear-gradient(to bottom, rgba(120, 120, 120, 0.7), rgba(90, 90, 90, 0.7));
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
-}
-
-.github-icon {
-  width: 18px;
-  height: 18px;
-  filter: brightness(0.9);
 }
 </style>
