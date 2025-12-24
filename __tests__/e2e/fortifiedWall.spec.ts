@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 /**
  * E2E tests for Fortified Wall dependencies in the tech tree
  * Tests that Fortified Wall correctly enables Stone Wall and Gate
- * Tests both /draft and /build techtree interfaces
+ * Uses /techtree page for direct access to tech tree component
  * 
  * Tech IDs:
  * - tech_194: Fortified Wall Tech (researched at University)
@@ -13,12 +13,12 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Fortified Wall Tech Tree Dependencies', () => {
-  test.describe('Build Page - Tech Tree', () => {
+  test.describe('Tech Tree Page', () => {
     test('should enable Stone Wall and Gate when Fortified Wall tech is clicked', async ({ page }) => {
-      await page.goto('/v2/build');
+      await page.goto('/v2/techtree');
       
       // Wait for page to load and tech tree to render
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1000);
       
       // Verify tech tree is visible
       const techtreeSvg = page.locator('.techtree-svg');
@@ -60,10 +60,10 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
     });
 
     test('should enable Stone Wall and Gate when Fortified Wall building is clicked', async ({ page }) => {
-      await page.goto('/v2/build');
+      await page.goto('/v2/techtree');
       
       // Wait for page to load
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1000);
       
       const techtreeSvg = page.locator('.techtree-svg');
       await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
@@ -92,10 +92,10 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
     });
 
     test('should disable Fortified Wall (tech and building) when Stone Wall is deselected', async ({ page }) => {
-      await page.goto('/v2/build');
+      await page.goto('/v2/techtree');
       
       // Wait for page to load
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1000);
       
       const techtreeSvg = page.locator('.techtree-svg');
       await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
@@ -131,10 +131,10 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
     });
 
     test('should disable Fortified Wall (tech and building) when Gate is deselected', async ({ page }) => {
-      await page.goto('/v2/build');
+      await page.goto('/v2/techtree');
       
       // Wait for page to load
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1000);
       
       const techtreeSvg = page.locator('.techtree-svg');
       await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
@@ -170,10 +170,10 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
     });
 
     test('should maintain correct state when toggling multiple times', async ({ page }) => {
-      await page.goto('/v2/build');
+      await page.goto('/v2/techtree');
       
       // Wait for page to load
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1000);
       
       const techtreeSvg = page.locator('.techtree-svg');
       await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
@@ -218,10 +218,10 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
 
   test.describe('Visual Verification Tests', () => {
     test('should take screenshot showing initial disabled state', async ({ page }, testInfo) => {
-      await page.goto('/v2/build');
+      await page.goto('/v2/techtree');
       
       // Wait for page and tech tree to load
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1000);
       
       const techtreeSvg = page.locator('.techtree-svg');
       await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
@@ -236,9 +236,9 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
     });
 
     test('should take screenshot showing enabled state after clicking', async ({ page }, testInfo) => {
-      await page.goto('/v2/build');
+      await page.goto('/v2/techtree');
       
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1000);
       
       const techtreeSvg = page.locator('.techtree-svg');
       await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
@@ -263,10 +263,10 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
  */
 test.describe('Fortified Wall Logic Tests', () => {
   test('should verify tech tree component loads correctly', async ({ page }) => {
-    await page.goto('/v2/build');
+    await page.goto('/v2/techtree');
     
     // Wait for page to load
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
     
     // Check that the tech tree component is present
     const techtree = page.locator('.techtree-container');
@@ -285,9 +285,9 @@ test.describe('Fortified Wall Logic Tests', () => {
   });
 
   test('should verify all four nodes start in disabled state', async ({ page }) => {
-    await page.goto('/v2/build');
+    await page.goto('/v2/techtree');
     
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000);
     
     const techtreeSvg = page.locator('.techtree-svg');
     await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
