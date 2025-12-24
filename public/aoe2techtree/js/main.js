@@ -557,6 +557,25 @@ function enableCaret(caretId) {
 	} else if (caretId == "building_487") {
 		enableCaret("building_117");
 	}
+	
+	// Fortified Wall (tech_194 and building_155) requires Stone Wall (building_117) and Gate (building_487)
+	// When Fortified Wall (tech or building) is enabled, enable Stone Wall + Gate
+	if (caretId == "tech_194" || caretId == "building_155") {
+		// Check if Stone Wall is not already enabled before calling enableCaret
+		var stoneWallType = idType("building_117");
+		var stoneWallId = idID("building_117");
+		if (!localtree[stoneWallType].includes(stoneWallId)) {
+			enableCaret("building_117"); // Stone Wall
+		}
+		
+		// Check if Gate is not already enabled before calling enableCaret
+		var gateType = idType("building_487");
+		var gateId = idID("building_487");
+		if (!localtree[gateType].includes(gateId)) {
+			enableCaret("building_487"); // Gate
+		}
+	}
+	
 	const parentId = parentConnections.get(caretId);
 	if (!parentId) {
 		return;
@@ -610,6 +629,23 @@ function disableCaret(caretId) {
 		disableCaret("building_487");
 	} else if (caretId == "building_487") {
 		disableCaret("building_117");
+	}
+	
+	// When Stone Wall or Gate is disabled, disable both Fortified Wall tech and building
+	if (caretId == "building_117" || caretId == "building_487") {
+		// Check if Fortified Wall tech is enabled before calling disableCaret
+		var fortifiedWallTechType = idType("tech_194");
+		var fortifiedWallTechId = idID("tech_194");
+		if (localtree[fortifiedWallTechType].includes(fortifiedWallTechId)) {
+			disableCaret("tech_194"); // Fortified Wall tech
+		}
+		
+		// Check if Fortified Wall building is enabled before calling disableCaret
+		var fortifiedWallBuildingType = idType("building_155");
+		var fortifiedWallBuildingId = idID("building_155");
+		if (localtree[fortifiedWallBuildingType].includes(fortifiedWallBuildingId)) {
+			disableCaret("building_155"); // Fortified Wall building
+		}
 	}
 }
 

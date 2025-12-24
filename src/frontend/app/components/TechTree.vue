@@ -816,6 +816,27 @@ function handleLinkedCarets(caretId: string, enable: boolean) {
     }
   }
   
+  // Fortified Wall (tech_194 and building_155) requires Stone Wall (building_117) and Gate (building_487)
+  // When Fortified Wall (tech or building) is enabled, enable Stone Wall + Gate
+  if (enable && (caretId === 'tech_194' || caretId === 'building_155')) {
+    if (!isEnabled('building_117')) {
+      enableCaret('building_117') // Stone Wall
+    }
+    if (!isEnabled('building_487')) {
+      enableCaret('building_487') // Gate
+    }
+  }
+  
+  // When Stone Wall or Gate is disabled, disable both Fortified Wall tech and building
+  if (!enable && (caretId === 'building_117' || caretId === 'building_487')) {
+    if (isEnabled('tech_194')) {
+      disableCaret('tech_194') // Fortified Wall tech
+    }
+    if (isEnabled('building_155')) {
+      disableCaret('building_155') // Fortified Wall building
+    }
+  }
+  
   // Special cases for trebuchet-related units
   if (!enable && caretId === 'tech_47') {
     disableCaret('unit_5')
