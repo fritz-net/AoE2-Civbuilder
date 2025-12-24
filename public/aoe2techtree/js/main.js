@@ -557,6 +557,14 @@ function enableCaret(caretId) {
 	} else if (caretId == "building_487") {
 		enableCaret("building_117");
 	}
+	
+	// Fortified Wall requires Stone Wall and Gate
+	// When Fortified Wall (tech or building) is enabled, enable Stone Wall + Gate
+	if (caretId == "tech_194" || caretId == "building_155") {
+		enableCaret("building_117"); // Stone Wall
+		enableCaret("building_487"); // Gate
+	}
+	
 	const parentId = parentConnections.get(caretId);
 	if (!parentId) {
 		return;
@@ -610,6 +618,12 @@ function disableCaret(caretId) {
 		disableCaret("building_487");
 	} else if (caretId == "building_487") {
 		disableCaret("building_117");
+	}
+	
+	// When Stone Wall or Gate is disabled, disable Fortified Wall (tech and building)
+	if (caretId == "building_117" || caretId == "building_487") {
+		disableCaret("tech_194"); // Fortified Wall tech
+		disableCaret("building_155"); // Fortified Wall building
 	}
 }
 
