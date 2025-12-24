@@ -26,7 +26,7 @@
       </div>
 
       <!-- Single Player Instructions -->
-      <div class="instructions-section">
+      <div class="instructions-section faq-section">
         <h2>Single Player / Local Mod Installation</h2>
         <ol class="instructions-list">
           <li>Locate the downloaded .zip file</li>
@@ -85,7 +85,7 @@
         </div>
       </div>
       
-      <div class="instructions-section">
+      <div class="instructions-section faq-section">
         <h2>Publication Instructions (only needed for multiplayer!)</h2>
         <ol class="instructions-list">
           <li>
