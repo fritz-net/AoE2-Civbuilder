@@ -518,10 +518,11 @@ onMounted(() => {
 <style scoped>
 .draft-board {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   background: url('/img/draftbackground.jpg') center/cover;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .board-header {
@@ -556,6 +557,7 @@ onMounted(() => {
   gap: 1rem;
   padding: 1rem;
   overflow: hidden;
+  min-height: 0;
 }
 
 .players-sidebar {
@@ -630,8 +632,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  overflow-y: visible;
-  max-height: calc(100vh - 200px);
+  overflow: hidden;
+  min-height: 0;
 }
 
 .cards-container {

@@ -48,7 +48,7 @@
       </button>
     </div>
 
-    <div ref="techtreeRef" class="techtree" :style="techtreeStyle" @mouseleave="hideHelp" @wheel="handleWheel">
+    <div ref="techtreeRef" class="techtree" :style="techtreeStyle" @mouseleave="hideHelp" @wheel="handleWheel" @mousemove="handleMouseMove">
       <div class="svg-wrapper" :style="svgWrapperStyle">
         <svg
           ref="svgRef"
@@ -300,6 +300,7 @@ const techtreePoints = ref(props.points)
 const focusedCaret = ref<Caret | null>(null)
 const helpVisible = ref(false)
 const highlightedIds = ref<Set<string>>(new Set())
+const mousePosition = ref({ x: 0, y: 0 })
 const helptextStyle = ref<{ top: string; left: string; display: string }>({
   top: '0px',
   left: '0px',
@@ -621,23 +622,40 @@ function highlightPath(caretId: string) {
   }
 }
 
+function handleMouseMove(event: MouseEvent) {
+  mousePosition.value = { x: event.clientX, y: event.clientY }
+  if (helpVisible.value && focusedCaret.value) {
+    positionHelptext(focusedCaret.value)
+  }
+}
+
 function positionHelptext(caret: Caret) {
-  if (!helptextRef.value || !techtreeRef.value) return
+  if (!helptextRef.value) return
   
   const helpbox = helptextRef.value.getBoundingClientRect()
-  const techtreeRect = techtreeRef.value.getBoundingClientRect()
+  const offset = 15 // pixels from cursor
   
-  let top = caret.y + caret.height
-  let left = caret.x - helpbox.width
+  let top = mousePosition.value.y + offset
+  let left = mousePosition.value.x + offset
   
-  // Check if tooltip goes below the tree
-  if (top + helpbox.height > tree.value.height) {
-    top = caret.y - helpbox.height
+  // Check if tooltip goes below viewport
+  if (top + helpbox.height > window.innerHeight) {
+    top = mousePosition.value.y - helpbox.height - offset
   }
   
-  // Check if tooltip goes out of view
-  if (left < techtreeRef.value.scrollLeft) {
-    left = techtreeRef.value.scrollLeft
+  // Check if tooltip goes beyond right edge of viewport
+  if (left + helpbox.width > window.innerWidth) {
+    left = mousePosition.value.x - helpbox.width - offset
+  }
+  
+  // Ensure tooltip stays within left edge
+  if (left < 0) {
+    left = offset
+  }
+  
+  // Ensure tooltip stays within top edge
+  if (top < 0) {
+    top = offset
   }
   
   helptextStyle.value = {
@@ -1238,16 +1256,17 @@ defineExpose({
 }
 
 .helptext {
-  position: absolute;
+  position: fixed;
   width: 300px;
   background: rgba(0, 0, 0, 0.95);
   border: 2px solid hsl(52, 100%, 50%);
   padding: 0.75rem 1rem;
   font-size: 10pt;
-  z-index: 100;
+  z-index: 10000;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   color: hsl(52, 100%, 50%);
+  pointer-events: none;
 }
 
 .helptext :deep(p) {
