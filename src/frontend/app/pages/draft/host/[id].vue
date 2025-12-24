@@ -112,8 +112,6 @@
       
       <!-- Show tech tree if not done yet -->
       <template v-else>
-        <h1 class="phase-title">Tech Tree</h1>
-        
         <div class="techtree-fullscreen">
           <!-- Sidebar with selected bonuses -->
           <DraftSidebar
@@ -552,6 +550,11 @@ onUnmounted(() => {
   min-height: 100vh;
 }
 
+/* Override default layout padding for draft pages */
+:global(.content) {
+  padding: 0 !important;
+}
+
 /* Join Form Styles */
 .join-phase {
   display: flex;
@@ -851,14 +854,15 @@ onUnmounted(() => {
 
 /* Tech tree phase (Phase 3) */
 .techtree-phase {
-  min-height: 100vh;
+  height: 100vh;
   padding: 0;
+  overflow: hidden;
 }
 
 /* Fullscreen tech tree layout */
 .techtree-fullscreen {
   display: flex;
-  height: 100vh;
+  height: 100%;
   width: 100%;
 }
 

@@ -968,7 +968,7 @@ defineExpose({
   display: flex;
   flex-direction: row;
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   font-family: 'Merriweather', Georgia, 'Times New Roman', Times, serif;
   position: relative;
 }
