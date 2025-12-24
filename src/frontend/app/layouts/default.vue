@@ -179,7 +179,7 @@ const showNavigation = computed(() => {
 }
 
 .github-link:hover {
-  background: linear-gradient(to bottom, rgba(120, 120, 120, 0.95), rgba(90, 90, 90, 0.95));
+  background: linear-gradient(to bottom, rgba(120, 120, 120, 0.9), rgba(90, 90, 90, 0.9));
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
 }
