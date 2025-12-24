@@ -6,12 +6,13 @@
       <NuxtLink to="/about" class="nav-button">About</NuxtLink>
       <NuxtLink to="/events" class="nav-button">Events</NuxtLink>
       <NuxtLink to="/updates" class="nav-button">Updates</NuxtLink>
-      <a :href="v1Url" class="nav-button classic-ui-link">Classic UI</a>
       
       <!-- GitHub Bug Tracker Link -->
-      <a :href="githubUrl" target="_blank" rel="noopener noreferrer" class="nav-button github-link">
+      <a :href="githubUrl" target="_blank" rel="noopener noreferrer" class="nav-button">
         Bug Tracker
       </a>
+      
+      <a :href="v1Url" class="nav-button classic-ui-link">Classic UI</a>
     </nav>
     
     <div class="top-right-links" v-if="showNavigation">
@@ -129,7 +130,7 @@ const showNavigation = computed(() => {
 }
 
 .discord-invite {
-  height: 50px;
+  height: 100px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
@@ -164,18 +165,5 @@ const showNavigation = computed(() => {
 .classic-ui-link {
   opacity: 0.85;
   font-size: min(1.8vh, 0.9vw) !important;
-}
-
-/* GitHub Bug Tracker Link - greyish color scheme */
-.github-link {
-  background: linear-gradient(to bottom, rgba(100, 100, 100, 0.7), rgba(70, 70, 70, 0.7));
-  color: #d0d0d0;
-  border: 2px solid #999;
-}
-
-.github-link:hover {
-  background: linear-gradient(to bottom, rgba(120, 120, 120, 0.7), rgba(90, 90, 90, 0.7));
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
 }
 </style>
