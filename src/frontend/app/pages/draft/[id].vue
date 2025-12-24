@@ -45,7 +45,7 @@
         :current-player-index="currentTurn?.playerNum || 0"
         :cards="displayCards"
         :is-my-turn="false"
-        :timer-duration="draft.preset.timer_enabled && !draft.gamestate.timer_paused ? draft.gamestate.timer_remaining : 0"
+        :timer-duration="timerDuration"
         @view-player="handleViewPlayer"
       >
         <template #card-details="{ card }">
@@ -160,6 +160,7 @@ const {
   currentPhase,
   currentTurn,
   roundTypeName,
+  timerDuration,
   initSocket,
   loadDraft,
   joinRoom,

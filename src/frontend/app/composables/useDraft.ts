@@ -102,6 +102,14 @@ export const useDraft = () => {
     return names[turn.roundType] || ''
   })
 
+  // Timer duration computed property
+  const timerDuration = computed(() => {
+    if (!draft.value) return 0
+    if (!draft.value.preset.timer_enabled) return 0
+    if (draft.value.gamestate.timer_paused) return 0
+    return draft.value.gamestate.timer_remaining
+  })
+
   // Get cookie value helper
   const getCookie = (name: string): string | null => {
     const cookies = document.cookie.split(';')
@@ -325,6 +333,7 @@ export const useDraft = () => {
     currentPhase,
     currentTurn,
     roundTypeName,
+    timerDuration,
     initSocket,
     loadDraft,
     joinRoom,

@@ -996,6 +996,66 @@ router.post("/download", (req, res) => {
 	res.download(__dirname + "/modding/requested_mods/" + req.body.draftID + ".zip");
 });
 
+// Helper function to determine current player's turn based on round type
+function getCurrentPlayer(draft) {
+	var numPlayers = draft["preset"]["slots"];
+	var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
+	var player = draft["gamestate"]["order"][draft["gamestate"]["turn"] % numPlayers];
+	if (roundType == 2 || roundType == 4) {
+		player = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
+	}
+	return { player, roundType, numPlayers };
+}
+
+// Helper function to process a card pick (used by both end turn and timer expired)
+function processCardPick(draft, pick) {
+	var { player, roundType, numPlayers } = getCurrentPlayer(draft);
+	
+	draft["gamestate"]["highlighted"] = [];
+	
+	// Give the player the card they chose
+	draft["players"][player]["bonuses"][roundType].push(pick);
+	
+	// If it's the last turn of a round, distribute new cards, otherwise make the card unavailable to others
+	if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
+		if (roundType == 4) {
+			// Last turn of the game
+			draft["gamestate"]["phase"] = 3;
+		} else {
+			draft["gamestate"]["cards"] = [];
+			for (var i = 0; i < 2 * numPlayers + 20; i++) {
+				var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][roundType + 1].length);
+				draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][roundType + 1][rand]);
+				draft["gamestate"]["available_cards"][roundType + 1].splice(rand, 1);
+			}
+		}
+	} else {
+		var pickIndex = draft["gamestate"]["cards"].indexOf(pick);
+		if (pickIndex != -1) {
+			draft["gamestate"]["cards"][pickIndex] = -1;
+		} else {
+			return { success: false, error: "Card not found" };
+		}
+	}
+	
+	// Increment the turn
+	draft["gamestate"]["turn"]++;
+	if (draft["gamestate"]["phase"] == 3) {
+		for (var i = 0; i < numPlayers; i++) {
+			draft["players"][i]["ready"] = 0;
+		}
+	}
+	
+	// Reset timer for next turn if timer is enabled
+	if (draft["preset"]["timer_enabled"]) {
+		draft["gamestate"]["timer_remaining"] = draft["preset"]["timer_duration"];
+		draft["gamestate"]["timer_last_update"] = Date.now();
+		draft["gamestate"]["timer_paused"] = false;
+	}
+	
+	return { success: true };
+}
+
 function draftIO(io) {
 	io.on("connection", function (socket) {
 		socket.on("join room", (roomID) => {
@@ -1301,60 +1361,16 @@ function draftIO(io) {
 		});
 		socket.on("end turn", (roomID, pick, client_turn) => {
 			let draft = getDraft(roomID);
-			var numPlayers = draft["preset"]["slots"];
-
-			//Determine which round we're in and who's turn it is
-			draft["gamestate"]["highlighted"] = [];
-			var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
-			var player = draft["gamestate"]["order"][draft["gamestate"]["turn"] % numPlayers];
-			if (roundType == 2 || roundType == 4) {
-				player = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
-			}
 
 			var bug = 0;
 			if (client_turn == draft["gamestate"]["turn"]) {
-				//Give the player the card they chose
-				draft["players"][player]["bonuses"][roundType].push(pick);
-
-				//If it's the last turn of a round, distribute new cards, otherwise make the card unavailable to others
-				if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
-					if (roundType == 4) {
-						//Last turn of the game
-						draft["gamestate"]["phase"] = 3;
-					} else {
-						draft["gamestate"]["cards"] = [];
-						for (var i = 0; i < 2 * numPlayers + 20; i++) {
-							var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][roundType + 1].length);
-							draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][roundType + 1][rand]);
-							draft["gamestate"]["available_cards"][roundType + 1].splice(rand, 1);
-						}
-					}
-				} else {
-					var pickIndex = draft["gamestate"]["cards"].indexOf(pick);
-					if (pickIndex != -1) {
-						draft["gamestate"]["cards"][pickIndex] = -1;
-					} else {
-						bug = 1;
-						console.log("THE BUG HAPPENED");
-						console.log("RoomID: " + roomID);
-						console.log("Pick: " + pick);
-						console.log("Draft State: ", draft["gamestate"]);
-					}
-				}
-
-				//Increment the turn and save the gamestate
-				draft["gamestate"]["turn"]++;
-				if (draft["gamestate"]["phase"] == 3) {
-					for (var i = 0; i < numPlayers; i++) {
-						draft["players"][i]["ready"] = 0;
-					}
-				}
-				
-				// Reset timer for next turn if timer is enabled
-				if (draft["preset"]["timer_enabled"]) {
-					draft["gamestate"]["timer_remaining"] = draft["preset"]["timer_duration"];
-					draft["gamestate"]["timer_last_update"] = Date.now();
-					draft["gamestate"]["timer_paused"] = false;
+				var result = processCardPick(draft, pick);
+				if (!result.success) {
+					bug = 1;
+					console.log("THE BUG HAPPENED");
+					console.log("RoomID: " + roomID);
+					console.log("Pick: " + pick);
+					console.log("Draft State: ", draft["gamestate"]);
 				}
 				
 				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
@@ -1434,8 +1450,6 @@ function draftIO(io) {
 			let draft = getDraft(roomID);
 			if (!draft || !draft["preset"]["timer_enabled"]) return;
 			
-			var numPlayers = draft["preset"]["slots"];
-			
 			// Only process if it's the correct turn (prevent duplicate processing)
 			if (client_turn !== draft["gamestate"]["turn"]) {
 				console.log("Timer expired for wrong turn, ignoring");
@@ -1464,49 +1478,8 @@ function draftIO(io) {
 			var randomPick = availableCards[Math.floor(Math.random() * availableCards.length)];
 			console.log(`Timer expired, auto-selecting card: ${randomPick}`);
 			
-			// Process the pick (same logic as "end turn")
-			draft["gamestate"]["highlighted"] = [];
-			var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
-			var player = draft["gamestate"]["order"][draft["gamestate"]["turn"] % numPlayers];
-			if (roundType == 2 || roundType == 4) {
-				player = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
-			}
-			
-			// Give the player the randomly selected card
-			draft["players"][player]["bonuses"][roundType].push(randomPick);
-			
-			// Handle card distribution
-			if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
-				if (roundType == 4) {
-					// Last turn of the game
-					draft["gamestate"]["phase"] = 3;
-				} else {
-					draft["gamestate"]["cards"] = [];
-					for (var i = 0; i < 2 * numPlayers + 20; i++) {
-						var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][roundType + 1].length);
-						draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][roundType + 1][rand]);
-						draft["gamestate"]["available_cards"][roundType + 1].splice(rand, 1);
-					}
-				}
-			} else {
-				var pickIndex = draft["gamestate"]["cards"].indexOf(randomPick);
-				if (pickIndex != -1) {
-					draft["gamestate"]["cards"][pickIndex] = -1;
-				}
-			}
-			
-			// Increment the turn
-			draft["gamestate"]["turn"]++;
-			if (draft["gamestate"]["phase"] == 3) {
-				for (var i = 0; i < numPlayers; i++) {
-					draft["players"][i]["ready"] = 0;
-				}
-			}
-			
-			// Reset timer for next turn
-			draft["gamestate"]["timer_remaining"] = draft["preset"]["timer_duration"];
-			draft["gamestate"]["timer_last_update"] = Date.now();
-			draft["gamestate"]["timer_paused"] = false;
+			// Process the pick using the same helper function
+			processCardPick(draft, randomPick);
 			
 			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			io.in(roomID).emit("set gamestate", draft);

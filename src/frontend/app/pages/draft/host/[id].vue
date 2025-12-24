@@ -107,7 +107,7 @@
       :cards="displayCards"
       :is-my-turn="currentTurn?.isMyTurn || false"
       :my-player-index="playerNumber"
-      :timer-duration="draft.preset.timer_enabled && !draft.gamestate.timer_paused ? draft.gamestate.timer_remaining : 0"
+      :timer-duration="timerDuration"
       :highlighted="draft.gamestate.highlighted || []"
       @select-card="handleSelectCard"
       @view-player="handleViewPlayer"
@@ -261,6 +261,7 @@ const {
   currentPhase,
   currentTurn,
   roundTypeName,
+  timerDuration,
   initSocket,
   loadDraft,
   joinRoom,
