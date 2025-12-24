@@ -10,7 +10,7 @@
       
       <!-- GitHub Bug Tracker Link -->
       <a :href="githubUrl" target="_blank" rel="noopener noreferrer" class="nav-button github-link">
-        <img :src="githubIconSrc" alt="GitHub" class="github-icon" />
+        <img :src="githubIconSrc" alt="Report bugs on GitHub" class="github-icon" />
         Bug Tracker
       </a>
     </nav>
@@ -42,7 +42,7 @@ const githubIconSrc = computed(() => `${baseURL}img/github-icon.svg`)
 
 // Determine GitHub URL based on hostname
 const githubUrl = computed(() => {
-  if (typeof window !== 'undefined') {
+  if (process.client) {
     const hostname = window.location.hostname
     if (hostname === 'krakenmeister.com' || hostname === 'www.krakenmeister.com') {
       return 'https://github.com/Krakenmeister/AoE2-Civbuilder/issues'
