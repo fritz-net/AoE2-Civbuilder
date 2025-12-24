@@ -291,6 +291,12 @@ export const useDraft = () => {
     socket.value.emit('timer expired', draft.value.id, turn)
   }
 
+  // Sync timer with server
+  const syncTimer = () => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('sync timer', draft.value.id)
+  }
+
   // Setup socket listeners
   const setupSocketListeners = () => {
     if (!socket.value) return
@@ -300,6 +306,14 @@ export const useDraft = () => {
       console.log('Received gamestate update:', updatedDraft)
       draft.value = updatedDraft
       isLoading.value = false
+    })
+
+    // Timer update handler (lightweight updates)
+    socket.value.on('timer update', (timerData: { timer_remaining: number, timer_paused: boolean }) => {
+      if (draft.value && draft.value.gamestate) {
+        draft.value.gamestate.timer_remaining = timerData.timer_remaining
+        draft.value.gamestate.timer_paused = timerData.timer_paused
+      }
     })
 
     // Error handler
@@ -355,6 +369,7 @@ export const useDraft = () => {
     pauseTimer,
     resumeTimer,
     notifyTimerExpired,
+    syncTimer,
     setupSocketListeners,
     cleanup,
   }

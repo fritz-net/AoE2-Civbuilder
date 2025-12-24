@@ -1001,6 +1001,27 @@ router.post("/download", (req, res) => {
 	res.download(__dirname + "/modding/requested_mods/" + req.body.draftID + ".zip");
 });
 
+// Helper function to update timer_remaining based on elapsed time
+function updateTimerRemaining(draft) {
+	if (!draft["preset"]["timer_enabled"]) return;
+	if (draft["gamestate"]["phase"] !== 2) return; // Only in picking phase
+	if (draft["gamestate"]["timer_paused"]) return;
+	
+	var lastUpdate = draft["gamestate"]["timer_last_update"];
+	if (!lastUpdate) {
+		draft["gamestate"]["timer_last_update"] = Date.now();
+		return;
+	}
+	
+	var now = Date.now();
+	var elapsed = Math.floor((now - lastUpdate) / 1000); // seconds elapsed
+	
+	if (elapsed > 0) {
+		draft["gamestate"]["timer_remaining"] = Math.max(0, draft["gamestate"]["timer_remaining"] - elapsed);
+		draft["gamestate"]["timer_last_update"] = now;
+	}
+}
+
 // Helper function to determine current player's turn based on round type
 function getCurrentPlayer(draft) {
 	var numPlayers = draft["preset"]["slots"];
@@ -1068,6 +1089,44 @@ function draftIO(io) {
 		});
 		socket.on("get gamestate", (roomID, playerNumber) => {
 			let draft = getDraft(roomID);
+			
+			// Update timer based on elapsed time
+			updateTimerRemaining(draft);
+			
+			// Check if timer expired and auto-select if needed
+			if (draft["preset"]["timer_enabled"] && 
+			    draft["gamestate"]["phase"] === 2 && 
+			    draft["gamestate"]["timer_remaining"] === 0 &&
+			    !draft["gamestate"]["timer_paused"]) {
+				// Timer expired, trigger auto-selection
+				console.log(`Timer expired on get gamestate, auto-selecting card for turn ${draft["gamestate"]["turn"]}`);
+				
+				// Select a random available card from highlighted indices
+				var availableCards = [];
+				var highlighted = draft["gamestate"]["highlighted"] || [];
+				
+				if (highlighted.length === 0) {
+					for (var i = 0; i < draft["gamestate"]["cards"].length; i++) {
+						if (draft["gamestate"]["cards"][i] !== -1) {
+							availableCards.push(draft["gamestate"]["cards"][i]);
+						}
+					}
+				} else {
+					for (var i = 0; i < highlighted.length; i++) {
+						var cardIndex = highlighted[i];
+						if (cardIndex < draft["gamestate"]["cards"].length && draft["gamestate"]["cards"][cardIndex] !== -1) {
+							availableCards.push(draft["gamestate"]["cards"][cardIndex]);
+						}
+					}
+				}
+				
+				if (availableCards.length > 0) {
+					var randomPick = availableCards[Math.floor(Math.random() * availableCards.length)];
+					console.log(`Auto-selecting card: ${randomPick} from ${availableCards.length} available cards`);
+					processCardPick(draft, randomPick);
+					fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+				}
+			}
 
 			if (playerNumber >= 0) {
 				io.in(roomID).emit("set gamestate", draft);
@@ -1077,6 +1136,7 @@ function draftIO(io) {
 		});
 		socket.on("get private gamestate", (roomID) => {
 			var draft = getDraft(roomID);
+			updateTimerRemaining(draft);
 			io.to(socket.id).emit("set gamestate", draft);
 		});
 		socket.on("toggle ready", (roomID, playerNumber) => {
@@ -1453,6 +1513,8 @@ function draftIO(io) {
 			let draft = getDraft(roomID);
 			if (!draft || !draft["preset"]["timer_enabled"]) return;
 			
+			// Update timer before pausing to save current state
+			updateTimerRemaining(draft);
 			draft["gamestate"]["timer_paused"] = true;
 			draft["gamestate"]["timer_last_update"] = Date.now();
 			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
@@ -1468,6 +1530,58 @@ function draftIO(io) {
 			draft["gamestate"]["timer_last_update"] = Date.now();
 			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			io.in(roomID).emit("set gamestate", draft);
+		});
+		
+		// Get timer sync - lightweight update for timer only
+		socket.on("sync timer", (roomID) => {
+			let draft = getDraft(roomID);
+			if (!draft || !draft["preset"]["timer_enabled"]) return;
+			
+			updateTimerRemaining(draft);
+			
+			// Check if timer expired and auto-select if needed
+			if (draft["gamestate"]["phase"] === 2 && 
+			    draft["gamestate"]["timer_remaining"] === 0 &&
+			    !draft["gamestate"]["timer_paused"]) {
+				// Timer expired, trigger auto-selection
+				console.log(`Timer expired on sync, auto-selecting card for turn ${draft["gamestate"]["turn"]}`);
+				
+				var availableCards = [];
+				var highlighted = draft["gamestate"]["highlighted"] || [];
+				
+				if (highlighted.length === 0) {
+					for (var i = 0; i < draft["gamestate"]["cards"].length; i++) {
+						if (draft["gamestate"]["cards"][i] !== -1) {
+							availableCards.push(draft["gamestate"]["cards"][i]);
+						}
+					}
+				} else {
+					for (var i = 0; i < highlighted.length; i++) {
+						var cardIndex = highlighted[i];
+						if (cardIndex < draft["gamestate"]["cards"].length && draft["gamestate"]["cards"][cardIndex] !== -1) {
+							availableCards.push(draft["gamestate"]["cards"][cardIndex]);
+						}
+					}
+				}
+				
+				if (availableCards.length > 0) {
+					var randomPick = availableCards[Math.floor(Math.random() * availableCards.length)];
+					console.log(`Auto-selecting card: ${randomPick}`);
+					processCardPick(draft, randomPick);
+					fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+					// Broadcast to all clients
+					io.in(roomID).emit("set gamestate", draft);
+					return;
+				}
+			}
+			
+			// Save updated timer state
+			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+			// Send just timer update to requesting client
+			io.to(socket.id).emit("timer update", {
+				timer_remaining: draft["gamestate"]["timer_remaining"],
+				timer_paused: draft["gamestate"]["timer_paused"]
+			});
 		});
 		
 		// Timer expired - make random selection

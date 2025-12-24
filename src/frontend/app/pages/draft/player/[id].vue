@@ -246,6 +246,7 @@ const {
   refillCards,
   clearCards,
   notifyTimerExpired,
+  syncTimer,
   setupSocketListeners,
   cleanup,
 } = useDraft()
@@ -484,6 +485,18 @@ onMounted(async () => {
     
     // Load draft - this will use socket.io to get gamestate
     await loadDraft(draftId.value)
+    
+    // Start periodic timer sync for phase 2 (every second)
+    const timerSyncInterval = setInterval(() => {
+      if (draft.value && draft.value.gamestate.phase === 2 && draft.value.preset.timer_enabled) {
+        syncTimer()
+      }
+    }, 1000)
+    
+    // Clean up interval on unmount
+    onUnmounted(() => {
+      clearInterval(timerSyncInterval)
+    })
   }
   // Otherwise, show join form
 })
