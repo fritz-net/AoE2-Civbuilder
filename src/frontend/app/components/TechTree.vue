@@ -993,6 +993,7 @@ defineExpose({
   position: relative;
   border-left: 6px solid #4d3617;
   padding-bottom: 100px; /* Space for toolbar */
+  width: 100%;
 }
 
 .is-maximized .techtree {
@@ -1001,7 +1002,8 @@ defineExpose({
 }
 
 .svg-wrapper {
-  display: inline-block;
+  display: block;
+  width: 100%;
   min-width: 100%;
 }
 

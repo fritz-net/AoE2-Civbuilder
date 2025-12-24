@@ -512,6 +512,12 @@ onUnmounted(() => {
   width: 100vw;
 }
 
+/* Override default layout for draft pages */
+:global(.app-layout) {
+  width: 100vw;
+  overflow-x: hidden;
+}
+
 /* Override default layout padding for draft pages */
 :global(.content) {
   padding: 0 !important;
