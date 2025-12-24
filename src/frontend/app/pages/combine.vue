@@ -18,16 +18,25 @@
         :class="{ 'drag-over': isDragging }"
       >
         <h2>Add Civilizations</h2>
-        <label class="upload-btn">
-          <input 
-            type="file" 
-            accept=".json"
-            multiple
-            @change="handleFileUpload"
-            ref="fileInput"
-          />
-          <span>📁 Choose JSON Files</span>
-        </label>
+        <div class="upload-buttons">
+          <label class="upload-btn">
+            <input 
+              type="file" 
+              accept=".json"
+              multiple
+              @change="handleFileUpload"
+              ref="fileInput"
+            />
+            <span>📁 Choose JSON Files</span>
+          </label>
+          <button 
+            class="vanilla-btn"
+            @click="handleDownloadVanilla"
+            title="Download all vanilla Age of Empires II civilizations as JSON files"
+          >
+            ⬇️ Get Vanilla Civs
+          </button>
+        </div>
         <p class="upload-hint">Select one or more .json civilization files</p>
         <p class="drag-hint">or drag and drop JSON files here</p>
       </div>
@@ -207,6 +216,21 @@ async function handleCreateMod() {
     alert(`Failed to create mod: ${error.value || 'Unknown error'}`)
   }
 }
+
+function handleDownloadVanilla() {
+  // Create a form and submit it to download the vanilla civs zip
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = '/vanilla'
+  form.style.display = 'none'
+  document.body.appendChild(form)
+  try {
+    form.submit()
+  } finally {
+    // Clean up the form element
+    document.body.removeChild(form)
+  }
+}
 </script>
 
 <style scoped>
@@ -255,6 +279,13 @@ async function handleCreateMod() {
   margin-bottom: 1.5rem;
 }
 
+.upload-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .upload-btn {
   display: inline-block;
   padding: 1rem 2rem;
@@ -270,6 +301,25 @@ async function handleCreateMod() {
 
 .upload-btn:hover {
   background: linear-gradient(to bottom, rgba(160, 82, 45, 0.95), rgba(139, 69, 19, 0.95));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+}
+
+.vanilla-btn {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background: linear-gradient(to bottom, rgba(30, 80, 120, 0.9), rgba(20, 60, 90, 0.9));
+  color: hsl(52, 100%, 50%);
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.vanilla-btn:hover {
+  background: linear-gradient(to bottom, rgba(40, 100, 140, 0.95), rgba(30, 80, 120, 0.95));
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
 }
