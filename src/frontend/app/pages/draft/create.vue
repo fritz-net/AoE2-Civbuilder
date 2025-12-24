@@ -78,6 +78,35 @@
           </div>
         </div>
       </div>
+      <!-- Advanced/Testing Options (collapsed by default) -->
+      <details class="form-section advanced-section">
+        <summary class="form-label">Advanced Options (for testing)</summary>
+        
+        <div class="form-section">
+          <label for="cardsPerRoll" class="form-label">Cards Per Roll:</label>
+          <input
+            id="cardsPerRoll"
+            v-model.number="draftSettings.cardsPerRoll"
+            type="number"
+            min="1"
+            max="10"
+            class="form-input"
+          />
+          <p class="form-help">Number of highlighted cards after refill/clear (default: 3)</p>
+        </div>
+
+        <div class="form-section">
+          <label for="requiredFirstRoll" class="form-label">Required Bonuses in First Roll:</label>
+          <input
+            id="requiredFirstRoll"
+            v-model="draftSettings.requiredFirstRoll"
+            type="text"
+            placeholder="e.g., 356 (pasture bonus)"
+            class="form-input"
+          />
+          <p class="form-help">Comma-separated bonus IDs to force into first roll (for testing)</p>
+        </div>
+      </details>
 
       <button
         class="submit-button"
@@ -178,6 +207,8 @@ const draftSettings = ref({
   allowedRarities: [true, true, true, true, true],
   timerEnabled: false,
   timerDuration: 60,
+  cardsPerRoll: 3, // Optional: number of cards to show per roll
+  requiredFirstRoll: '', // Optional: comma-separated bonus IDs for testing (e.g., "356" for pasture bonus)
 })
 
 const draftLinks = ref<{
@@ -207,6 +238,8 @@ const createDraft = async () => {
         allowed_rarities: draftSettings.value.allowedRarities.join(','),
         timer_enabled: draftSettings.value.timerEnabled.toString(),
         timer_duration: draftSettings.value.timerDuration.toString(),
+        cards_per_roll: draftSettings.value.cardsPerRoll.toString(),
+        required_first_roll: draftSettings.value.requiredFirstRoll,
       }).toString(),
     })
 
@@ -588,5 +621,32 @@ const goBack = () => {
   .copy-button {
     width: 100%;
   }
+}
+
+/* Advanced section styling */
+.advanced-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 204, 0, 0.3);
+  border-radius: 4px;
+}
+
+.advanced-section summary {
+  cursor: pointer;
+  user-select: none;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+.advanced-section[open] summary {
+  margin-bottom: 1rem;
+}
+
+.form-help {
+  font-size: 0.85rem;
+  color: rgba(240, 230, 210, 0.7);
+  margin-top: 0.25rem;
+  font-style: italic;
 }
 </style>
