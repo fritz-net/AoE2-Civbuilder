@@ -106,8 +106,14 @@ export const useDraft = () => {
   const timerDuration = computed(() => {
     if (!draft.value) return 0
     if (!draft.value.preset.timer_enabled) return 0
-    if (draft.value.gamestate.timer_paused) return 0
+    // Return remaining time even when paused so timer display stays visible
     return draft.value.gamestate.timer_remaining
+  })
+
+  // Timer paused state
+  const isTimerPaused = computed(() => {
+    if (!draft.value) return false
+    return draft.value.gamestate.timer_paused
   })
 
   // Get cookie value helper
@@ -334,6 +340,7 @@ export const useDraft = () => {
     currentTurn,
     roundTypeName,
     timerDuration,
+    isTimerPaused,
     initSocket,
     loadDraft,
     joinRoom,

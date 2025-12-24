@@ -46,6 +46,7 @@
         :cards="displayCards"
         :is-my-turn="false"
         :timer-duration="timerDuration"
+        :timer-paused="isTimerPaused"
         @view-player="handleViewPlayer"
       >
         <template #card-details="{ card }">
@@ -161,6 +162,7 @@ const {
   currentTurn,
   roundTypeName,
   timerDuration,
+  isTimerPaused,
   initSocket,
   loadDraft,
   joinRoom,

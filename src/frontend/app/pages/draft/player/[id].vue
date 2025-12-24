@@ -90,6 +90,7 @@
         :is-my-turn="currentTurn?.isMyTurn || false"
         :my-player-index="playerNumber"
         :timer-duration="timerDuration"
+        :timer-paused="isTimerPaused"
         :highlighted="draft.gamestate.highlighted || []"
         @select-card="handleSelectCard"
         @view-player="handleViewPlayer"
@@ -231,6 +232,7 @@ const {
   currentTurn,
   roundTypeName,
   timerDuration,
+  isTimerPaused,
   initSocket,
   loadDraft,
   joinRoom,
