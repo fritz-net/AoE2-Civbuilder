@@ -71,7 +71,7 @@
             </li>
             <li>
               <strong>Limit to 50 civilizations:</strong> Age of Empires II currently does not support more than 50 civilizations 
-              in a single mod. Make sure your total number of civilizations (vanilla + custom) does not exceed 50.
+              in a single mod. Make sure your total number of civilizations (vanilla + custom) does not exceed this limit to ensure compatibility.
             </li>
           </ul>
           <p class="faq-note">

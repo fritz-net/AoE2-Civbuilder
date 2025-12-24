@@ -224,8 +224,12 @@ function handleDownloadVanilla() {
   form.action = '/vanilla'
   form.style.display = 'none'
   document.body.appendChild(form)
-  form.submit()
-  document.body.removeChild(form)
+  try {
+    form.submit()
+  } finally {
+    // Clean up the form element
+    document.body.removeChild(form)
+  }
 }
 </script>
 
