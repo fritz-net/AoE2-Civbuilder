@@ -12,7 +12,8 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 
 const props = withDefaults(defineProps<{
-  duration?: number // Duration in seconds
+  duration?: number // Current remaining time in seconds
+  maxDuration?: number // Maximum duration for progress bar calculation (optional, defaults to duration)
   autoStart?: boolean
   showProgress?: boolean
   label?: string
@@ -20,6 +21,7 @@ const props = withDefaults(defineProps<{
   criticalThreshold?: number // Show critical color below this (seconds)
 }>(), {
   duration: 60,
+  maxDuration: 0, // 0 means use duration
   autoStart: true,
   showProgress: true,
   label: 'Time Remaining',
@@ -43,7 +45,8 @@ const formattedTime = computed(() => {
 })
 
 const progressPercent = computed(() => {
-  return (timeRemaining.value / props.duration) * 100
+  const max = props.maxDuration > 0 ? props.maxDuration : props.duration
+  return (timeRemaining.value / max) * 100
 })
 
 const isWarning = computed(() => {
@@ -97,9 +100,25 @@ const resume = () => {
 }
 
 // Watch for duration changes
-watch(() => props.duration, (newDuration) => {
-  if (!isRunning.value) {
+watch(() => props.duration, (newDuration, oldDuration) => {
+  // Always update timeRemaining when duration changes from server
+  // This handles page reload and turn changes
+  if (newDuration !== oldDuration && newDuration !== timeRemaining.value) {
     timeRemaining.value = newDuration
+    // If it was running and should auto-start, restart it
+    if (props.autoStart) {
+      stop()
+      start()
+    }
+  }
+})
+
+// Watch for autoStart changes (handles pause/resume)
+watch(() => props.autoStart, (shouldStart) => {
+  if (shouldStart && !isRunning.value) {
+    start()
+  } else if (!shouldStart && isRunning.value) {
+    stop()
   }
 })
 

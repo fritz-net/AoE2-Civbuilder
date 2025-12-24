@@ -53,6 +53,31 @@
         </div>
       </div>
 
+      <div class="form-section timer-section">
+        <label class="form-label">
+          <input
+            v-model="draftSettings.timerEnabled"
+            type="checkbox"
+            id="timerEnabled"
+            class="timer-checkbox"
+          />
+          Enable Timer for Picking Phase
+        </label>
+        <div v-if="draftSettings.timerEnabled" class="timer-input-group">
+          <label for="timerDuration" class="timer-sublabel">Time per Pick (seconds):</label>
+          <input
+            id="timerDuration"
+            v-model.number="draftSettings.timerDuration"
+            type="number"
+            min="5"
+            max="300"
+            class="form-input"
+          />
+          <div class="timer-help-text">
+            Players must pick within this time, or a random bonus/tech will be selected automatically.
+          </div>
+        </div>
+      </div>
       <!-- Advanced/Testing Options (collapsed by default) -->
       <details class="form-section advanced-section">
         <summary class="form-label">Advanced Options (for testing)</summary>
@@ -180,6 +205,8 @@ const draftSettings = ref({
   rounds: 4,
   techTreePoints: 200,
   allowedRarities: [true, true, true, true, true],
+  timerEnabled: false,
+  timerDuration: 60,
   cardsPerRoll: 3, // Optional: number of cards to show per roll
   requiredFirstRoll: '', // Optional: comma-separated bonus IDs for testing (e.g., "356" for pasture bonus)
 })
@@ -209,6 +236,8 @@ const createDraft = async () => {
         rounds: draftSettings.value.rounds.toString(),
         techtree_currency: draftSettings.value.techTreePoints.toString(),
         allowed_rarities: draftSettings.value.allowedRarities.join(','),
+        timer_enabled: draftSettings.value.timerEnabled.toString(),
+        timer_duration: draftSettings.value.timerDuration.toString(),
         cards_per_roll: draftSettings.value.cardsPerRoll.toString(),
         required_first_roll: draftSettings.value.requiredFirstRoll,
       }).toString(),
@@ -360,6 +389,40 @@ const goBack = () => {
   width: 20px;
   height: 20px;
   cursor: pointer;
+}
+
+.timer-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.timer-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin-right: 0.5rem;
+}
+
+.timer-input-group {
+  margin-top: 1rem;
+  padding-left: 1.5rem;
+}
+
+.timer-sublabel {
+  display: block;
+  color: #f0e6d2;
+  font-weight: normal;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.timer-help-text {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: rgba(240, 230, 210, 0.7);
+  font-style: italic;
 }
 
 .submit-button {

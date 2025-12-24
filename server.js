@@ -220,6 +220,9 @@ const createDraft = (req, res, next) => {
 	preset["points"] = parseInt(req.body.techtree_currency, 10);
 	preset["rounds"] = parseInt(req.body.rounds, 10);
 	preset["rarities"] = available_rarities;
+	// Timer settings (default disabled for backward compatibility)
+	preset["timer_enabled"] = req.body.timer_enabled === "true";
+	preset["timer_duration"] = preset["timer_enabled"] ? parseInt(req.body.timer_duration || "60", 10) : 0;
 	// Number of cards to show per roll (default 3 if not specified)
 	preset["cards_per_roll"] = req.body.cards_per_roll ? parseInt(req.body.cards_per_roll, 10) : 3;
 	// Optional: Force specific bonuses to appear in first roll (for testing)
@@ -270,6 +273,10 @@ const createDraft = (req, res, next) => {
 	gamestate["cards"] = [];
 	gamestate["order"] = [];
 	gamestate["highlighted"] = [];
+	// Timer state
+	gamestate["timer_paused"] = false;
+	gamestate["timer_remaining"] = preset["timer_duration"];
+	gamestate["timer_last_update"] = null;
 	draft["gamestate"] = gamestate;
 	fs.writeFileSync(`${tempdir}/drafts/${id}.json`, JSON.stringify(draft, null, 2));
 	req.playerlink = `${hostname}/draft/player/${id}`;
@@ -994,6 +1001,87 @@ router.post("/download", (req, res) => {
 	res.download(__dirname + "/modding/requested_mods/" + req.body.draftID + ".zip");
 });
 
+// Helper function to update timer_remaining based on elapsed time
+function updateTimerRemaining(draft) {
+	if (!draft["preset"]["timer_enabled"]) return;
+	if (draft["gamestate"]["phase"] !== 2) return; // Only in picking phase
+	if (draft["gamestate"]["timer_paused"]) return;
+	
+	var lastUpdate = draft["gamestate"]["timer_last_update"];
+	if (!lastUpdate) {
+		draft["gamestate"]["timer_last_update"] = Date.now();
+		return;
+	}
+	
+	var now = Date.now();
+	var elapsed = Math.floor((now - lastUpdate) / 1000); // seconds elapsed
+	
+	if (elapsed > 0) {
+		draft["gamestate"]["timer_remaining"] = Math.max(0, draft["gamestate"]["timer_remaining"] - elapsed);
+		draft["gamestate"]["timer_last_update"] = now;
+	}
+}
+
+// Helper function to determine current player's turn based on round type
+function getCurrentPlayer(draft) {
+	var numPlayers = draft["preset"]["slots"];
+	var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
+	var player = draft["gamestate"]["order"][draft["gamestate"]["turn"] % numPlayers];
+	if (roundType == 2 || roundType == 4) {
+		player = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
+	}
+	return { player, roundType, numPlayers };
+}
+
+// Helper function to process a card pick (used by both end turn and timer expired)
+function processCardPick(draft, pick) {
+	var { player, roundType, numPlayers } = getCurrentPlayer(draft);
+	
+	draft["gamestate"]["highlighted"] = [];
+	
+	// Give the player the card they chose
+	draft["players"][player]["bonuses"][roundType].push(pick);
+	
+	// If it's the last turn of a round, distribute new cards, otherwise make the card unavailable to others
+	if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
+		if (roundType == 4) {
+			// Last turn of the game
+			draft["gamestate"]["phase"] = 3;
+		} else {
+			draft["gamestate"]["cards"] = [];
+			for (var i = 0; i < 2 * numPlayers + 20; i++) {
+				var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][roundType + 1].length);
+				draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][roundType + 1][rand]);
+				draft["gamestate"]["available_cards"][roundType + 1].splice(rand, 1);
+			}
+		}
+	} else {
+		var pickIndex = draft["gamestate"]["cards"].indexOf(pick);
+		if (pickIndex != -1) {
+			draft["gamestate"]["cards"][pickIndex] = -1;
+		} else {
+			return { success: false, error: "Card not found" };
+		}
+	}
+	
+	// Increment the turn
+	draft["gamestate"]["turn"]++;
+	if (draft["gamestate"]["phase"] == 3) {
+		for (var i = 0; i < numPlayers; i++) {
+			draft["players"][i]["ready"] = 0;
+		}
+	}
+	
+	// Reset timer for next turn if timer is enabled
+	if (draft["preset"]["timer_enabled"]) {
+		draft["gamestate"]["timer_remaining"] = draft["preset"]["timer_duration"];
+		draft["gamestate"]["timer_last_update"] = Date.now();
+		draft["gamestate"]["timer_paused"] = false;
+	}
+	
+	return { success: true };
+}
+
 function draftIO(io) {
 	io.on("connection", function (socket) {
 		socket.on("join room", (roomID) => {
@@ -1001,6 +1089,44 @@ function draftIO(io) {
 		});
 		socket.on("get gamestate", (roomID, playerNumber) => {
 			let draft = getDraft(roomID);
+			
+			// Update timer based on elapsed time
+			updateTimerRemaining(draft);
+			
+			// Check if timer expired and auto-select if needed
+			if (draft["preset"]["timer_enabled"] && 
+			    draft["gamestate"]["phase"] === 2 && 
+			    draft["gamestate"]["timer_remaining"] === 0 &&
+			    !draft["gamestate"]["timer_paused"]) {
+				// Timer expired, trigger auto-selection
+				console.log(`Timer expired on get gamestate, auto-selecting card for turn ${draft["gamestate"]["turn"]}`);
+				
+				// Select a random available card from highlighted indices
+				var availableCards = [];
+				var highlighted = draft["gamestate"]["highlighted"] || [];
+				
+				if (highlighted.length === 0) {
+					for (var i = 0; i < draft["gamestate"]["cards"].length; i++) {
+						if (draft["gamestate"]["cards"][i] !== -1) {
+							availableCards.push(draft["gamestate"]["cards"][i]);
+						}
+					}
+				} else {
+					for (var i = 0; i < highlighted.length; i++) {
+						var cardIndex = highlighted[i];
+						if (cardIndex < draft["gamestate"]["cards"].length && draft["gamestate"]["cards"][cardIndex] !== -1) {
+							availableCards.push(draft["gamestate"]["cards"][cardIndex]);
+						}
+					}
+				}
+				
+				if (availableCards.length > 0) {
+					var randomPick = availableCards[Math.floor(Math.random() * availableCards.length)];
+					console.log(`Auto-selecting card: ${randomPick} from ${availableCards.length} available cards`);
+					processCardPick(draft, randomPick);
+					fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+				}
+			}
 
 			if (playerNumber >= 0) {
 				io.in(roomID).emit("set gamestate", draft);
@@ -1010,6 +1136,7 @@ function draftIO(io) {
 		});
 		socket.on("get private gamestate", (roomID) => {
 			var draft = getDraft(roomID);
+			updateTimerRemaining(draft);
 			io.to(socket.id).emit("set gamestate", draft);
 		});
 		socket.on("toggle ready", (roomID, playerNumber) => {
@@ -1315,54 +1442,18 @@ function draftIO(io) {
 		});
 		socket.on("end turn", (roomID, pick, client_turn) => {
 			let draft = getDraft(roomID);
-			var numPlayers = draft["preset"]["slots"];
-
-			//Determine which round we're in and who's turn it is
-			draft["gamestate"]["highlighted"] = [];
-			var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
-			var player = draft["gamestate"]["order"][draft["gamestate"]["turn"] % numPlayers];
-			if (roundType == 2 || roundType == 4) {
-				player = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
-			}
 
 			var bug = 0;
 			if (client_turn == draft["gamestate"]["turn"]) {
-				//Give the player the card they chose
-				draft["players"][player]["bonuses"][roundType].push(pick);
-
-				//If it's the last turn of a round, distribute new cards, otherwise make the card unavailable to others
-				if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
-					if (roundType == 4) {
-						//Last turn of the game
-						draft["gamestate"]["phase"] = 3;
-					} else {
-						draft["gamestate"]["cards"] = [];
-						for (var i = 0; i < 2 * numPlayers + 20; i++) {
-							var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][roundType + 1].length);
-							draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][roundType + 1][rand]);
-							draft["gamestate"]["available_cards"][roundType + 1].splice(rand, 1);
-						}
-					}
-				} else {
-					var pickIndex = draft["gamestate"]["cards"].indexOf(pick);
-					if (pickIndex != -1) {
-						draft["gamestate"]["cards"][pickIndex] = -1;
-					} else {
-						bug = 1;
-						console.log("THE BUG HAPPENED");
-						console.log("RoomID: " + roomID);
-						console.log("Pick: " + pick);
-						console.log("Draft State: ", draft["gamestate"]);
-					}
+				var result = processCardPick(draft, pick);
+				if (!result.success) {
+					bug = 1;
+					console.log("THE BUG HAPPENED");
+					console.log("RoomID: " + roomID);
+					console.log("Pick: " + pick);
+					console.log("Draft State: ", draft["gamestate"]);
 				}
-
-				//Increment the turn and save the gamestate
-				draft["gamestate"]["turn"]++;
-				if (draft["gamestate"]["phase"] == 3) {
-					for (var i = 0; i < numPlayers; i++) {
-						draft["players"][i]["ready"] = 0;
-					}
-				}
+				
 				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 				io.in(roomID).emit("set gamestate", draft);
 			} else {
@@ -1413,6 +1504,135 @@ function draftIO(io) {
 				draft["gamestate"]["cards"][i] = draft["gamestate"]["available_cards"][roundType][rand];
 				draft["gamestate"]["available_cards"][roundType].splice(rand, 1);
 			}
+			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+			io.in(roomID).emit("set gamestate", draft);
+		});
+		
+		// Timer control - pause (host only)
+		socket.on("pause timer", (roomID) => {
+			let draft = getDraft(roomID);
+			if (!draft || !draft["preset"]["timer_enabled"]) return;
+			
+			// Update timer before pausing to save current state
+			updateTimerRemaining(draft);
+			draft["gamestate"]["timer_paused"] = true;
+			draft["gamestate"]["timer_last_update"] = Date.now();
+			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+			io.in(roomID).emit("set gamestate", draft);
+		});
+		
+		// Timer control - resume (host only)
+		socket.on("resume timer", (roomID) => {
+			let draft = getDraft(roomID);
+			if (!draft || !draft["preset"]["timer_enabled"]) return;
+			
+			draft["gamestate"]["timer_paused"] = false;
+			draft["gamestate"]["timer_last_update"] = Date.now();
+			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+			io.in(roomID).emit("set gamestate", draft);
+		});
+		
+		// Get timer sync - lightweight update for timer only
+		socket.on("sync timer", (roomID) => {
+			let draft = getDraft(roomID);
+			if (!draft || !draft["preset"]["timer_enabled"]) return;
+			
+			updateTimerRemaining(draft);
+			
+			// Check if timer expired and auto-select if needed
+			if (draft["gamestate"]["phase"] === 2 && 
+			    draft["gamestate"]["timer_remaining"] === 0 &&
+			    !draft["gamestate"]["timer_paused"]) {
+				// Timer expired, trigger auto-selection
+				console.log(`Timer expired on sync, auto-selecting card for turn ${draft["gamestate"]["turn"]}`);
+				
+				var availableCards = [];
+				var highlighted = draft["gamestate"]["highlighted"] || [];
+				
+				if (highlighted.length === 0) {
+					for (var i = 0; i < draft["gamestate"]["cards"].length; i++) {
+						if (draft["gamestate"]["cards"][i] !== -1) {
+							availableCards.push(draft["gamestate"]["cards"][i]);
+						}
+					}
+				} else {
+					for (var i = 0; i < highlighted.length; i++) {
+						var cardIndex = highlighted[i];
+						if (cardIndex < draft["gamestate"]["cards"].length && draft["gamestate"]["cards"][cardIndex] !== -1) {
+							availableCards.push(draft["gamestate"]["cards"][cardIndex]);
+						}
+					}
+				}
+				
+				if (availableCards.length > 0) {
+					var randomPick = availableCards[Math.floor(Math.random() * availableCards.length)];
+					console.log(`Auto-selecting card: ${randomPick}`);
+					processCardPick(draft, randomPick);
+					fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+					// Broadcast to all clients
+					io.in(roomID).emit("set gamestate", draft);
+					return;
+				}
+			}
+			
+			// Save updated timer state
+			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+			// Send just timer update to requesting client
+			io.to(socket.id).emit("timer update", {
+				timer_remaining: draft["gamestate"]["timer_remaining"],
+				timer_paused: draft["gamestate"]["timer_paused"]
+			});
+		});
+		
+		// Timer expired - make random selection
+		socket.on("timer expired", (roomID, client_turn) => {
+			let draft = getDraft(roomID);
+			if (!draft || !draft["preset"]["timer_enabled"]) return;
+			
+			// Only process if it's the correct turn (prevent duplicate processing)
+			if (client_turn !== draft["gamestate"]["turn"]) {
+				console.log("Timer expired for wrong turn, ignoring");
+				return;
+			}
+			
+			// Check if we're in the picking phase (phase 2)
+			if (draft["gamestate"]["phase"] !== 2) {
+				console.log("Timer expired but not in picking phase");
+				return;
+			}
+			
+			// Select a random available card from highlighted indices
+			var availableCards = [];
+			var highlighted = draft["gamestate"]["highlighted"] || [];
+			
+			// If highlighted is empty, all non-(-1) cards are available
+			if (highlighted.length === 0) {
+				for (var i = 0; i < draft["gamestate"]["cards"].length; i++) {
+					if (draft["gamestate"]["cards"][i] !== -1) {
+						availableCards.push(draft["gamestate"]["cards"][i]);
+					}
+				}
+			} else {
+				// Only select from highlighted card indices
+				for (var i = 0; i < highlighted.length; i++) {
+					var cardIndex = highlighted[i];
+					if (cardIndex < draft["gamestate"]["cards"].length && draft["gamestate"]["cards"][cardIndex] !== -1) {
+						availableCards.push(draft["gamestate"]["cards"][cardIndex]);
+					}
+				}
+			}
+			
+			if (availableCards.length === 0) {
+				console.log("No available cards for random selection");
+				return;
+			}
+			
+			var randomPick = availableCards[Math.floor(Math.random() * availableCards.length)];
+			console.log(`Timer expired, auto-selecting card: ${randomPick} from ${availableCards.length} available cards`);
+			
+			// Process the pick using the same helper function
+			processCardPick(draft, randomPick);
+			
 			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			io.in(roomID).emit("set gamestate", draft);
 		});
