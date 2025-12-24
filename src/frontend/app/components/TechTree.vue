@@ -206,7 +206,6 @@
             :height="caret.height"
             class="node__overlay"
             :data-testid="`overlay-${caret.id}`"
-            :data-enabled="isEnabled(caret.id)"
             @mouseover="showHelp(caret)"
             @mouseout="resetHighlight"
             @click="handleCaretClick(caret)"

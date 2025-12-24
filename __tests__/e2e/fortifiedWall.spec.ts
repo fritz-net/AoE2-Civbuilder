@@ -24,38 +24,39 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
       const techtreeSvg = page.locator('.techtree-svg');
       await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
       
-      // Check initial state: Stone Wall, Gate, and Fortified Wall should be disabled
-      const stoneWallOverlay = page.locator('[data-testid="overlay-building_117"]');
-      const gateOverlay = page.locator('[data-testid="overlay-building_487"]');
-      const fortifiedWallTechOverlay = page.locator('[data-testid="overlay-tech_194"]');
-      const fortifiedWallBuildingOverlay = page.locator('[data-testid="overlay-building_155"]');
+      // Check initial state: Stone Wall, Gate, and Fortified Wall should be disabled (have cross)
+      const stoneWallNode = page.locator('[data-testid="node-building_117"]');
+      const gateNode = page.locator('[data-testid="node-building_487"]');
+      const fortifiedWallTechNode = page.locator('[data-testid="node-tech_194"]');
+      const fortifiedWallBuildingNode = page.locator('[data-testid="node-building_155"]');
       
-      // Verify all are present
-      await expect(stoneWallOverlay).toBeAttached();
-      await expect(gateOverlay).toBeAttached();
-      await expect(fortifiedWallTechOverlay).toBeAttached();
-      await expect(fortifiedWallBuildingOverlay).toBeAttached();
+      // Verify all nodes are present
+      await expect(stoneWallNode).toBeAttached();
+      await expect(gateNode).toBeAttached();
+      await expect(fortifiedWallTechNode).toBeAttached();
+      await expect(fortifiedWallBuildingNode).toBeAttached();
       
-      // Check initial disabled state
-      await expect(stoneWallOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(fortifiedWallTechOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(fortifiedWallBuildingOverlay).toHaveAttribute('data-enabled', 'false');
+      // Check initial disabled state by verifying crosses are present
+      await expect(stoneWallNode.locator('image.cross')).toBeVisible();
+      await expect(gateNode.locator('image.cross')).toBeVisible();
+      await expect(fortifiedWallTechNode.locator('image.cross')).toBeVisible();
+      await expect(fortifiedWallBuildingNode.locator('image.cross')).toBeVisible();
       
       // Click on Fortified Wall Tech (tech_194)
+      const fortifiedWallTechOverlay = page.locator('[data-testid="overlay-tech_194"]');
       await fortifiedWallTechOverlay.click();
       
       // Wait for state update
       await page.waitForTimeout(300);
       
-      // Verify that clicking Fortified Wall Tech enables:
+      // Verify that clicking Fortified Wall Tech enables all (crosses should be gone):
       // 1. Fortified Wall Building (building_155)
       // 2. Stone Wall (building_117)
       // 3. Gate (building_487)
-      await expect(fortifiedWallTechOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(fortifiedWallBuildingOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(stoneWallOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'true');
+      await expect(fortifiedWallTechNode.locator('image.cross')).not.toBeVisible();
+      await expect(fortifiedWallBuildingNode.locator('image.cross')).not.toBeVisible();
+      await expect(stoneWallNode.locator('image.cross')).not.toBeVisible();
+      await expect(gateNode.locator('image.cross')).not.toBeVisible();
     });
 
     test('should enable Stone Wall and Gate when Fortified Wall building is clicked', async ({ page }) => {
@@ -67,27 +68,27 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
       const techtreeSvg = page.locator('.techtree-svg');
       await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
       
-      // Get overlays
-      const stoneWallOverlay = page.locator('[data-testid="overlay-building_117"]');
-      const gateOverlay = page.locator('[data-testid="overlay-building_487"]');
-      const fortifiedWallTechOverlay = page.locator('[data-testid="overlay-tech_194"]');
-      const fortifiedWallBuildingOverlay = page.locator('[data-testid="overlay-building_155"]');
+      // Get nodes
+      const stoneWallNode = page.locator('[data-testid="node-building_117"]');
+      const gateNode = page.locator('[data-testid="node-building_487"]');
+      const fortifiedWallBuildingNode = page.locator('[data-testid="node-building_155"]');
       
-      // Check initial state
-      await expect(stoneWallOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(fortifiedWallBuildingOverlay).toHaveAttribute('data-enabled', 'false');
+      // Check initial state - crosses should be visible
+      await expect(stoneWallNode.locator('image.cross')).toBeVisible();
+      await expect(gateNode.locator('image.cross')).toBeVisible();
+      await expect(fortifiedWallBuildingNode.locator('image.cross')).toBeVisible();
       
       // Click on Fortified Wall Building (building_155)
+      const fortifiedWallBuildingOverlay = page.locator('[data-testid="overlay-building_155"]');
       await fortifiedWallBuildingOverlay.click();
       
       // Wait for state update
       await page.waitForTimeout(300);
       
-      // Verify that clicking Fortified Wall Building also enables Stone Wall and Gate
-      await expect(fortifiedWallBuildingOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(stoneWallOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'true');
+      // Verify that clicking Fortified Wall Building also enables Stone Wall and Gate (crosses gone)
+      await expect(fortifiedWallBuildingNode.locator('image.cross')).not.toBeVisible();
+      await expect(stoneWallNode.locator('image.cross')).not.toBeVisible();
+      await expect(gateNode.locator('image.cross')).not.toBeVisible();
     });
 
     test('should disable Fortified Wall (tech and building) when Stone Wall is deselected', async ({ page }) => {
@@ -99,32 +100,34 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
       const techtreeSvg = page.locator('.techtree-svg');
       await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
       
-      // Get overlays
-      const stoneWallOverlay = page.locator('[data-testid="overlay-building_117"]');
-      const gateOverlay = page.locator('[data-testid="overlay-building_487"]');
-      const fortifiedWallTechOverlay = page.locator('[data-testid="overlay-tech_194"]');
-      const fortifiedWallBuildingOverlay = page.locator('[data-testid="overlay-building_155"]');
+      // Get nodes
+      const stoneWallNode = page.locator('[data-testid="node-building_117"]');
+      const gateNode = page.locator('[data-testid="node-building_487"]');
+      const fortifiedWallTechNode = page.locator('[data-testid="node-tech_194"]');
+      const fortifiedWallBuildingNode = page.locator('[data-testid="node-building_155"]');
       
       // First, enable Fortified Wall Tech (which enables everything)
+      const fortifiedWallTechOverlay = page.locator('[data-testid="overlay-tech_194"]');
       await fortifiedWallTechOverlay.click();
       await page.waitForTimeout(300);
       
-      // Verify all are enabled
-      await expect(fortifiedWallTechOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(fortifiedWallBuildingOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(stoneWallOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'true');
+      // Verify all are enabled (no crosses)
+      await expect(fortifiedWallTechNode.locator('image.cross')).not.toBeVisible();
+      await expect(fortifiedWallBuildingNode.locator('image.cross')).not.toBeVisible();
+      await expect(stoneWallNode.locator('image.cross')).not.toBeVisible();
+      await expect(gateNode.locator('image.cross')).not.toBeVisible();
       
       // Now click Stone Wall to disable it
+      const stoneWallOverlay = page.locator('[data-testid="overlay-building_117"]');
       await stoneWallOverlay.click();
       await page.waitForTimeout(300);
       
-      // Verify that disabling Stone Wall also disables Fortified Wall tech and building
-      await expect(stoneWallOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(fortifiedWallTechOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(fortifiedWallBuildingOverlay).toHaveAttribute('data-enabled', 'false');
+      // Verify that disabling Stone Wall also disables Fortified Wall tech and building (crosses back)
+      await expect(stoneWallNode.locator('image.cross')).toBeVisible();
+      await expect(fortifiedWallTechNode.locator('image.cross')).toBeVisible();
+      await expect(fortifiedWallBuildingNode.locator('image.cross')).toBeVisible();
       // Gate should also be disabled because Stone Wall and Gate are linked
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'false');
+      await expect(gateNode.locator('image.cross')).toBeVisible();
     });
 
     test('should disable Fortified Wall (tech and building) when Gate is deselected', async ({ page }) => {
@@ -136,32 +139,34 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
       const techtreeSvg = page.locator('.techtree-svg');
       await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
       
-      // Get overlays
-      const stoneWallOverlay = page.locator('[data-testid="overlay-building_117"]');
-      const gateOverlay = page.locator('[data-testid="overlay-building_487"]');
-      const fortifiedWallTechOverlay = page.locator('[data-testid="overlay-tech_194"]');
-      const fortifiedWallBuildingOverlay = page.locator('[data-testid="overlay-building_155"]');
+      // Get nodes
+      const stoneWallNode = page.locator('[data-testid="node-building_117"]');
+      const gateNode = page.locator('[data-testid="node-building_487"]');
+      const fortifiedWallTechNode = page.locator('[data-testid="node-tech_194"]');
+      const fortifiedWallBuildingNode = page.locator('[data-testid="node-building_155"]');
       
       // First, enable Fortified Wall Building (which enables everything)
+      const fortifiedWallBuildingOverlay = page.locator('[data-testid="overlay-building_155"]');
       await fortifiedWallBuildingOverlay.click();
       await page.waitForTimeout(300);
       
-      // Verify all are enabled
-      await expect(fortifiedWallTechOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(fortifiedWallBuildingOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(stoneWallOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'true');
+      // Verify all are enabled (no crosses)
+      await expect(fortifiedWallTechNode.locator('image.cross')).not.toBeVisible();
+      await expect(fortifiedWallBuildingNode.locator('image.cross')).not.toBeVisible();
+      await expect(stoneWallNode.locator('image.cross')).not.toBeVisible();
+      await expect(gateNode.locator('image.cross')).not.toBeVisible();
       
       // Now click Gate to disable it
+      const gateOverlay = page.locator('[data-testid="overlay-building_487"]');
       await gateOverlay.click();
       await page.waitForTimeout(300);
       
-      // Verify that disabling Gate also disables Fortified Wall tech and building
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(fortifiedWallTechOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(fortifiedWallBuildingOverlay).toHaveAttribute('data-enabled', 'false');
+      // Verify that disabling Gate also disables Fortified Wall tech and building (crosses back)
+      await expect(gateNode.locator('image.cross')).toBeVisible();
+      await expect(fortifiedWallTechNode.locator('image.cross')).toBeVisible();
+      await expect(fortifiedWallBuildingNode.locator('image.cross')).toBeVisible();
       // Stone Wall should also be disabled because Stone Wall and Gate are linked
-      await expect(stoneWallOverlay).toHaveAttribute('data-enabled', 'false');
+      await expect(stoneWallNode.locator('image.cross')).toBeVisible();
     });
 
     test('should maintain correct state when toggling multiple times', async ({ page }) => {
@@ -173,38 +178,41 @@ test.describe('Fortified Wall Tech Tree Dependencies', () => {
       const techtreeSvg = page.locator('.techtree-svg');
       await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
       
-      // Get overlays
-      const stoneWallOverlay = page.locator('[data-testid="overlay-building_117"]');
-      const gateOverlay = page.locator('[data-testid="overlay-building_487"]');
-      const fortifiedWallTechOverlay = page.locator('[data-testid="overlay-tech_194"]');
-      const fortifiedWallBuildingOverlay = page.locator('[data-testid="overlay-building_155"]');
+      // Get nodes
+      const stoneWallNode = page.locator('[data-testid="node-building_117"]');
+      const gateNode = page.locator('[data-testid="node-building_487"]');
+      const fortifiedWallTechNode = page.locator('[data-testid="node-tech_194"]');
+      const fortifiedWallBuildingNode = page.locator('[data-testid="node-building_155"]');
       
       // Enable Fortified Wall Tech
+      const fortifiedWallTechOverlay = page.locator('[data-testid="overlay-tech_194"]');
       await fortifiedWallTechOverlay.click();
       await page.waitForTimeout(200);
-      await expect(stoneWallOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'true');
+      await expect(stoneWallNode.locator('image.cross')).not.toBeVisible();
+      await expect(gateNode.locator('image.cross')).not.toBeVisible();
       
       // Disable by clicking Fortified Wall Tech again
       await fortifiedWallTechOverlay.click();
       await page.waitForTimeout(200);
-      await expect(stoneWallOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(fortifiedWallBuildingOverlay).toHaveAttribute('data-enabled', 'false');
+      await expect(stoneWallNode.locator('image.cross')).toBeVisible();
+      await expect(gateNode.locator('image.cross')).toBeVisible();
+      await expect(fortifiedWallBuildingNode.locator('image.cross')).toBeVisible();
       
       // Enable again via Fortified Wall Building
+      const fortifiedWallBuildingOverlay = page.locator('[data-testid="overlay-building_155"]');
       await fortifiedWallBuildingOverlay.click();
       await page.waitForTimeout(200);
-      await expect(stoneWallOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'true');
-      await expect(fortifiedWallTechOverlay).toHaveAttribute('data-enabled', 'true');
+      await expect(stoneWallNode.locator('image.cross')).not.toBeVisible();
+      await expect(gateNode.locator('image.cross')).not.toBeVisible();
+      await expect(fortifiedWallTechNode.locator('image.cross')).not.toBeVisible();
       
       // Disable by clicking Stone Wall
+      const stoneWallOverlay = page.locator('[data-testid="overlay-building_117"]');
       await stoneWallOverlay.click();
       await page.waitForTimeout(200);
-      await expect(fortifiedWallTechOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(fortifiedWallBuildingOverlay).toHaveAttribute('data-enabled', 'false');
-      await expect(gateOverlay).toHaveAttribute('data-enabled', 'false');
+      await expect(fortifiedWallTechNode.locator('image.cross')).toBeVisible();
+      await expect(fortifiedWallBuildingNode.locator('image.cross')).toBeVisible();
+      await expect(gateNode.locator('image.cross')).toBeVisible();
     });
   });
 
@@ -284,10 +292,15 @@ test.describe('Fortified Wall Logic Tests', () => {
     const techtreeSvg = page.locator('.techtree-svg');
     await expect(techtreeSvg).toBeVisible({ timeout: 10000 });
     
-    // Check that all four start disabled
-    await expect(page.locator('[data-testid="overlay-tech_194"]')).toHaveAttribute('data-enabled', 'false');
-    await expect(page.locator('[data-testid="overlay-building_155"]')).toHaveAttribute('data-enabled', 'false');
-    await expect(page.locator('[data-testid="overlay-building_117"]')).toHaveAttribute('data-enabled', 'false');
-    await expect(page.locator('[data-testid="overlay-building_487"]')).toHaveAttribute('data-enabled', 'false');
+    // Check that all four start disabled (have crosses)
+    const fortifiedWallTech = page.locator('[data-testid="node-tech_194"]');
+    const fortifiedWallBuilding = page.locator('[data-testid="node-building_155"]');
+    const stoneWall = page.locator('[data-testid="node-building_117"]');
+    const gate = page.locator('[data-testid="node-building_487"]');
+    
+    await expect(fortifiedWallTech.locator('image.cross')).toBeVisible();
+    await expect(fortifiedWallBuilding.locator('image.cross')).toBeVisible();
+    await expect(stoneWall.locator('image.cross')).toBeVisible();
+    await expect(gate.locator('image.cross')).toBeVisible();
   });
 });
