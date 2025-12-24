@@ -89,10 +89,13 @@
         :cards="displayCards"
         :is-my-turn="currentTurn?.isMyTurn || false"
         :my-player-index="playerNumber"
-        :timer-duration="0"
+        :timer-duration="timerDuration"
+        :timer-max-duration="timerMaxDuration"
+        :timer-paused="isTimerPaused"
         :highlighted="draft.gamestate.highlighted || []"
         @select-card="handleSelectCard"
         @view-player="handleViewPlayer"
+        @timer-complete="handleTimerComplete"
         @refill="handleRefill"
         @clear="handleClear"
       />
@@ -231,6 +234,9 @@ const {
   currentPhase,
   currentTurn,
   roundTypeName,
+  timerDuration,
+  timerMaxDuration,
+  isTimerPaused,
   initSocket,
   loadDraft,
   joinRoom,
@@ -241,6 +247,8 @@ const {
   selectCard,
   refillCards,
   clearCards,
+  notifyTimerExpired,
+  syncTimer,
   setupSocketListeners,
   cleanup,
 } = useDraft()
@@ -417,6 +425,13 @@ const handleClear = () => {
   clearCards()
 }
 
+const handleTimerComplete = () => {
+  if (draft.value && currentTurn.value?.isMyTurn) {
+    // Notify server that timer expired
+    notifyTimerExpired(draft.value.gamestate.turn)
+  }
+}
+
 const handleDownload = () => {
   if (!draft.value) return
   
@@ -472,6 +487,18 @@ onMounted(async () => {
     
     // Load draft - this will use socket.io to get gamestate
     await loadDraft(draftId.value)
+    
+    // Start periodic timer sync for phase 2 (every second)
+    const timerSyncInterval = setInterval(() => {
+      if (draft.value && draft.value.gamestate.phase === 2 && draft.value.preset.timer_enabled) {
+        syncTimer()
+      }
+    }, 1000)
+    
+    // Clean up interval on unmount
+    onUnmounted(() => {
+      clearInterval(timerSyncInterval)
+    })
   }
   // Otherwise, show join form
 })

@@ -79,8 +79,26 @@
     </div>
 
     <!-- Phase 2: Draft Cards -->
-    <DraftBoard
-      v-else-if="currentPhase === 2 && draft"
+    <div v-if="currentPhase === 2 && draft">
+      <!-- Timer Control Panel (Host only, during Phase 2) -->
+      <div v-if="draft.preset.timer_enabled && isHost" class="timer-controls">
+        <button 
+          v-if="!draft.gamestate.timer_paused" 
+          @click="handlePauseTimer" 
+          class="timer-control-btn pause-btn"
+        >
+          ⏸ Pause Timer
+        </button>
+        <button 
+          v-else 
+          @click="handleResumeTimer" 
+          class="timer-control-btn resume-btn"
+        >
+          ▶ Resume Timer
+        </button>
+      </div>
+
+      <DraftBoard
       :phase-title="roundTypeName"
       :round-number="(currentTurn?.roundType || 0) + 1"
       :players="draft.players"
@@ -89,13 +107,17 @@
       :cards="displayCards"
       :is-my-turn="currentTurn?.isMyTurn || false"
       :my-player-index="playerNumber"
-      :timer-duration="0"
+      :timer-duration="timerDuration"
+      :timer-max-duration="timerMaxDuration"
+      :timer-paused="isTimerPaused"
       :highlighted="draft.gamestate.highlighted || []"
       @select-card="handleSelectCard"
       @view-player="handleViewPlayer"
+      @timer-complete="handleTimerComplete"
       @refill="handleRefill"
       @clear="handleClear"
     />
+    </div>
 
     <!-- Phase 3: Tech Tree (after drafting, shows selected bonuses in sidebar) -->
     <div v-else-if="currentPhase === 3" class="techtree-phase">
@@ -244,6 +266,9 @@ const {
   currentPhase,
   currentTurn,
   roundTypeName,
+  timerDuration,
+  timerMaxDuration,
+  isTimerPaused,
   initSocket,
   loadDraft,
   joinRoom,
@@ -254,6 +279,10 @@ const {
   selectCard,
   refillCards,
   clearCards,
+  pauseTimer,
+  resumeTimer,
+  notifyTimerExpired,
+  syncTimer,
   setupSocketListeners,
   cleanup,
 } = useDraft()
@@ -427,6 +456,21 @@ const handleClear = () => {
   clearCards()
 }
 
+const handleTimerComplete = () => {
+  if (draft.value && currentTurn.value?.isMyTurn) {
+    // Notify server that timer expired
+    notifyTimerExpired(draft.value.gamestate.turn)
+  }
+}
+
+const handlePauseTimer = () => {
+  pauseTimer()
+}
+
+const handleResumeTimer = () => {
+  resumeTimer()
+}
+
 const handleDownload = () => {
   if (!draft.value) return
   
@@ -538,6 +582,18 @@ onMounted(async () => {
     
     // Load draft - this will use socket.io to get gamestate
     await loadDraft(draftId.value)
+    
+    // Start periodic timer sync for phase 2 (every second)
+    const timerSyncInterval = setInterval(() => {
+      if (draft.value && draft.value.gamestate.phase === 2 && draft.value.preset.timer_enabled) {
+        syncTimer()
+      }
+    }, 1000)
+    
+    // Clean up interval on unmount
+    onUnmounted(() => {
+      clearInterval(timerSyncInterval)
+    })
   }
   // Otherwise, show join form
 })
@@ -997,5 +1053,48 @@ onUnmounted(() => {
   margin-top: 2rem;
   text-align: center;
   max-width: 500px;
+}
+
+/* Timer Controls */
+.timer-controls {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  z-index: 100;
+}
+
+.timer-control-btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border: 2px solid;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.pause-btn {
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border-color: hsl(39, 100%, 50%);
+  color: hsl(39, 100%, 50%);
+}
+
+.pause-btn:hover {
+  background: hsl(39, 100%, 50%);
+  color: #1a0f0a;
+  box-shadow: 0 0 12px rgba(255, 165, 0, 0.5);
+}
+
+.resume-btn {
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border-color: hsl(120, 100%, 50%);
+  color: hsl(120, 100%, 50%);
+}
+
+.resume-btn:hover {
+  background: hsl(120, 100%, 50%);
+  color: #1a0f0a;
+  box-shadow: 0 0 12px rgba(0, 255, 0, 0.5);
 }
 </style>

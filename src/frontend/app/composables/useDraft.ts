@@ -11,6 +11,8 @@ export interface DraftPreset {
   points: number
   rarities: Record<string, boolean>
   cards: number[]
+  timer_enabled: boolean
+  timer_duration: number
 }
 
 export interface DraftPlayer {
@@ -35,6 +37,9 @@ export interface DraftGameState {
   order: number[]
   cards: number[]
   deck: number[]
+  timer_paused: boolean
+  timer_remaining: number
+  timer_last_update: number | null
 }
 
 export interface Draft {
@@ -95,6 +100,27 @@ export const useDraft = () => {
       'Team Bonuses',
     ]
     return names[turn.roundType] || ''
+  })
+
+  // Timer duration computed property (current remaining time)
+  const timerDuration = computed(() => {
+    if (!draft.value) return 0
+    if (!draft.value.preset.timer_enabled) return 0
+    // Return remaining time even when paused so timer display stays visible
+    return draft.value.gamestate.timer_remaining
+  })
+
+  // Timer max duration (for progress bar calculation)
+  const timerMaxDuration = computed(() => {
+    if (!draft.value) return 0
+    if (!draft.value.preset.timer_enabled) return 0
+    return draft.value.preset.timer_duration
+  })
+
+  // Timer paused state
+  const isTimerPaused = computed(() => {
+    if (!draft.value) return false
+    return draft.value.gamestate.timer_paused
   })
 
   // Get cookie value helper
@@ -254,6 +280,30 @@ export const useDraft = () => {
     socket.value.emit('clear', draft.value.id)
   }
 
+  // Timer control - pause (host only)
+  const pauseTimer = () => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('pause timer', draft.value.id)
+  }
+
+  // Timer control - resume (host only)
+  const resumeTimer = () => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('resume timer', draft.value.id)
+  }
+
+  // Timer expired - notify server
+  const notifyTimerExpired = (turn: number) => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('timer expired', draft.value.id, turn)
+  }
+
+  // Sync timer with server
+  const syncTimer = () => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('sync timer', draft.value.id)
+  }
+
   // Setup socket listeners
   const setupSocketListeners = () => {
     if (!socket.value) return
@@ -263,6 +313,14 @@ export const useDraft = () => {
       console.log('Received gamestate update:', updatedDraft)
       draft.value = updatedDraft
       isLoading.value = false
+    })
+
+    // Timer update handler (lightweight updates)
+    socket.value.on('timer update', (timerData: { timer_remaining: number, timer_paused: boolean }) => {
+      if (draft.value && draft.value.gamestate) {
+        draft.value.gamestate.timer_remaining = timerData.timer_remaining
+        draft.value.gamestate.timer_paused = timerData.timer_paused
+      }
     })
 
     // Error handler
@@ -302,6 +360,9 @@ export const useDraft = () => {
     currentPhase,
     currentTurn,
     roundTypeName,
+    timerDuration,
+    timerMaxDuration,
+    isTimerPaused,
     initSocket,
     loadDraft,
     joinRoom,
@@ -313,6 +374,10 @@ export const useDraft = () => {
     getPrivateGamestate,
     refillCards,
     clearCards,
+    pauseTimer,
+    resumeTimer,
+    notifyTimerExpired,
+    syncTimer,
     setupSocketListeners,
     cleanup,
   }
