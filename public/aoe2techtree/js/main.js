@@ -558,7 +558,7 @@ function enableCaret(caretId) {
 		enableCaret("building_117");
 	}
 	
-	// Fortified Wall requires Stone Wall and Gate
+	// Fortified Wall (tech_194 and building_155) requires Stone Wall (building_117) and Gate (building_487)
 	// When Fortified Wall (tech or building) is enabled, enable Stone Wall + Gate
 	if (caretId == "tech_194" || caretId == "building_155") {
 		// Check if Stone Wall is not already enabled before calling enableCaret
@@ -631,7 +631,7 @@ function disableCaret(caretId) {
 		disableCaret("building_117");
 	}
 	
-	// When Stone Wall or Gate is disabled, disable Fortified Wall (tech and building)
+	// When Stone Wall or Gate is disabled, disable both Fortified Wall tech and building
 	if (caretId == "building_117" || caretId == "building_487") {
 		// Check if Fortified Wall tech is enabled before calling disableCaret
 		var fortifiedWallTechType = idType("tech_194");

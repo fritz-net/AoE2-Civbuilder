@@ -816,7 +816,7 @@ function handleLinkedCarets(caretId: string, enable: boolean) {
     }
   }
   
-  // Fortified Wall requires Stone Wall and Gate
+  // Fortified Wall (tech_194 and building_155) requires Stone Wall (building_117) and Gate (building_487)
   // When Fortified Wall (tech or building) is enabled, enable Stone Wall + Gate
   if (enable && (caretId === 'tech_194' || caretId === 'building_155')) {
     if (!isEnabled('building_117')) {
@@ -827,7 +827,7 @@ function handleLinkedCarets(caretId: string, enable: boolean) {
     }
   }
   
-  // When Stone Wall or Gate is disabled, disable Fortified Wall (tech and building)
+  // When Stone Wall or Gate is disabled, disable both Fortified Wall tech and building
   if (!enable && (caretId === 'building_117' || caretId === 'building_487')) {
     if (isEnabled('tech_194')) {
       disableCaret('tech_194') // Fortified Wall tech
