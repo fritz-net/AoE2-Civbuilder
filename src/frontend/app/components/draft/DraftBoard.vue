@@ -369,7 +369,8 @@ const isCardDisabled = (index: number): boolean => {
     return true
   }
   
-  // Spectators and non-active players see enabled cards (not greyed) when timer is NOT paused
+  // All other cards remain enabled (not disabled/greyed out)
+  // This includes spectator cards when timer is running
   return false
 }
 
