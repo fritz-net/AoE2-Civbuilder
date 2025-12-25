@@ -253,6 +253,7 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 3rem;
   min-height: 3rem;
 }
 
@@ -265,6 +266,8 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  height: 3rem;
+  line-height: 3rem;
 }
 
 .timer-critical .timer-display {
@@ -279,6 +282,8 @@ defineExpose({
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 3rem;
+  height: 3rem;
   min-width: 3rem;
   min-height: 3rem;
 }
