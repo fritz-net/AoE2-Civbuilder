@@ -1,35 +1,37 @@
 <template>
-  <div v-if="showTimer" class="timer-container" :class="{ 'timer-warning': isWarning, 'timer-critical': isCritical, 'timer-paused': isPaused }">
+  <div 
+    v-if="showTimer" 
+    class="timer-container" 
+    :class="{ 
+      'timer-warning': isWarning, 
+      'timer-critical': isCritical, 
+      'timer-paused': isPaused,
+      'timer-clickable': isHost && showControls
+    }"
+    @click="handleTimerClick"
+    @mouseenter="isHovered = true"
+    @mouseleave="isHovered = false"
+  >
     <div class="timer-label">{{ label }}</div>
     <div class="timer-display-row">
-      <div class="timer-display">{{ formattedTime }}</div>
-      <div v-if="isPaused" class="pause-indicator pulse-animation">
-        <svg viewBox="0 0 24 24" class="pause-icon">
+      <!-- Show pause/play icon on hover (host only), otherwise show time -->
+      <div v-if="isHost && showControls && isHovered" class="timer-icon-display">
+        <svg v-if="!isPaused" viewBox="0 0 24 24" class="hover-control-icon">
           <rect x="6" y="4" width="4" height="16" rx="1" />
           <rect x="14" y="4" width="4" height="16" rx="1" />
         </svg>
+        <svg v-else viewBox="0 0 24 24" class="hover-control-icon">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+      </div>
+      <div v-else class="timer-display">
+        {{ formattedTime }}
+        <span v-if="isPaused" class="pause-indicator-inline pulse-animation">⏸</span>
       </div>
     </div>
     <div v-if="showProgress" class="timer-progress">
       <div class="timer-progress-bar" :style="{ width: progressPercent + '%' }"></div>
     </div>
-    
-    <!-- Integrated timer controls (only visible for host) -->
-    <button 
-      v-if="isHost && showControls" 
-      class="timer-control-button"
-      :class="{ 'is-paused': isPaused }"
-      @click="handleControlClick"
-    >
-      <svg v-if="!isPaused" viewBox="0 0 24 24" class="control-icon pause-icon">
-        <rect x="6" y="4" width="4" height="16" rx="1" />
-        <rect x="14" y="4" width="4" height="16" rx="1" />
-      </svg>
-      <svg v-else viewBox="0 0 24 24" class="control-icon play-icon">
-        <path d="M8 5v14l11-7z" />
-      </svg>
-      <span class="control-label">{{ isPaused ? 'Resume' : 'Pause' }}</span>
-    </button>
   </div>
 </template>
 
@@ -70,8 +72,12 @@ const emit = defineEmits<{
 const timeRemaining = ref(props.duration)
 const isRunning = ref(false)
 const intervalId = ref<number | null>(null)
+const isHovered = ref(false)
 
-const handleControlClick = () => {
+const handleTimerClick = () => {
+  // Only handle clicks if host and controls are enabled
+  if (!props.isHost || !props.showControls) return
+  
   if (props.isPaused) {
     emit('resume')
   } else {
@@ -202,6 +208,16 @@ defineExpose({
   position: relative;
 }
 
+.timer-clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.timer-clickable:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8);
+}
+
 .timer-warning {
   border-color: hsl(39, 100%, 50%);
 }
@@ -235,7 +251,8 @@ defineExpose({
 .timer-display-row {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  min-height: 3rem;
 }
 
 .timer-display {
@@ -244,6 +261,9 @@ defineExpose({
   color: #f0e6d2;
   font-family: monospace;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .timer-critical .timer-display {
@@ -254,18 +274,36 @@ defineExpose({
   color: hsl(39, 100%, 60%);
 }
 
-.pause-indicator {
+.timer-icon-display {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  min-width: 3rem;
+  min-height: 3rem;
 }
 
-.pause-indicator .pause-icon {
-  width: 100%;
-  height: 100%;
-  fill: hsl(200, 100%, 50%);
+.hover-control-icon {
+  width: 3rem;
+  height: 3rem;
+  fill: #f0e6d2;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
+  animation: iconPulse 0.3s ease-in-out;
+}
+
+@keyframes iconPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pause-indicator-inline {
+  font-size: 2rem;
+  margin-left: 0.5rem;
 }
 
 .pulse-animation {
@@ -307,50 +345,6 @@ defineExpose({
   background: hsl(0, 100%, 50%);
 }
 
-.timer-control-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.7), rgba(101, 67, 33, 0.7));
-  border: 2px solid hsl(39, 100%, 50%);
-  border-radius: 4px;
-  color: hsl(39, 100%, 50%);
-  font-size: 0.9rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.timer-control-button:hover {
-  background: hsl(39, 100%, 50%);
-  color: #1a0f0a;
-  box-shadow: 0 0 12px rgba(255, 165, 0, 0.5);
-  transform: translateY(-1px);
-}
-
-.timer-control-button.is-paused {
-  border-color: hsl(120, 100%, 50%);
-  color: hsl(120, 100%, 50%);
-}
-
-.timer-control-button.is-paused:hover {
-  background: hsl(120, 100%, 50%);
-  color: #1a0f0a;
-  box-shadow: 0 0 12px rgba(0, 255, 0, 0.5);
-}
-
-.control-icon {
-  width: 1rem;
-  height: 1rem;
-  fill: currentColor;
-}
-
-.control-label {
-  font-size: 0.85rem;
-}
-
 @media (max-width: 768px) {
   .timer-container {
     padding: 0.75rem;
@@ -364,14 +358,9 @@ defineExpose({
     font-size: 0.8rem;
   }
   
-  .timer-control-button {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.8rem;
-  }
-  
-  .pause-indicator {
-    width: 1.5rem;
-    height: 1.5rem;
+  .hover-control-icon {
+    width: 2.5rem;
+    height: 2.5rem;
   }
 }
 </style>
