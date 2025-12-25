@@ -15,7 +15,12 @@
         :max-duration="timerMaxDuration"
         :auto-start="!timerPaused"
         :show-progress="true"
+        :is-host="isHost"
+        :is-paused="timerPaused"
+        :show-controls="true"
         @complete="handleTimerComplete"
+        @pause="handleTimerPause"
+        @resume="handleTimerResume"
       />
     </div>
 
@@ -267,12 +272,14 @@ const props = withDefaults(defineProps<{
   timerPaused?: boolean
   myPlayerIndex?: number // The player viewing this board
   highlighted?: number[] // Array of card indices that can be selected (selection limit)
+  isHost?: boolean // Whether the current user is the host
 }>(), {
   timerDuration: 0,
   timerMaxDuration: 0,
   timerPaused: false,
   myPlayerIndex: -1,
   highlighted: () => [],
+  isHost: false,
 })
 
 const emit = defineEmits<{
@@ -281,6 +288,8 @@ const emit = defineEmits<{
   (e: 'timer-complete'): void
   (e: 'refill'): void
   (e: 'clear'): void
+  (e: 'timer-pause'): void
+  (e: 'timer-resume'): void
 }>()
 
 const hoveredCard = ref<DisplayCard | null>(null)
@@ -514,6 +523,14 @@ const handleToolbarUnhover = () => {
 
 const handleTimerComplete = () => {
   emit('timer-complete')
+}
+
+const handleTimerPause = () => {
+  emit('timer-pause')
+}
+
+const handleTimerResume = () => {
+  emit('timer-resume')
 }
 
 onMounted(() => {
