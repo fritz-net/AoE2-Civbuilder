@@ -94,6 +94,7 @@
         v-if="currentPlayerData"
         :player="currentPlayerData"
         :show-bonuses="true"
+        :disabled="!isMyTurn || timerPaused"
         class="bonuses-sidebar"
       />
     </div>

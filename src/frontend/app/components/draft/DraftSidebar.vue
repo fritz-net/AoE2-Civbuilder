@@ -1,5 +1,5 @@
 <template>
-  <div class="draft-sidebar">
+  <div class="draft-sidebar" :class="{ 'sidebar-disabled': disabled }">
     <div class="sidebar-header">
       <h3>{{ player?.alias || player?.name || 'Your Civilization' }}</h3>
     </div>
@@ -54,10 +54,13 @@ import { computed } from 'vue'
 import type { DraftPlayer } from '~/composables/useDraft'
 import { getBonusCards, type BonusType } from '~/composables/useBonusData'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   player?: DraftPlayer | null
   showBonuses?: boolean
-}>()
+  disabled?: boolean // Grey out when not player's turn or timer paused
+}>(), {
+  disabled: false
+})
 
 // Helper to get bonus name by type and ID
 function getBonusName(type: BonusType, id: number): string {
@@ -118,6 +121,15 @@ const isEmpty = computed(() => {
   width: 280px;
   min-width: 250px;
   flex-shrink: 0;
+  transition: filter 0.3s ease;
+  cursor: default;
+}
+
+/* Disabled state - greyed out when not player's turn or timer paused */
+.sidebar-disabled {
+  filter: brightness(35%);
+  pointer-events: none;
+  cursor: not-allowed;
 }
 
 .sidebar-header {
