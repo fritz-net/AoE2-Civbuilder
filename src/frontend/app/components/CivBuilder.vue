@@ -161,6 +161,7 @@
         :sidebar-content="sidebarContent"
         :sidebar-title="civConfig.alias || 'Custom Civilization'"
         :show-pastures="showPasturesInTechtree"
+        mode="build"
         @done="handleTechtreeDone"
         @update:tree="handleTechtreeUpdate"
         @update:points="handlePointsUpdate"
@@ -215,7 +216,7 @@
           </div>
           <div class="review-item">
             <span class="review-label">Tech Tree Points:</span>
-            <span class="review-value">{{ techtreePointsRemaining }} remaining</span>
+            <span class="review-value">{{ techtreePointsRemaining }} spent</span>
           </div>
         </div>
       </div>
@@ -333,8 +334,8 @@ const techtreePath = computed(() => {
   // Ensure no trailing slash on parent path, then append /aoe2techtree
   return parentPath.replace(/\/$/, '') + '/aoe2techtree'
 })
-const techtreePoints = ref(100)
-const techtreePointsRemaining = ref(100)
+const techtreePoints = ref(0)
+const techtreePointsRemaining = ref(0)
 
 const civConfig = reactive<CivConfig>({
   ...createDefaultCiv(),
@@ -652,7 +653,7 @@ function handleReset() {
   selectedCastleTech.value = []
   selectedImpTech.value = []
   selectedTeamBonus.value = []
-  techtreePointsRemaining.value = techtreePoints.value
+  techtreePointsRemaining.value = 0
   currentStep.value = 0
   
   // Clear local storage if autosave was enabled

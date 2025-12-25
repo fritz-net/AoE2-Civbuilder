@@ -127,6 +127,7 @@
           :show-pastures="showPasturesInTechtree"
           :sidebar-content="sidebarContent"
           :sidebar-title="sidebarTitle"
+          mode="draft"
           @done="handleTechTreeDone"
         />
       </template>
