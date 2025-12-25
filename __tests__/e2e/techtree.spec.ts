@@ -1,49 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * E2E tests for TechTree component in Build and Draft modes
- * Tests the demo page functionality for both variants
+ * E2E tests for TechTree component functionality
+ * Uses the demo page as a testing interface to verify core TechTree behavior
  */
 
-test.describe('TechTree Demo - Navigation', () => {
-  test('should navigate to demo index from home', async ({ page }) => {
-    await page.goto('/v2/');
-    
-    // Navigate to demo (may need to scroll or find the link)
-    await page.goto('/v2/demo');
-    
-    // Check page title
-    await expect(page).toHaveTitle(/AoE2 Civbuilder/);
-    
-    // Check heading
-    await expect(page.getByRole('heading', { name: /Component Demos/i })).toBeVisible();
-  });
-
-  test('should navigate to techtree demo from demo index', async ({ page }) => {
-    await page.goto('/v2/demo');
-    
-    // Click on Tech Tree demo link
-    await page.getByRole('link', { name: /Tech Tree/i }).click();
-    
-    // Should navigate to techtree demo page
-    await expect(page).toHaveURL(/.*\/demo\/techtree/);
-  });
-
-  test('should load techtree demo page successfully', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
-    
-    // Check page title
-    await expect(page).toHaveTitle(/AoE2 Civbuilder/);
-    
-    // Check demo settings heading
-    await expect(page.getByRole('heading', { name: /Tech Tree Demo Settings/i })).toBeVisible();
-    
-    // Check tech tree is visible
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
-  });
-});
-
-test.describe('TechTree Demo - Build Mode', () => {
+test.describe('TechTree Functionality - Build Mode', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
@@ -52,272 +14,308 @@ test.describe('TechTree Demo - Build Mode', () => {
     await expect(buildModeRadio).toBeChecked();
   });
 
-  test('should display build mode settings correctly', async ({ page }) => {
-    // Check mode label
-    await expect(page.getByText('Mode: build')).toBeVisible();
-    
-    // Check points display starts at 0
-    await expect(page.getByText('Points: 0')).toBeVisible();
-    
-    // Check label is "Points Spent"
-    await expect(page.getByText('Label: Points Spent')).toBeVisible();
-    
-    // Check point limit input is disabled
-    const pointLimitInput = page.locator('input[type="number"]').first();
-    await expect(pointLimitInput).toBeDisabled();
-    
-    // Check info text about build mode
-    await expect(page.getByText(/Build mode always starts at 0/i)).toBeVisible();
-  });
-
-  test('should show Points Spent label in build mode', async ({ page }) => {
-    // Main tech tree should show "Points Spent"
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
-  });
-
   test('should start with 0 points in build mode', async ({ page }) => {
-    // Check current state shows 0 points
-    await expect(page.getByText('Points: 0')).toBeVisible();
-    
-    // Check tech tree display
+    // Check points display starts at 0
     await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
   });
 
-  test('should have unlimited points (no limit check) in build mode', async ({ page }) => {
-    // In build mode, there should be no limit mentioned
-    // Check that we can see the unlimited description
-    await expect(page.getByText(/Start at 0, count up, unlimited/i)).toBeVisible();
+  test('should add points when enabling techs in build mode', async ({ page }) => {
+    // Get initial points
+    const initialPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+    const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
+    
+    // Click the Fill button to enable all techs
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Check that points increased
+    const finalPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+    const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
+    
+    expect(finalPoints).toBeGreaterThan(initialPoints);
   });
 
-  test('should allow toggling editable checkbox', async ({ page }) => {
-    const editableCheckbox = page.getByRole('checkbox', { name: /Editable/i });
+  test('should have unlimited points in build mode', async ({ page }) => {
+    // Click Fill button
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
     
-    // Should be checked by default
-    await expect(editableCheckbox).toBeChecked();
+    // Get final points - should be a large number with no restriction
+    const pointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+    const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
     
-    // Uncheck it
-    await editableCheckbox.click();
-    await expect(editableCheckbox).not.toBeChecked();
-    
-    // Check it again
-    await editableCheckbox.click();
-    await expect(editableCheckbox).toBeChecked();
+    // In build mode, points can exceed typical draft limits (e.g., 100, 200, 250)
+    // Just verify we have points and no error occurred
+    expect(points).toBeGreaterThan(0);
   });
 
-  test('should reset tree in build mode', async ({ page }) => {
-    // Click reset button
-    await page.getByRole('button', { name: /Reset Tree/i }).click();
+  test('should reset points to 0 in build mode', async ({ page }) => {
+    // Click Fill to add some techs
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
     
-    // Points should still be 0
-    await expect(page.getByText('Points: 0')).toBeVisible();
+    // Verify points increased
+    const filledPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+    const filledPoints = parseInt(filledPointsText?.match(/\d+/)?.[0] || '0');
+    expect(filledPoints).toBeGreaterThan(0);
+    
+    // Click Reset button
+    await page.getByRole('button', { name: /Reset/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Verify points back to 0
     await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
+  });
+
+  test('should subtract points when disabling techs in build mode', async ({ page }) => {
+    // Click Fill to enable all techs
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Get filled points
+    const filledPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+    const filledPoints = parseInt(filledPointsText?.match(/\d+/)?.[0] || '0');
+    
+    // Click Reset to disable all techs
+    await page.getByRole('button', { name: /Reset/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Verify points reduced to 0
+    const resetPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+    const resetPoints = parseInt(resetPointsText?.match(/\d+/)?.[0] || '0');
+    
+    expect(resetPoints).toBe(0);
+    expect(resetPoints).toBeLessThan(filledPoints);
   });
 });
 
-test.describe('TechTree Demo - Draft Mode', () => {
+test.describe('TechTree Functionality - Draft Mode', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
     // Switch to draft mode
     const draftModeRadio = page.getByRole('radio', { name: /Draft Mode/i });
     await draftModeRadio.click();
-    
-    // Wait for mode to change
     await page.waitForTimeout(500);
   });
 
-  test('should switch to draft mode correctly', async ({ page }) => {
-    // Check draft mode radio is selected
-    const draftModeRadio = page.getByRole('radio', { name: /Draft Mode/i });
-    await expect(draftModeRadio).toBeChecked();
-    
-    // Check mode label updated
-    await expect(page.getByText('Mode: draft')).toBeVisible();
-  });
-
-  test('should display draft mode settings correctly', async ({ page }) => {
-    // Check points display starts at limit (250)
-    await expect(page.getByText('Points: 250')).toBeVisible();
-    
-    // Check label is "Points Remaining"
-    await expect(page.getByText('Label: Points Remaining')).toBeVisible();
-    
-    // Check point limit input is enabled
-    const pointLimitInput = page.locator('input[type="number"]').first();
-    await expect(pointLimitInput).toBeEnabled();
-    await expect(pointLimitInput).toHaveValue('250');
-  });
-
-  test('should show Points Remaining label in draft mode', async ({ page }) => {
-    // Main tech tree should show "Points Remaining"
+  test('should start with full point limit in draft mode', async ({ page }) => {
+    // Default limit is 250
     await expect(page.getByText(/Points Remaining: 250/i)).toBeVisible();
   });
 
-  test('should start with point limit in draft mode', async ({ page }) => {
-    // Check current state shows 250 points (default limit)
-    await expect(page.getByText('Points: 250')).toBeVisible();
+  test('should subtract points when enabling techs in draft mode', async ({ page }) => {
+    // Get initial points (should be 250)
+    const initialPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
     
-    // Check tech tree display
-    await expect(page.getByText(/Points Remaining: 250/i)).toBeVisible();
+    // Click Fill button to enable all available techs
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Check that points decreased
+    const finalPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
+    
+    expect(finalPoints).toBeLessThan(initialPoints);
   });
 
-  test('should allow changing point limit in draft mode', async ({ page }) => {
+  test('should not allow spending more points than limit in draft mode', async ({ page }) => {
+    // Set a lower limit to test enforcement (e.g., 50)
     const pointLimitInput = page.locator('input[type="number"]').first();
-    
-    // Change to 300
-    await pointLimitInput.fill('300');
-    
-    // Wait for update
+    await pointLimitInput.fill('50');
     await page.waitForTimeout(1000);
     
-    // Check updated points
-    await expect(page.getByText('Points: 300')).toBeVisible();
+    // Get current points
+    const currentPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const currentPoints = parseInt(currentPointsText?.match(/\d+/)?.[0] || '0');
+    
+    // Click Fill button
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Check final points
+    const finalPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
+    
+    // Points remaining should not go below 0
+    expect(finalPoints).toBeGreaterThanOrEqual(0);
+    expect(finalPoints).toBeLessThanOrEqual(currentPoints);
   });
 
-  test('should reset tree in draft mode', async ({ page }) => {
-    // Click reset button
-    await page.getByRole('button', { name: /Reset Tree/i }).click();
+  test('should add points back when disabling techs in draft mode', async ({ page }) => {
+    // Click Fill to enable techs
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Get points after fill
+    const filledPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const filledPoints = parseInt(filledPointsText?.match(/\d+/)?.[0] || '0');
+    
+    // Click Reset to disable techs
+    await page.getByRole('button', { name: /Reset/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Get points after reset (should be back to limit)
+    const resetPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const resetPoints = parseInt(resetPointsText?.match(/\d+/)?.[0] || '0');
+    
+    // Points should increase back to original limit
+    expect(resetPoints).toBeGreaterThan(filledPoints);
+    expect(resetPoints).toBe(250); // Default limit
+  });
+
+  test('should reset points to limit in draft mode', async ({ page }) => {
+    // Click Fill to use some points
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Verify points decreased
+    const filledPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const filledPoints = parseInt(filledPointsText?.match(/\d+/)?.[0] || '0');
+    expect(filledPoints).toBeLessThan(250);
+    
+    // Click Reset button
+    await page.getByRole('button', { name: /Reset/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Verify points back to limit
+    await expect(page.getByText(/Points Remaining: 250/i)).toBeVisible();
+  });
+
+  test('should respect custom point limits in draft mode', async ({ page }) => {
+    // Set custom limit (e.g., 150)
+    const pointLimitInput = page.locator('input[type="number"]').first();
+    await pointLimitInput.fill('150');
+    await page.waitForTimeout(1000);
+    
+    // Verify points updated to new limit
+    await expect(page.getByText(/Points Remaining: 150/i)).toBeVisible();
+    
+    // Reset should use the new limit
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
+    await page.getByRole('button', { name: /Reset/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Should be back to custom limit
+    await expect(page.getByText(/Points Remaining: 150/i)).toBeVisible();
+  });
+});
+
+test.describe('TechTree Functionality - Fill Button', () => {
+  test('should enable all available techs when Fill is clicked (build mode)', async ({ page }) => {
+    await page.goto('/v2/demo/techtree');
+    
+    // Click Fill button
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Check that points are greater than 0
+    const pointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+    const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
+    expect(points).toBeGreaterThan(0);
+    
+    // Check tech count increased
+    const techCountText = await page.getByText(/Techs Enabled: \d+/i).textContent();
+    const techCount = parseInt(techCountText?.match(/\d+/)?.[0] || '0');
+    expect(techCount).toBeGreaterThan(39); // Initial loaded techs
+  });
+
+  test('should enable techs up to point limit when Fill is clicked (draft mode)', async ({ page }) => {
+    await page.goto('/v2/demo/techtree');
+    
+    // Switch to draft mode
+    await page.getByRole('radio', { name: /Draft Mode/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Set a low limit to test
+    const pointLimitInput = page.locator('input[type="number"]').first();
+    await pointLimitInput.fill('100');
+    await page.waitForTimeout(1000);
+    
+    // Click Fill button
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Points remaining should be >= 0 and <= 100
+    const pointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
+    expect(points).toBeGreaterThanOrEqual(0);
+    expect(points).toBeLessThanOrEqual(100);
+  });
+});
+
+test.describe('TechTree Functionality - Reset Button', () => {
+  test('should clear all techs when Reset is clicked (build mode)', async ({ page }) => {
+    await page.goto('/v2/demo/techtree');
+    
+    // Fill first
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Click Reset
+    await page.getByRole('button', { name: /Reset/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Points should be 0
+    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
+  });
+
+  test('should clear all techs and restore points when Reset is clicked (draft mode)', async ({ page }) => {
+    await page.goto('/v2/demo/techtree');
+    
+    // Switch to draft mode
+    await page.getByRole('radio', { name: /Draft Mode/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Fill first
+    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Click Reset
+    await page.getByRole('button', { name: /Reset/i }).click();
+    await page.waitForTimeout(500);
     
     // Points should be back to limit
-    await expect(page.getByText('Points: 250')).toBeVisible();
     await expect(page.getByText(/Points Remaining: 250/i)).toBeVisible();
   });
 });
 
-test.describe('TechTree Demo - Mode Switching', () => {
-  test('should switch from build to draft mode', async ({ page }) => {
+test.describe('TechTree Functionality - Mode Switching', () => {
+  test('should correctly switch point calculation when changing modes', async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
-    // Start in build mode
-    await expect(page.getByText('Mode: build')).toBeVisible();
+    // Start in build mode - verify 0 points
     await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
     
     // Switch to draft mode
-    const draftModeRadio = page.getByRole('radio', { name: /Draft Mode/i });
-    await draftModeRadio.click();
-    
-    // Wait for mode change
-    await page.waitForTimeout(500);
-    
-    // Check mode changed
-    await expect(page.getByText('Mode: draft')).toBeVisible();
-    await expect(page.getByText(/Points Remaining: 250/i)).toBeVisible();
-  });
-
-  test('should switch from draft to build mode', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
-    
-    // Switch to draft mode first
-    const draftModeRadio = page.getByRole('radio', { name: /Draft Mode/i });
-    await draftModeRadio.click();
-    await page.waitForTimeout(500);
-    
-    // Verify we're in draft mode
-    await expect(page.getByText('Mode: draft')).toBeVisible();
-    
-    // Switch back to build mode
-    const buildModeRadio = page.getByRole('radio', { name: /Build Mode/i });
-    await buildModeRadio.click();
-    
-    // Wait for mode change
-    await page.waitForTimeout(500);
-    
-    // Check mode changed back
-    await expect(page.getByText('Mode: build')).toBeVisible();
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
-  });
-
-  test('should maintain state when switching modes', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
-    
-    // Check initial tech count
-    const TECH_COUNT_PATTERN = /Techs Enabled: (\d+)/;
-    const initialTechsText = await page.getByText(TECH_COUNT_PATTERN).textContent();
-    const match = initialTechsText?.match(TECH_COUNT_PATTERN);
-    
-    if (!match) {
-      throw new Error('Could not parse tech count from page');
-    }
-    
-    const initialTechs = parseInt(match[1]);
-    
-    // Switch to draft and back
     await page.getByRole('radio', { name: /Draft Mode/i }).click();
     await page.waitForTimeout(500);
+    
+    // Should show points remaining at limit
+    await expect(page.getByText(/Points Remaining: 250/i)).toBeVisible();
+    
+    // Switch back to build mode
     await page.getByRole('radio', { name: /Build Mode/i }).click();
     await page.waitForTimeout(500);
     
-    // Tech count should be the same
-    await expect(page.getByText(new RegExp(`Techs Enabled: ${initialTechs}`))).toBeVisible();
+    // Should show points spent at 0
+    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
   });
 });
 
-test.describe('TechTree Demo - UI Elements', () => {
-  test('should display current state info box', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
-    
-    // Check info box heading
-    await expect(page.getByRole('heading', { name: /Current State/i })).toBeVisible();
-    
-    // Check all state items are displayed
-    await expect(page.getByText(/Mode:/i)).toBeVisible();
-    await expect(page.getByText(/Points:/i)).toBeVisible();
-    await expect(page.getByText(/Label:/i)).toBeVisible();
-    await expect(page.getByText(/Techs Enabled:/i)).toBeVisible();
-  });
-
-  test('should display sidebar with mode information', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
-    
-    // Check sidebar title
-    await expect(page.getByRole('heading', { name: /Tech Tree Demo/i })).toBeVisible();
-    
-    // Check demo civilization name
-    await expect(page.getByText(/Demo Civilization/i)).toBeVisible();
-    
-    // Check mode information section
-    await expect(page.getByRole('heading', { name: /Mode Information/i })).toBeVisible();
-    
-    // Check test instructions
-    await expect(page.getByRole('heading', { name: /Test Instructions/i })).toBeVisible();
-  });
-
-  test('should have show pastures toggle', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
-    
-    const pasturesCheckbox = page.getByRole('checkbox', { name: /Show Pastures/i });
-    
-    // Should be unchecked by default
-    await expect(pasturesCheckbox).not.toBeChecked();
-    
-    // Toggle it
-    await pasturesCheckbox.click();
-    await expect(pasturesCheckbox).toBeChecked();
-  });
-
-  test('should display reset tree button', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
-    
-    // Check reset button is visible and clickable
-    const resetButton = page.getByRole('button', { name: /Reset Tree/i });
-    await expect(resetButton).toBeVisible();
-    await expect(resetButton).toBeEnabled();
-  });
-});
-
-test.describe('TechTree Production - Build Page', () => {
-  test('should use build mode on /build page', async ({ page }) => {
+test.describe('TechTree Production - Page Verification', () => {
+  test('should use build mode with unlimited points on /build page', async ({ page }) => {
     await page.goto('/v2/build');
     
-    // Navigate to tech tree step
-    // First fill in civilization name
+    // Fill in civilization name
     await page.getByPlaceholder(/Enter civilization name/i).fill('Test Civ');
     
-    // Click Next to navigate through steps
-    const STEPS_TO_TECH_TREE = 6; // Number of steps before reaching tech tree
+    // Navigate to tech tree step
+    const STEPS_TO_TECH_TREE = 6;
     const nextButton = page.getByRole('button', { name: /Next/i });
     
-    // Navigate through steps to reach tech tree
     for (let i = 0; i < STEPS_TO_TECH_TREE; i++) {
       if (await nextButton.isVisible()) {
         await nextButton.click();
@@ -325,14 +323,11 @@ test.describe('TechTree Production - Build Page', () => {
       }
     }
     
-    // Should show Points Spent: 0
+    // Should show Points Spent: 0 (build mode)
     await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
   });
-});
 
-test.describe('TechTree Production - Draft Pages', () => {
-  test('should use draft mode on draft pages', async ({ page }) => {
-    // Navigate to draft techtree page (existing /v2/techtree)
+  test('should use draft mode with point limit on /techtree page', async ({ page }) => {
     await page.goto('/v2/techtree');
     
     // Should show Points Remaining (draft mode)
