@@ -94,7 +94,6 @@
         v-if="currentPlayerData"
         :player="currentPlayerData"
         :show-bonuses="true"
-        :disabled="!isMyTurn || timerPaused"
         class="bonuses-sidebar"
       />
     </div>
@@ -359,11 +358,15 @@ const isCardSelectable = (index: number): boolean => {
 
 // Check if a card should be disabled (greyed out)
 const isCardDisabled = (index: number): boolean => {
-  // Cards are disabled (greyed) ONLY when timer is paused (for everyone including spectators)
+  // Cards are disabled (greyed) when timer is paused (for everyone)
   if (props.timerPaused) return true
   
   // Hidden cards are always disabled
   if (props.cards[index]?.id === -1) return true
+  
+  // Spectators (myPlayerIndex < 0): cards are NOT greyed when timer is running
+  // Non-active players (myPlayerIndex >= 0 && !isMyTurn): cards ARE greyed
+  if (props.myPlayerIndex >= 0 && !props.isMyTurn) return true
   
   // For active player: disable cards not in highlighted array (when array has values)
   if (props.isMyTurn && props.highlighted && props.highlighted.length > 0 && !props.highlighted.includes(index)) {
@@ -371,7 +374,7 @@ const isCardDisabled = (index: number): boolean => {
   }
   
   // All other cards remain enabled (not disabled/greyed out)
-  // This includes spectator cards when timer is running
+  // This includes spectator cards (myPlayerIndex < 0) when timer is running
   return false
 }
 
