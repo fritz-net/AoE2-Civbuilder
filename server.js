@@ -222,8 +222,9 @@ const createDraft = (req, res, next) => {
 	preset["rounds"] = parseInt(req.body.rounds, 10);
 	preset["rarities"] = available_rarities;
 	// UU edition settings (default both enabled for backward compatibility)
-	preset["allow_base_edition_uu"] = req.body.allow_base_edition_uu !== "false"; // true if not explicitly false
-	preset["allow_first_edition_uu"] = req.body.allow_first_edition_uu !== "false"; // true if not explicitly false
+	// Only set to false if explicitly provided as "false" string, otherwise default to true
+	preset["allow_base_edition_uu"] = (req.body.allow_base_edition_uu === undefined || req.body.allow_base_edition_uu === null || req.body.allow_base_edition_uu === "true");
+	preset["allow_first_edition_uu"] = (req.body.allow_first_edition_uu === undefined || req.body.allow_first_edition_uu === null || req.body.allow_first_edition_uu === "true");
 	// Timer settings (default disabled for backward compatibility)
 	preset["timer_enabled"] = req.body.timer_enabled === "true";
 	preset["timer_duration"] = preset["timer_enabled"] ? parseInt(req.body.timer_duration || "60", 10) : 0;
@@ -284,10 +285,11 @@ const createDraft = (req, res, next) => {
 				var isBaseEdition = edition < 0;
 				var isFirstEdition = edition >= 0;
 				
-				if (isBaseEdition && !draft["preset"]["allow_base_edition_uu"]) {
+				// Check edition filters (should already be set as booleans in preset)
+				if (isBaseEdition && draft["preset"]["allow_base_edition_uu"] === false) {
 					continue;
 				}
-				if (isFirstEdition && !draft["preset"]["allow_first_edition_uu"]) {
+				if (isFirstEdition && draft["preset"]["allow_first_edition_uu"] === false) {
 					continue;
 				}
 			}
@@ -417,8 +419,9 @@ function reshuffleCards(draft) {
 				var isFirstEdition = edition >= 0;
 				
 				// Default to true if settings don't exist (backward compatibility)
-				var allowBaseEdition = draft["preset"]["allow_base_edition_uu"] !== false;
-				var allowFirstEdition = draft["preset"]["allow_first_edition_uu"] !== false;
+				// Use explicit checks to match createDraft logic
+				var allowBaseEdition = (draft["preset"]["allow_base_edition_uu"] === undefined || draft["preset"]["allow_base_edition_uu"] === null || draft["preset"]["allow_base_edition_uu"] === true);
+				var allowFirstEdition = (draft["preset"]["allow_first_edition_uu"] === undefined || draft["preset"]["allow_first_edition_uu"] === null || draft["preset"]["allow_first_edition_uu"] === true);
 				
 				if (isBaseEdition && !allowBaseEdition) {
 					continue;
