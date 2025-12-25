@@ -764,28 +764,39 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       let zipPath: string | null = null;
       let zipFile: string | null = null;
       
-      // Look for zip file with the new filename format or fallback to draft ID
-      console.log(`[Test] Looking for zip file with draft ID: ${draftId}`);
+      // The server generates zip files with timestamp-based names (not draft ID)
+      // Format: {iso_datetime}_{hex}_v{version}.zip
+      // Since we just created this mod, look for the most recent .zip file
+      console.log(`[Test] Looking for zip file (draft ID: ${draftId})`);
       const modsFiles = fs.readdirSync(modsDir);
       console.log(`[Test] Files in mods directory (${modsDir}):`, modsFiles);
       
-      const foundZipFile = modsFiles.find(f => f.includes(draftId!) && f.endsWith('.zip'));
+      // First try: Look for zip files that contain the draft ID (legacy naming)
+      let foundZipFile = modsFiles.find(f => f.includes(draftId!) && f.endsWith('.zip'));
+      
+      if (!foundZipFile) {
+        // Second try: Find the most recent .zip file (new naming scheme)
+        const zipFiles = modsFiles.filter(f => f.endsWith('.zip'));
+        console.log(`[Test] Found ${zipFiles.length} zip files:`, zipFiles);
+        
+        if (zipFiles.length > 0) {
+          // Get the most recently modified zip file
+          const zipFilesWithStats = zipFiles.map(f => ({
+            name: f,
+            mtime: fs.statSync(path.join(modsDir, f)).mtime.getTime()
+          }));
+          zipFilesWithStats.sort((a, b) => b.mtime - a.mtime);
+          foundZipFile = zipFilesWithStats[0].name;
+          console.log(`[Test] Using most recent zip file: ${foundZipFile}`);
+        }
+      }
       
       if (foundZipFile) {
         zipFile = foundZipFile;
         zipPath = path.join(modsDir, zipFile);
         console.log(`[Test] Found zip file: ${zipFile}`);
       } else {
-        // Fallback to default filename
-        const defaultZipPath = path.join(modsDir, `${draftId}.zip`);
-        console.log(`[Test] No matching zip found, checking default path: ${defaultZipPath}`);
-        if (fs.existsSync(defaultZipPath)) {
-          zipFile = `${draftId}.zip`;
-          zipPath = defaultZipPath;
-          console.log(`[Test] Found zip at default path`);
-        } else {
-          console.log(`[Test] ERROR: No zip file found for draft ${draftId}`);
-        }
+        console.log(`[Test] ERROR: No zip file found for draft ${draftId}`);
       }
       
       // Better error message if zip file not found
