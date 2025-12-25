@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variant 1: Sticky Positioning</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #2c1810;
+            color: #f4e4c1;
+        }
+
+        /* Variant 1: Sticky positioning */
+        #sideheader {
+            position: sticky;
+            top: 10px;
+            left: 2vw;
+            display: flex;
+            flex-direction: row;
+            width: fit-content;
+            z-index: 1000;
+            background: rgba(44, 24, 16, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            margin: 10px;
+        }
+
+        #sidephase {
+            font-size: max(16px, 2.2vw);
+            text-align: center;
+            width: auto;
+            min-width: 150px;
+            padding: 0 15px;
+        }
+
+        #buttonleft,
+        #buttonright {
+            width: max(40px, 1.5vw);
+            font-size: max(24px, 3vw);
+            line-height: normal;
+            cursor: pointer;
+            background: #8b4513;
+            border: 2px solid #d4af37;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            transition: background 0.3s;
+        }
+
+        #buttonleft:hover,
+        #buttonright:hover {
+            background: #a0522d;
+        }
+
+        .content {
+            padding: 20px;
+            min-height: 2000px;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 60px;
+        }
+
+        .card {
+            width: 6rem;
+            height: 6rem;
+            background: #8b4513;
+            border: 2px solid #d4af37;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            #sideheader {
+                width: calc(100% - 20px);
+                margin: 10px;
+            }
+
+            #buttonleft,
+            #buttonright {
+                min-width: 44px;
+                min-height: 44px;
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1 style="text-align: center; margin-top: 20px;">Variant 1: Sticky Positioning</h1>
+        
+        <div id="sideheader">
+            <div id="buttonleft">&lt;</div>
+            <div id="sidephase">Civilization Bonuses</div>
+            <div id="buttonright">&gt;</div>
+        </div>
+
+        <div class="card-container">
+            <div class="card">Card 1</div>
+            <div class="card">Card 2</div>
+            <div class="card">Card 3</div>
+            <div class="card">Card 4</div>
+            <div class="card">Card 5</div>
+            <div class="card">Card 6</div>
+            <div class="card">Card 7</div>
+            <div class="card">Card 8</div>
+            <div class="card">Card 9</div>
+            <div class="card">Card 10</div>
+        </div>
+
+        <p style="margin-top: 40px;">
+            <strong>Key Features:</strong><br>
+            • Buttons stick to the top when scrolling down<br>
+            • Semi-transparent background for better visibility<br>
+            • Responsive sizing with min/max values<br>
+            • Buttons stay within viewport on all screen sizes<br>
+            • Touch-friendly minimum sizes on mobile (44px)
+        </p>
+    </div>
+</body>
+</html>
