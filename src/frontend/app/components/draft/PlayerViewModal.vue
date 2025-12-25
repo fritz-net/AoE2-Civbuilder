@@ -7,35 +7,18 @@
       </div>
 
       <div class="modal-body">
-        <!-- Player flag -->
-        <div class="player-flag-section">
-          <canvas
-            ref="flagCanvasRef"
-            :width="150"
-            :height="150"
-            class="flag-canvas"
-          ></canvas>
-        </div>
-
-        <!-- Bonuses sidebar -->
-        <div class="bonuses-section">
-          <DraftSidebar :player="player" :show-bonuses="true" />
-        </div>
-
-        <!-- Tech tree (read-only) -->
-        <div class="techtree-section">
-          <TechTree
-            v-if="player && showTechTree"
-            :civ="playerCivData"
-            :editable="false"
-            :techtree-points="techtreePoints"
-            :points-label="'Tech Tree Points Used'"
-            :sidebar-content="sidebarContent"
-            :sidebar-title="'Civilization Info'"
-            done-button-text="Close"
-            @done="closeModal"
-          />
-        </div>
+        <!-- Tech tree with native sidebar showing bonuses -->
+        <TechTree
+          v-if="player && showTechTree"
+          :civ="playerCivData"
+          :editable="false"
+          :techtree-points="techtreePoints"
+          :points-label="'Tech Tree Points Used'"
+          :sidebar-content="sidebarContent"
+          :sidebar-title="sidebarTitle"
+          done-button-text="Close"
+          @done="closeModal"
+        />
       </div>
     </div>
   </div>
@@ -44,9 +27,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue'
 import type { DraftPlayer } from '~/composables/useDraft'
-import { renderFlagOnCanvas } from '~/composables/useFlagRenderer'
-import { DEFAULT_FLAG_PALETTE } from '~/composables/useCivConstants'
-import DraftSidebar from './DraftSidebar.vue'
+import { getBonusCards } from '~/composables/useBonusData'
 import TechTree from '~/components/TechTree.vue'
 
 const props = defineProps<{
@@ -60,10 +41,14 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const flagCanvasRef = ref<HTMLCanvasElement | null>(null)
 const showTechTree = ref(false)
 
 const playerTitle = computed(() => {
+  if (!props.player) return 'Player Info'
+  return props.player.alias || props.player.name || `Player ${props.playerIndex + 1}`
+})
+
+const sidebarTitle = computed(() => {
   if (!props.player) return 'Player Info'
   return props.player.alias || props.player.name || `Player ${props.playerIndex + 1}`
 })
@@ -81,7 +66,7 @@ const playerCivData = computed(() => {
     description: props.player.description || '',
     wonder: props.player.wonder || 0,
     castle: props.player.castle || 0,
-    flag_palette: props.player.flag_palette || DEFAULT_FLAG_PALETTE,
+    flag_palette: props.player.flag_palette || [3, 4, 5, 6, 7, 3, 3, 3],
     tree: props.player.tree || [[], [], []],
     architecture: props.player.architecture || 1,
     language: props.player.language || 0,
@@ -89,41 +74,104 @@ const playerCivData = computed(() => {
   }
 })
 
-// Create sidebar content with player info
+// Generate sidebar content with bonuses for TechTree's native sidebar
 const sidebarContent = computed(() => {
-  if (!props.player) return ''
+  if (!props.player) return '<p>No player data available</p>'
   
-  const parts = []
+  const player = props.player
   
-  if (props.player.alias) {
-    parts.push(`<h3>${props.player.alias}</h3>`)
+  // Check if player has any bonuses at all
+  if (!player.bonuses || !Array.isArray(player.bonuses)) {
+    return '<p>Loading bonuses...</p>'
   }
   
-  if (props.player.name) {
-    parts.push(`<p><strong>Player:</strong> ${props.player.name}</p>`)
+  // Get all bonus cards by type
+  const allCards = {
+    civBonuses: getBonusCards('civ'),
+    uniqueUnits: getBonusCards('uu'),
+    castleTechs: getBonusCards('castle'),
+    imperialTechs: getBonusCards('imp'),
+    teamBonuses: getBonusCards('team'),
   }
   
-  if (props.player.description) {
-    parts.push(`<p>${props.player.description}</p>`)
+  let html = ''
+  let hasAnyBonus = false
+  
+  // Player info header
+  if (player.name) {
+    html += `<p><strong>Player:</strong> ${player.name}</p>`
+  }
+  if (player.description) {
+    html += `<p>${player.description}</p>`
+  }
+  if (html) {
+    html += '<hr>'
   }
   
-  return parts.join('')
-})
-
-// Draw flag when player changes
-watch(() => props.player, (player) => {
-  if (player && flagCanvasRef.value) {
-    nextTick(() => {
-      const canvas = flagCanvasRef.value
-      if (!canvas) return
-      
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-      
-      renderFlagOnCanvas(ctx, player.flag_palette || DEFAULT_FLAG_PALETTE, canvas.width, canvas.height, '/img/symbols')
+  // Civilization Bonuses
+  if (player.bonuses[0] && Array.isArray(player.bonuses[0]) && player.bonuses[0].length > 0) {
+    html += '<h3>Civilization Bonuses</h3><ul>'
+    player.bonuses[0].forEach((id: number) => {
+      const bonus = allCards.civBonuses[id]
+      if (bonus && bonus.name) {
+        html += `<li>${bonus.name}</li>`
+        hasAnyBonus = true
+      }
     })
+    html += '</ul>'
   }
-}, { immediate: true })
+  
+  // Unique Unit
+  if (player.bonuses[1] && Array.isArray(player.bonuses[1]) && player.bonuses[1].length > 0) {
+    const unitId = player.bonuses[1][0]
+    const unit = allCards.uniqueUnits[unitId]
+    if (unit && unit.name) {
+      if (hasAnyBonus) html += '<hr>'
+      html += `<h3>Unique Unit</h3><p>${unit.name}</p>`
+      hasAnyBonus = true
+    }
+  }
+  
+  // Castle Age Tech
+  if (player.bonuses[2] && Array.isArray(player.bonuses[2]) && player.bonuses[2].length > 0) {
+    const techId = player.bonuses[2][0]
+    const tech = allCards.castleTechs[techId]
+    if (tech && tech.name) {
+      if (hasAnyBonus) html += '<hr>'
+      html += `<h3>Castle Age Tech</h3><p>${tech.name}</p>`
+      hasAnyBonus = true
+    }
+  }
+  
+  // Imperial Age Tech
+  if (player.bonuses[3] && Array.isArray(player.bonuses[3]) && player.bonuses[3].length > 0) {
+    const techId = player.bonuses[3][0]
+    const tech = allCards.imperialTechs[techId]
+    if (tech && tech.name) {
+      if (hasAnyBonus) html += '<hr>'
+      html += `<h3>Imperial Age Tech</h3><p>${tech.name}</p>`
+      hasAnyBonus = true
+    }
+  }
+  
+  // Team Bonus
+  if (player.bonuses[4] && Array.isArray(player.bonuses[4]) && player.bonuses[4].length > 0) {
+    const bonusId = player.bonuses[4][0]
+    const bonus = allCards.teamBonuses[bonusId]
+    if (bonus && bonus.name) {
+      if (hasAnyBonus) html += '<hr>'
+      html += `<h3>Team Bonus</h3><p>${bonus.name}</p>`
+      hasAnyBonus = true
+    }
+  }
+  
+  // If no bonuses were found at all, show message
+  if (!hasAnyBonus) {
+    return '<p>No bonuses selected yet</p>'
+  }
+  
+  return html
+})
 
 // Show tech tree after a brief delay to allow rendering
 watch(() => props.show, (show) => {
@@ -216,40 +264,13 @@ const closeModal = () => {
 
 .modal-body {
   flex: 1;
-  overflow-y: auto;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.player-flag-section {
-  display: flex;
-  justify-content: center;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 8px;
-}
-
-.flag-canvas {
-  border-radius: 8px;
-  border: 3px solid hsl(52, 100%, 50%);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-}
-
-.bonuses-section {
-  display: flex;
-  justify-content: center;
-}
-
-.techtree-section {
-  flex: 1;
-  min-height: 0;
+  overflow: hidden;
+  padding: 0;
   display: flex;
   flex-direction: column;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - keep for consistency but TechTree handles its own scrolling */
 .modal-body::-webkit-scrollbar {
   width: 12px;
 }
@@ -275,15 +296,6 @@ const closeModal = () => {
 
   .modal-header h2 {
     font-size: 1.5rem;
-  }
-
-  .modal-body {
-    padding: 1rem;
-  }
-
-  .flag-canvas {
-    width: 100px;
-    height: 100px;
   }
 }
 </style>
