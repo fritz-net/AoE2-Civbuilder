@@ -140,6 +140,15 @@
     <div v-if="error" class="error-message">
       {{ error }}
     </div>
+
+    <!-- Player View Modal -->
+    <PlayerViewModal
+      :show="showPlayerModal"
+      :player="selectedPlayer"
+      :player-index="selectedPlayerIndex"
+      :techtree-points="draft?.preset?.points || 0"
+      @close="closePlayerModal"
+    />
   </div>
 </template>
 
@@ -150,6 +159,7 @@ import { useDraft } from '~/composables/useDraft'
 import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
 import { renderFlagOnCanvas } from '~/composables/useFlagRenderer'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
+import PlayerViewModal from '~/components/draft/PlayerViewModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -174,6 +184,16 @@ const {
 } = useDraft()
 
 const { getBonusCards, getBonusImageUrl, rarityNames } = useBonusData()
+
+// Player view modal state
+const showPlayerModal = ref(false)
+const selectedPlayerIndex = ref(-1)
+const selectedPlayer = computed(() => {
+  if (selectedPlayerIndex.value >= 0 && draft.value?.players) {
+    return draft.value.players[selectedPlayerIndex.value]
+  }
+  return null
+})
 
 const flagCanvasRefs = ref<Map<number, HTMLCanvasElement>>(new Map())
 
@@ -257,8 +277,16 @@ watch(() => draft.value?.players, (players) => {
 }, { deep: true })
 
 const handleViewPlayer = (playerIndex: number) => {
-  // TODO: Show modal with player's tech tree and selected bonuses
-  console.log('View player:', playerIndex)
+  // Spectators can always view all players
+  if (draft.value?.players && playerIndex >= 0 && playerIndex < draft.value.players.length) {
+    selectedPlayerIndex.value = playerIndex
+    showPlayerModal.value = true
+  }
+}
+
+const closePlayerModal = () => {
+  showPlayerModal.value = false
+  selectedPlayerIndex.value = -1
 }
 
 const handleDownload = () => {

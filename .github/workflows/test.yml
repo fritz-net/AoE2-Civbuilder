@@ -93,6 +93,8 @@ jobs:
       - name: Configure Playwright to use system Chromium
         run: |
           # Use system chromium instead of downloading Playwright's version
+          # Note: chromium-browser is pre-installed on GitHub Actions Ubuntu runners
+          # so we don't need to install it explicitly
           echo "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1" >> $GITHUB_ENV
           echo "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser" >> $GITHUB_ENV
 
@@ -107,4 +109,12 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report/
+          retention-days: 30
+      
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
           retention-days: 30

@@ -22,6 +22,7 @@ const { createCivilizationsJson } = require("./process_mod/createCivilizationsJs
 const commonJs = require("./public/js/common.js");
 const { integrateNuxt } = require("./nuxt-integration.js");
 const { BONUS_INDEX } = require("./src/shared/bonusConstants.js");
+const { generateModFilename, generateModFilenameNoExt } = require("./process_mod/modFilename.js");
 
 console.log("Starting server...");
 
@@ -223,6 +224,10 @@ const createDraft = (req, res, next) => {
 	// Timer settings (default disabled for backward compatibility)
 	preset["timer_enabled"] = req.body.timer_enabled === "true";
 	preset["timer_duration"] = preset["timer_enabled"] ? parseInt(req.body.timer_duration || "60", 10) : 0;
+	// Blind picks setting (default disabled for backward compatibility)
+	preset["blind_picks"] = req.body.blind_picks === "true";
+	// Snake draft setting (default disabled for backward compatibility)
+	preset["snake_draft"] = req.body.snake_draft === "true";
 	// Number of cards to show per roll (default 3 if not specified)
 	preset["cards_per_roll"] = req.body.cards_per_roll ? parseInt(req.body.cards_per_roll, 10) : 3;
 	// Optional: Force specific bonuses to appear in first roll (for testing)
@@ -568,12 +573,17 @@ const writeAIFiles = (req, res, next) => {
 
 const zipModFolder = (req, res, next) => {
 	console.log(`[${req.body.seed}]: Zipping folder...`);
+	
+	// Generate new filename with version, datetime, and hex
+	const newFilename = generateModFilenameNoExt(__dirname);
+	req.modFilename = newFilename; // Store for download route
+	
 	if (req.body.civs === "false") {
-		osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 0`, function () {
+		osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 0 ${newFilename}`, function () {
 			next();
 		});
 	} else {
-		osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 1`, function () {
+		osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${req.body.seed} 1 ${newFilename}`, function () {
 			next();
 		});
 	}
@@ -898,12 +908,14 @@ router.get("/build", function (req, res) {
 
 router.post("/random", createModFolder, createCivIcons, copyCivIcons, generateJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
 	console.log(`[${req.body.seed}]: Completed generation!`);
-	res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
+	const filename = req.modFilename || req.body.seed;
+	res.download(__dirname + "/modding/requested_mods/" + filename + ".zip");
 });
 
 router.post("/create", createModFolder, writeIconsJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
 	console.log(`[${req.body.seed}]: Completed generation!`);
-	res.download(__dirname + "/modding/requested_mods/" + req.body.seed + ".zip");
+	const filename = req.modFilename || req.body.seed;
+	res.download(__dirname + "/modding/requested_mods/" + filename + ".zip");
 });
 
 router.post("/setCookie", (req, res) => {
@@ -998,7 +1010,10 @@ router.get("/api/draft/:id", checkCookies, authenticateDraft, function (req, res
 });
 
 router.post("/download", (req, res) => {
-	res.download(__dirname + "/modding/requested_mods/" + req.body.draftID + ".zip");
+	// Try to load draft to get the stored filename
+	const draft = getDraft(req.body.draftID);
+	const filename = (draft && draft.modFilename) ? draft.modFilename : req.body.draftID;
+	res.download(__dirname + "/modding/requested_mods/" + filename + ".zip");
 });
 
 // Helper function to update timer_remaining based on elapsed time
@@ -1026,10 +1041,24 @@ function updateTimerRemaining(draft) {
 function getCurrentPlayer(draft) {
 	var numPlayers = draft["preset"]["slots"];
 	var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
-	var player = draft["gamestate"]["order"][draft["gamestate"]["turn"] % numPlayers];
-	if (roundType == 2 || roundType == 4) {
-		player = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
+	var turnModPlayers = draft["gamestate"]["turn"] % numPlayers;
+	var player = draft["gamestate"]["order"][turnModPlayers];
+	
+	// Snake draft mode: alternate direction every round
+	if (draft["preset"]["snake_draft"]) {
+		// Calculate which round we're in (0-indexed)
+		var currentRound = Math.floor(draft["gamestate"]["turn"] / numPlayers);
+		// Reverse order on odd rounds (1, 3, 5, ...)
+		if (currentRound % 2 === 1) {
+			player = draft["gamestate"]["order"][numPlayers - 1 - turnModPlayers];
+		}
+	} else {
+		// Legacy mode: only reverse on specific round types
+		if (roundType == 2 || roundType == 4) {
+			player = draft["gamestate"]["order"][numPlayers - 1 - turnModPlayers];
+		}
 	}
+	
 	return { player, roundType, numPlayers };
 }
 
@@ -1253,11 +1282,18 @@ function draftIO(io) {
 				fs.writeFileSync(`${tempdir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
 				io.in(roomID).emit("set gamestate", draft);
 
-				//Create the mod
-				//Welcome to callback hell because I wasted $1800 on a web-dev class where the professor was seemingly incapable of answering a single question
-				//process.chdir(tempdir);
+				// Create the mod by executing a series of steps:
+				// 1. Create mod folder structure
+				// 2. Generate civ icons
+				// 3. Generate data.json
+				// 4. Write language strings
+				// 5. Write unit icons
+				// 6. Write tech tree and civilizations JSON
+				// 7. Create DAT file
+				// 8. Zip the mod
+				
 				//Create Mod Folder
-				osUtil.execCommand(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${draft["id"]} ${tempdir} 1`, function () {
+				osUtil.execCommand(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${draft["id"]} ${__dirname} 1`, function () {
 					//Create Civ Icons
 					for (var i = 0; i < numPlayers; i++) {
 						var civName = nameArr[i];
@@ -1418,8 +1454,51 @@ function draftIO(io) {
 										osUtil.execCommand(command, function () {
 											//Write Dat File
 											osUtil.execCommand(`./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`, function () {
-												//Zip Files
-												osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${draft["id"]} 1`, function () {
+												// Copy JSON files to mod folder for user reference
+												try {
+													const sourcePath = path.join(tempdir, 'drafts', `${draft["id"]}.json`);
+													const destPath = path.join(__dirname, 'modding', 'requested_mods', draft["id"], 'draft-config.json');
+													
+													// Check if source file exists before copying
+													if (!fs.existsSync(sourcePath)) {
+														console.error(`[${draft["id"]}]: Source draft JSON not found at ${sourcePath}`);
+													} else {
+														fs.copyFileSync(sourcePath, destPath);
+														
+														// Create individual civ JSON files for each player (for combine compatibility)
+														draft["players"].forEach((player, index) => {
+															const civJson = {
+																alias: player.alias || `Civ${index + 1}`,
+																description: player.description || '',
+																flag_palette: player.flag_palette,
+																tree: player.tree,
+																bonuses: player.bonuses,
+																architecture: player.architecture,
+																language: player.language,
+																wonder: player.wonder,
+																castle: player.castle,
+																customFlag: player.customFlag || false,
+																customFlagData: player.customFlagData || ''
+															};
+															
+															// Create filename based on player alias, sanitized for filesystem
+															const safeName = (player.alias || `Civ${index + 1}`)
+																.replace(/[^a-zA-Z0-9_-]/g, '_')
+																.substring(0, 50);
+															const civFilePath = path.join(__dirname, 'modding', 'requested_mods', draft["id"], `${safeName}.json`);
+															fs.writeFileSync(civFilePath, JSON.stringify(civJson, null, 2));
+														});
+														
+														console.log(`[${draft["id"]}]: Added draft-config.json, data.json, and ${draft["players"].length} individual civ JSON file(s) to mod folder`);
+													}
+												} catch (error) {
+													console.error(`[${draft["id"]}]: Error copying JSON files from ${error.path || 'unknown path'}:`, error.message);
+												}
+												
+												//Zip Files with new filename format
+												const newFilename = generateModFilenameNoExt(__dirname);
+												draft["modFilename"] = newFilename; // Store filename in draft for download
+												osUtil.execCommand(`bash ./process_mod/zipModFolder.sh ${draft["id"]} 1 ${newFilename}`, function () {
 													draft["gamestate"]["phase"] = 6;
 													fs.writeFileSync(`${tempdir}/drafts/${draft["id"]}.json`, JSON.stringify(draft, null, 2));
 													io.in(roomID).emit("set gamestate", draft);

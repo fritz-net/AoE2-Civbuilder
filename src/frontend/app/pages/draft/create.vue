@@ -78,6 +78,37 @@
           </div>
         </div>
       </div>
+
+      <div class="form-section blind-picks-section">
+        <label class="form-label">
+          <input
+            v-model="draftSettings.blindPicks"
+            type="checkbox"
+            id="blindPicks"
+            class="timer-checkbox"
+          />
+          Enable Blind Picks
+        </label>
+        <div class="timer-help-text">
+          When enabled, players cannot view other players' bonuses during the draft. Spectators can always view all players.
+        </div>
+      </div>
+
+      <div class="form-section snake-draft-section">
+        <label class="form-label">
+          <input
+            v-model="draftSettings.snakeDraft"
+            type="checkbox"
+            id="snakeDraft"
+            class="timer-checkbox"
+          />
+          Enable Snake Draft
+        </label>
+        <div class="timer-help-text">
+          When enabled, the draft order alternates every round (e.g., 1234→4321→1234 for 4 players). When disabled, uses the default order pattern where only specific round types (Castle Age and Imperial Age unique techs) reverse the order.
+        </div>
+      </div>
+      
       <!-- Advanced/Testing Options (collapsed by default) -->
       <details class="form-section advanced-section">
         <summary class="form-label">Advanced Options (for testing)</summary>
@@ -207,6 +238,8 @@ const draftSettings = ref({
   allowedRarities: [true, true, true, true, true],
   timerEnabled: false,
   timerDuration: 60,
+  blindPicks: false,
+  snakeDraft: false,
   cardsPerRoll: 3, // Optional: number of cards to show per roll
   requiredFirstRoll: '', // Optional: comma-separated bonus IDs for testing (e.g., "356" for pasture bonus)
 })
@@ -238,6 +271,8 @@ const createDraft = async () => {
         allowed_rarities: draftSettings.value.allowedRarities.join(','),
         timer_enabled: draftSettings.value.timerEnabled.toString(),
         timer_duration: draftSettings.value.timerDuration.toString(),
+        blind_picks: draftSettings.value.blindPicks.toString(),
+        snake_draft: draftSettings.value.snakeDraft.toString(),
         cards_per_roll: draftSettings.value.cardsPerRoll.toString(),
         required_first_roll: draftSettings.value.requiredFirstRoll,
       }).toString(),
@@ -423,6 +458,20 @@ const goBack = () => {
   font-size: 0.9rem;
   color: rgba(240, 230, 210, 0.7);
   font-style: italic;
+}
+
+.blind-picks-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.snake-draft-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
 }
 
 .submit-button {
