@@ -231,8 +231,15 @@ test.describe('TechTree Demo - Mode Switching', () => {
     await page.goto('/v2/demo/techtree');
     
     // Check initial tech count
-    const initialTechsText = await page.getByText(/Techs Enabled: \d+/).textContent();
-    const initialTechs = parseInt(initialTechsText?.match(/\d+/)?.[0] || '0');
+    const TECH_COUNT_PATTERN = /Techs Enabled: (\d+)/;
+    const initialTechsText = await page.getByText(TECH_COUNT_PATTERN).textContent();
+    const match = initialTechsText?.match(TECH_COUNT_PATTERN);
+    
+    if (!match) {
+      throw new Error('Could not parse tech count from page');
+    }
+    
+    const initialTechs = parseInt(match[1]);
     
     // Switch to draft and back
     await page.getByRole('radio', { name: /Draft Mode/i }).click();
@@ -307,11 +314,11 @@ test.describe('TechTree Production - Build Page', () => {
     await page.getByPlaceholder(/Enter civilization name/i).fill('Test Civ');
     
     // Click Next to navigate through steps
-    // This is a simplified version - may need adjustment based on actual flow
+    const STEPS_TO_TECH_TREE = 6; // Number of steps before reaching tech tree
     const nextButton = page.getByRole('button', { name: /Next/i });
     
-    // Navigate through steps (6 times to reach tech tree)
-    for (let i = 0; i < 6; i++) {
+    // Navigate through steps to reach tech tree
+    for (let i = 0; i < STEPS_TO_TECH_TREE; i++) {
       if (await nextButton.isVisible()) {
         await nextButton.click();
         await page.waitForTimeout(500);

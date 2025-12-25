@@ -172,7 +172,7 @@
 import { ref } from 'vue'
 import TimerCountdown from '~/components/draft/TimerCountdown.vue'
 
-const timerRef = ref<any>(null)
+const timerRef = ref<InstanceType<typeof TimerCountdown> | null>(null)
 const timerKey = ref(0)
 
 // Settings
