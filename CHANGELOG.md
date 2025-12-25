@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.7.0...v1.8.0) (2025-12-25)
+
+
+### Features
+
+* add hostname-aware GitHub bug tracker link to UI v2 navigation ([#147](https://github.com/fritz-net/AoE2-Civbuilder/issues/147)) ([df6a6e2](https://github.com/fritz-net/AoE2-Civbuilder/commit/df6a6e2ef0d3dffeb4f0e015738543e92b2b6e08))
+* add optional timer/countdown feature for draft mode picking phase ([#145](https://github.com/fritz-net/AoE2-Civbuilder/issues/145)) ([baadd3f](https://github.com/fritz-net/AoE2-Civbuilder/commit/baadd3fb90d4f244963e1285725f0372c297465d))
+* add player tech tree viewing with optional blind picks in draft mode ([#159](https://github.com/fritz-net/AoE2-Civbuilder/issues/159)) ([e5b49d9](https://github.com/fritz-net/AoE2-Civbuilder/commit/e5b49d90c23d68aed2a31d367fc90143d12da158))
+* add vanilla civs download to UI v2 with FAQ documentation ([#144](https://github.com/fritz-net/AoE2-Civbuilder/issues/144)) ([226e58c](https://github.com/fritz-net/AoE2-Civbuilder/commit/226e58c020f34882f14e3dbabd5fed0173dae1ad))
+* add versioned filenames to mod zips with datetime and random hex, plus individual civ JSON files for draft mode ([#132](https://github.com/fritz-net/AoE2-Civbuilder/issues/132)) ([164f894](https://github.com/fritz-net/AoE2-Civbuilder/commit/164f8945d6027f7eddd64cbc771a54de83c8b54c))
+* draft card visibility for spectators, non-active players, and timer pause states ([#157](https://github.com/fritz-net/AoE2-Civbuilder/issues/157)) ([3d060c0](https://github.com/fritz-net/AoE2-Civbuilder/commit/3d060c09ab513eb74e74ab72ae330ec58b129e17))
+* make timer fully clickable with hover icon controls ([#154](https://github.com/fritz-net/AoE2-Civbuilder/issues/154)) ([ba83837](https://github.com/fritz-net/AoE2-Civbuilder/commit/ba83837276232f185061a0637049a93ca7c326fb))
+
+
+### Bug Fixes
+
+* draft mode layout: remove scrolling, fix tech tree width, improve tooltip contrast, correct icon paths, fix tooltip positioning, and use TechTree's built-in sidebar ([#139](https://github.com/fritz-net/AoE2-Civbuilder/issues/139)) ([31538b7](https://github.com/fritz-net/AoE2-Civbuilder/commit/31538b7522b76e2e76741370a2b70f68e871c788))
+* pasture bonus tech tree display in draft mode and add configurable draft settings ([#138](https://github.com/fritz-net/AoE2-Civbuilder/issues/138)) ([e3971f4](https://github.com/fritz-net/AoE2-Civbuilder/commit/e3971f40df3641a02953b47c063ad99cd8390de5))
+
 ## [1.7.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.6.2...v1.7.0) (2025-12-03)
 
 
