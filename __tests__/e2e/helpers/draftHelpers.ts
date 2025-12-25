@@ -197,6 +197,21 @@ export async function completeTechTreePhase(page: Page) {
     await doneButton.click();
     console.log('[completeTechTreePhase] Done button clicked');
     
+    // Wait for confirmation dialog to appear
+    await page.waitForTimeout(1000);
+    
+    // Check if confirmation dialog appeared and click "Yes, Done" button
+    const confirmButton = page.getByRole('button', { name: /Yes, Done/i });
+    const isConfirmVisible = await confirmButton.isVisible().catch(() => false);
+    
+    if (isConfirmVisible) {
+      console.log('[completeTechTreePhase] Confirmation dialog appeared, clicking "Yes, Done"...');
+      await confirmButton.click();
+      console.log('[completeTechTreePhase] Confirmation button clicked');
+    } else {
+      console.log('[completeTechTreePhase] No confirmation dialog found, proceeding...');
+    }
+    
     // Wait for the click to be processed and socket event to be sent
     await page.waitForTimeout(3000);
     console.log('[completeTechTreePhase] Completed tech tree phase');

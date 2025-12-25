@@ -227,11 +227,24 @@
     <div v-if="description" class="techtree-panel">
       <p class="description-text" v-html="description"></p>
     </div>
+
+    <!-- Confirmation Dialog -->
+    <ConfirmDialog
+      :show="showConfirmDialog"
+      :title="confirmDialogTitle"
+      :message="confirmDialogMessage"
+      :warning="confirmDialogWarning"
+      confirm-text="Yes, Done"
+      cancel-text="Go Back"
+      @confirm="handleConfirmDone"
+      @cancel="handleCancelDone"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 import type { Caret, Tree, TechtreeData, LaneRows } from '~/composables/useTechtreeData'
 import {
   TYPES,
@@ -311,6 +324,7 @@ const helptextStyle = ref<{ top: string; left: string; display: string }>({
 const isMaximized = ref(false)
 const showSidebar = ref(true)
 const containerHeight = ref(typeof window !== 'undefined' ? window.innerHeight : 600)
+const showConfirmDialog = ref(false)
 
 // Computed
 const connections = computed(() => getConnections(props.showPastures))
@@ -432,6 +446,26 @@ const formattedSidebarContent = computed(() => {
 const helpTextContent = computed(() => {
   if (!focusedCaret.value || !data.value) return ''
   return getHelpText(focusedCaret.value)
+})
+
+// Confirmation dialog content
+const confirmDialogTitle = computed(() => {
+  if (!props.editable) return 'Close Tech Tree'
+  return 'Finalize Tech Tree?'
+})
+
+const confirmDialogMessage = computed(() => {
+  if (!props.editable) return 'Are you sure you want to close the tech tree?'
+  return 'Are you sure you want to finalize your tech tree selections?'
+})
+
+const confirmDialogWarning = computed(() => {
+  if (!props.editable) return ''
+  if (techtreePoints.value > 0) {
+    const pointsText = techtreePoints.value === 1 ? 'point' : 'points'
+    return `You have ${techtreePoints.value} ${pointsText} remaining! You can spend these ${pointsText} on more techs, units, or buildings.`
+  }
+  return ''
 })
 
 // Handle window resize to update scale
@@ -937,7 +971,19 @@ function handleReset() {
 }
 
 function handleDone() {
+  // Show confirmation dialog instead of immediately emitting done
+  showConfirmDialog.value = true
+}
+
+function handleConfirmDone() {
+  // User confirmed - close dialog and emit done event
+  showConfirmDialog.value = false
   emit('done', localtree.value, techtreePoints.value)
+}
+
+function handleCancelDone() {
+  // User canceled - just close the dialog
+  showConfirmDialog.value = false
 }
 
 function toggleMaximize() {
