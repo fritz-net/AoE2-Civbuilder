@@ -455,7 +455,8 @@ const confirmDialogMessage = computed(() => {
 const confirmDialogWarning = computed(() => {
   if (!props.editable) return ''
   if (techtreePoints.value > 0) {
-    return `You have ${techtreePoints.value} points remaining! You can spend these points on more techs, units, or buildings.`
+    const pointsText = techtreePoints.value === 1 ? 'point' : 'points'
+    return `You have ${techtreePoints.value} ${pointsText} remaining! You can spend these ${pointsText} on more techs, units, or buildings.`
   }
   return ''
 })
