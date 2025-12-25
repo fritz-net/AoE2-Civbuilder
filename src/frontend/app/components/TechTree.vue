@@ -124,6 +124,7 @@
           v-for="caret in allCarets"
           :key="caret.id"
           :class="['node', { 'is-highlight': isHighlighted(caret.id) }]"
+          :data-testid="`node-${caret.id}`"
         >
           <!-- Background -->
           <rect
@@ -204,6 +205,7 @@
             :width="caret.width"
             :height="caret.height"
             class="node__overlay"
+            :data-testid="`overlay-${caret.id}`"
             @mouseover="showHelp(caret)"
             @mouseout="resetHighlight"
             @click="handleCaretClick(caret)"
@@ -842,6 +844,19 @@ function handleLinkedCarets(caretId: string, enable: boolean) {
   }
   if (enable && (caretId === 'unit_5' || caretId === 'unit_420' || caretId === 'unit_36')) {
     enableCaret('tech_47')
+  }
+  
+  // Fortified Wall dependencies
+  // When enabling Fortified Wall (tech or building), also enable Stone Wall and Gate
+  if (enable && (caretId === 'tech_194' || caretId === 'building_155')) {
+    enableCaret('building_117')
+    enableCaret('building_487')
+  }
+  
+  // When disabling Stone Wall or Gate, also disable Fortified Wall (both tech and building)
+  if (!enable && (caretId === 'building_117' || caretId === 'building_487')) {
+    disableCaret('tech_194')
+    disableCaret('building_155')
   }
 }
 
