@@ -765,35 +765,53 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       let zipFile: string | null = null;
       
       // Look for zip file with the new filename format or fallback to draft ID
+      console.log(`[Test] Looking for zip file with draft ID: ${draftId}`);
       const modsFiles = fs.readdirSync(modsDir);
+      console.log(`[Test] Files in mods directory (${modsDir}):`, modsFiles);
+      
       const foundZipFile = modsFiles.find(f => f.includes(draftId!) && f.endsWith('.zip'));
       
       if (foundZipFile) {
         zipFile = foundZipFile;
         zipPath = path.join(modsDir, zipFile);
+        console.log(`[Test] Found zip file: ${zipFile}`);
       } else {
         // Fallback to default filename
         const defaultZipPath = path.join(modsDir, `${draftId}.zip`);
+        console.log(`[Test] No matching zip found, checking default path: ${defaultZipPath}`);
         if (fs.existsSync(defaultZipPath)) {
           zipFile = `${draftId}.zip`;
           zipPath = defaultZipPath;
+          console.log(`[Test] Found zip at default path`);
+        } else {
+          console.log(`[Test] ERROR: No zip file found for draft ${draftId}`);
         }
       }
       
-      expect(fs.existsSync(zipPath!)).toBeTruthy();
+      // Better error message if zip file not found
+      if (!zipPath) {
+        throw new Error(`Zip file not found for draft ${draftId}. Files in ${modsDir}: ${modsFiles.join(', ')}`);
+      }
+      
+      console.log(`[Test] Verifying zip file exists at: ${zipPath}`);
+      expect(fs.existsSync(zipPath)).toBeTruthy();
       
       // Extract the zip
+      console.log(`[Test] Extracting zip to: ${extractDir}`);
       fs.mkdirSync(extractDir, { recursive: true });
       execSync(`unzip -q "${zipPath}" -d "${extractDir}"`, {
         cwd: projectRoot,
         stdio: 'pipe'
       });
+      console.log(`[Test] Zip extracted successfully`);
       
       // Verify draft-config.json exists
       const extractedDraftConfigPath = path.join(extractDir, 'draft-config.json');
+      console.log(`[Test] Checking for draft-config.json at: ${extractedDraftConfigPath}`);
       expect(fs.existsSync(extractedDraftConfigPath)).toBeTruthy();
       
       const extractedDraftConfig = JSON.parse(fs.readFileSync(extractedDraftConfigPath, 'utf8'));
+      console.log(`[Test] Draft config loaded, players: ${extractedDraftConfig.players.length}`);
       expect(extractedDraftConfig.players).toHaveLength(1);
       expect(extractedDraftConfig.id).toBe(draftId);
       
