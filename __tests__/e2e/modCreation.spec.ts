@@ -734,10 +734,29 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       // Complete full draft using helper function
       draftId = await completeFullDraft(page, 1, 'E2E Test Player', 'DraftE2ECiv');
       
+      console.log(`[Test] Draft ${draftId} completed, waiting for mod creation...`);
+      
+      // First, verify we're in the creating phase (phase 5)
+      // This confirms the server received the update tree event and started mod creation
+      const creatingPhase = page.locator('.creating-phase');
+      try {
+        await creatingPhase.waitFor({ state: 'visible', timeout: 10000 });
+        console.log('[Test] Phase 5 (creating) is visible - mod creation started');
+      } catch (error) {
+        console.log('[Test] Warning: Phase 5 (creating) not visible - checking current state');
+        const currentURL = page.url();
+        const draftBoard = await page.locator('.draft-board').isVisible().catch(() => false);
+        const techTreePhase = await page.locator('.techtree-phase').isVisible().catch(() => false);
+        const downloadPhase = await page.locator('.download-phase').isVisible().catch(() => false);
+        console.log(`[Test] Current state: URL=${currentURL}, draft-board=${draftBoard}, techtree=${techTreePhase}, download=${downloadPhase}`);
+      }
+      
       // Wait for the download button to appear (indicates phase 6 - mod creation complete)
       // Increased timeout to 60s as mod creation involves: folder setup, icon generation,
       // JSON creation, DAT file compilation (C++), and zipping - which can be slow in CI
+      console.log('[Test] Waiting for download button (phase 6)...');
       await page.waitForSelector('.download-button', { timeout: 60000 });
+      console.log('[Test] Download button appeared - mod creation complete!');
       
       // Give server a moment to ensure file is fully written
       await page.waitForTimeout(2000);
