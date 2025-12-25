@@ -190,6 +190,7 @@
     <!-- Hover tooltip - follows mouse cursor -->
     <div 
       v-if="hoveredCard" 
+      ref="tooltipRef"
       class="hover-tooltip"
       :class="`rarity-bg-${rarityCssClasses[hoveredCard.rarity]}`"
       :style="tooltipStyle"
@@ -311,7 +312,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { 
   type BonusCard,
   type BonusType,
@@ -368,6 +369,7 @@ const selectedRarities = ref([true, true, true, true, true])
 const selectedEditions = ref([true, true])
 const showEditionBadge = ref(true)
 const hoveredCard = ref<BonusCard | null>(null)
+const tooltipRef = ref<HTMLDivElement | null>(null)
 
 // Mouse position for tooltip
 const mouseX = ref(0)
@@ -381,23 +383,41 @@ function updateMousePosition(event: MouseEvent) {
 // Tooltip configuration constants
 const TOOLTIP_OFFSET_X = 15
 const TOOLTIP_OFFSET_Y = 15
-const TOOLTIP_WIDTH = 350 // matches max-width in CSS
-const TOOLTIP_HEIGHT = 100 // approximate height for overflow detection
 
-// Tooltip style - positions tooltip near cursor with offset
+// Tooltip style - positions tooltip near cursor with offset and boundary checking
 const tooltipStyle = computed(() => {
   // Guard for SSR - return default position if window is undefined
   if (typeof window === 'undefined') {
     return { left: '0px', top: '0px' }
   }
   
-  // Check if tooltip would overflow right edge
-  const rightOverflow = mouseX.value + TOOLTIP_OFFSET_X + TOOLTIP_WIDTH > window.innerWidth
-  // Check if tooltip would overflow bottom
-  const bottomOverflow = mouseY.value + TOOLTIP_OFFSET_Y + TOOLTIP_HEIGHT > window.innerHeight
+  let left = mouseX.value + TOOLTIP_OFFSET_X
+  let top = mouseY.value + TOOLTIP_OFFSET_Y
   
-  const left = rightOverflow ? mouseX.value - TOOLTIP_WIDTH - TOOLTIP_OFFSET_X : mouseX.value + TOOLTIP_OFFSET_X
-  const top = bottomOverflow ? mouseY.value - TOOLTIP_HEIGHT - TOOLTIP_OFFSET_Y : mouseY.value + TOOLTIP_OFFSET_Y
+  // Only check boundaries if tooltip is visible and has been rendered
+  if (tooltipRef.value && hoveredCard.value) {
+    const tooltipRect = tooltipRef.value.getBoundingClientRect()
+    
+    // Check if tooltip goes beyond right edge of viewport
+    if (left + tooltipRect.width > window.innerWidth) {
+      left = mouseX.value - tooltipRect.width - TOOLTIP_OFFSET_X
+    }
+    
+    // Check if tooltip goes below viewport
+    if (top + tooltipRect.height > window.innerHeight) {
+      top = mouseY.value - tooltipRect.height - TOOLTIP_OFFSET_Y
+    }
+    
+    // Ensure tooltip stays within left edge
+    if (left < 0) {
+      left = TOOLTIP_OFFSET_X
+    }
+    
+    // Ensure tooltip stays within top edge
+    if (top < 0) {
+      top = TOOLTIP_OFFSET_Y
+    }
+  }
   
   return {
     left: `${left}px`,
@@ -631,6 +651,13 @@ function decrementMultiplier(cardId: number) {
 function handleCardHover(card: BonusCard, isHovering: boolean) {
   if (isHovering) {
     hoveredCard.value = card
+    // Force tooltip position recalculation after DOM update
+    nextTick(() => {
+      if (tooltipRef.value) {
+        // Access computed property to trigger recalculation with updated DOM dimensions
+        const _ = tooltipStyle.value
+      }
+    })
   } else {
     hoveredCard.value = null
   }

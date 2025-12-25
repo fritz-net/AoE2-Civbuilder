@@ -101,6 +101,7 @@
     <!-- Mouse-following help tooltip -->
     <div 
       v-show="hoveredCard || tooltipText" 
+      ref="tooltipRef"
       class="help-tooltip"
       :class="[
         hoveredCard ? `rarity-border-${hoveredCard.rarity || 0}` : '',
@@ -294,6 +295,7 @@ const emit = defineEmits<{
 
 const hoveredCard = ref<DisplayCard | null>(null)
 const tooltipText = ref<string | null>(null)
+const tooltipRef = ref<HTMLDivElement | null>(null)
 const flagCanvasRefs = ref<Map<number, HTMLCanvasElement>>(new Map())
 const mousePosition = ref({ x: 0, y: 0 })
 // Cache rendered flag palettes to prevent flickering on re-renders
@@ -398,12 +400,45 @@ const cardMargin = computed(() => {
   return 0.3
 })
 
-// Tooltip positioning - follows mouse
+// Tooltip positioning - follows mouse with boundary checking
 const tooltipStyle = computed(() => {
+  // Guard for SSR - return default position if window is undefined
+  if (typeof window === 'undefined') {
+    return { left: '0px', top: '0px' }
+  }
+  
   const offset = 15 // pixels from cursor
+  let left = mousePosition.value.x + offset
+  let top = mousePosition.value.y + offset
+  
+  // Only check boundaries if tooltip is visible and has been rendered
+  if (tooltipRef.value && (hoveredCard.value || tooltipText.value)) {
+    const tooltipRect = tooltipRef.value.getBoundingClientRect()
+    
+    // Check if tooltip goes beyond right edge of viewport
+    if (left + tooltipRect.width > window.innerWidth) {
+      left = mousePosition.value.x - tooltipRect.width - offset
+    }
+    
+    // Check if tooltip goes below viewport
+    if (top + tooltipRect.height > window.innerHeight) {
+      top = mousePosition.value.y - tooltipRect.height - offset
+    }
+    
+    // Ensure tooltip stays within left edge
+    if (left < 0) {
+      left = offset
+    }
+    
+    // Ensure tooltip stays within top edge
+    if (top < 0) {
+      top = offset
+    }
+  }
+  
   return {
-    left: `${mousePosition.value.x + offset}px`,
-    top: `${mousePosition.value.y + offset}px`,
+    left: `${left}px`,
+    top: `${top}px`,
   }
 })
 
@@ -519,6 +554,13 @@ const handleCardSelect = (card: DisplayCard) => {
 
 const handleCardHover = (card: DisplayCard) => {
   hoveredCard.value = card
+  // Force tooltip position recalculation after DOM update
+  nextTick(() => {
+    if (tooltipRef.value) {
+      // Access computed property to trigger recalculation with updated DOM dimensions
+      const _ = tooltipStyle.value
+    }
+  })
 }
 
 const handleCardUnhover = () => {
@@ -527,6 +569,13 @@ const handleCardUnhover = () => {
 
 const handleToolbarHover = (text: string) => {
   tooltipText.value = text
+  // Force tooltip position recalculation after DOM update
+  nextTick(() => {
+    if (tooltipRef.value) {
+      // Access computed property to trigger recalculation with updated DOM dimensions
+      const _ = tooltipStyle.value
+    }
+  })
 }
 
 const handleToolbarUnhover = () => {
