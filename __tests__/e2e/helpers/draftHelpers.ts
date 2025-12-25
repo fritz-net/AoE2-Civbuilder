@@ -106,8 +106,11 @@ export async function completeCardDrafting(page: Page, maxRounds: number = 20): 
       break;
     }
     
-    const cards = page.locator('.card:not(.card-disabled)');
+    // Use the correct selector: .draft-card that is not hidden
+    const cards = page.locator('.draft-card:not(.card-hidden)');
     const cardCount = await cards.count();
+    
+    console.log(`[completeCardDrafting] Found ${cardCount} clickable cards`);
     
     if (cardCount > 0) {
       await cards.first().click();
