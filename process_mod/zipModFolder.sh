@@ -19,14 +19,8 @@ then
     cd ..
     mv ./$1-data/thumbnail.jpg ./thumbnail.jpg
     
-    # Include JSON files if they exist
-    JSON_FILES=""
-    if [ -f ./data.json ]; then
-        JSON_FILES="$JSON_FILES data.json"
-    fi
-    if [ -f ./draft-config.json ]; then
-        JSON_FILES="$JSON_FILES draft-config.json"
-    fi
+    # Include all JSON files if they exist
+    JSON_FILES=$(find . -maxdepth 1 -name "*.json" -type f)
     
     if [ -n "$JSON_FILES" ]; then
         zip ../$ZIPNAME.zip $1-data.zip thumbnail.jpg $JSON_FILES -qq
@@ -48,14 +42,8 @@ else
     cd ..
     mv ./$1-ui/thumbnail.jpg ./thumbnail.jpg
     
-    # Include JSON files if they exist
-    JSON_FILES=""
-    if [ -f ./data.json ]; then
-        JSON_FILES="$JSON_FILES data.json"
-    fi
-    if [ -f ./draft-config.json ]; then
-        JSON_FILES="$JSON_FILES draft-config.json"
-    fi
+    # Include all JSON files if they exist
+    JSON_FILES=$(find . -maxdepth 1 -name "*.json" -type f)
     
     if [ -n "$JSON_FILES" ]; then
         zip ../$ZIPNAME.zip $1-data.zip $1-ui.zip thumbnail.jpg $JSON_FILES -qq

@@ -252,4 +252,107 @@ describe('JSON files in draft zip', () => {
     // UI mod should not be present
     expect(zipContents).not.toContain(`${testId}-ui.zip`);
   });
+
+  test('should include individual civ JSON files along with draft-config and data.json', () => {
+    // Create mod folder structure
+    execSync(`bash ./process_mod/createModFolder.sh ./modding/requested_mods ${testId} ${projectRoot} 1`, {
+      cwd: projectRoot,
+      stdio: 'pipe'
+    });
+
+    // Create a sample data.json
+    const modFolderPath = path.join(modsDir, testId);
+    const dataJson = {
+      name: ['TestCiv1', 'TestCiv2'],
+      description: ['First test civ', 'Second test civ']
+    };
+    fs.writeFileSync(
+      path.join(modFolderPath, 'data.json'),
+      JSON.stringify(dataJson, null, 2)
+    );
+
+    // Create a sample draft-config.json
+    const draftConfig = {
+      id: testId,
+      preset: {
+        slots: 2,
+        points: 100,
+        rounds: 3
+      },
+      players: [
+        { alias: 'TestCiv1' },
+        { alias: 'TestCiv2' }
+      ]
+    };
+    fs.writeFileSync(
+      path.join(modFolderPath, 'draft-config.json'),
+      JSON.stringify(draftConfig, null, 2)
+    );
+
+    // Create individual civ JSON files (simulating what server.js does)
+    const civ1Json = {
+      alias: 'TestCiv1',
+      description: 'First test civ',
+      tree: [[0]],
+      bonuses: []
+    };
+    fs.writeFileSync(
+      path.join(modFolderPath, 'TestCiv1.json'),
+      JSON.stringify(civ1Json, null, 2)
+    );
+
+    const civ2Json = {
+      alias: 'TestCiv2',
+      description: 'Second test civ',
+      tree: [[0]],
+      bonuses: []
+    };
+    fs.writeFileSync(
+      path.join(modFolderPath, 'TestCiv2.json'),
+      JSON.stringify(civ2Json, null, 2)
+    );
+
+    // Run zipModFolder.sh
+    execSync(`bash ./process_mod/zipModFolder.sh ${testId} 1`, {
+      cwd: projectRoot,
+      stdio: 'pipe'
+    });
+
+    // Check that zip was created
+    const zipPath = path.join(modsDir, `${testId}.zip`);
+    expect(fs.existsSync(zipPath)).toBe(true);
+
+    // Extract zip to verify contents
+    const extractPath = path.join(testDir, 'extract');
+    fs.mkdirSync(extractPath, { recursive: true });
+    execSync(`unzip -q "${zipPath}" -d "${extractPath}"`, {
+      cwd: projectRoot,
+      stdio: 'pipe'
+    });
+
+    // Verify all JSON files are present
+    expect(fs.existsSync(path.join(extractPath, 'data.json'))).toBe(true);
+    expect(fs.existsSync(path.join(extractPath, 'draft-config.json'))).toBe(true);
+    expect(fs.existsSync(path.join(extractPath, 'TestCiv1.json'))).toBe(true);
+    expect(fs.existsSync(path.join(extractPath, 'TestCiv2.json'))).toBe(true);
+    
+    // Verify the individual civ JSON files have correct content
+    const extractedCiv1 = JSON.parse(fs.readFileSync(path.join(extractPath, 'TestCiv1.json'), 'utf8'));
+    expect(extractedCiv1.alias).toBe('TestCiv1');
+    expect(extractedCiv1.description).toBe('First test civ');
+    
+    // List contents to verify all expected files
+    const zipContents = execSync(`unzip -l "${zipPath}"`, {
+      cwd: projectRoot,
+      encoding: 'utf8'
+    });
+    
+    expect(zipContents).toContain('data.json');
+    expect(zipContents).toContain('draft-config.json');
+    expect(zipContents).toContain('TestCiv1.json');
+    expect(zipContents).toContain('TestCiv2.json');
+    expect(zipContents).toContain('thumbnail.jpg');
+    expect(zipContents).toContain(`${testId}-data.zip`);
+    expect(zipContents).toContain(`${testId}-ui.zip`);
+  });
 });
