@@ -20,13 +20,20 @@ test.describe('TechTree Functionality - Build Mode', () => {
   });
 
   test('should add points when enabling techs in build mode', async ({ page }) => {
+    // Wait for techs to load (check tech count is greater than initial 39)
+    await page.waitForFunction(() => {
+      const techText = document.body.textContent;
+      const match = techText?.match(/Techs Enabled: (\d+)/);
+      return match && parseInt(match[1]) > 39;
+    }, { timeout: 10000 });
+    
     // Get initial points
     const initialPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
     const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
     
     // Click the Fill button in the TechTree toolbar (not the demo panel)
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
     
     // Check that points increased
     const finalPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
@@ -36,9 +43,16 @@ test.describe('TechTree Functionality - Build Mode', () => {
   });
 
   test('should have unlimited points in build mode', async ({ page }) => {
+    // Wait for techs to load
+    await page.waitForFunction(() => {
+      const techText = document.body.textContent;
+      const match = techText?.match(/Techs Enabled: (\d+)/);
+      return match && parseInt(match[1]) > 39;
+    }, { timeout: 10000 });
+    
     // Click Fill button in TechTree toolbar
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
     
     // Get final points - should be a large number with no restriction
     const pointsText = await page.getByText(/Points Spent: \d+/i).textContent();
@@ -50,9 +64,16 @@ test.describe('TechTree Functionality - Build Mode', () => {
   });
 
   test('should reset points to 0 in build mode', async ({ page }) => {
+    // Wait for techs to load
+    await page.waitForFunction(() => {
+      const techText = document.body.textContent;
+      const match = techText?.match(/Techs Enabled: (\d+)/);
+      return match && parseInt(match[1]) > 39;
+    }, { timeout: 10000 });
+    
     // Click Fill to add some techs
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
     
     // Verify points increased
     const filledPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
@@ -68,9 +89,16 @@ test.describe('TechTree Functionality - Build Mode', () => {
   });
 
   test('should subtract points when disabling techs in build mode', async ({ page }) => {
+    // Wait for techs to load
+    await page.waitForFunction(() => {
+      const techText = document.body.textContent;
+      const match = techText?.match(/Techs Enabled: (\d+)/);
+      return match && parseInt(match[1]) > 39;
+    }, { timeout: 10000 });
+    
     // Click Fill to enable all techs
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
     
     // Get filled points
     const filledPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
@@ -207,9 +235,16 @@ test.describe('TechTree Functionality - Fill Button', () => {
   test('should enable all available techs when Fill is clicked (build mode)', async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
+    // Wait for techs to load
+    await page.waitForFunction(() => {
+      const techText = document.body.textContent;
+      const match = techText?.match(/Techs Enabled: (\d+)/);
+      return match && parseInt(match[1]) > 39;
+    }, { timeout: 10000 });
+    
     // Click Fill button in TechTree toolbar
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
     
     // Check that points are greater than 0
     const pointsText = await page.getByText(/Points Spent: \d+/i).textContent();
