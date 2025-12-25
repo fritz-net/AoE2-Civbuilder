@@ -1041,7 +1041,8 @@ function updateTimerRemaining(draft) {
 function getCurrentPlayer(draft) {
 	var numPlayers = draft["preset"]["slots"];
 	var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
-	var player = draft["gamestate"]["order"][draft["gamestate"]["turn"] % numPlayers];
+	var turnModPlayers = draft["gamestate"]["turn"] % numPlayers;
+	var player = draft["gamestate"]["order"][turnModPlayers];
 	
 	// Snake draft mode: alternate direction every round
 	if (draft["preset"]["snake_draft"]) {
@@ -1049,12 +1050,12 @@ function getCurrentPlayer(draft) {
 		var currentRound = Math.floor(draft["gamestate"]["turn"] / numPlayers);
 		// Reverse order on odd rounds (1, 3, 5, ...)
 		if (currentRound % 2 === 1) {
-			player = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
+			player = draft["gamestate"]["order"][numPlayers - 1 - turnModPlayers];
 		}
 	} else {
 		// Legacy mode: only reverse on specific round types
 		if (roundType == 2 || roundType == 4) {
-			player = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
+			player = draft["gamestate"]["order"][numPlayers - 1 - turnModPlayers];
 		}
 	}
 	

@@ -105,7 +105,7 @@
           Enable Snake Draft
         </label>
         <div class="timer-help-text">
-          When enabled, the draft order alternates every round (e.g., 1234→4321→1234 for 4 players). When disabled, uses the default order pattern.
+          When enabled, the draft order alternates every round (e.g., 1234→4321→1234 for 4 players). When disabled, uses the default order pattern where only specific round types (Castle Age and Imperial Age unique techs) reverse the order.
         </div>
       </div>
       

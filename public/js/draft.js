@@ -334,7 +334,8 @@ function renderFlagTech(draft) {
 function renderDraftTable(draft) {
 	var numPlayers = draft["preset"]["slots"];
 	var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
-	var playerNum = draft["gamestate"]["order"][draft["gamestate"]["turn"] % numPlayers];
+	var turnModPlayers = draft["gamestate"]["turn"] % numPlayers;
+	var playerNum = draft["gamestate"]["order"][turnModPlayers];
 	
 	// Snake draft mode: alternate direction every round
 	if (draft["preset"]["snake_draft"]) {
@@ -342,12 +343,12 @@ function renderDraftTable(draft) {
 		var currentRound = Math.floor(draft["gamestate"]["turn"] / numPlayers);
 		// Reverse order on odd rounds (1, 3, 5, ...)
 		if (currentRound % 2 === 1) {
-			playerNum = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
+			playerNum = draft["gamestate"]["order"][numPlayers - 1 - turnModPlayers];
 		}
 	} else {
 		// Legacy mode: only reverse on specific round types
 		if (roundType == 2 || roundType == 4) {
-			playerNum = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
+			playerNum = draft["gamestate"]["order"][numPlayers - 1 - turnModPlayers];
 		}
 	}
 	var playerNumber = getCookie("playerNumber");

@@ -78,7 +78,8 @@ export const useDraft = () => {
       Math.floor(draft.value.gamestate.turn / numPlayers) - (draft.value.preset.rounds - 1),
       0
     )
-    let playerNum = draft.value.gamestate.order[draft.value.gamestate.turn % numPlayers]
+    const turnModPlayers = draft.value.gamestate.turn % numPlayers
+    let playerNum = draft.value.gamestate.order[turnModPlayers]
     
     // Snake draft mode: alternate direction every round
     if (draft.value.preset.snake_draft) {
@@ -86,12 +87,12 @@ export const useDraft = () => {
       const currentRound = Math.floor(draft.value.gamestate.turn / numPlayers)
       // Reverse order on odd rounds (1, 3, 5, ...)
       if (currentRound % 2 === 1) {
-        playerNum = draft.value.gamestate.order[numPlayers - 1 - (draft.value.gamestate.turn % numPlayers)]
+        playerNum = draft.value.gamestate.order[numPlayers - 1 - turnModPlayers]
       }
     } else {
       // Legacy mode: only reverse on specific round types
       if (roundType === 2 || roundType === 4) {
-        playerNum = draft.value.gamestate.order[numPlayers - 1 - (draft.value.gamestate.turn % numPlayers)]
+        playerNum = draft.value.gamestate.order[numPlayers - 1 - turnModPlayers]
       }
     }
     
