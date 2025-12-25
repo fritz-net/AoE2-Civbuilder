@@ -3,6 +3,10 @@ import { test, expect } from '@playwright/test';
 /**
  * E2E tests for the Updates/Changelog page
  */
+
+// Minimum expected changelog length to verify content loaded
+const MIN_CHANGELOG_LENGTH = 1000;
+
 test.describe('Updates Page - Changelog Display', () => {
   test('should load updates page successfully', async ({ page }) => {
     await page.goto('/v2/updates');
@@ -87,5 +91,50 @@ test.describe('Updates Page - Changelog Display', () => {
     // Verify changelog loaded successfully
     const changelogContent = page.locator('.changelog-content');
     await expect(changelogContent).toBeVisible({ timeout: 10000 });
+  });
+
+  test('should display changelog with full content including bullets', async ({ page }) => {
+    await page.goto('/v2/updates');
+    
+    // Wait for changelog to load
+    await page.waitForSelector('.changelog-content', { timeout: 10000 });
+    
+    // Get the changelog text content
+    const changelogText = await page.locator('.changelog-content').textContent();
+    
+    // Verify it's not empty or just loading
+    expect(changelogText).toBeTruthy();
+    expect(changelogText!.length).toBeGreaterThan(MIN_CHANGELOG_LENGTH);
+    
+    // Verify it contains version numbers
+    expect(changelogText).toMatch(/v\d+\.\d+\.\d+/);
+    
+    // Verify it contains dates
+    expect(changelogText).toMatch(/\d{4}-\d{2}-\d{2}/);
+    
+    // Verify it contains bullet points (actual content)
+    expect(changelogText).toContain('•');
+  });
+
+  test('should fetch changelog from /v2/CHANGELOG.md path', async ({ page }) => {
+    const requestUrls: string[] = [];
+    
+    // Listen for network requests
+    page.on('request', request => {
+      if (request.url().includes('CHANGELOG.md')) {
+        requestUrls.push(request.url());
+      }
+    });
+    
+    await page.goto('/v2/updates');
+    
+    // Wait for changelog to load
+    await page.waitForSelector('.changelog-content', { timeout: 10000 });
+    
+    // Should have fetched the changelog
+    expect(requestUrls.length).toBeGreaterThan(0);
+    
+    // The URL should contain /v2/CHANGELOG.md
+    expect(requestUrls[0]).toContain('/v2/CHANGELOG.md');
   });
 });

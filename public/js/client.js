@@ -7,7 +7,7 @@ function parseChangelogMarkdown(markdown) {
 	const VERSION_PATTERN = /^## \[([^\]]+)\](?:\([^)]+\))? \((\d{4}-\d{2}-\d{2})\)/;
 	const VERSION_PATTERN_UNRELEASED = /^## \[Unreleased\]/i;
 	const SECTION_PATTERN = /^### /;
-	const BULLET_PATTERN = /^- /;
+	const BULLET_PATTERN = /^[-*] /; // Match both - and * for bullets
 	const SKIP_PATTERNS = [
 		/^# Changelog/,
 		/^All notable changes/,
@@ -73,9 +73,11 @@ function parseChangelogMarkdown(markdown) {
 			continue;
 		}
 		
-		// Match bullet points: - item
+		// Match bullet points: - item or * item
 		if (BULLET_PATTERN.test(line)) {
-			const content = line.substring(2);
+			let content = line.substring(2).trim();
+			// Replace markdown links with HTML links
+			content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 			html += `&emsp;&emsp;• ${content}<br>`;
 			inList = true;
 			continue;

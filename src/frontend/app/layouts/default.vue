@@ -6,6 +6,12 @@
       <NuxtLink to="/about" class="nav-button">About</NuxtLink>
       <NuxtLink to="/events" class="nav-button">Events</NuxtLink>
       <NuxtLink to="/updates" class="nav-button">Updates</NuxtLink>
+      
+      <!-- GitHub Bug Tracker Link -->
+      <a :href="githubUrl" target="_blank" rel="noopener noreferrer" class="nav-button">
+        Bug Tracker
+      </a>
+      
       <a :href="v1Url" class="nav-button classic-ui-link">Classic UI</a>
     </nav>
     
@@ -32,6 +38,18 @@ const config = useRuntimeConfig()
 const baseURL = config.app.baseURL || '/v2/'
 
 const discordImageSrc = computed(() => `${baseURL}img/kraken_invite.png`)
+const githubIconSrc = computed(() => `${baseURL}img/github-icon.svg`)
+
+// Determine GitHub URL based on hostname
+const githubUrl = computed(() => {
+  if (process.client) {
+    const hostname = window.location.hostname
+    if (hostname === 'krakenmeister.com' || hostname === 'www.krakenmeister.com') {
+      return 'https://github.com/Krakenmeister/AoE2-Civbuilder/issues'
+    }
+  }
+  return 'https://github.com/fritz-net/AoE2-Civbuilder/issues'
+})
 
 // URL to v1 (classic) UI
 const v1Url = computed(() => {
@@ -112,7 +130,7 @@ const showNavigation = computed(() => {
 }
 
 .discord-invite {
-  height: 50px;
+  height: 100px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }

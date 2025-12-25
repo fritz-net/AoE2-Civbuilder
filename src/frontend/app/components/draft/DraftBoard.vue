@@ -10,10 +10,17 @@
       <!-- Timer (if enabled) -->
       <TimerCountdown
         v-if="timerDuration > 0"
+        ref="timerRef"
         :duration="timerDuration"
-        :auto-start="isMyTurn"
+        :max-duration="timerMaxDuration"
+        :auto-start="!timerPaused"
         :show-progress="true"
+        :is-host="isHost"
+        :is-paused="timerPaused"
+        :show-controls="true"
         @complete="handleTimerComplete"
+        @pause="handleTimerPause"
+        @resume="handleTimerResume"
       />
     </div>
 
@@ -261,12 +268,18 @@ const props = withDefaults(defineProps<{
   cards: DisplayCard[]
   isMyTurn: boolean
   timerDuration?: number
+  timerMaxDuration?: number
+  timerPaused?: boolean
   myPlayerIndex?: number // The player viewing this board
   highlighted?: number[] // Array of card indices that can be selected (selection limit)
+  isHost?: boolean // Whether the current user is the host
 }>(), {
   timerDuration: 0,
+  timerMaxDuration: 0,
+  timerPaused: false,
   myPlayerIndex: -1,
   highlighted: () => [],
+  isHost: false,
 })
 
 const emit = defineEmits<{
@@ -275,6 +288,8 @@ const emit = defineEmits<{
   (e: 'timer-complete'): void
   (e: 'refill'): void
   (e: 'clear'): void
+  (e: 'timer-pause'): void
+  (e: 'timer-resume'): void
 }>()
 
 const hoveredCard = ref<DisplayCard | null>(null)
@@ -326,6 +341,9 @@ const displayCards = computed(() => {
 
 // Check if a card is selectable (respects highlighted array like legacy code)
 const isCardSelectable = (index: number): boolean => {
+  // Cards are never selectable when timer is paused (for anyone)
+  if (props.timerPaused) return false
+  
   if (!props.isMyTurn) return false
   if (props.cards[index]?.id === -1) return false
   
@@ -340,14 +358,23 @@ const isCardSelectable = (index: number): boolean => {
 
 // Check if a card should be disabled (greyed out)
 const isCardDisabled = (index: number): boolean => {
-  if (!props.isMyTurn) return true
+  // Cards are disabled (greyed) when timer is paused (for everyone)
+  if (props.timerPaused) return true
+  
+  // Hidden cards are always disabled
   if (props.cards[index]?.id === -1) return true
   
-  // If highlighted array has values and this card isn't in it, disable it
-  if (props.highlighted && props.highlighted.length > 0 && !props.highlighted.includes(index)) {
+  // Spectators (myPlayerIndex < 0): cards are NOT greyed when timer is running
+  // Non-active players (myPlayerIndex >= 0 && !isMyTurn): cards ARE greyed
+  if (props.myPlayerIndex >= 0 && !props.isMyTurn) return true
+  
+  // For active player: disable cards not in highlighted array (when array has values)
+  if (props.isMyTurn && props.highlighted && props.highlighted.length > 0 && !props.highlighted.includes(index)) {
     return true
   }
   
+  // All other cards remain enabled (not disabled/greyed out)
+  // This includes spectator cards (myPlayerIndex < 0) when timer is running
   return false
 }
 
@@ -403,7 +430,7 @@ function formatArmorStat(basic: number, elite: number): string {
 }
 
 function getUnitGraphicUrl(unitId: number): string {
-  return `/img/unitgraphics/uu_${unitId}.png`
+  return `/v2/img/unitgraphics/uu_${unitId}.jpg`
 }
 
 function getStatIconUrl(stat: string): string {
@@ -413,15 +440,15 @@ function getStatIconUrl(stat: string): string {
     'stone': 'stone.png',
     'gold': 'gold.png',
     'hp': 'hp.png',
-    'meleeAttack': 'attack-melee.png',
-    'pierceAttack': 'attack-pierce.png',
+    'meleeAttack': 'damage.png',
+    'pierceAttack': 'pierceAttack.png',
     'range': 'range.png',
-    'reloadTime': 'reload-time.png',
-    'movementSpeed': 'movement-speed.png',
-    'armor': 'armor-melee.png',
-    'range-armor': 'armor-pierce.png',
+    'reloadTime': 'reloadTime.png',
+    'movementSpeed': 'movementSpeed.png',
+    'armor': 'armor.png',
+    'range-armor': 'range-armor.png',
   }
-  return `${techtreeBasePath.value}/img/${iconMap[stat] || 'hp.png'}`
+  return `/v2/img/staticons/${iconMap[stat] || 'hp.png'}`
 }
 
 function getAttackIcon(stats: UnitStats): string {
@@ -510,6 +537,14 @@ const handleTimerComplete = () => {
   emit('timer-complete')
 }
 
+const handleTimerPause = () => {
+  emit('timer-pause')
+}
+
+const handleTimerResume = () => {
+  emit('timer-resume')
+}
+
 onMounted(() => {
   // Initialize any necessary setup
 })
@@ -518,10 +553,11 @@ onMounted(() => {
 <style scoped>
 .draft-board {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   background: url('/img/draftbackground.jpg') center/cover;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .board-header {
@@ -556,6 +592,7 @@ onMounted(() => {
   gap: 1rem;
   padding: 1rem;
   overflow: hidden;
+  min-height: 0;
 }
 
 .players-sidebar {
@@ -630,7 +667,8 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  overflow-y: auto;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .cards-container {
@@ -642,7 +680,9 @@ onMounted(() => {
   padding: 1rem;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 8px;
-  min-height: 400px;
+  min-height: 200px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 /* Mouse-following tooltip - matches /build style with black background and colored border */

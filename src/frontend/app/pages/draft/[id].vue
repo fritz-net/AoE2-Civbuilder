@@ -45,7 +45,9 @@
         :current-player-index="currentTurn?.playerNum || 0"
         :cards="displayCards"
         :is-my-turn="false"
-        :timer-duration="0"
+        :timer-duration="timerDuration"
+        :timer-max-duration="timerMaxDuration"
+        :timer-paused="isTimerPaused"
         @view-player="handleViewPlayer"
       >
         <template #card-details="{ card }">
@@ -138,6 +140,15 @@
     <div v-if="error" class="error-message">
       {{ error }}
     </div>
+
+    <!-- Player View Modal -->
+    <PlayerViewModal
+      :show="showPlayerModal"
+      :player="selectedPlayer"
+      :player-index="selectedPlayerIndex"
+      :techtree-points="draft?.preset?.points || 0"
+      @close="closePlayerModal"
+    />
   </div>
 </template>
 
@@ -148,6 +159,7 @@ import { useDraft } from '~/composables/useDraft'
 import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
 import { renderFlagOnCanvas } from '~/composables/useFlagRenderer'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
+import PlayerViewModal from '~/components/draft/PlayerViewModal.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -160,14 +172,28 @@ const {
   currentPhase,
   currentTurn,
   roundTypeName,
+  timerDuration,
+  timerMaxDuration,
+  isTimerPaused,
   initSocket,
   loadDraft,
   joinRoom,
+  syncTimer,
   setupSocketListeners,
   cleanup,
 } = useDraft()
 
 const { getBonusCards, getBonusImageUrl, rarityNames } = useBonusData()
+
+// Player view modal state
+const showPlayerModal = ref(false)
+const selectedPlayerIndex = ref(-1)
+const selectedPlayer = computed(() => {
+  if (selectedPlayerIndex.value >= 0 && draft.value?.players) {
+    return draft.value.players[selectedPlayerIndex.value]
+  }
+  return null
+})
 
 const flagCanvasRefs = ref<Map<number, HTMLCanvasElement>>(new Map())
 
@@ -251,8 +277,16 @@ watch(() => draft.value?.players, (players) => {
 }, { deep: true })
 
 const handleViewPlayer = (playerIndex: number) => {
-  // TODO: Show modal with player's tech tree and selected bonuses
-  console.log('View player:', playerIndex)
+  // Spectators can always view all players
+  if (draft.value?.players && playerIndex >= 0 && playerIndex < draft.value.players.length) {
+    selectedPlayerIndex.value = playerIndex
+    showPlayerModal.value = true
+  }
+}
+
+const closePlayerModal = () => {
+  showPlayerModal.value = false
+  selectedPlayerIndex.value = -1
 }
 
 const handleDownload = () => {
@@ -296,6 +330,18 @@ onMounted(async () => {
   
   // Load draft - this will use socket.io to get gamestate
   await loadDraft(draftId.value)
+  
+  // Start periodic timer sync for phase 2 (every second)
+  const timerSyncInterval = setInterval(() => {
+    if (draft.value && draft.value.gamestate.phase === 2 && draft.value.preset.timer_enabled) {
+      syncTimer()
+    }
+  }, 1000)
+  
+  // Clean up interval on unmount
+  onUnmounted(() => {
+    clearInterval(timerSyncInterval)
+  })
 })
 
 onUnmounted(() => {
