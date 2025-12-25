@@ -723,7 +723,7 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
   });
 
   test('should extract JSON from actual draft zip created via full draft flow and use in combine', async ({ page }) => {
-    test.setTimeout(120000); // Extend timeout for this comprehensive test (draft + mod creation + extraction)
+    test.setTimeout(60000); // Reduced timeout - mod creation takes ~5s, draft+extraction should complete well within 60s
     
     const projectRoot = path.join(__dirname, '../..');
     const modsDir = path.join(projectRoot, 'modding', 'requested_mods');
@@ -752,14 +752,13 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       }
       
       // Wait for the download button to appear (indicates phase 6 - mod creation complete)
-      // Increased timeout to 60s as mod creation involves: folder setup, icon generation,
-      // JSON creation, DAT file compilation (C++), and zipping - which can be slow in CI
+      // Mod creation typically takes ~5 seconds, using 15s timeout to account for CI variability
       console.log('[Test] Waiting for download button (phase 6)...');
-      await page.waitForSelector('.download-button', { timeout: 60000 });
+      await page.waitForSelector('.download-button', { timeout: 15000 });
       console.log('[Test] Download button appeared - mod creation complete!');
       
       // Give server a moment to ensure file is fully written
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1000);
       
       // Now find the zip file
       let zipPath: string | null = null;
