@@ -267,7 +267,6 @@ defineExpose({
   align-items: center;
   gap: 0.5rem;
   height: 3rem;
-  line-height: 3rem;
 }
 
 .timer-critical .timer-display {
@@ -284,8 +283,6 @@ defineExpose({
   justify-content: center;
   width: 3rem;
   height: 3rem;
-  min-width: 3rem;
-  min-height: 3rem;
 }
 
 .hover-control-icon {
