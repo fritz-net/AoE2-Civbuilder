@@ -1,5 +1,5 @@
 <template>
-  <div v-if="show" class="confirm-overlay" @click="handleOverlayClick">
+  <div v-if="show" class="confirm-overlay">
     <div class="confirm-content" @click.stop>
       <div class="confirm-header">
         <h2>{{ title }}</h2>
@@ -44,10 +44,6 @@ const emit = defineEmits<{
   (e: 'confirm'): void
   (e: 'cancel'): void
 }>()
-
-const handleOverlayClick = () => {
-  // Don't close on overlay click - require explicit button click
-}
 
 const handleConfirm = () => {
   emit('confirm')
