@@ -92,10 +92,13 @@
         :timer-duration="timerDuration"
         :timer-max-duration="timerMaxDuration"
         :timer-paused="isTimerPaused"
+        :is-host="isHost"
         :highlighted="draft.gamestate.highlighted || []"
         @select-card="handleSelectCard"
         @view-player="handleViewPlayer"
         @timer-complete="handleTimerComplete"
+        @timer-pause="handleTimerPause"
+        @timer-resume="handleTimerResume"
         @refill="handleRefill"
         @clear="handleClear"
       />
@@ -247,6 +250,8 @@ const {
   selectCard,
   refillCards,
   clearCards,
+  pauseTimer,
+  resumeTimer,
   notifyTimerExpired,
   syncTimer,
   setupSocketListeners,
@@ -430,6 +435,14 @@ const handleTimerComplete = () => {
     // Notify server that timer expired
     notifyTimerExpired(draft.value.gamestate.turn)
   }
+}
+
+const handleTimerPause = () => {
+  pauseTimer()
+}
+
+const handleTimerResume = () => {
+  resumeTimer()
 }
 
 const handleDownload = () => {
