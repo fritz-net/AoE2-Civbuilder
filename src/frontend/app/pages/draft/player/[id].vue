@@ -313,7 +313,7 @@ const sidebarContent = computed(() => {
     const unit = allCards.uniqueUnits[unitId]
     if (unit && unit.name) {
       if (hasAnyBonus) html += '<hr>'
-      html += `<h3>Unique Unit</h3><p><span>${unit.name}</span></p>`
+      html += `<h3>Unique Unit</h3><p>${unit.name}</p>`
       hasAnyBonus = true
     }
   }
@@ -324,7 +324,7 @@ const sidebarContent = computed(() => {
     const tech = allCards.castleTechs[techId]
     if (tech && tech.name) {
       if (hasAnyBonus) html += '<hr>'
-      html += `<h3>Castle Age Tech</h3><p><span>${tech.name}</span></p>`
+      html += `<h3>Castle Age Tech</h3><p>${tech.name}</p>`
       hasAnyBonus = true
     }
   }
@@ -335,7 +335,7 @@ const sidebarContent = computed(() => {
     const tech = allCards.imperialTechs[techId]
     if (tech && tech.name) {
       if (hasAnyBonus) html += '<hr>'
-      html += `<h3>Imperial Age Tech</h3><p><span>${tech.name}</span></p>`
+      html += `<h3>Imperial Age Tech</h3><p>${tech.name}</p>`
       hasAnyBonus = true
     }
   }
@@ -346,7 +346,7 @@ const sidebarContent = computed(() => {
     const bonus = allCards.teamBonuses[bonusId]
     if (bonus && bonus.name) {
       if (hasAnyBonus) html += '<hr>'
-      html += `<h3>Team Bonus</h3><p><span>${bonus.name}</span></p>`
+      html += `<h3>Team Bonus</h3><p>${bonus.name}</p>`
       hasAnyBonus = true
     }
   }
