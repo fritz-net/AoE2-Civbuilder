@@ -3,7 +3,7 @@
     <div class="timer-label">{{ label }}</div>
     <div class="timer-display-row">
       <div class="timer-display">{{ formattedTime }}</div>
-      <div v-if="isPaused" class="pause-indicator" :class="{ 'pulse-animation': isPaused }">
+      <div v-if="isPaused" class="pause-indicator pulse-animation">
         <svg viewBox="0 0 24 24" class="pause-icon">
           <rect x="6" y="4" width="4" height="16" rx="1" />
           <rect x="14" y="4" width="4" height="16" rx="1" />
