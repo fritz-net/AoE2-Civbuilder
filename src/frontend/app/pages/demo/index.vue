@@ -10,12 +10,11 @@
         <p>Test both build and draft modes for the Tech Tree component</p>
       </NuxtLink>
       
-      <!-- Placeholder for future demos -->
-      <div class="demo-card disabled">
+      <NuxtLink to="/demo/timer" class="demo-card">
         <div class="demo-card-icon">⏱️</div>
-        <h2>Timer</h2>
-        <p>Coming soon...</p>
-      </div>
+        <h2>Timer Countdown</h2>
+        <p>Interactive demo for the Timer Countdown component used in drafts</p>
+      </NuxtLink>
     </div>
   </div>
 </template>
