@@ -313,15 +313,16 @@ const sidebarContent = computed(() => {
   
   // Check if player has any bonuses at all
   if (!player.bonuses || !Array.isArray(player.bonuses)) {
-    return '<p>No bonuses selected yet</p>'
+    return '<p>Loading bonuses...</p>'
   }
   
+  // Get all bonus cards by type
   const allCards = {
-    civBonuses: getBonusCards(0),
-    uniqueUnits: getBonusCards(1),
-    castleTechs: getBonusCards(2),
-    imperialTechs: getBonusCards(3),
-    teamBonuses: getBonusCards(4),
+    civBonuses: getBonusCards('civ'),
+    uniqueUnits: getBonusCards('uu'),
+    castleTechs: getBonusCards('castle'),
+    imperialTechs: getBonusCards('imp'),
+    teamBonuses: getBonusCards('team'),
   }
   
   let html = ''
@@ -380,9 +381,9 @@ const sidebarContent = computed(() => {
     }
   }
   
-  // If no bonuses were found, return a message
+  // If no bonuses were found, this shouldn't happen in tech tree phase
   if (!hasAnyBonus) {
-    return '<p>No bonuses selected yet.<br>Complete the draft to see your civilization bonuses here.</p>'
+    return '<p style="color: #f00;">Error: No bonuses found. This is a bug.</p>'
   }
   
   return html
