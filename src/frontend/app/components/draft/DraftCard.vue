@@ -140,7 +140,7 @@ const onImageError = () => {
   pointer-events: none;
 }
 
-/* Disabled state - greyed out when not player's turn */
+/* Disabled state - greyed out (only when timer is paused) */
 .card-disabled {
   filter: brightness(35%);
   cursor: not-allowed;
@@ -148,6 +148,11 @@ const onImageError = () => {
 
 .card-disabled:hover {
   transform: none;
+}
+
+/* Non-selectable but enabled cards (spectator mode when timer is running) */
+.draft-card:not(.card-selectable):not(.card-disabled):not(.card-hidden) {
+  cursor: not-allowed;
 }
 
 .card-selectable:not(.card-hidden):not(.card-disabled):hover {

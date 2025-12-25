@@ -341,6 +341,9 @@ const displayCards = computed(() => {
 
 // Check if a card is selectable (respects highlighted array like legacy code)
 const isCardSelectable = (index: number): boolean => {
+  // Cards are never selectable when timer is paused (for anyone)
+  if (props.timerPaused) return false
+  
   if (!props.isMyTurn) return false
   if (props.cards[index]?.id === -1) return false
   
@@ -355,14 +358,23 @@ const isCardSelectable = (index: number): boolean => {
 
 // Check if a card should be disabled (greyed out)
 const isCardDisabled = (index: number): boolean => {
-  if (!props.isMyTurn) return true
+  // Cards are disabled (greyed) when timer is paused (for everyone)
+  if (props.timerPaused) return true
+  
+  // Hidden cards are always disabled
   if (props.cards[index]?.id === -1) return true
   
-  // If highlighted array has values and this card isn't in it, disable it
-  if (props.highlighted && props.highlighted.length > 0 && !props.highlighted.includes(index)) {
+  // Spectators (myPlayerIndex < 0): cards are NOT greyed when timer is running
+  // Non-active players (myPlayerIndex >= 0 && !isMyTurn): cards ARE greyed
+  if (props.myPlayerIndex >= 0 && !props.isMyTurn) return true
+  
+  // For active player: disable cards not in highlighted array (when array has values)
+  if (props.isMyTurn && props.highlighted && props.highlighted.length > 0 && !props.highlighted.includes(index)) {
     return true
   }
   
+  // All other cards remain enabled (not disabled/greyed out)
+  // This includes spectator cards (myPlayerIndex < 0) when timer is running
   return false
 }
 
