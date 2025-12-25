@@ -19,17 +19,15 @@ then
     cd ..
     mv ./$1-data/thumbnail.jpg ./thumbnail.jpg
     
-    # Include JSON files if they exist
-    JSON_FILES=""
-    if [ -f ./data.json ]; then
-        JSON_FILES="$JSON_FILES data.json"
-    fi
-    if [ -f ./draft-config.json ]; then
-        JSON_FILES="$JSON_FILES draft-config.json"
-    fi
+    # Include all JSON files if they exist
+    # Using find with -print0 and array to safely handle filenames with spaces/special chars
+    JSON_FILES=()
+    while IFS= read -r -d '' file; do
+        JSON_FILES+=("$file")
+    done < <(find . -maxdepth 1 -name "*.json" -type f -print0)
     
-    if [ -n "$JSON_FILES" ]; then
-        zip ../$ZIPNAME.zip $1-data.zip thumbnail.jpg $JSON_FILES -qq
+    if [ ${#JSON_FILES[@]} -gt 0 ]; then
+        zip ../$ZIPNAME.zip $1-data.zip thumbnail.jpg "${JSON_FILES[@]}" -qq
     else
         zip ../$ZIPNAME.zip $1-data.zip thumbnail.jpg -qq
     fi
@@ -48,17 +46,15 @@ else
     cd ..
     mv ./$1-ui/thumbnail.jpg ./thumbnail.jpg
     
-    # Include JSON files if they exist
-    JSON_FILES=""
-    if [ -f ./data.json ]; then
-        JSON_FILES="$JSON_FILES data.json"
-    fi
-    if [ -f ./draft-config.json ]; then
-        JSON_FILES="$JSON_FILES draft-config.json"
-    fi
+    # Include all JSON files if they exist
+    # Using find with -print0 and array to safely handle filenames with spaces/special chars
+    JSON_FILES=()
+    while IFS= read -r -d '' file; do
+        JSON_FILES+=("$file")
+    done < <(find . -maxdepth 1 -name "*.json" -type f -print0)
     
-    if [ -n "$JSON_FILES" ]; then
-        zip ../$ZIPNAME.zip $1-data.zip $1-ui.zip thumbnail.jpg $JSON_FILES -qq
+    if [ ${#JSON_FILES[@]} -gt 0 ]; then
+        zip ../$ZIPNAME.zip $1-data.zip $1-ui.zip thumbnail.jpg "${JSON_FILES[@]}" -qq
     else
         zip ../$ZIPNAME.zip $1-data.zip $1-ui.zip thumbnail.jpg -qq
     fi

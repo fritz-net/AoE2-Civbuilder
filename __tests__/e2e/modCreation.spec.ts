@@ -723,7 +723,7 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
   });
 
   test('should extract JSON from actual draft zip created via full draft flow and use in combine', async ({ page }) => {
-    test.setTimeout(90000); // Extend timeout for this comprehensive test
+    test.setTimeout(60000); // Reduced timeout - mod creation takes ~5s, draft+extraction should complete well within 60s
     
     const projectRoot = path.join(__dirname, '../..');
     const modsDir = path.join(projectRoot, 'modding', 'requested_mods');
@@ -734,46 +734,95 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       // Complete full draft using helper function
       draftId = await completeFullDraft(page, 1, 'E2E Test Player', 'DraftE2ECiv');
       
+      console.log(`[Test] Draft ${draftId} completed, waiting for mod creation...`);
+      
+      // First, verify we're in the creating phase (phase 5)
+      // This confirms the server received the update tree event and started mod creation
+      const creatingPhase = page.locator('.creating-phase');
+      try {
+        await creatingPhase.waitFor({ state: 'visible', timeout: 10000 });
+        console.log('[Test] Phase 5 (creating) is visible - mod creation started');
+      } catch (error) {
+        console.log('[Test] Warning: Phase 5 (creating) not visible - checking current state');
+        const currentURL = page.url();
+        const draftBoard = await page.locator('.draft-board').isVisible().catch(() => false);
+        const techTreePhase = await page.locator('.techtree-phase').isVisible().catch(() => false);
+        const downloadPhase = await page.locator('.download-phase').isVisible().catch(() => false);
+        console.log(`[Test] Current state: URL=${currentURL}, draft-board=${draftBoard}, techtree=${techTreePhase}, download=${downloadPhase}`);
+      }
+      
       // Wait for the download button to appear (indicates phase 6 - mod creation complete)
-      await page.waitForSelector('.download-button', { timeout: 45000 });
+      // Mod creation typically takes ~5 seconds, using 15s timeout to account for CI variability
+      console.log('[Test] Waiting for download button (phase 6)...');
+      await page.waitForSelector('.download-button', { timeout: 15000 });
+      console.log('[Test] Download button appeared - mod creation complete!');
       
       // Give server a moment to ensure file is fully written
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1000);
       
       // Now find the zip file
       let zipPath: string | null = null;
       let zipFile: string | null = null;
       
-      // Look for zip file with the new filename format or fallback to draft ID
+      // The server generates zip files with timestamp-based names (not draft ID)
+      // Format: {iso_datetime}_{hex}_v{version}.zip
+      // Since we just created this mod, look for the most recent .zip file
+      console.log(`[Test] Looking for zip file (draft ID: ${draftId})`);
       const modsFiles = fs.readdirSync(modsDir);
-      const foundZipFile = modsFiles.find(f => f.includes(draftId!) && f.endsWith('.zip'));
+      console.log(`[Test] Files in mods directory (${modsDir}):`, modsFiles);
+      
+      // First try: Look for zip files that contain the draft ID (legacy naming)
+      let foundZipFile = modsFiles.find(f => f.includes(draftId!) && f.endsWith('.zip'));
+      
+      if (!foundZipFile) {
+        // Second try: Find the most recent .zip file (new naming scheme)
+        const zipFiles = modsFiles.filter(f => f.endsWith('.zip'));
+        console.log(`[Test] Found ${zipFiles.length} zip files:`, zipFiles);
+        
+        if (zipFiles.length > 0) {
+          // Get the most recently modified zip file
+          const zipFilesWithStats = zipFiles.map(f => ({
+            name: f,
+            mtime: fs.statSync(path.join(modsDir, f)).mtime.getTime()
+          }));
+          zipFilesWithStats.sort((a, b) => b.mtime - a.mtime);
+          foundZipFile = zipFilesWithStats[0].name;
+          console.log(`[Test] Using most recent zip file: ${foundZipFile}`);
+        }
+      }
       
       if (foundZipFile) {
         zipFile = foundZipFile;
         zipPath = path.join(modsDir, zipFile);
+        console.log(`[Test] Found zip file: ${zipFile}`);
       } else {
-        // Fallback to default filename
-        const defaultZipPath = path.join(modsDir, `${draftId}.zip`);
-        if (fs.existsSync(defaultZipPath)) {
-          zipFile = `${draftId}.zip`;
-          zipPath = defaultZipPath;
-        }
+        console.log(`[Test] ERROR: No zip file found for draft ${draftId}`);
       }
       
-      expect(fs.existsSync(zipPath!)).toBeTruthy();
+      // Better error message if zip file not found
+      if (!zipPath) {
+        throw new Error(`Zip file not found for draft ${draftId}. Files in ${modsDir}: ${modsFiles.join(', ')}`);
+      }
+      
+      console.log(`[Test] Verifying zip file exists at: ${zipPath}`);
+      expect(fs.existsSync(zipPath)).toBeTruthy();
       
       // Extract the zip
+      console.log(`[Test] Extracting zip to: ${extractDir}`);
       fs.mkdirSync(extractDir, { recursive: true });
       execSync(`unzip -q "${zipPath}" -d "${extractDir}"`, {
         cwd: projectRoot,
         stdio: 'pipe'
       });
+      console.log(`[Test] Zip extracted successfully`);
       
       // Verify draft-config.json exists
       const extractedDraftConfigPath = path.join(extractDir, 'draft-config.json');
+      console.log(`[Test] Checking for draft-config.json at: ${extractedDraftConfigPath}`);
       expect(fs.existsSync(extractedDraftConfigPath)).toBeTruthy();
       
       const extractedDraftConfig = JSON.parse(fs.readFileSync(extractedDraftConfigPath, 'utf8'));
+      console.log(`[Test] Draft config loaded, players: ${extractedDraftConfig.players.length}`);
       expect(extractedDraftConfig.players).toHaveLength(1);
       expect(extractedDraftConfig.id).toBe(draftId);
       
