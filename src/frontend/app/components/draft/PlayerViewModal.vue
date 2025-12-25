@@ -45,6 +45,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import type { DraftPlayer } from '~/composables/useDraft'
 import { renderFlagOnCanvas } from '~/composables/useFlagRenderer'
+import { DEFAULT_FLAG_PALETTE } from '~/composables/useCivConstants'
 import DraftSidebar from './DraftSidebar.vue'
 import TechTree from '~/components/TechTree.vue'
 
@@ -80,7 +81,7 @@ const playerCivData = computed(() => {
     description: props.player.description || '',
     wonder: props.player.wonder || 0,
     castle: props.player.castle || 0,
-    flag_palette: props.player.flag_palette || [3, 4, 5, 6, 7, 3, 3, 3],
+    flag_palette: props.player.flag_palette || DEFAULT_FLAG_PALETTE,
     tree: props.player.tree || [[], [], []],
     architecture: props.player.architecture || 1,
     language: props.player.language || 0,
@@ -119,7 +120,7 @@ watch(() => props.player, (player) => {
       const ctx = canvas.getContext('2d')
       if (!ctx) return
       
-      renderFlagOnCanvas(ctx, player.flag_palette || [3, 4, 5, 6, 7, 3, 3, 3], canvas.width, canvas.height, '/img/symbols')
+      renderFlagOnCanvas(ctx, player.flag_palette || DEFAULT_FLAG_PALETTE, canvas.width, canvas.height, '/img/symbols')
     })
   }
 }, { immediate: true })

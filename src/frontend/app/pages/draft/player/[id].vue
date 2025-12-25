@@ -527,7 +527,8 @@ const handleViewPlayer = (playerIndex: number) => {
     return
   }
   
-  // If blind picks is enabled, non-spectators cannot view other players
+  // If blind picks is enabled, non-spectators (playerNumber >= 0) cannot view other players
+  // Note: spectators have playerNumber < 0
   if (blindPicks && playerNumber.value >= 0) {
     console.log('Cannot view other players when blind picks is enabled')
     return

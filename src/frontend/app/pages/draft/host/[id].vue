@@ -531,8 +531,9 @@ const handleViewPlayer = (playerIndex: number) => {
   // Check if blind picks is enabled
   const blindPicks = draft.value?.preset?.blind_picks || false
   
-  // Users can always view their own bonuses (host is player 0)
-  if (playerIndex === 0) {
+  // Host is always player 0 - they can always view their own bonuses
+  const HOST_PLAYER_INDEX = 0
+  if (playerIndex === HOST_PLAYER_INDEX) {
     selectedPlayerIndex.value = playerIndex
     showPlayerModal.value = true
     return
