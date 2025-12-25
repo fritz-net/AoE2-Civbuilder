@@ -176,6 +176,15 @@
     <div v-if="error" class="error-message">
       {{ error }}
     </div>
+
+    <!-- Player View Modal -->
+    <PlayerViewModal
+      :show="showPlayerModal"
+      :player="selectedPlayer"
+      :player-index="selectedPlayerIndex"
+      :techtree-points="draft?.preset?.points || 0"
+      @close="closePlayerModal"
+    />
   </div>
 </template>
 
@@ -192,6 +201,7 @@ import FlagCreator from '~/components/FlagCreator.vue'
 import ArchitectureSelector from '~/components/ArchitectureSelector.vue'
 import LanguageSelector from '~/components/LanguageSelector.vue'
 import TechTree from '~/components/TechTree.vue'
+import PlayerViewModal from '~/components/draft/PlayerViewModal.vue'
 
 const config = useRuntimeConfig()
 const route = useRoute()
@@ -268,6 +278,16 @@ const civConfig = ref<CivConfig>({
 
 const techTreePoints = computed(() => {
   return draft.value?.preset.points || 250
+})
+
+// Player view modal state
+const showPlayerModal = ref(false)
+const selectedPlayerIndex = ref(-1)
+const selectedPlayer = computed(() => {
+  if (selectedPlayerIndex.value >= 0 && draft.value?.players) {
+    return draft.value.players[selectedPlayerIndex.value]
+  }
+  return null
 })
 
 const showPasturesInTechtree = computed(() => {
@@ -497,8 +517,32 @@ const handleSelectCard = (card: any) => {
 }
 
 const handleViewPlayer = (playerIndex: number) => {
-  // TODO: Show player's tech tree with their selected bonuses
-  console.log('View player:', playerIndex)
+  // Check if blind picks is enabled
+  const blindPicks = draft.value?.preset?.blind_picks || false
+  
+  // Users can always view their own bonuses
+  if (playerIndex === playerNumber.value) {
+    selectedPlayerIndex.value = playerIndex
+    showPlayerModal.value = true
+    return
+  }
+  
+  // If blind picks is enabled, non-spectators cannot view other players
+  if (blindPicks && playerNumber.value >= 0) {
+    console.log('Cannot view other players when blind picks is enabled')
+    return
+  }
+  
+  // Show player modal
+  if (draft.value?.players && playerIndex >= 0 && playerIndex < draft.value.players.length) {
+    selectedPlayerIndex.value = playerIndex
+    showPlayerModal.value = true
+  }
+}
+
+const closePlayerModal = () => {
+  showPlayerModal.value = false
+  selectedPlayerIndex.value = -1
 }
 
 const handleRefill = () => {

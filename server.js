@@ -223,6 +223,8 @@ const createDraft = (req, res, next) => {
 	// Timer settings (default disabled for backward compatibility)
 	preset["timer_enabled"] = req.body.timer_enabled === "true";
 	preset["timer_duration"] = preset["timer_enabled"] ? parseInt(req.body.timer_duration || "60", 10) : 0;
+	// Blind picks setting (default disabled for backward compatibility)
+	preset["blind_picks"] = req.body.blind_picks === "true";
 	// Number of cards to show per roll (default 3 if not specified)
 	preset["cards_per_roll"] = req.body.cards_per_roll ? parseInt(req.body.cards_per_roll, 10) : 3;
 	// Optional: Force specific bonuses to appear in first roll (for testing)
