@@ -557,7 +557,7 @@ const handleCardHover = (card: DisplayCard) => {
   // Force tooltip position recalculation after DOM update
   nextTick(() => {
     if (tooltipRef.value) {
-      // Trigger computed property recalculation by accessing it
+      // Access computed property to trigger recalculation with updated DOM dimensions
       const _ = tooltipStyle.value
     }
   })
@@ -572,7 +572,7 @@ const handleToolbarHover = (text: string) => {
   // Force tooltip position recalculation after DOM update
   nextTick(() => {
     if (tooltipRef.value) {
-      // Trigger computed property recalculation by accessing it
+      // Access computed property to trigger recalculation with updated DOM dimensions
       const _ = tooltipStyle.value
     }
   })
