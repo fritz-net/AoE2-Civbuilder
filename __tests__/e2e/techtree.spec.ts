@@ -24,8 +24,8 @@ test.describe('TechTree Functionality - Build Mode', () => {
     const initialPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
     const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
     
-    // Click the Fill button to enable all techs
-    await page.getByRole('button', { name: /Fill/i }).click();
+    // Click the Fill button in the TechTree toolbar (not the demo panel)
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(500);
     
     // Check that points increased
@@ -36,8 +36,8 @@ test.describe('TechTree Functionality - Build Mode', () => {
   });
 
   test('should have unlimited points in build mode', async ({ page }) => {
-    // Click Fill button
-    await page.getByRole('button', { name: /Fill/i }).click();
+    // Click Fill button in TechTree toolbar
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(500);
     
     // Get final points - should be a large number with no restriction
@@ -51,7 +51,7 @@ test.describe('TechTree Functionality - Build Mode', () => {
 
   test('should reset points to 0 in build mode', async ({ page }) => {
     // Click Fill to add some techs
-    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(500);
     
     // Verify points increased
@@ -59,8 +59,8 @@ test.describe('TechTree Functionality - Build Mode', () => {
     const filledPoints = parseInt(filledPointsText?.match(/\d+/)?.[0] || '0');
     expect(filledPoints).toBeGreaterThan(0);
     
-    // Click Reset button
-    await page.getByRole('button', { name: /Reset/i }).click();
+    // Click Reset button in TechTree toolbar
+    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
     await page.waitForTimeout(500);
     
     // Verify points back to 0
@@ -69,7 +69,7 @@ test.describe('TechTree Functionality - Build Mode', () => {
 
   test('should subtract points when disabling techs in build mode', async ({ page }) => {
     // Click Fill to enable all techs
-    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(500);
     
     // Get filled points
@@ -77,7 +77,7 @@ test.describe('TechTree Functionality - Build Mode', () => {
     const filledPoints = parseInt(filledPointsText?.match(/\d+/)?.[0] || '0');
     
     // Click Reset to disable all techs
-    await page.getByRole('button', { name: /Reset/i }).click();
+    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
     await page.waitForTimeout(500);
     
     // Verify points reduced to 0
@@ -145,7 +145,7 @@ test.describe('TechTree Functionality - Draft Mode', () => {
 
   test('should add points back when disabling techs in draft mode', async ({ page }) => {
     // Click Fill to enable techs
-    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(500);
     
     // Get points after fill
@@ -153,7 +153,7 @@ test.describe('TechTree Functionality - Draft Mode', () => {
     const filledPoints = parseInt(filledPointsText?.match(/\d+/)?.[0] || '0');
     
     // Click Reset to disable techs
-    await page.getByRole('button', { name: /Reset/i }).click();
+    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
     await page.waitForTimeout(500);
     
     // Get points after reset (should be back to limit)
@@ -167,7 +167,7 @@ test.describe('TechTree Functionality - Draft Mode', () => {
 
   test('should reset points to limit in draft mode', async ({ page }) => {
     // Click Fill to use some points
-    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(500);
     
     // Verify points decreased
@@ -175,8 +175,8 @@ test.describe('TechTree Functionality - Draft Mode', () => {
     const filledPoints = parseInt(filledPointsText?.match(/\d+/)?.[0] || '0');
     expect(filledPoints).toBeLessThan(250);
     
-    // Click Reset button
-    await page.getByRole('button', { name: /Reset/i }).click();
+    // Click Reset button in TechTree toolbar
+    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
     await page.waitForTimeout(500);
     
     // Verify points back to limit
@@ -193,9 +193,9 @@ test.describe('TechTree Functionality - Draft Mode', () => {
     await expect(page.getByText(/Points Remaining: 150/i)).toBeVisible();
     
     // Reset should use the new limit
-    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(500);
-    await page.getByRole('button', { name: /Reset/i }).click();
+    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
     await page.waitForTimeout(500);
     
     // Should be back to custom limit
@@ -207,8 +207,8 @@ test.describe('TechTree Functionality - Fill Button', () => {
   test('should enable all available techs when Fill is clicked (build mode)', async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
-    // Click Fill button
-    await page.getByRole('button', { name: /Fill/i }).click();
+    // Click Fill button in TechTree toolbar
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(500);
     
     // Check that points are greater than 0
@@ -234,8 +234,8 @@ test.describe('TechTree Functionality - Fill Button', () => {
     await pointLimitInput.fill('100');
     await page.waitForTimeout(1000);
     
-    // Click Fill button
-    await page.getByRole('button', { name: /Fill/i }).click();
+    // Click Fill button in TechTree toolbar
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(500);
     
     // Points remaining should be >= 0 and <= 100
@@ -251,11 +251,11 @@ test.describe('TechTree Functionality - Reset Button', () => {
     await page.goto('/v2/demo/techtree');
     
     // Fill first
-    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(500);
     
-    // Click Reset
-    await page.getByRole('button', { name: /Reset/i }).click();
+    // Click Reset in TechTree toolbar
+    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
     await page.waitForTimeout(500);
     
     // Points should be 0
@@ -270,11 +270,11 @@ test.describe('TechTree Functionality - Reset Button', () => {
     await page.waitForTimeout(500);
     
     // Fill first
-    await page.getByRole('button', { name: /Fill/i }).click();
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(500);
     
-    // Click Reset
-    await page.getByRole('button', { name: /Reset/i }).click();
+    // Click Reset in TechTree toolbar
+    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
     await page.waitForTimeout(500);
     
     // Points should be back to limit
