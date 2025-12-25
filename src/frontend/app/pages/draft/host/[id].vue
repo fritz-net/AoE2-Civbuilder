@@ -950,22 +950,6 @@ onUnmounted(() => {
   height: 100vh;
 }
 
-.techtree-container {
-  display: flex;
-  gap: 2rem;
-  max-width: 1600px;
-  margin: 0 auto;
-}
-
-.techtree-container .tech-tree-section {
-  flex: 1;
-  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
-  border: 3px solid hsl(52, 100%, 50%);
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-}
-
 /* Creating phase (Phase 5) */
 .creating-phase {
   display: flex;
