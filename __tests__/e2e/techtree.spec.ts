@@ -3,17 +3,9 @@ import { test, expect } from '@playwright/test';
 /**
  * E2E tests for TechTree component functionality
  * Uses the demo page as a testing interface to verify core TechTree behavior
- * 
- * NOTE: These tests require the Nuxt dev server to be running with the demo pages.
- * They are skipped in CI because the demo pages are not part of the production build.
  */
 
-// Skip all tests in this file in CI or if SKIP_TECHTREE_TESTS is set
-const skipTests = process.env.CI || process.env.SKIP_TECHTREE_TESTS;
-
 test.describe('TechTree Functionality - Build Mode', () => {
-  test.skip(skipTests, 'Demo pages not available in production build');
-  
   test.beforeEach(async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
@@ -98,8 +90,6 @@ test.describe('TechTree Functionality - Build Mode', () => {
 });
 
 test.describe('TechTree Functionality - Draft Mode', () => {
-  test.skip(skipTests, 'Demo pages not available in production build');
-  
   test.beforeEach(async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
@@ -214,8 +204,6 @@ test.describe('TechTree Functionality - Draft Mode', () => {
 });
 
 test.describe('TechTree Functionality - Fill Button', () => {
-  test.skip(skipTests, 'Demo pages not available in production build');
-  
   test('should enable all available techs when Fill is clicked (build mode)', async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
@@ -259,8 +247,6 @@ test.describe('TechTree Functionality - Fill Button', () => {
 });
 
 test.describe('TechTree Functionality - Reset Button', () => {
-  test.skip(skipTests, 'Demo pages not available in production build');
-  
   test('should clear all techs when Reset is clicked (build mode)', async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
@@ -297,8 +283,6 @@ test.describe('TechTree Functionality - Reset Button', () => {
 });
 
 test.describe('TechTree Functionality - Mode Switching', () => {
-  test.skip(skipTests, 'Demo pages not available in production build');
-  
   test('should correctly switch point calculation when changing modes', async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
@@ -322,8 +306,6 @@ test.describe('TechTree Functionality - Mode Switching', () => {
 });
 
 test.describe('TechTree Production - Page Verification', () => {
-  test.skip(skipTests, 'Demo pages not available in production build');
-  
   test('should use build mode with unlimited points on /build page', async ({ page }) => {
     await page.goto('/v2/build');
     
