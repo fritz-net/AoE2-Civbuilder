@@ -165,10 +165,12 @@ watch(() => props.autoStart, (shouldStart) => {
 
 // Watch isPaused prop to ensure timer state stays in sync
 // This handles when parent component updates the paused state
-watch(() => props.isPaused, (paused) => {
+watch(() => props.isPaused, (paused, wasPaused) => {
   if (paused && isRunning.value) {
+    // Pause the timer
     stop()
-  } else if (!paused && !isRunning.value && props.autoStart) {
+  } else if (!paused && wasPaused === true) {
+    // Resume only if transitioning from paused to unpaused
     start()
   }
 })
