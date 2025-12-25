@@ -1,7 +1,34 @@
 <template>
-  <div v-if="showTimer" class="timer-container" :class="{ 'timer-warning': isWarning, 'timer-critical': isCritical }">
+  <div 
+    v-if="showTimer" 
+    class="timer-container" 
+    :class="{ 
+      'timer-warning': isWarning, 
+      'timer-critical': isCritical, 
+      'timer-paused': isPaused,
+      'timer-clickable': isHost && showControls
+    }"
+    @click="handleTimerClick"
+    @mouseenter="isHovered = true"
+    @mouseleave="isHovered = false"
+  >
     <div class="timer-label">{{ label }}</div>
-    <div class="timer-display">{{ formattedTime }}</div>
+    <div class="timer-display-row">
+      <!-- Show pause/play icon on hover (host only), otherwise show time -->
+      <div v-if="isHost && showControls && isHovered" class="timer-icon-display">
+        <svg v-if="!isPaused" viewBox="0 0 24 24" class="hover-control-icon">
+          <rect x="6" y="4" width="4" height="16" rx="1" />
+          <rect x="14" y="4" width="4" height="16" rx="1" />
+        </svg>
+        <svg v-else viewBox="0 0 24 24" class="hover-control-icon">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+      </div>
+      <div v-else class="timer-display">
+        {{ formattedTime }}
+        <span v-if="isPaused" class="pause-indicator-inline pulse-animation">⏸</span>
+      </div>
+    </div>
     <div v-if="showProgress" class="timer-progress">
       <div class="timer-progress-bar" :style="{ width: progressPercent + '%' }"></div>
     </div>
@@ -19,6 +46,9 @@ const props = withDefaults(defineProps<{
   label?: string
   warningThreshold?: number // Show warning color below this (seconds)
   criticalThreshold?: number // Show critical color below this (seconds)
+  isHost?: boolean // Whether the current user is the host
+  isPaused?: boolean // Whether the timer is currently paused
+  showControls?: boolean // Whether to show pause/resume controls
 }>(), {
   duration: 60,
   maxDuration: 0, // 0 means use duration
@@ -27,16 +57,33 @@ const props = withDefaults(defineProps<{
   label: 'Time Remaining',
   warningThreshold: 30,
   criticalThreshold: 10,
+  isHost: false,
+  isPaused: false,
+  showControls: true,
 })
 
 const emit = defineEmits<{
   (e: 'complete'): void
   (e: 'tick', remainingSeconds: number): void
+  (e: 'pause'): void
+  (e: 'resume'): void
 }>()
 
 const timeRemaining = ref(props.duration)
 const isRunning = ref(false)
 const intervalId = ref<number | null>(null)
+const isHovered = ref(false)
+
+const handleTimerClick = () => {
+  // Only handle clicks if host and controls are enabled
+  if (!props.isHost || !props.showControls) return
+  
+  if (props.isPaused) {
+    emit('resume')
+  } else {
+    emit('pause')
+  }
+}
 
 const formattedTime = computed(() => {
   const minutes = Math.floor(timeRemaining.value / 60)
@@ -106,24 +153,28 @@ watch(() => props.duration, (newDuration, oldDuration) => {
   if (newDuration !== oldDuration && newDuration !== timeRemaining.value) {
     timeRemaining.value = newDuration
     // If it was running and should auto-start, restart it
-    if (props.autoStart) {
+    if (props.autoStart && !props.isPaused) {
       stop()
       start()
     }
   }
 })
 
-// Watch for autoStart changes (handles pause/resume)
-watch(() => props.autoStart, (shouldStart) => {
-  if (shouldStart && !isRunning.value) {
+// Combined watcher for autoStart and isPaused to prevent conflicts
+// Handles both initial state and pause/resume transitions
+watch([() => props.autoStart, () => props.isPaused], ([shouldAutoStart, paused]) => {
+  const shouldRun = shouldAutoStart && !paused
+  
+  if (shouldRun && !isRunning.value) {
     start()
-  } else if (!shouldStart && isRunning.value) {
+  } else if (!shouldRun && isRunning.value) {
     stop()
   }
 })
 
 onMounted(() => {
-  if (props.autoStart) {
+  // Start timer only if autoStart is true AND not paused
+  if (props.autoStart && !props.isPaused) {
     start()
   }
 })
@@ -155,6 +206,17 @@ defineExpose({
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
   transition: all 0.3s ease;
+  position: relative;
+}
+
+.timer-clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.timer-clickable:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8);
 }
 
 .timer-warning {
@@ -164,6 +226,10 @@ defineExpose({
 .timer-critical {
   border-color: hsl(0, 100%, 50%);
   animation: pulse 1s ease-in-out infinite;
+}
+
+.timer-paused {
+  border-color: hsl(200, 100%, 50%);
 }
 
 @keyframes pulse {
@@ -183,12 +249,24 @@ defineExpose({
   letter-spacing: 1px;
 }
 
+.timer-display-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;
+  min-height: 3rem;
+}
+
 .timer-display {
   font-size: 2.5rem;
   font-weight: bold;
   color: #f0e6d2;
   font-family: monospace;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 3rem;
 }
 
 .timer-critical .timer-display {
@@ -197,6 +275,53 @@ defineExpose({
 
 .timer-warning .timer-display {
   color: hsl(39, 100%, 60%);
+}
+
+.timer-icon-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+}
+
+.hover-control-icon {
+  width: 3rem;
+  height: 3rem;
+  fill: #f0e6d2;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
+  animation: iconPulse 0.3s ease-in-out;
+}
+
+@keyframes iconPulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pause-indicator-inline {
+  font-size: 2rem;
+  margin-left: 0.5rem;
+}
+
+.pulse-animation {
+  animation: pausePulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pausePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
 }
 
 .timer-progress {
@@ -234,6 +359,11 @@ defineExpose({
 
   .timer-label {
     font-size: 0.8rem;
+  }
+  
+  .hover-control-icon {
+    width: 2.5rem;
+    height: 2.5rem;
   }
 }
 </style>
