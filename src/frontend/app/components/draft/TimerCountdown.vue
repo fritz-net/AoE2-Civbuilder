@@ -173,7 +173,8 @@ watch([() => props.autoStart, () => props.isPaused], ([shouldAutoStart, paused])
 })
 
 onMounted(() => {
-  if (props.autoStart) {
+  // Start timer only if autoStart is true AND not paused
+  if (props.autoStart && !props.isPaused) {
     start()
   }
 })
