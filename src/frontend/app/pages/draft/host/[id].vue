@@ -307,9 +307,15 @@ const showPasturesInTechtree = computed(() => {
 
 // Generate sidebar HTML content from player's selected bonuses
 const sidebarContent = computed(() => {
-  if (!currentPlayer.value) return ''
+  if (!currentPlayer.value) return '<p>No player data available</p>'
   
   const player = currentPlayer.value
+  
+  // Check if player has any bonuses at all
+  if (!player.bonuses || !Array.isArray(player.bonuses)) {
+    return '<p>No bonuses selected yet</p>'
+  }
+  
   const allCards = {
     civBonuses: getBonusCards(0),
     uniqueUnits: getBonusCards(1),
@@ -319,53 +325,64 @@ const sidebarContent = computed(() => {
   }
   
   let html = ''
+  let hasAnyBonus = false
   
   // Civilization Bonuses
-  if (player.bonuses?.[0] && player.bonuses[0].length > 0) {
+  if (player.bonuses[0] && Array.isArray(player.bonuses[0]) && player.bonuses[0].length > 0) {
     html += '<h3>Civilization Bonuses</h3><ul>'
     player.bonuses[0].forEach((id: number) => {
       const bonus = allCards.civBonuses[id]
-      if (bonus) {
+      if (bonus && bonus.name) {
         html += `<li>${bonus.name}</li>`
+        hasAnyBonus = true
       }
     })
     html += '</ul>'
   }
   
   // Unique Unit
-  if (player.bonuses?.[1] && player.bonuses[1].length > 0) {
+  if (player.bonuses[1] && Array.isArray(player.bonuses[1]) && player.bonuses[1].length > 0) {
     const unitId = player.bonuses[1][0]
     const unit = allCards.uniqueUnits[unitId]
-    if (unit) {
-      html += `<h3>Unique Unit</h3><p><span>${unit.name}</span></p>`
+    if (unit && unit.name) {
+      html += `<h3>Unique Unit</h3><p><strong>${unit.name}</strong></p>`
+      hasAnyBonus = true
     }
   }
   
   // Castle Age Tech
-  if (player.bonuses?.[2] && player.bonuses[2].length > 0) {
+  if (player.bonuses[2] && Array.isArray(player.bonuses[2]) && player.bonuses[2].length > 0) {
     const techId = player.bonuses[2][0]
     const tech = allCards.castleTechs[techId]
-    if (tech) {
-      html += `<h3>Castle Age Tech</h3><p><span>${tech.name}</span></p>`
+    if (tech && tech.name) {
+      html += `<h3>Castle Age Tech</h3><p><strong>${tech.name}</strong></p>`
+      hasAnyBonus = true
     }
   }
   
   // Imperial Age Tech
-  if (player.bonuses?.[3] && player.bonuses[3].length > 0) {
+  if (player.bonuses[3] && Array.isArray(player.bonuses[3]) && player.bonuses[3].length > 0) {
     const techId = player.bonuses[3][0]
     const tech = allCards.imperialTechs[techId]
-    if (tech) {
-      html += `<h3>Imperial Age Tech</h3><p><span>${tech.name}</span></p>`
+    if (tech && tech.name) {
+      html += `<h3>Imperial Age Tech</h3><p><strong>${tech.name}</strong></p>`
+      hasAnyBonus = true
     }
   }
   
   // Team Bonus
-  if (player.bonuses?.[4] && player.bonuses[4].length > 0) {
+  if (player.bonuses[4] && Array.isArray(player.bonuses[4]) && player.bonuses[4].length > 0) {
     const bonusId = player.bonuses[4][0]
     const bonus = allCards.teamBonuses[bonusId]
-    if (bonus) {
-      html += `<h3>Team Bonus</h3><p><span>${bonus.name}</span></p>`
+    if (bonus && bonus.name) {
+      html += `<h3>Team Bonus</h3><p><strong>${bonus.name}</strong></p>`
+      hasAnyBonus = true
     }
+  }
+  
+  // If no bonuses were found, return a message
+  if (!hasAnyBonus) {
+    return '<p>No bonuses selected yet.<br>Complete the draft to see your civilization bonuses here.</p>'
   }
   
   return html
