@@ -134,26 +134,16 @@
       
       <!-- Show tech tree if not done yet -->
       <template v-else>
-        <div class="techtree-fullscreen">
-          <!-- Sidebar with selected bonuses -->
-          <DraftSidebar
-            v-if="currentPlayer"
-            :player="currentPlayer"
-            :show-bonuses="true"
-          />
-          
-          <!-- Tech Tree - fills remaining space -->
-          <div class="tech-tree-full">
-            <TechTree
-              v-model="civConfig.tree"
-              :points="techTreePoints"
-              :editable="true"
-              :relative-path="techtreePath"
-              :show-pastures="showPasturesInTechtree"
-              @done="handleTechTreeDone"
-            />
-          </div>
-        </div>
+        <TechTree
+          v-model="civConfig.tree"
+          :points="techTreePoints"
+          :editable="true"
+          :relative-path="techtreePath"
+          :show-pastures="showPasturesInTechtree"
+          :sidebar-content="sidebarContent"
+          :sidebar-title="sidebarTitle"
+          @done="handleTechTreeDone"
+        />
       </template>
     </div>
 
@@ -227,7 +217,6 @@ import { PASTURES_BONUS_ID } from '~/composables/useCivConstants'
 import type { CivConfig } from '~/composables/useCivData'
 import DraftLobby from '~/components/draft/DraftLobby.vue'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
-import DraftSidebar from '~/components/draft/DraftSidebar.vue'
 import FlagCreator from '~/components/FlagCreator.vue'
 import ArchitectureSelector from '~/components/ArchitectureSelector.vue'
 import LanguageSelector from '~/components/LanguageSelector.vue'
@@ -314,6 +303,76 @@ const showPasturesInTechtree = computed(() => {
   // Check if PASTURES_BONUS_ID is selected in civ bonuses (bonuses[0] array)
   if (!currentPlayer.value?.bonuses?.[0]) return false
   return currentPlayer.value.bonuses[0].includes(PASTURES_BONUS_ID)
+})
+
+// Generate sidebar HTML content from player's selected bonuses
+const sidebarContent = computed(() => {
+  if (!currentPlayer.value) return ''
+  
+  const player = currentPlayer.value
+  const allCards = {
+    civBonuses: getBonusCards(0),
+    uniqueUnits: getBonusCards(1),
+    castleTechs: getBonusCards(2),
+    imperialTechs: getBonusCards(3),
+    teamBonuses: getBonusCards(4),
+  }
+  
+  let html = ''
+  
+  // Civilization Bonuses
+  if (player.bonuses?.[0] && player.bonuses[0].length > 0) {
+    html += '<h3>Civilization Bonuses</h3><ul>'
+    player.bonuses[0].forEach((id: number) => {
+      const bonus = allCards.civBonuses[id]
+      if (bonus) {
+        html += `<li>${bonus.name}</li>`
+      }
+    })
+    html += '</ul>'
+  }
+  
+  // Unique Unit
+  if (player.bonuses?.[1] && player.bonuses[1].length > 0) {
+    const unitId = player.bonuses[1][0]
+    const unit = allCards.uniqueUnits[unitId]
+    if (unit) {
+      html += `<h3>Unique Unit</h3><p><span>${unit.name}</span></p>`
+    }
+  }
+  
+  // Castle Age Tech
+  if (player.bonuses?.[2] && player.bonuses[2].length > 0) {
+    const techId = player.bonuses[2][0]
+    const tech = allCards.castleTechs[techId]
+    if (tech) {
+      html += `<h3>Castle Age Tech</h3><p><span>${tech.name}</span></p>`
+    }
+  }
+  
+  // Imperial Age Tech
+  if (player.bonuses?.[3] && player.bonuses[3].length > 0) {
+    const techId = player.bonuses[3][0]
+    const tech = allCards.imperialTechs[techId]
+    if (tech) {
+      html += `<h3>Imperial Age Tech</h3><p><span>${tech.name}</span></p>`
+    }
+  }
+  
+  // Team Bonus
+  if (player.bonuses?.[4] && player.bonuses[4].length > 0) {
+    const bonusId = player.bonuses[4][0]
+    const bonus = allCards.teamBonuses[bonusId]
+    if (bonus) {
+      html += `<h3>Team Bonus</h3><p><span>${bonus.name}</span></p>`
+    }
+  }
+  
+  return html
+})
+
+const sidebarTitle = computed(() => {
+  return currentPlayer.value?.alias || currentPlayer.value?.name || 'Your Civilization'
 })
 
 const displayCards = computed(() => {
@@ -922,32 +981,6 @@ onUnmounted(() => {
   width: 100%;
   padding: 0;
   overflow: hidden;
-}
-
-/* Fullscreen tech tree layout */
-.techtree-fullscreen {
-  display: flex;
-  height: 100%;
-  width: 100%;
-}
-
-.techtree-fullscreen .tech-tree-full {
-  flex: 1;
-  overflow: visible;
-  position: relative;
-  width: 100%;
-}
-
-/* Ensure TechTree fullscreen mode works in draft context */
-.techtree-fullscreen :deep(.techtree-container.is-maximized) {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 10000;
-  min-height: 100vh;
-  height: 100vh;
 }
 
 /* Creating phase (Phase 5) */
