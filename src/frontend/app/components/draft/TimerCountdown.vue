@@ -147,31 +147,22 @@ watch(() => props.duration, (newDuration, oldDuration) => {
   if (newDuration !== oldDuration && newDuration !== timeRemaining.value) {
     timeRemaining.value = newDuration
     // If it was running and should auto-start, restart it
-    if (props.autoStart) {
+    if (props.autoStart && !props.isPaused) {
       stop()
       start()
     }
   }
 })
 
-// Watch for autoStart changes (handles pause/resume)
-watch(() => props.autoStart, (shouldStart) => {
-  if (shouldStart && !isRunning.value) {
+// Combined watcher for autoStart and isPaused to prevent conflicts
+// Handles both initial state and pause/resume transitions
+watch([() => props.autoStart, () => props.isPaused], ([shouldAutoStart, paused]) => {
+  const shouldRun = shouldAutoStart && !paused
+  
+  if (shouldRun && !isRunning.value) {
     start()
-  } else if (!shouldStart && isRunning.value) {
+  } else if (!shouldRun && isRunning.value) {
     stop()
-  }
-})
-
-// Watch isPaused prop to ensure timer state stays in sync
-// This handles when parent component updates the paused state (e.g., from pause/resume button)
-watch(() => props.isPaused, (paused, wasPaused) => {
-  if (paused && isRunning.value) {
-    // Pause the timer
-    stop()
-  } else if (!paused && wasPaused === true && props.autoStart) {
-    // Resume only if transitioning from paused to unpaused AND autoStart is true
-    start()
   }
 })
 
