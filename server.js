@@ -226,6 +226,8 @@ const createDraft = (req, res, next) => {
 	preset["timer_duration"] = preset["timer_enabled"] ? parseInt(req.body.timer_duration || "60", 10) : 0;
 	// Blind picks setting (default disabled for backward compatibility)
 	preset["blind_picks"] = req.body.blind_picks === "true";
+	// Snake draft setting (default disabled for backward compatibility)
+	preset["snake_draft"] = req.body.snake_draft === "true";
 	// Number of cards to show per roll (default 3 if not specified)
 	preset["cards_per_roll"] = req.body.cards_per_roll ? parseInt(req.body.cards_per_roll, 10) : 3;
 	// Optional: Force specific bonuses to appear in first roll (for testing)
@@ -1040,9 +1042,22 @@ function getCurrentPlayer(draft) {
 	var numPlayers = draft["preset"]["slots"];
 	var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
 	var player = draft["gamestate"]["order"][draft["gamestate"]["turn"] % numPlayers];
-	if (roundType == 2 || roundType == 4) {
-		player = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
+	
+	// Snake draft mode: alternate direction every round
+	if (draft["preset"]["snake_draft"]) {
+		// Calculate which round we're in (0-indexed)
+		var currentRound = Math.floor(draft["gamestate"]["turn"] / numPlayers);
+		// Reverse order on odd rounds (1, 3, 5, ...)
+		if (currentRound % 2 === 1) {
+			player = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
+		}
+	} else {
+		// Legacy mode: only reverse on specific round types
+		if (roundType == 2 || roundType == 4) {
+			player = draft["gamestate"]["order"][numPlayers - 1 - (draft["gamestate"]["turn"] % numPlayers)];
+		}
 	}
+	
 	return { player, roundType, numPlayers };
 }
 

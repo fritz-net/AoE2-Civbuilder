@@ -93,6 +93,21 @@
           When enabled, players cannot view other players' bonuses during the draft. Spectators can always view all players.
         </div>
       </div>
+
+      <div class="form-section snake-draft-section">
+        <label class="form-label">
+          <input
+            v-model="draftSettings.snakeDraft"
+            type="checkbox"
+            id="snakeDraft"
+            class="timer-checkbox"
+          />
+          Enable Snake Draft
+        </label>
+        <div class="timer-help-text">
+          When enabled, the draft order alternates every round (e.g., 1234→4321→1234 for 4 players). When disabled, uses the default order pattern.
+        </div>
+      </div>
       
       <!-- Advanced/Testing Options (collapsed by default) -->
       <details class="form-section advanced-section">
@@ -224,6 +239,7 @@ const draftSettings = ref({
   timerEnabled: false,
   timerDuration: 60,
   blindPicks: false,
+  snakeDraft: false,
   cardsPerRoll: 3, // Optional: number of cards to show per roll
   requiredFirstRoll: '', // Optional: comma-separated bonus IDs for testing (e.g., "356" for pasture bonus)
 })
@@ -256,6 +272,7 @@ const createDraft = async () => {
         timer_enabled: draftSettings.value.timerEnabled.toString(),
         timer_duration: draftSettings.value.timerDuration.toString(),
         blind_picks: draftSettings.value.blindPicks.toString(),
+        snake_draft: draftSettings.value.snakeDraft.toString(),
         cards_per_roll: draftSettings.value.cardsPerRoll.toString(),
         required_first_roll: draftSettings.value.requiredFirstRoll,
       }).toString(),
@@ -444,6 +461,13 @@ const goBack = () => {
 }
 
 .blind-picks-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.snake-draft-section {
   margin-bottom: 2rem;
   padding: 1rem;
   background: rgba(0, 0, 0, 0.3);

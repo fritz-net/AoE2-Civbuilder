@@ -13,6 +13,7 @@ export interface DraftPreset {
   cards: number[]
   timer_enabled: boolean
   timer_duration: number
+  snake_draft?: boolean
 }
 
 export interface DraftPlayer {
@@ -78,9 +79,22 @@ export const useDraft = () => {
       0
     )
     let playerNum = draft.value.gamestate.order[draft.value.gamestate.turn % numPlayers]
-    if (roundType === 2 || roundType === 4) {
-      playerNum = draft.value.gamestate.order[numPlayers - 1 - (draft.value.gamestate.turn % numPlayers)]
+    
+    // Snake draft mode: alternate direction every round
+    if (draft.value.preset.snake_draft) {
+      // Calculate which round we're in (0-indexed)
+      const currentRound = Math.floor(draft.value.gamestate.turn / numPlayers)
+      // Reverse order on odd rounds (1, 3, 5, ...)
+      if (currentRound % 2 === 1) {
+        playerNum = draft.value.gamestate.order[numPlayers - 1 - (draft.value.gamestate.turn % numPlayers)]
+      }
+    } else {
+      // Legacy mode: only reverse on specific round types
+      if (roundType === 2 || roundType === 4) {
+        playerNum = draft.value.gamestate.order[numPlayers - 1 - (draft.value.gamestate.turn % numPlayers)]
+      }
     }
+    
     return {
       roundType,
       playerNum,
