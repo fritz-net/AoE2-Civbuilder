@@ -590,8 +590,8 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     const numPlayersInput = page.locator('#numPlayers');
     await numPlayersInput.fill('1');
     
-    // Expand advanced options
-    await page.locator('summary').filter({ hasText: 'Advanced Options' }).click();
+    // Expand testing settings
+    await page.locator('summary').filter({ hasText: 'Testing Settings' }).click();
     
     // Set required first roll to include pasture bonus (356)
     const requiredFirstRollInput = page.locator('#requiredFirstRoll');
