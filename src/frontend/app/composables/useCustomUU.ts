@@ -133,43 +133,46 @@ const ARMOR_CLASS_NAMES: Record<number, string> = {
 };
 
 // Base unit options for each type with UU graphic IDs
+// UU IDs 0-87 map to unique unit graphics
+// Vanilla UUs: 0=Longbow, 1=Cataphract, 2=Huskarl, 3=Teutonic, 4=Samurai, 5=War Elephant, 
+// 6=Cataphract, 7=Chu Ko Nu, 8=Mameluke, 9=Janissary, 10=War Wagon, 11=Mangudai, etc.
 const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
   infantry: [
     { id: 1067, name: 'Jaguar Warrior', type: 'infantry', isRanged: false, uuGraphicId: 14 },
     { id: 1723, name: 'Teutonic Knight', type: 'infantry', isRanged: false, uuGraphicId: 3 },
     { id: 1570, name: 'Woad Raider', type: 'infantry', isRanged: false, uuGraphicId: 12 },
     { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false, uuGraphicId: 2 },
-    { id: 75, name: 'Militia', type: 'infantry', isRanged: false, uuGraphicId: 0 },
-    { id: 358, name: 'Champion', type: 'infantry', isRanged: false, uuGraphicId: 0 },
-    { id: 93, name: 'Spearman', type: 'infantry', isRanged: false, uuGraphicId: 0 },
-    { id: 359, name: 'Halberdier', type: 'infantry', isRanged: false, uuGraphicId: 0 },
+    { id: 1306, name: 'Samurai', type: 'infantry', isRanged: false, uuGraphicId: 4 },
+    { id: 1317, name: 'Berserk', type: 'infantry', isRanged: false, uuGraphicId: 13 },
+    { id: 75, name: 'Militia Line', type: 'infantry', isRanged: false, uuGraphicId: 39 },
+    { id: 93, name: 'Spearman Line', type: 'infantry', isRanged: false, uuGraphicId: 39 },
   ],
   cavalry: [
-    { id: 1721, name: 'Knight', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
     { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false, uuGraphicId: 6 },
     { id: 1269, name: 'Boyar', type: 'cavalry', isRanged: false, uuGraphicId: 22 },
-    { id: 283, name: 'Paladin', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
-    { id: 207, name: 'Camel Rider', type: 'cavalry', isRanged: false, uuGraphicId: 8 },
+    { id: 1755, name: 'War Elephant', type: 'cavalry', isRanged: false, uuGraphicId: 5 },
     { id: 1132, name: 'Battle Elephant', type: 'cavalry', isRanged: false, uuGraphicId: 19 },
+    { id: 1721, name: 'Knight Line', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
+    { id: 207, name: 'Camel Line', type: 'cavalry', isRanged: false, uuGraphicId: 8 },
     { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
     { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
   ],
   archer: [
-    { id: 850, name: 'Plumed Archer', type: 'archer', isRanged: true, uuGraphicId: 15 },
     { id: 873, name: 'Longbowman', type: 'archer', isRanged: true, uuGraphicId: 0 },
-    { id: 5, name: 'Archer', type: 'archer', isRanged: true, uuGraphicId: 0 },
-    { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true, uuGraphicId: 0 },
-    { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, uuGraphicId: 11 },
-    { id: 185, name: 'Skirmisher', type: 'archer', isRanged: true, uuGraphicId: 0 },
+    { id: 850, name: 'Plumed Archer', type: 'archer', isRanged: true, uuGraphicId: 15 },
+    { id: 1225, name: 'Chu Ko Nu', type: 'archer', isRanged: true, uuGraphicId: 7 },
+    { id: 1231, name: 'Mangudai', type: 'archer', isRanged: true, uuGraphicId: 11 },
     { id: 1036, name: 'Genitour', type: 'archer', isRanged: true, uuGraphicId: 25 },
-    { id: 5, name: 'Hand Cannoneer', type: 'archer', isRanged: true, uuGraphicId: 9 },
+    { id: 5, name: 'Archer Line', type: 'archer', isRanged: true, uuGraphicId: 39 },
+    { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true, uuGraphicId: 39 },
+    { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, uuGraphicId: 39 },
   ],
   siege: [
-    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false, uuGraphicId: 0 },
-    { id: 280, name: 'Mangonel', type: 'siege', isRanged: true, uuGraphicId: 0 },
-    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, uuGraphicId: 0 },
+    { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, uuGraphicId: 10 },
+    { id: 280, name: 'Mangonel Line', type: 'siege', isRanged: true, uuGraphicId: 39 },
+    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, uuGraphicId: 39 },
     { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, uuGraphicId: 9 },
-    { id: 420, name: 'Petard', type: 'siege', isRanged: false, uuGraphicId: 0 },
+    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false, uuGraphicId: 39 },
   ]
 };
 

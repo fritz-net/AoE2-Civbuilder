@@ -609,8 +609,10 @@ const enforceSliderLimit = (event: Event, statName: string) => {
   const limit = parseInt(target.getAttribute('data-limit') || '999');
   const value = parseInt(target.value);
   
+  // Enforce the limit by capping the value
   if (value > limit) {
     (customUnit.value as any)[statName] = limit;
+    target.value = String(limit); // Also update the slider visual position
   }
   
   onUnitChange();
