@@ -936,15 +936,17 @@ function handleFill() {
   
   // Enable as many techs as possible within the point budget
   for (const { id, cost } of enableableCarets) {
-    if (cost <= availablePoints) {
+    // In build mode, ignore point limit (unlimited points)
+    // In draft mode, check if we have enough points
+    if (props.mode === 'build' || cost <= availablePoints) {
       // Check if not already enabled (could have been enabled as parent)
       if (!isEnabled(id)) {
         enableCaret(id)
         availablePoints = techtreePoints.value // Update from actual points
       }
     }
-    // Stop if no points left
-    if (availablePoints <= 0) break
+    // Stop if no points left (only in draft mode)
+    if (props.mode === 'draft' && availablePoints <= 0) break
   }
   
   emit('update:tree', localtree.value)
