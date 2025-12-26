@@ -433,14 +433,15 @@ test.describe('Draft Mode - Draft Host Page', () => {
       // Fill in join form
       await page.fill('#playerName', 'Socket Test Player');
       await page.click('.join-button');
-      await page.waitForTimeout(5000);
+      await page.waitForTimeout(3000);
     }
     
-    // Check that Socket.io script was loaded (either before or after joining)
-    const socketScript = await page.evaluate(() => {
+    // Wait for Socket.io script to be loaded (it's dynamically loaded)
+    // Use waitForFunction to retry checking for the script
+    const socketScript = await page.waitForFunction(() => {
       const scripts = document.querySelectorAll('script[src*="socket.io"]');
       return scripts.length > 0;
-    });
+    }, { timeout: 10000 }).then(() => true).catch(() => false);
     
     expect(socketScript).toBe(true);
   });
