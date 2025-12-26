@@ -53,8 +53,9 @@ The project has two parallel frontends:
 - Test helpers: `__tests__/helpers/`
 
 **E2E Tests for Vue/Nuxt UI**
-- uses playwright and locally installed chromium
+- uses playwright and locally installed chromium -> u have all the tools to run the tests
 - location: likely `src/frontend/tests/` or `__tests__/e2e/`
+- u are NOT allowed to increase timeouts. If we run into a timeout in nearly all cases selectors are wrong, the flow changed, something is really broken.
 
 ### Tools and Utilities
 
