@@ -157,7 +157,7 @@
         <summary class="form-label collapsible-summary">Testing Settings</summary>
         
         <div class="form-section">
-          <label for="requiredFirstRoll" class="form-label">Required Bonuses in First Roll:</label>
+          <label for="requiredFirstRoll" class="form-label">Required Bonus IDs:</label>
           <input
             id="requiredFirstRoll"
             v-model="draftSettings.requiredFirstRoll"
