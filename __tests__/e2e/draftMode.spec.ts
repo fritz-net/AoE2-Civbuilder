@@ -571,7 +571,6 @@ test.describe('Draft Mode - Draft Spectator Page', () => {
 test.describe('Draft Mode - Pasture Bonus Detection', () => {
   test('should show pasture building and techs when pasture bonus is selected in draft', async ({ page }) => {
     // This test creates a draft with pasture bonus forced into first roll, selects it, and verifies tech tree
-    test.setTimeout(60000); // Increase timeout to 60 seconds for this complex test
     
     await page.goto('/v2/draft/create');
     
