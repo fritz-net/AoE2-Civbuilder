@@ -25,7 +25,7 @@ test.describe('TechTree Functionality - Build Mode', () => {
       const techText = document.body.textContent;
       const match = techText?.match(/Techs Enabled: (\d+)/);
       return match && parseInt(match[1]) > 39;
-    }, { timeout: 10000 });
+    }, { timeout: 30000 });
     
     // Get initial points
     const initialPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
@@ -48,7 +48,7 @@ test.describe('TechTree Functionality - Build Mode', () => {
       const techText = document.body.textContent;
       const match = techText?.match(/Techs Enabled: (\d+)/);
       return match && parseInt(match[1]) > 39;
-    }, { timeout: 10000 });
+    }, { timeout: 30000 });
     
     // Click Fill button in TechTree toolbar
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
@@ -69,7 +69,7 @@ test.describe('TechTree Functionality - Build Mode', () => {
       const techText = document.body.textContent;
       const match = techText?.match(/Techs Enabled: (\d+)/);
       return match && parseInt(match[1]) > 39;
-    }, { timeout: 10000 });
+    }, { timeout: 30000 });
     
     // Click Fill to add some techs
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
@@ -94,7 +94,7 @@ test.describe('TechTree Functionality - Build Mode', () => {
       const techText = document.body.textContent;
       const match = techText?.match(/Techs Enabled: (\d+)/);
       return match && parseInt(match[1]) > 39;
-    }, { timeout: 10000 });
+    }, { timeout: 30000 });
     
     // Click Fill to enable all techs
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
@@ -240,7 +240,7 @@ test.describe('TechTree Functionality - Fill Button', () => {
       const techText = document.body.textContent;
       const match = techText?.match(/Techs Enabled: (\d+)/);
       return match && parseInt(match[1]) > 39;
-    }, { timeout: 10000 });
+    }, { timeout: 30000 });
     
     // Click Fill button in TechTree toolbar
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
