@@ -762,7 +762,6 @@ const goBack = () => {
   border-top: 8px solid currentColor;
   transition: transform 0.2s ease;
   opacity: 0.7;
-  border-radius: 2px;
 }
 
 .collapsible-summary:hover::after {
