@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { expandAdvancedSettings } from './helpers/draftHelpers';
+import { expandAdvancedSettings, expandTestingSettings } from './helpers/draftHelpers';
 
 /**
  * E2E tests for Draft Mode functionality
@@ -589,7 +589,7 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await numPlayersInput.fill('1');
     
     // Expand testing settings
-    await page.locator('summary').filter({ hasText: 'Testing Settings' }).click();
+    await expandTestingSettings(page);
     
     // Set required first roll to include pasture bonus (356)
     const requiredFirstRollInput = page.locator('#requiredFirstRoll');

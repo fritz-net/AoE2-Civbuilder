@@ -10,8 +10,23 @@ import { Page, expect } from '@playwright/test';
  * @param page - Playwright page object
  */
 export async function expandAdvancedSettings(page: Page) {
-  await page.getByText('Advanced Settings').click();
-  await page.waitForTimeout(500); // Wait for animation
+  const advancedSettingsSummary = page.getByText('Advanced Settings');
+  await advancedSettingsSummary.click();
+  
+  // Wait for the first checkbox inside Advanced Settings to be visible (confirms section is expanded)
+  await page.locator('#rarity-0').waitFor({ state: 'visible', timeout: 5000 });
+}
+
+/**
+ * Expands the Testing Settings section on the draft creation page
+ * @param page - Playwright page object
+ */
+export async function expandTestingSettings(page: Page) {
+  const testingSettingsSummary = page.getByText('Testing Settings');
+  await testingSettingsSummary.click();
+  
+  // Wait for the required first roll input to be visible (confirms section is expanded)
+  await page.locator('#requiredFirstRoll').waitFor({ state: 'visible', timeout: 5000 });
 }
 
 /**
