@@ -66,7 +66,7 @@
                 type="checkbox"
                 id="baseEditionUU"
               />
-              <span>Base Edition (Vanilla Civs)</span>
+              <span>Base Edition (Vanilla UUs)</span>
             </label>
             <label class="uu-edition-checkbox">
               <input
@@ -74,7 +74,7 @@
                 type="checkbox"
                 id="firstEditionUU"
               />
-              <span>First Edition (Custom Civs)</span>
+              <span>First Edition (Custom UUs)</span>
             </label>
           </div>
           <div class="timer-help-text">
