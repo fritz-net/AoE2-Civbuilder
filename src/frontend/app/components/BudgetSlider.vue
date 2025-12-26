@@ -127,8 +127,13 @@ const updateValue = (clientX: number) => {
 const startDrag = (event: MouseEvent | TouchEvent) => {
   isDragging.value = true;
   
-  const clientX = event instanceof MouseEvent ? event.clientX : event.touches[0].clientX;
-  updateValue(clientX);
+  const clientX = event instanceof MouseEvent 
+    ? event.clientX 
+    : (event.touches && event.touches[0] ? event.touches[0].clientX : 0);
+  
+  if (clientX) {
+    updateValue(clientX);
+  }
   
   event.preventDefault();
 };
@@ -136,8 +141,13 @@ const startDrag = (event: MouseEvent | TouchEvent) => {
 const onDrag = (event: MouseEvent | TouchEvent) => {
   if (!isDragging.value) return;
   
-  const clientX = event instanceof MouseEvent ? event.clientX : event.touches[0].clientX;
-  updateValue(clientX);
+  const clientX = event instanceof MouseEvent 
+    ? event.clientX 
+    : (event.touches && event.touches[0] ? event.touches[0].clientX : 0);
+  
+  if (clientX) {
+    updateValue(clientX);
+  }
 };
 
 const stopDrag = () => {
@@ -145,10 +155,11 @@ const stopDrag = () => {
 };
 
 onMounted(() => {
-  document.addEventListener('mousemove', onDrag);
-  document.addEventListener('mouseup', stopDrag);
-  document.addEventListener('touchmove', onDrag);
-  document.addEventListener('touchend', stopDrag);
+  // Use passive listeners where possible for better scroll performance
+  document.addEventListener('mousemove', onDrag, { passive: false });
+  document.addEventListener('mouseup', stopDrag, { passive: true });
+  document.addEventListener('touchmove', onDrag, { passive: false });
+  document.addEventListener('touchend', stopDrag, { passive: true });
 });
 
 onUnmounted(() => {
