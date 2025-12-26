@@ -230,10 +230,10 @@ test.describe('Custom UU Editor - Budget Slider Enforcement', () => {
     const budgetText = await page.getByText(/Power Budget:/i).textContent();
     const initialBudget = parseInt(budgetText?.match(/(\d+) \//)?.[1] || '0');
     
-    // Try to max out multiple stats - budget should prevent going over 150
-    // Wait a bit for UI to be interactive
-    await page.waitForTimeout(500);
+    // Wait for editor to be fully interactive
+    await page.waitForSelector('.budget-slider-track', { state: 'visible' });
     
+    // Try to max out multiple stats - budget should prevent going over 150
     // Check that budget doesn't exceed 150
     const finalBudgetText = await page.getByText(/Power Budget:/i).textContent();
     const finalBudget = parseInt(finalBudgetText?.match(/(\d+) \//)?.[1] || '0');
