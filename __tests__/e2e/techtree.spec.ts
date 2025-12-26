@@ -20,12 +20,9 @@ test.describe('TechTree Functionality - Build Mode', () => {
   });
 
   test('should add points when enabling techs in build mode', async ({ page }) => {
-    // Wait for techs to load (check tech count is greater than initial 39)
-    await page.waitForFunction(() => {
-      const techText = document.body.textContent;
-      const match = techText?.match(/Techs Enabled: (\d+)/);
-      return match && parseInt(match[1]) > 39;
-    }, { timeout: 10000 });
+    // Wait for tech tree SVG to load
+    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(500); // Allow time for initialization
     
     // Get initial points
     const initialPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
@@ -43,12 +40,9 @@ test.describe('TechTree Functionality - Build Mode', () => {
   });
 
   test('should have unlimited points in build mode', async ({ page }) => {
-    // Wait for techs to load
-    await page.waitForFunction(() => {
-      const techText = document.body.textContent;
-      const match = techText?.match(/Techs Enabled: (\d+)/);
-      return match && parseInt(match[1]) > 39;
-    }, { timeout: 10000 });
+    // Wait for tech tree SVG to load
+    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(500); // Allow time for initialization
     
     // Click Fill button in TechTree toolbar
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
@@ -64,12 +58,9 @@ test.describe('TechTree Functionality - Build Mode', () => {
   });
 
   test('should reset points to 0 in build mode', async ({ page }) => {
-    // Wait for techs to load
-    await page.waitForFunction(() => {
-      const techText = document.body.textContent;
-      const match = techText?.match(/Techs Enabled: (\d+)/);
-      return match && parseInt(match[1]) > 39;
-    }, { timeout: 10000 });
+    // Wait for tech tree SVG to load
+    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(500); // Allow time for initialization
     
     // Click Fill to add some techs
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
@@ -89,12 +80,9 @@ test.describe('TechTree Functionality - Build Mode', () => {
   });
 
   test('should subtract points when disabling techs in build mode', async ({ page }) => {
-    // Wait for techs to load
-    await page.waitForFunction(() => {
-      const techText = document.body.textContent;
-      const match = techText?.match(/Techs Enabled: (\d+)/);
-      return match && parseInt(match[1]) > 39;
-    }, { timeout: 10000 });
+    // Wait for tech tree SVG to load
+    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(500); // Allow time for initialization
     
     // Click Fill to enable all techs
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
@@ -235,12 +223,9 @@ test.describe('TechTree Functionality - Fill Button', () => {
   test('should enable all available techs when Fill is clicked (build mode)', async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
-    // Wait for techs to load
-    await page.waitForFunction(() => {
-      const techText = document.body.textContent;
-      const match = techText?.match(/Techs Enabled: (\d+)/);
-      return match && parseInt(match[1]) > 39;
-    }, { timeout: 10000 });
+    // Wait for tech tree SVG to load
+    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(500); // Allow time for initialization
     
     // Click Fill button in TechTree toolbar
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();

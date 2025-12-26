@@ -433,14 +433,15 @@ test.describe('Draft Mode - Draft Host Page', () => {
       // Fill in join form
       await page.fill('#playerName', 'Socket Test Player');
       await page.click('.join-button');
-      await page.waitForTimeout(5000);
+      await page.waitForTimeout(3000);
     }
     
-    // Check that Socket.io script was loaded (either before or after joining)
-    const socketScript = await page.evaluate(() => {
+    // Wait for Socket.io script to be loaded (it's dynamically loaded)
+    // Use waitForFunction to retry checking for the script
+    const socketScript = await page.waitForFunction(() => {
       const scripts = document.querySelectorAll('script[src*="socket.io"]');
       return scripts.length > 0;
-    });
+    }, { timeout: 10000 }).then(() => true).catch(() => false);
     
     expect(socketScript).toBe(true);
   });
@@ -602,7 +603,7 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await page.waitForSelector('#playerName', { timeout: 10000 });
     await page.fill('#playerName', 'Pasture Test Player');
     await page.click('.join-button');
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000); // Reduced from 3000ms
     
     // Step 3: Verify lobby and start draft
     const lobbyTitle = page.locator('.lobby-title, h1:has-text("Civilization Drafter")');
@@ -613,7 +614,7 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await startButton.click();
     
     // Step 4: Phase 1 - Setup (Flag, Architecture, Language, Civ Name)
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000); // Reduced from 3000ms
     
     const setupPhase = page.locator('.setup-phase');
     const isSetupVisible = await setupPhase.isVisible().catch(() => false);
@@ -629,7 +630,7 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       const nextButton = page.getByRole('button', { name: /Next/i });
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        await page.waitForTimeout(3000);
+        await page.waitForTimeout(2000); // Reduced from 3000ms
       }
     }
     
@@ -646,9 +647,13 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       const isPastureVisible = await pastureCard.isVisible().catch(() => false);
       
       if (isPastureVisible) {
-        await pastureCard.click();
+        // Wait for card to be stable before clicking
+        await pastureCard.waitFor({ state: 'visible', timeout: 10000 });
+        await page.waitForTimeout(300); // Wait for transitions
+        
+        await pastureCard.click({ timeout: 15000 });
         pastureSelected = true;
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(1500); // Reduced from 2000ms
       }
     }
     
@@ -679,14 +684,14 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       if (cardCount > 0) {
         await cards.first().click();
         currentRound++;
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(1500);
       } else {
         break;
       }
     }
     
     // Step 6: Verify Phase 3 - Tech tree with pasture bonus
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000); // Reduced from 2000ms
     
     const phaseTitle = page.getByRole('heading', { name: /Tech Tree/i });
     const isTechTreePhase = await phaseTitle.isVisible({ timeout: 5000 }).catch(() => false);

@@ -174,14 +174,22 @@ test.describe('Draft Flow - Complete Single Player Draft to Download', () => {
       const cardCount = await cards.count();
       
       if (cardCount > 0) {
-        // Select the first available card
         await cards.first().click();
         currentRound++;
-        
-        // Wait for server response
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(1500);
       } else {
-        break; // No more cards available
+        // No cards available - check if we've moved to next phase
+        await page.waitForTimeout(2000);
+        const isDraftBoardStillVisible = await page.locator('.draft-board').isVisible().catch(() => false);
+        if (!isDraftBoardStillVisible) {
+          break;
+        }
+        // If still visible with no cards, wait longer for phase transition
+        await page.waitForTimeout(2000);
+        const stillNoCards = await cards.count() === 0;
+        if (stillNoCards) {
+          break;
+        }
       }
     }
     
