@@ -39,80 +39,105 @@
         />
       </div>
 
-      <div class="form-section rarities-section">
-        <label class="form-label">Allowed Ranks:</label>
-        <div class="rarities-checkboxes">
-          <label v-for="(rarity, index) in rarityTexts" :key="index" class="rarity-checkbox">
-            <input
-              v-model="draftSettings.allowedRarities[index]"
-              type="checkbox"
-              :id="`rarity-${index}`"
-            />
-            <span>{{ rarity }}</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="form-section timer-section">
-        <label class="form-label">
-          <input
-            v-model="draftSettings.timerEnabled"
-            type="checkbox"
-            id="timerEnabled"
-            class="timer-checkbox"
-          />
-          Enable Timer for Picking Phase
-        </label>
-        <div v-if="draftSettings.timerEnabled" class="timer-input-group">
-          <label for="timerDuration" class="timer-sublabel">Time per Pick (seconds):</label>
-          <input
-            id="timerDuration"
-            v-model.number="draftSettings.timerDuration"
-            type="number"
-            min="5"
-            max="300"
-            class="form-input"
-          />
-          <div class="timer-help-text">
-            Players must pick within this time, or a random bonus/tech will be selected automatically.
+      <!-- Advanced Settings (collapsed by default) -->
+      <details class="form-section advanced-section">
+        <summary class="form-label collapsible-summary">Advanced Settings</summary>
+        
+        <div class="form-section rarities-section">
+          <label class="form-label">Allowed Ranks:</label>
+          <div class="rarities-checkboxes">
+            <label v-for="(rarity, index) in rarityTexts" :key="index" class="rarity-checkbox">
+              <input
+                v-model="draftSettings.allowedRarities[index]"
+                type="checkbox"
+                :id="`rarity-${index}`"
+              />
+              <span>{{ rarity }}</span>
+            </label>
           </div>
         </div>
-      </div>
 
-      <div class="form-section blind-picks-section">
-        <label class="form-label">
-          <input
-            v-model="draftSettings.blindPicks"
-            type="checkbox"
-            id="blindPicks"
-            class="timer-checkbox"
-          />
-          Enable Blind Picks
-        </label>
-        <div class="timer-help-text">
-          When enabled, players cannot view other players' bonuses during the draft. Spectators can always view all players.
+        <div class="form-section uu-edition-section">
+          <label class="form-label">Available Unique Units:</label>
+          <div class="uu-edition-checkboxes">
+            <label class="uu-edition-checkbox">
+              <input
+                v-model="draftSettings.allowBaseEditionUU"
+                type="checkbox"
+                id="baseEditionUU"
+              />
+              <span>Base Edition (Vanilla UUs)</span>
+            </label>
+            <label class="uu-edition-checkbox">
+              <input
+                v-model="draftSettings.allowFirstEditionUU"
+                type="checkbox"
+                id="firstEditionUU"
+              />
+              <span>First Edition (Custom UUs)</span>
+            </label>
+          </div>
+          <div class="timer-help-text">
+            Select which unique units should be available in the draft pool.
+          </div>
         </div>
-      </div>
 
-      <div class="form-section snake-draft-section">
-        <label class="form-label">
-          <input
-            v-model="draftSettings.snakeDraft"
-            type="checkbox"
-            id="snakeDraft"
-            class="timer-checkbox"
-          />
-          Enable Snake Draft
-        </label>
-        <div class="timer-help-text">
-          When enabled, the draft order alternates every round (e.g., 1234→4321→1234 for 4 players). When disabled, uses the default order pattern where only specific round types (Castle Age and Imperial Age unique techs) reverse the order.
+        <div class="form-section timer-section">
+          <label class="form-label">
+            <input
+              v-model="draftSettings.timerEnabled"
+              type="checkbox"
+              id="timerEnabled"
+              class="timer-checkbox"
+            />
+            Enable Timer for Picking Phase
+          </label>
+          <div v-if="draftSettings.timerEnabled" class="timer-input-group">
+            <label for="timerDuration" class="timer-sublabel">Time per Pick (seconds):</label>
+            <input
+              id="timerDuration"
+              v-model.number="draftSettings.timerDuration"
+              type="number"
+              min="5"
+              max="300"
+              class="form-input"
+            />
+            <div class="timer-help-text">
+              Players must pick within this time, or a random bonus/tech will be selected automatically.
+            </div>
+          </div>
         </div>
-      </div>
-      
-      <!-- Advanced/Testing Options (collapsed by default) -->
-      <details class="form-section advanced-section">
-        <summary class="form-label">Advanced Options (for testing)</summary>
-        
+
+        <div class="form-section blind-picks-section">
+          <label class="form-label">
+            <input
+              v-model="draftSettings.blindPicks"
+              type="checkbox"
+              id="blindPicks"
+              class="timer-checkbox"
+            />
+            Enable Blind Picks
+          </label>
+          <div class="timer-help-text">
+            When enabled, players cannot view other players' bonuses during the draft. Spectators can always view all players.
+          </div>
+        </div>
+
+        <div class="form-section snake-draft-section">
+          <label class="form-label">
+            <input
+              v-model="draftSettings.snakeDraft"
+              type="checkbox"
+              id="snakeDraft"
+              class="timer-checkbox"
+            />
+            Enable Snake Draft
+          </label>
+          <div class="timer-help-text">
+            When enabled, the draft order alternates every round (e.g., 1234→4321→1234 for 4 players). When disabled, uses the default order pattern where only specific round types (Castle Age and Imperial Age unique techs) reverse the order.
+          </div>
+        </div>
+
         <div class="form-section">
           <label for="cardsPerRoll" class="form-label">Cards Per Roll:</label>
           <input
@@ -125,9 +150,14 @@
           />
           <p class="form-help">Number of highlighted cards after refill/clear (default: 3)</p>
         </div>
-
+      </details>
+      
+      <!-- Testing Settings (collapsed by default) -->
+      <details class="form-section required-bonuses-section">
+        <summary class="form-label collapsible-summary">Testing Settings</summary>
+        
         <div class="form-section">
-          <label for="requiredFirstRoll" class="form-label">Required Bonuses in First Roll:</label>
+          <label for="requiredFirstRoll" class="form-label">Required Bonus IDs:</label>
           <input
             id="requiredFirstRoll"
             v-model="draftSettings.requiredFirstRoll"
@@ -236,6 +266,8 @@ const draftSettings = ref({
   rounds: 4,
   techTreePoints: 200,
   allowedRarities: [true, true, true, true, true],
+  allowBaseEditionUU: true, // Base Edition (Vanilla Civs) unique units
+  allowFirstEditionUU: true, // First Edition (Custom Civs) unique units
   timerEnabled: false,
   timerDuration: 60,
   blindPicks: false,
@@ -269,6 +301,8 @@ const createDraft = async () => {
         rounds: draftSettings.value.rounds.toString(),
         techtree_currency: draftSettings.value.techTreePoints.toString(),
         allowed_rarities: draftSettings.value.allowedRarities.join(','),
+        allow_base_edition_uu: draftSettings.value.allowBaseEditionUU.toString(),
+        allow_first_edition_uu: draftSettings.value.allowFirstEditionUU.toString(),
         timer_enabled: draftSettings.value.timerEnabled.toString(),
         timer_duration: draftSettings.value.timerDuration.toString(),
         blind_picks: draftSettings.value.blindPicks.toString(),
@@ -690,6 +724,80 @@ const goBack = () => {
 
 .advanced-section[open] summary {
   margin-bottom: 1rem;
+}
+
+.required-bonuses-section {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 204, 0, 0.3);
+  border-radius: 4px;
+}
+
+.required-bonuses-section summary {
+  cursor: pointer;
+  user-select: none;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+.required-bonuses-section[open] summary {
+  margin-bottom: 1rem;
+}
+
+/* Collapsible summary with down arrow indicator */
+.collapsible-summary {
+  position: relative;
+  padding-right: 2rem;
+}
+
+.collapsible-summary::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid currentColor;
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+.collapsible-summary:hover::after {
+  opacity: 1;
+}
+
+details[open] .collapsible-summary::after {
+  transform: rotate(180deg);
+}
+
+.uu-edition-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.uu-edition-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.uu-edition-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #f0e6d2;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.uu-edition-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
 }
 
 .form-help {

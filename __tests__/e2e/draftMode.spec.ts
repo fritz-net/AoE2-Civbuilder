@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expandAdvancedSettings, expandTestingSettings } from './helpers/draftHelpers';
 
 /**
  * E2E tests for Draft Mode functionality
@@ -112,6 +113,9 @@ test.describe('Draft Mode - Draft Creation Form', () => {
   test('should display all rarity checkboxes checked by default', async ({ page }) => {
     await page.goto('/v2/draft/create');
     
+    // Open the Advanced Settings section first
+    await expandAdvancedSettings(page);
+    
     // Check all rarity checkboxes are present and checked by default
     const rarityLabels = ['Ordinary', 'Distinguished', 'Superior', 'Epic', 'Legendary'];
     
@@ -125,6 +129,9 @@ test.describe('Draft Mode - Draft Creation Form', () => {
   test('should allow toggling rarity checkboxes', async ({ page }) => {
     await page.goto('/v2/draft/create');
     
+    // Open the Advanced Settings section first
+    await expandAdvancedSettings(page);
+    
     // Uncheck the first rarity (Ordinary)
     const ordinaryCheckbox = page.locator('#rarity-0');
     await ordinaryCheckbox.uncheck();
@@ -137,6 +144,9 @@ test.describe('Draft Mode - Draft Creation Form', () => {
 
   test('should display rarity labels correctly', async ({ page }) => {
     await page.goto('/v2/draft/create');
+    
+    // Open the Advanced Settings section first
+    await expandAdvancedSettings(page);
     
     // Check all rarity labels are visible
     await expect(page.getByText('Ordinary')).toBeVisible();
@@ -579,8 +589,8 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     const numPlayersInput = page.locator('#numPlayers');
     await numPlayersInput.fill('1');
     
-    // Expand advanced options
-    await page.locator('summary').filter({ hasText: 'Advanced Options' }).click();
+    // Expand testing settings
+    await expandTestingSettings(page);
     
     // Set required first roll to include pasture bonus (356)
     const requiredFirstRollInput = page.locator('#requiredFirstRoll');

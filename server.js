@@ -221,6 +221,10 @@ const createDraft = (req, res, next) => {
 	preset["points"] = parseInt(req.body.techtree_currency, 10);
 	preset["rounds"] = parseInt(req.body.rounds, 10);
 	preset["rarities"] = available_rarities;
+	// UU edition settings (default both enabled for backward compatibility)
+	// Only set to false if explicitly provided as "false" string, otherwise default to true
+	preset["allow_base_edition_uu"] = (req.body.allow_base_edition_uu === undefined || req.body.allow_base_edition_uu === null || req.body.allow_base_edition_uu === "true");
+	preset["allow_first_edition_uu"] = (req.body.allow_first_edition_uu === undefined || req.body.allow_first_edition_uu === null || req.body.allow_first_edition_uu === "true");
 	// Timer settings (default disabled for backward compatibility)
 	preset["timer_enabled"] = req.body.timer_enabled === "true";
 	preset["timer_duration"] = preset["timer_enabled"] ? parseInt(req.body.timer_duration || "60", 10) : 0;
@@ -269,9 +273,28 @@ const createDraft = (req, res, next) => {
 		var numBonus;
 		numBonus = numBonuses[i];
 		for (var j = 0; j < numBonus; j++) {
-			if (draft["preset"]["rarities"][commonJs.card_descriptions[i][j][1]]) {
-				available_bonuses.push(j);
+			// Check rarity filter
+			if (!draft["preset"]["rarities"][commonJs.card_descriptions[i][j][1]]) {
+				continue;
 			}
+			
+			// For unique units (roundType 1), check edition filter
+			if (i === 1) {
+				var edition = commonJs.card_descriptions[i][j][2];
+				// Negative edition = base/vanilla civ, positive edition = first edition
+				var isBaseEdition = edition < 0;
+				var isFirstEdition = edition >= 0;
+				
+				// Check edition filters (should already be set as booleans in preset)
+				if (isBaseEdition && draft["preset"]["allow_base_edition_uu"] === false) {
+					continue;
+				}
+				if (isFirstEdition && draft["preset"]["allow_first_edition_uu"] === false) {
+					continue;
+				}
+			}
+			
+			available_bonuses.push(j);
 		}
 		gamestate["available_cards"].push(available_bonuses);
 	}
@@ -383,10 +406,32 @@ function reshuffleCards(draft) {
 			discarded = 0;
 		}
 		if (discarded == 1) {
-			if (draft["preset"]["rarities"][commonJs.card_descriptions[roundType][i][1]]) {
-				available_bonuses.push(i);
+			// Check rarity filter
+			if (!draft["preset"]["rarities"][commonJs.card_descriptions[roundType][i][1]]) {
+				continue;
 			}
-			//			available_bonuses.push(i);
+			
+			// For unique units (roundType 1), check edition filter
+			if (roundType === 1) {
+				var edition = commonJs.card_descriptions[roundType][i][2];
+				// Negative edition = base/vanilla civ, positive edition = first edition
+				var isBaseEdition = edition < 0;
+				var isFirstEdition = edition >= 0;
+				
+				// Default to true if settings don't exist (backward compatibility)
+				// Use explicit checks to match createDraft logic
+				var allowBaseEdition = (draft["preset"]["allow_base_edition_uu"] === undefined || draft["preset"]["allow_base_edition_uu"] === null || draft["preset"]["allow_base_edition_uu"] === true);
+				var allowFirstEdition = (draft["preset"]["allow_first_edition_uu"] === undefined || draft["preset"]["allow_first_edition_uu"] === null || draft["preset"]["allow_first_edition_uu"] === true);
+				
+				if (isBaseEdition && !allowBaseEdition) {
+					continue;
+				}
+				if (isFirstEdition && !allowFirstEdition) {
+					continue;
+				}
+			}
+			
+			available_bonuses.push(i);
 		}
 	}
 	return available_bonuses;
