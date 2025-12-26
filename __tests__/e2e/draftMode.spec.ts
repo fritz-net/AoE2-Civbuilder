@@ -677,35 +677,13 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       }
       
       // Select a card
-      // Only select cards that are actually selectable (not just visible)
-      const cards = page.locator('.draft-card.card-selectable:not(.card-hidden)');
-      
-      // Wait for at least one card to be visible before proceeding
-      try {
-        await cards.first().waitFor({ state: 'visible', timeout: 5000 });
-      } catch (e) {
-        // If no cards become visible, check if we've moved to a different phase
-        const isDraftBoardStillVisible = await page.locator('.draft-board').isVisible().catch(() => false);
-        if (!isDraftBoardStillVisible) {
-          // We've likely moved to the next phase, continue loop to check
-          continue;
-        }
-        // Otherwise, no more cards available
-        break;
-      }
-      
+      const cards = page.locator('.draft-card:not(.card-hidden)');
       const cardCount = await cards.count();
       
       if (cardCount > 0) {
-        // Wait for cards to be fully stable
-        const firstCard = cards.first();
-        
-        // Wait for any transitions to complete (cards have 0.2s transition)
-        await page.waitForTimeout(300);
-        
-        await firstCard.click({ timeout: 15000 });
+        await cards.first().click();
         currentRound++;
-        await page.waitForTimeout(1500); // Reduced from 2000ms
+        await page.waitForTimeout(1500);
       } else {
         break;
       }
