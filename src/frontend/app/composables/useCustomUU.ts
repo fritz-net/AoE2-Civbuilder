@@ -502,18 +502,31 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     }
 
     // Calculate how much we can add to this stat
+    // Point costs per single unit of stat (not per group)
     const pointCosts: Record<string, number> = {
-      health: 0.2, // 2 points per 10 HP
-      attack: 3,   // 3 points per attack
-      meleeArmor: 4,
-      pierceArmor: 4,
-      speed: 50,   // 5 points per 0.1 speed
-      range: 6
+      health: 0.2, // 0.2 points per 1 HP (2 points per 10 HP)
+      attack: 3,   // 3 points per 1 attack
+      meleeArmor: 4, // 4 points per 1 armor
+      pierceArmor: 4, // 4 points per 1 armor
+      speed: 50,   // 50 points per 1.0 speed (5 points per 0.1 speed)
+      range: 6     // 6 points per 1 range
     };
 
     const cost = pointCosts[stat] || 1;
     const currentValue = (currentUnit as any)[stat] || 0;
-    const maxIncrease = Math.floor(pointsLeft / cost);
+    
+    // Calculate max increase based on stat type
+    let maxIncrease = 0;
+    if (stat === 'health') {
+      // For health: 0.2 points per 1 HP
+      maxIncrease = Math.floor(pointsLeft / 0.2);
+    } else if (stat === 'speed') {
+      // For speed: 50 points per 1.0 speed unit
+      maxIncrease = pointsLeft / 50;
+    } else {
+      // For attack, armor, range: direct point cost
+      maxIncrease = Math.floor(pointsLeft / cost);
+    }
     
     const normalMaxes: Record<string, number> = {
       health: 250,
@@ -525,11 +538,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     };
 
     const absoluteMax = normalMaxes[stat] || 100;
-    const calculatedMax = stat === 'health' 
-      ? currentValue + (maxIncrease * 10)
-      : stat === 'speed'
-      ? currentValue + (maxIncrease * 0.1)
-      : currentValue + maxIncrease;
+    const calculatedMax = currentValue + maxIncrease;
 
     return Math.min(calculatedMax, absoluteMax);
   };
