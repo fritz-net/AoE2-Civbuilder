@@ -139,23 +139,15 @@
                 type="number" 
                 min="15"
                 max="250"
-                @input="onStatChange('health', $event)"
+                @input="onUnitChange"
               />
-              <div class="budget-slider">
-                <input 
-                  type="range" 
-                  v-model.number="customUnit.health" 
-                  min="15"
-                  max="250"
-                  class="slider"
-                  @input="onStatChange('health', $event)"
-                />
-                <div 
-                  v-if="maxPoints && getMaxValue('health') < 250" 
-                  class="budget-limit-marker"
-                  :style="{ left: ((getMaxValue('health') - 15) / (250 - 15) * 100) + '%' }"
-                ></div>
-              </div>
+              <BudgetSlider
+                v-model="customUnit.health"
+                :min="15"
+                :max="250"
+                :budget-limit="maxPoints ? getMaxValue('health') : null"
+                @change="onUnitChange"
+              />
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.health }} HP</span>
             </div>
           </div>
@@ -169,23 +161,15 @@
                 type="number" 
                 min="2"
                 max="35"
-                @input="onStatChange('attack', $event)"
+                @input="onUnitChange"
               />
-              <div class="budget-slider">
-                <input 
-                  type="range" 
-                  v-model.number="customUnit.attack" 
-                  min="2"
-                  max="35"
-                  class="slider"
-                  @input="onStatChange('attack', $event)"
-                />
-                <div 
-                  v-if="maxPoints && getMaxValue('attack') < 35" 
-                  class="budget-limit-marker"
-                  :style="{ left: ((getMaxValue('attack') - 2) / (35 - 2) * 100) + '%' }"
-                ></div>
-              </div>
+              <BudgetSlider
+                v-model="customUnit.attack"
+                :min="2"
+                :max="35"
+                :budget-limit="maxPoints ? getMaxValue('attack') : null"
+                @change="onUnitChange"
+              />
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.attack }} ATK</span>
             </div>
           </div>
@@ -199,23 +183,15 @@
                 type="number" 
                 min="-3"
                 max="10"
-                @input="onStatChange('meleeArmor', $event)"
+                @input="onUnitChange"
               />
-              <div class="budget-slider">
-                <input 
-                  type="range" 
-                  v-model.number="customUnit.meleeArmor" 
-                  min="-3"
-                  max="10"
-                  class="slider"
-                  @input="onStatChange('meleeArmor', $event)"
-                />
-                <div 
-                  v-if="maxPoints && getMaxValue('meleeArmor') < 10" 
-                  class="budget-limit-marker"
-                  :style="{ left: ((getMaxValue('meleeArmor') + 3) / (10 + 3) * 100) + '%' }"
-                ></div>
-              </div>
+              <BudgetSlider
+                v-model="customUnit.meleeArmor"
+                :min="-3"
+                :max="10"
+                :budget-limit="maxPoints ? getMaxValue('meleeArmor') : null"
+                @change="onUnitChange"
+              />
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.meleeArmor }} ARM</span>
             </div>
           </div>
@@ -229,23 +205,15 @@
                 type="number" 
                 min="-3"
                 max="10"
-                @input="onStatChange('pierceArmor', $event)"
+                @input="onUnitChange"
               />
-              <div class="budget-slider">
-                <input 
-                  type="range" 
-                  v-model.number="customUnit.pierceArmor" 
-                  min="-3"
-                  max="10"
-                  class="slider"
-                  @input="onStatChange('pierceArmor', $event)"
-                />
-                <div 
-                  v-if="maxPoints && getMaxValue('pierceArmor') < 10" 
-                  class="budget-limit-marker"
-                  :style="{ left: ((getMaxValue('pierceArmor') + 3) / (10 + 3) * 100) + '%' }"
-                ></div>
-              </div>
+              <BudgetSlider
+                v-model="customUnit.pierceArmor"
+                :min="-3"
+                :max="10"
+                :budget-limit="maxPoints ? getMaxValue('pierceArmor') : null"
+                @change="onUnitChange"
+              />
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.pierceArmor }} ARM</span>
             </div>
           </div>
@@ -298,13 +266,14 @@
               step="0.05"
               @input="onUnitChange"
             />
-            <input 
-              type="range" 
-              v-model.number="customUnit.speed" 
-              min="0.5"
-              max="1.65"
-              step="0.05"
-              class="slider"
+            <BudgetSlider
+              v-model="customUnit.speed"
+              :min="0.5"
+              :max="1.65"
+              :step="0.05"
+              :decimals="2"
+              :budget-limit="maxPoints ? getMaxValue('speed') : null"
+              @change="onUnitChange"
             />
           </div>
 
@@ -497,6 +466,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useCustomUU, type CustomUUData } from '~/composables/useCustomUU';
+import BudgetSlider from './BudgetSlider.vue';
 
 interface Props {
   showModeSelector?: boolean;
@@ -583,20 +553,6 @@ const onUnitChange = () => {
   if (customUnit.value) {
     validationErrors.value = validateUnit(customUnit.value);
   }
-};
-
-const onStatChange = (stat: string, event: any) => {
-  if (!customUnit.value) return;
-  
-  const value = parseFloat(event.target.value);
-  const maxValue = getMaxValue(stat);
-  
-  // Enforce budget limit
-  if (maxPoints.value && value > maxValue) {
-    customUnit.value[stat as keyof typeof customUnit.value] = maxValue as any;
-  }
-  
-  onUnitChange();
 };
 
 const baseUnitOptions = computed(() => {
@@ -1046,54 +1002,6 @@ watch(() => customUnit.value, (newVal) => {
 .form-group select:focus {
   outline: none;
   border-color: #d4af37;
-}
-
-.slider {
-  width: 100%;
-  margin-top: 0.3rem;
-}
-
-/* Budget Slider */
-.budget-slider {
-  position: relative;
-  width: 100%;
-}
-
-.budget-limit-marker {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 3px;
-  height: 20px;
-  background: #dc3545;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.budget-limit-marker::before {
-  content: '';
-  position: absolute;
-  top: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 5px solid #dc3545;
-}
-
-.budget-limit-marker::after {
-  content: '';
-  position: absolute;
-  bottom: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-bottom: 5px solid #dc3545;
 }
 
 .char-count,
