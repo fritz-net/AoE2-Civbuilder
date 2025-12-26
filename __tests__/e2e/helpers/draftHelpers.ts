@@ -6,6 +6,15 @@ import { Page, expect } from '@playwright/test';
  */
 
 /**
+ * Expands the Advanced Settings section on the draft creation page
+ * @param page - Playwright page object
+ */
+export async function expandAdvancedSettings(page: Page) {
+  await page.getByText('Advanced Settings').click();
+  await page.waitForTimeout(500); // Wait for animation
+}
+
+/**
  * Creates a draft via the UI
  * @param page - Playwright page object
  * @param numPlayers - Number of players for the draft

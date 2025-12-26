@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { expandAdvancedSettings } from './helpers/draftHelpers';
 
 /**
  * E2E tests for Draft Mode functionality
@@ -113,8 +114,7 @@ test.describe('Draft Mode - Draft Creation Form', () => {
     await page.goto('/v2/draft/create');
     
     // Open the Advanced Settings section first
-    await page.getByText('Advanced Settings').click();
-    await page.waitForTimeout(500); // Wait for animation
+    await expandAdvancedSettings(page);
     
     // Check all rarity checkboxes are present and checked by default
     const rarityLabels = ['Ordinary', 'Distinguished', 'Superior', 'Epic', 'Legendary'];
@@ -130,8 +130,7 @@ test.describe('Draft Mode - Draft Creation Form', () => {
     await page.goto('/v2/draft/create');
     
     // Open the Advanced Settings section first
-    await page.getByText('Advanced Settings').click();
-    await page.waitForTimeout(500); // Wait for animation
+    await expandAdvancedSettings(page);
     
     // Uncheck the first rarity (Ordinary)
     const ordinaryCheckbox = page.locator('#rarity-0');
@@ -147,8 +146,7 @@ test.describe('Draft Mode - Draft Creation Form', () => {
     await page.goto('/v2/draft/create');
     
     // Open the Advanced Settings section first
-    await page.getByText('Advanced Settings').click();
-    await page.waitForTimeout(500); // Wait for animation
+    await expandAdvancedSettings(page);
     
     // Check all rarity labels are visible
     await expect(page.getByText('Ordinary')).toBeVisible();
