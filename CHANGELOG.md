@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.8.0...v1.9.0) (2025-12-26)
+
+
+### Features
+
+* add confirmation dialog for tech tree finalization in draft mode ([#169](https://github.com/fritz-net/AoE2-Civbuilder/issues/169)) ([d9cea54](https://github.com/fritz-net/AoE2-Civbuilder/commit/d9cea545667092cec6a2ad0aab0f84a24f74ab56))
+* add demo pages, change /build mode to count up from 0 points and functional e2e tests ([#160](https://github.com/fritz-net/AoE2-Civbuilder/issues/160)) ([22acca8](https://github.com/fritz-net/AoE2-Civbuilder/commit/22acca814786d1eb450f308de513104f2b6b2c67))
+* add snake draft mode option for alternating turn order ([#164](https://github.com/fritz-net/AoE2-Civbuilder/issues/164)) ([2ebd5f3](https://github.com/fritz-net/AoE2-Civbuilder/commit/2ebd5f38088d7826680a0c6ad3fec0e26e242bc1))
+* add UU edition filtering with collapsible settings and visual indicators ([#172](https://github.com/fritz-net/AoE2-Civbuilder/issues/172)) ([89b94ab](https://github.com/fritz-net/AoE2-Civbuilder/commit/89b94ab0c2143fe91e5144ec2a6e77f8fe3b1081))
+
+
+### Bug Fixes
+
+* tooltip overflow in draft UI and card picker ([#170](https://github.com/fritz-net/AoE2-Civbuilder/issues/170)) ([4cc484d](https://github.com/fritz-net/AoE2-Civbuilder/commit/4cc484d6a005d4b5d9511a476bb230ec29d3d64e))
+
 ## [1.8.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.7.0...v1.8.0) (2025-12-25)
 
 
