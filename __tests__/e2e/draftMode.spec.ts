@@ -646,7 +646,11 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       const isPastureVisible = await pastureCard.isVisible().catch(() => false);
       
       if (isPastureVisible) {
-        await pastureCard.click();
+        // Wait for card to be stable before clicking
+        await pastureCard.waitFor({ state: 'visible', timeout: 10000 });
+        await page.waitForTimeout(300); // Wait for transitions
+        
+        await pastureCard.click({ timeout: 15000 });
         pastureSelected = true;
         await page.waitForTimeout(2000);
       }
@@ -677,7 +681,14 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       const cardCount = await cards.count();
       
       if (cardCount > 0) {
-        await cards.first().click();
+        // Wait for cards to be fully rendered and stable
+        const firstCard = cards.first();
+        await firstCard.waitFor({ state: 'visible', timeout: 10000 });
+        
+        // Wait for any transitions to complete (cards have 0.2s transition)
+        await page.waitForTimeout(300);
+        
+        await firstCard.click({ timeout: 15000 });
         currentRound++;
         await page.waitForTimeout(2000);
       } else {
