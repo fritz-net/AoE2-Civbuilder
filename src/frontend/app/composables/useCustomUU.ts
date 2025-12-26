@@ -59,7 +59,7 @@ export interface BaseUnitOption {
   name: string;
   type: 'infantry' | 'cavalry' | 'archer' | 'siege';
   isRanged: boolean;
-  icon?: string; // Icon path or identifier
+  uuGraphicId: number; // UU graphic ID for icon (0-87)
 }
 
 interface UnitTypeDefaults {
@@ -132,44 +132,44 @@ const ARMOR_CLASS_NAMES: Record<number, string> = {
   30: 'War Elephants'
 };
 
-// Base unit options for each type
+// Base unit options for each type with UU graphic IDs
 const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
   infantry: [
-    { id: 1067, name: 'Jaguar Warrior', type: 'infantry', isRanged: false },
-    { id: 1723, name: 'Teutonic Knight', type: 'infantry', isRanged: false },
-    { id: 1570, name: 'Woad Raider', type: 'infantry', isRanged: false },
-    { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false },
-    { id: 75, name: 'Militia', type: 'infantry', isRanged: false },
-    { id: 358, name: 'Champion', type: 'infantry', isRanged: false },
-    { id: 93, name: 'Spearman', type: 'infantry', isRanged: false },
-    { id: 359, name: 'Halberdier', type: 'infantry', isRanged: false },
+    { id: 1067, name: 'Jaguar Warrior', type: 'infantry', isRanged: false, uuGraphicId: 14 },
+    { id: 1723, name: 'Teutonic Knight', type: 'infantry', isRanged: false, uuGraphicId: 3 },
+    { id: 1570, name: 'Woad Raider', type: 'infantry', isRanged: false, uuGraphicId: 12 },
+    { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false, uuGraphicId: 2 },
+    { id: 75, name: 'Militia', type: 'infantry', isRanged: false, uuGraphicId: 0 },
+    { id: 358, name: 'Champion', type: 'infantry', isRanged: false, uuGraphicId: 0 },
+    { id: 93, name: 'Spearman', type: 'infantry', isRanged: false, uuGraphicId: 0 },
+    { id: 359, name: 'Halberdier', type: 'infantry', isRanged: false, uuGraphicId: 0 },
   ],
   cavalry: [
-    { id: 1721, name: 'Knight', type: 'cavalry', isRanged: false },
-    { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false },
-    { id: 1269, name: 'Boyar', type: 'cavalry', isRanged: false },
-    { id: 283, name: 'Paladin', type: 'cavalry', isRanged: false },
-    { id: 207, name: 'Camel Rider', type: 'cavalry', isRanged: false },
-    { id: 1132, name: 'Battle Elephant', type: 'cavalry', isRanged: false },
-    { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false },
-    { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false },
+    { id: 1721, name: 'Knight', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
+    { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false, uuGraphicId: 6 },
+    { id: 1269, name: 'Boyar', type: 'cavalry', isRanged: false, uuGraphicId: 22 },
+    { id: 283, name: 'Paladin', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
+    { id: 207, name: 'Camel Rider', type: 'cavalry', isRanged: false, uuGraphicId: 8 },
+    { id: 1132, name: 'Battle Elephant', type: 'cavalry', isRanged: false, uuGraphicId: 19 },
+    { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
+    { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
   ],
   archer: [
-    { id: 850, name: 'Plumed Archer', type: 'archer', isRanged: true },
-    { id: 873, name: 'Longbowman', type: 'archer', isRanged: true },
-    { id: 5, name: 'Archer', type: 'archer', isRanged: true },
-    { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true },
-    { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true },
-    { id: 185, name: 'Skirmisher', type: 'archer', isRanged: true },
-    { id: 1036, name: 'Genitour', type: 'archer', isRanged: true },
-    { id: 5, name: 'Hand Cannoneer', type: 'archer', isRanged: true },
+    { id: 850, name: 'Plumed Archer', type: 'archer', isRanged: true, uuGraphicId: 15 },
+    { id: 873, name: 'Longbowman', type: 'archer', isRanged: true, uuGraphicId: 0 },
+    { id: 5, name: 'Archer', type: 'archer', isRanged: true, uuGraphicId: 0 },
+    { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true, uuGraphicId: 0 },
+    { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, uuGraphicId: 11 },
+    { id: 185, name: 'Skirmisher', type: 'archer', isRanged: true, uuGraphicId: 0 },
+    { id: 1036, name: 'Genitour', type: 'archer', isRanged: true, uuGraphicId: 25 },
+    { id: 5, name: 'Hand Cannoneer', type: 'archer', isRanged: true, uuGraphicId: 9 },
   ],
   siege: [
-    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false },
-    { id: 280, name: 'Mangonel', type: 'siege', isRanged: true },
-    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true },
-    { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true },
-    { id: 420, name: 'Petard', type: 'siege', isRanged: false },
+    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false, uuGraphicId: 0 },
+    { id: 280, name: 'Mangonel', type: 'siege', isRanged: true, uuGraphicId: 0 },
+    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, uuGraphicId: 0 },
+    { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, uuGraphicId: 9 },
+    { id: 420, name: 'Petard', type: 'siege', isRanged: false, uuGraphicId: 0 },
   ]
 };
 
@@ -409,6 +409,10 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     return BASE_UNIT_OPTIONS[unitType] || [];
   };
 
+  const getUnitIconUrl = (uuGraphicId: number): string => {
+    return `/v2/img/unitgraphics/uu_${uuGraphicId}.jpg`;
+  };
+
   const calculateEliteStats = (unit: CustomUUData): EliteStats => {
     // Elite units get predictable improvements based on unit type
     const improvements: Record<string, Partial<EliteStats>> = {
@@ -550,6 +554,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     exportToTechtree,
     getArmorClassName,
     getBaseUnitOptions,
+    getUnitIconUrl,
     setMode,
     getMaxStatValue,
     isValid,

@@ -91,7 +91,11 @@
               :class="['base-unit-option', { selected: customUnit.baseUnit === option.id }]"
               @click="selectBaseUnit(option.id)"
             >
-              <div class="unit-icon">🎭</div>
+              <img 
+                :src="getUnitIconUrl(option.uuGraphicId)" 
+                :alt="option.name"
+                class="unit-icon-img"
+              />
               <div class="unit-name">{{ option.name }}</div>
             </button>
           </div>
@@ -129,10 +133,12 @@
                 type="range" 
                 v-model.number="customUnit.health" 
                 min="15"
-                :max="getMaxValue('health')"
+                max="250"
+                :data-limit="getMaxValue('health')"
                 class="slider"
+                @input="enforceSliderLimit($event, 'health')"
               />
-              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.health }}</span>
+              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.health }} HP</span>
             </div>
           </div>
 
@@ -151,10 +157,12 @@
                 type="range" 
                 v-model.number="customUnit.attack" 
                 min="2"
-                :max="getMaxValue('attack')"
+                max="35"
+                :data-limit="getMaxValue('attack')"
                 class="slider"
+                @input="enforceSliderLimit($event, 'attack')"
               />
-              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.attack }}</span>
+              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.attack }} ATK</span>
             </div>
           </div>
 
@@ -173,10 +181,12 @@
                 type="range" 
                 v-model.number="customUnit.meleeArmor" 
                 min="-3"
-                :max="getMaxValue('meleeArmor')"
+                max="10"
+                :data-limit="getMaxValue('meleeArmor')"
                 class="slider"
+                @input="enforceSliderLimit($event, 'meleeArmor')"
               />
-              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.meleeArmor }}</span>
+              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.meleeArmor }} ARM</span>
             </div>
           </div>
 
@@ -195,10 +205,12 @@
                 type="range" 
                 v-model.number="customUnit.pierceArmor" 
                 min="-3"
-                :max="getMaxValue('pierceArmor')"
+                max="10"
+                :data-limit="getMaxValue('pierceArmor')"
                 class="slider"
+                @input="enforceSliderLimit($event, 'pierceArmor')"
               />
-              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.pierceArmor }}</span>
+              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.pierceArmor }} ARM</span>
             </div>
           </div>
 
@@ -228,7 +240,7 @@
                 @input="onUnitChange"
               />
               <span class="help-text">0 = melee</span>
-              <span v-if="eliteStats && eliteStats.range !== customUnit.range" class="elite-value">Elite: {{ eliteStats.range }}</span>
+              <span v-if="eliteStats && eliteStats.range !== customUnit.range" class="elite-value">Elite: {{ eliteStats.range }} RNG</span>
             </div>
           </div>
         </div>
@@ -466,6 +478,7 @@ const {
   calculateEliteStats,
   exportToTechtree,
   getBaseUnitOptions,
+  getUnitIconUrl,
   isValid,
   hasWarnings,
   editorMode,
@@ -587,6 +600,20 @@ const getRangeMax = () => {
 const getMaxValue = (stat: string) => {
   if (!customUnit.value) return 250;
   return getMaxStatValue(stat, customUnit.value.unitType);
+};
+
+const enforceSliderLimit = (event: Event, statName: string) => {
+  if (!customUnit.value) return;
+  
+  const target = event.target as HTMLInputElement;
+  const limit = parseInt(target.getAttribute('data-limit') || '999');
+  const value = parseInt(target.value);
+  
+  if (value > limit) {
+    (customUnit.value as any)[statName] = limit;
+  }
+  
+  onUnitChange();
 };
 
 const getMaxBonuses = () => {
@@ -741,9 +768,15 @@ watch(() => customUnit.value, (newVal) => {
   font-weight: bold;
 }
 
-.base-unit-option .unit-icon {
-  font-size: 2rem;
+.base-unit-option .unit-icon-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
   margin-bottom: 0.25rem;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .base-unit-option .unit-name {
