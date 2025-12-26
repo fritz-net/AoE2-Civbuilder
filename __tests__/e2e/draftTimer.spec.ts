@@ -9,6 +9,10 @@ test.describe('Draft Mode - Timer Feature', () => {
   test('should show timer settings in draft creation page', async ({ page }) => {
     await page.goto('/v2/draft/create');
     
+    // Expand Advanced Settings to see timer checkbox
+    await page.getByText('Advanced Settings').click();
+    await page.waitForTimeout(500); // Wait for animation
+    
     // Check that timer checkbox is visible
     await expect(page.getByLabel(/Enable Timer for Picking Phase/i)).toBeVisible();
     
@@ -19,6 +23,10 @@ test.describe('Draft Mode - Timer Feature', () => {
 
   test('should show timer duration input when timer is enabled', async ({ page }) => {
     await page.goto('/v2/draft/create');
+    
+    // Expand Advanced Settings
+    await page.getByText('Advanced Settings').click();
+    await page.waitForTimeout(500); // Wait for animation
     
     // Enable timer
     const timerCheckbox = page.locator('#timerEnabled');
@@ -35,6 +43,10 @@ test.describe('Draft Mode - Timer Feature', () => {
 
   test('should hide timer duration input when timer is disabled', async ({ page }) => {
     await page.goto('/v2/draft/create');
+    
+    // Expand Advanced Settings
+    await page.getByText('Advanced Settings').click();
+    await page.waitForTimeout(500); // Wait for animation
     
     // Enable timer first
     const timerCheckbox = page.locator('#timerEnabled');
@@ -53,6 +65,10 @@ test.describe('Draft Mode - Timer Feature', () => {
 
   test('should allow changing timer duration', async ({ page }) => {
     await page.goto('/v2/draft/create');
+    
+    // Expand Advanced Settings
+    await page.getByText('Advanced Settings').click();
+    await page.waitForTimeout(500); // Wait for animation
     
     // Enable timer
     await page.locator('#timerEnabled').check();
@@ -75,6 +91,10 @@ test.describe('Draft Mode - Timer Feature', () => {
   test('should show help text for timer feature', async ({ page }) => {
     await page.goto('/v2/draft/create');
     
+    // Expand Advanced Settings
+    await page.getByText('Advanced Settings').click();
+    await page.waitForTimeout(500); // Wait for animation
+    
     // Enable timer
     await page.locator('#timerEnabled').check();
     
@@ -84,6 +104,10 @@ test.describe('Draft Mode - Timer Feature', () => {
 
   test('should submit draft with timer enabled', async ({ page }) => {
     await page.goto('/v2/draft/create');
+    
+    // Expand Advanced Settings
+    await page.getByText('Advanced Settings').click();
+    await page.waitForTimeout(500); // Wait for animation
     
     // Enable timer
     await page.locator('#timerEnabled').check();
