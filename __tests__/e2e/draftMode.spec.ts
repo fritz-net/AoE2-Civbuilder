@@ -602,7 +602,7 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await page.waitForSelector('#playerName', { timeout: 10000 });
     await page.fill('#playerName', 'Pasture Test Player');
     await page.click('.join-button');
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000); // Reduced from 3000ms
     
     // Step 3: Verify lobby and start draft
     const lobbyTitle = page.locator('.lobby-title, h1:has-text("Civilization Drafter")');
@@ -613,7 +613,7 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await startButton.click();
     
     // Step 4: Phase 1 - Setup (Flag, Architecture, Language, Civ Name)
-    await page.waitForTimeout(3000);
+    await page.waitForTimeout(2000); // Reduced from 3000ms
     
     const setupPhase = page.locator('.setup-phase');
     const isSetupVisible = await setupPhase.isVisible().catch(() => false);
@@ -629,7 +629,7 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       const nextButton = page.getByRole('button', { name: /Next/i });
       if (await nextButton.isVisible()) {
         await nextButton.click();
-        await page.waitForTimeout(3000);
+        await page.waitForTimeout(2000); // Reduced from 3000ms
       }
     }
     
@@ -652,7 +652,7 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
         
         await pastureCard.click({ timeout: 15000 });
         pastureSelected = true;
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(1500); // Reduced from 2000ms
       }
     }
     
@@ -678,26 +678,40 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       
       // Select a card
       const cards = page.locator('.draft-card:not(.card-hidden)');
+      
+      // Wait for at least one card to be visible before proceeding
+      try {
+        await cards.first().waitFor({ state: 'visible', timeout: 5000 });
+      } catch (e) {
+        // If no cards become visible, check if we've moved to a different phase
+        const isDraftBoardStillVisible = await page.locator('.draft-board').isVisible().catch(() => false);
+        if (!isDraftBoardStillVisible) {
+          // We've likely moved to the next phase, continue loop to check
+          continue;
+        }
+        // Otherwise, no more cards available
+        break;
+      }
+      
       const cardCount = await cards.count();
       
       if (cardCount > 0) {
-        // Wait for cards to be fully rendered and stable
+        // Wait for cards to be fully stable
         const firstCard = cards.first();
-        await firstCard.waitFor({ state: 'visible', timeout: 10000 });
         
         // Wait for any transitions to complete (cards have 0.2s transition)
         await page.waitForTimeout(300);
         
         await firstCard.click({ timeout: 15000 });
         currentRound++;
-        await page.waitForTimeout(2000);
+        await page.waitForTimeout(1500); // Reduced from 2000ms
       } else {
         break;
       }
     }
     
     // Step 6: Verify Phase 3 - Tech tree with pasture bonus
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(1000); // Reduced from 2000ms
     
     const phaseTitle = page.getByRole('heading', { name: /Tech Tree/i });
     const isTechTreePhase = await phaseTitle.isVisible({ timeout: 5000 }).catch(() => false);
