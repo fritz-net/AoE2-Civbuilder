@@ -170,7 +170,8 @@ test.describe('Draft Flow - Complete Single Player Draft to Download', () => {
       }
       
       // We're on the draft board - select a card
-      const cards = page.locator('.draft-card:not(.card-hidden)');
+      // Only select cards that are actually selectable (not just visible)
+      const cards = page.locator('.draft-card.card-selectable:not(.card-hidden)');
       
       // Wait for at least one card to be visible before proceeding
       try {
