@@ -41,7 +41,7 @@
 
       <!-- Advanced Settings (collapsed by default) -->
       <details class="form-section advanced-section">
-        <summary class="form-label">Advanced Settings</summary>
+        <summary class="form-label collapsible-summary">Advanced Settings</summary>
         
         <div class="form-section rarities-section">
           <label class="form-label">Allowed Ranks:</label>
@@ -152,12 +152,12 @@
         </div>
       </details>
       
-      <!-- Required Bonuses (collapsed by default, for testing) -->
+      <!-- Testing Settings (collapsed by default) -->
       <details class="form-section required-bonuses-section">
-        <summary class="form-label">Required Bonuses in First Roll</summary>
+        <summary class="form-label collapsible-summary">Testing Settings</summary>
         
         <div class="form-section">
-          <label for="requiredFirstRoll" class="form-label">Bonus IDs:</label>
+          <label for="requiredFirstRoll" class="form-label">Required Bonuses in First Roll:</label>
           <input
             id="requiredFirstRoll"
             v-model="draftSettings.requiredFirstRoll"
@@ -743,6 +743,28 @@ const goBack = () => {
 
 .required-bonuses-section[open] summary {
   margin-bottom: 1rem;
+}
+
+/* Collapsible summary with down arrow indicator */
+.collapsible-summary {
+  position: relative;
+  padding-right: 2rem;
+}
+
+.collapsible-summary::after {
+  content: '▼';
+  position: absolute;
+  right: 0;
+  transition: transform 0.2s ease;
+  opacity: 0.7;
+}
+
+.collapsible-summary:hover::after {
+  opacity: 1;
+}
+
+details[open] .collapsible-summary::after {
+  transform: rotate(180deg);
 }
 
 .uu-edition-section {

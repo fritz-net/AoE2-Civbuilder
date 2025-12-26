@@ -112,6 +112,10 @@ test.describe('Draft Mode - Draft Creation Form', () => {
   test('should display all rarity checkboxes checked by default', async ({ page }) => {
     await page.goto('/v2/draft/create');
     
+    // Open the Advanced Settings section first
+    await page.getByText('Advanced Settings').click();
+    await page.waitForTimeout(500); // Wait for animation
+    
     // Check all rarity checkboxes are present and checked by default
     const rarityLabels = ['Ordinary', 'Distinguished', 'Superior', 'Epic', 'Legendary'];
     
@@ -125,6 +129,10 @@ test.describe('Draft Mode - Draft Creation Form', () => {
   test('should allow toggling rarity checkboxes', async ({ page }) => {
     await page.goto('/v2/draft/create');
     
+    // Open the Advanced Settings section first
+    await page.getByText('Advanced Settings').click();
+    await page.waitForTimeout(500); // Wait for animation
+    
     // Uncheck the first rarity (Ordinary)
     const ordinaryCheckbox = page.locator('#rarity-0');
     await ordinaryCheckbox.uncheck();
@@ -137,6 +145,10 @@ test.describe('Draft Mode - Draft Creation Form', () => {
 
   test('should display rarity labels correctly', async ({ page }) => {
     await page.goto('/v2/draft/create');
+    
+    // Open the Advanced Settings section first
+    await page.getByText('Advanced Settings').click();
+    await page.waitForTimeout(500); // Wait for animation
     
     // Check all rarity labels are visible
     await expect(page.getByText('Ordinary')).toBeVisible();
