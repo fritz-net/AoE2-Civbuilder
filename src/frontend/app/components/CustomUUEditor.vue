@@ -54,11 +54,21 @@
 
       <!-- Unit Properties (shown after type selection) -->
       <template v-if="customUnit">
-      <!-- Header with unit type and reset -->
+      <!-- Header with unit type switcher and validation -->
       <div class="form-header">
-        <div class="current-type">
-          <span class="type-badge">{{ customUnit.unitType }}</span>
-          <button class="btn-secondary" @click="resetUnit">Change Type</button>
+        <div class="type-switcher">
+          <label>Unit Type:</label>
+          <div class="type-tabs">
+            <button 
+              v-for="type in unitTypes" 
+              :key="type.id"
+              :class="['type-tab', { active: customUnit.unitType === type.id }]"
+              @click="switchUnitType(type.id)"
+            >
+              <span class="type-icon-small">{{ type.icon }}</span>
+              <span>{{ type.name }}</span>
+            </button>
+          </div>
         </div>
         <div class="validation-status">
           <span v-if="isValid && !hasWarnings" class="status-valid">✓ Valid</span>
@@ -128,17 +138,24 @@
                 v-model.number="customUnit.health" 
                 type="number" 
                 min="15"
-                :max="getMaxValue('health')"
-                @input="onUnitChange"
+                max="250"
+                @input="onStatChange('health', $event)"
               />
-              <input 
-                type="range" 
-                v-model.number="customUnit.health" 
-                min="15"
-                :max="getMaxValue('health')"
-                class="slider"
-                @input="onUnitChange"
-              />
+              <div class="budget-slider">
+                <input 
+                  type="range" 
+                  v-model.number="customUnit.health" 
+                  min="15"
+                  max="250"
+                  class="slider"
+                  @input="onStatChange('health', $event)"
+                />
+                <div 
+                  v-if="maxPoints && getMaxValue('health') < 250" 
+                  class="budget-limit-marker"
+                  :style="{ left: ((getMaxValue('health') - 15) / (250 - 15) * 100) + '%' }"
+                ></div>
+              </div>
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.health }} HP</span>
             </div>
           </div>
@@ -151,17 +168,24 @@
                 v-model.number="customUnit.attack" 
                 type="number" 
                 min="2"
-                :max="getMaxValue('attack')"
-                @input="onUnitChange"
+                max="35"
+                @input="onStatChange('attack', $event)"
               />
-              <input 
-                type="range" 
-                v-model.number="customUnit.attack" 
-                min="2"
-                :max="getMaxValue('attack')"
-                class="slider"
-                @input="onUnitChange"
-              />
+              <div class="budget-slider">
+                <input 
+                  type="range" 
+                  v-model.number="customUnit.attack" 
+                  min="2"
+                  max="35"
+                  class="slider"
+                  @input="onStatChange('attack', $event)"
+                />
+                <div 
+                  v-if="maxPoints && getMaxValue('attack') < 35" 
+                  class="budget-limit-marker"
+                  :style="{ left: ((getMaxValue('attack') - 2) / (35 - 2) * 100) + '%' }"
+                ></div>
+              </div>
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.attack }} ATK</span>
             </div>
           </div>
@@ -174,17 +198,24 @@
                 v-model.number="customUnit.meleeArmor" 
                 type="number" 
                 min="-3"
-                :max="getMaxValue('meleeArmor')"
-                @input="onUnitChange"
+                max="10"
+                @input="onStatChange('meleeArmor', $event)"
               />
-              <input 
-                type="range" 
-                v-model.number="customUnit.meleeArmor" 
-                min="-3"
-                :max="getMaxValue('meleeArmor')"
-                class="slider"
-                @input="onUnitChange"
-              />
+              <div class="budget-slider">
+                <input 
+                  type="range" 
+                  v-model.number="customUnit.meleeArmor" 
+                  min="-3"
+                  max="10"
+                  class="slider"
+                  @input="onStatChange('meleeArmor', $event)"
+                />
+                <div 
+                  v-if="maxPoints && getMaxValue('meleeArmor') < 10" 
+                  class="budget-limit-marker"
+                  :style="{ left: ((getMaxValue('meleeArmor') + 3) / (10 + 3) * 100) + '%' }"
+                ></div>
+              </div>
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.meleeArmor }} ARM</span>
             </div>
           </div>
@@ -197,17 +228,24 @@
                 v-model.number="customUnit.pierceArmor" 
                 type="number" 
                 min="-3"
-                :max="getMaxValue('pierceArmor')"
-                @input="onUnitChange"
+                max="10"
+                @input="onStatChange('pierceArmor', $event)"
               />
-              <input 
-                type="range" 
-                v-model.number="customUnit.pierceArmor" 
-                min="-3"
-                :max="getMaxValue('pierceArmor')"
-                class="slider"
-                @input="onUnitChange"
-              />
+              <div class="budget-slider">
+                <input 
+                  type="range" 
+                  v-model.number="customUnit.pierceArmor" 
+                  min="-3"
+                  max="10"
+                  class="slider"
+                  @input="onStatChange('pierceArmor', $event)"
+                />
+                <div 
+                  v-if="maxPoints && getMaxValue('pierceArmor') < 10" 
+                  class="budget-limit-marker"
+                  :style="{ left: ((getMaxValue('pierceArmor') + 3) / (10 + 3) * 100) + '%' }"
+                ></div>
+              </div>
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.pierceArmor }} ARM</span>
             </div>
           </div>
@@ -521,6 +559,13 @@ const selectUnitType = (type: string) => {
   onUnitChange();
 };
 
+const switchUnitType = (type: string) => {
+  if (customUnit.value && customUnit.value.unitType !== type) {
+    customUnit.value = createCustomUnit(type as any);
+    onUnitChange();
+  }
+};
+
 const resetUnit = () => {
   customUnit.value = null;
   validationErrors.value = [];
@@ -538,6 +583,20 @@ const onUnitChange = () => {
   if (customUnit.value) {
     validationErrors.value = validateUnit(customUnit.value);
   }
+};
+
+const onStatChange = (stat: string, event: any) => {
+  if (!customUnit.value) return;
+  
+  const value = parseFloat(event.target.value);
+  const maxValue = getMaxValue(stat);
+  
+  // Enforce budget limit
+  if (maxPoints.value && value > maxValue) {
+    customUnit.value[stat as keyof typeof customUnit.value] = maxValue as any;
+  }
+  
+  onUnitChange();
 };
 
 const baseUnitOptions = computed(() => {
@@ -649,29 +708,29 @@ watch(() => customUnit.value, (newVal) => {
 .custom-uu-editor {
   max-width: 900px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 .editor-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .editor-header h2 {
   color: #d4af37;
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.75rem;
+  margin-bottom: 0.4rem;
 }
 
 .subtitle {
   color: #666;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 /* Mode Selector */
 .mode-selector {
-  margin-top: 1.5rem;
-  padding: 1rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
   background: #f0f0f0;
   border-radius: 8px;
   text-align: center;
@@ -680,24 +739,26 @@ watch(() => customUnit.value, (newVal) => {
 .mode-selector label {
   font-weight: bold;
   color: #4d3617;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   display: block;
+  font-size: 0.9rem;
 }
 
 .mode-buttons {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .mode-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.8rem;
   border: 2px solid #d4af37;
   background: white;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-size: 0.9rem;
 }
 
 .mode-btn:hover {
@@ -854,15 +915,15 @@ watch(() => customUnit.value, (newVal) => {
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 .form-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
   border-bottom: 2px solid #d4af37;
 }
 
@@ -896,29 +957,78 @@ watch(() => customUnit.value, (newVal) => {
   font-weight: bold;
 }
 
+/* Type Switcher */
+.type-switcher {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.type-switcher label {
+  font-weight: bold;
+  color: #4d3617;
+  font-size: 0.9rem;
+}
+
+.type-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.type-tab {
+  padding: 0.4rem 0.8rem;
+  border: 2px solid #ccc;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+
+.type-tab:hover {
+  border-color: #d4af37;
+  background: #f5f5f5;
+}
+
+.type-tab.active {
+  border-color: #d4af37;
+  background: #d4af37;
+  color: white;
+  font-weight: bold;
+}
+
+.type-icon-small {
+  font-size: 1.1rem;
+}
+
 /* Form Sections */
 .form-section {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
   background: #f9f9f9;
   border-radius: 6px;
 }
 
 .form-section h3 {
   color: #4d3617;
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
 }
 
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .form-group label {
   display: block;
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
   color: #333;
+  font-size: 0.9rem;
 }
 
 .form-group input[type="text"],
@@ -940,23 +1050,66 @@ watch(() => customUnit.value, (newVal) => {
 
 .slider {
   width: 100%;
-  margin-top: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+/* Budget Slider */
+.budget-slider {
+  position: relative;
+  width: 100%;
+}
+
+.budget-limit-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 20px;
+  background: #dc3545;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.budget-limit-marker::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #dc3545;
+}
+
+.budget-limit-marker::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #dc3545;
 }
 
 .char-count,
 .help-text {
   display: block;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #666;
-  margin-top: 0.25rem;
+  margin-top: 0.2rem;
 }
 
 /* Grids */
 .stats-grid,
 .cost-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
 }
 
 /* Resource Icons */
