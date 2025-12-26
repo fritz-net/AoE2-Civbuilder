@@ -1,0 +1,879 @@
+<template>
+  <div class="custom-uu-editor">
+    <div class="editor-header">
+      <h2>Custom Unique Unit Editor</h2>
+      <p class="subtitle">Design your own unique unit with customizable stats and abilities</p>
+    </div>
+
+    <!-- Unit Type Selection -->
+    <div v-if="!customUnit" class="type-selection">
+      <h3>Select Unit Type</h3>
+      <div class="type-grid">
+        <button 
+          v-for="type in unitTypes" 
+          :key="type.id"
+          class="type-button"
+          @click="selectUnitType(type.id)"
+        >
+          <div class="type-icon">{{ type.icon }}</div>
+          <div class="type-name">{{ type.name }}</div>
+          <div class="type-desc">{{ type.description }}</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Editor Form -->
+    <div v-else class="editor-form">
+      <!-- Header with unit type and reset -->
+      <div class="form-header">
+        <div class="current-type">
+          <span class="type-badge">{{ customUnit.unitType }}</span>
+          <button class="btn-secondary" @click="resetUnit">Change Type</button>
+        </div>
+        <div class="validation-status">
+          <span v-if="isValid && !hasWarnings" class="status-valid">✓ Valid</span>
+          <span v-else-if="hasWarnings" class="status-warning">⚠ Has Warnings</span>
+          <span v-else class="status-error">✗ Invalid</span>
+        </div>
+      </div>
+
+      <!-- Basic Properties -->
+      <section class="form-section">
+        <h3>Basic Properties</h3>
+        
+        <div class="form-group">
+          <label for="unit-name">Unit Name</label>
+          <input 
+            id="unit-name"
+            v-model="customUnit.name" 
+            type="text" 
+            maxlength="30"
+            placeholder="Enter unit name"
+            @input="onUnitChange"
+          />
+          <span class="char-count">{{ customUnit.name.length }}/30</span>
+        </div>
+
+        <div class="form-group">
+          <label for="base-unit">Base Unit Template</label>
+          <input 
+            id="base-unit"
+            v-model.number="customUnit.baseUnit" 
+            type="number" 
+            min="1"
+            max="2000"
+            @input="onUnitChange"
+          />
+          <span class="help-text">ID of vanilla unit to use as template</span>
+        </div>
+      </section>
+
+      <!-- Combat Stats -->
+      <section class="form-section">
+        <h3>Combat Stats</h3>
+        
+        <div class="stats-grid">
+          <div class="form-group">
+            <label for="health">Health (HP)</label>
+            <input 
+              id="health"
+              v-model.number="customUnit.health" 
+              type="number" 
+              min="15"
+              max="250"
+              @input="onUnitChange"
+            />
+            <input 
+              type="range" 
+              v-model.number="customUnit.health" 
+              min="15"
+              max="250"
+              class="slider"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="attack">Attack</label>
+            <input 
+              id="attack"
+              v-model.number="customUnit.attack" 
+              type="number" 
+              min="2"
+              max="35"
+              @input="onUnitChange"
+            />
+            <input 
+              type="range" 
+              v-model.number="customUnit.attack" 
+              min="2"
+              max="35"
+              class="slider"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="melee-armor">Melee Armor</label>
+            <input 
+              id="melee-armor"
+              v-model.number="customUnit.meleeArmor" 
+              type="number" 
+              min="-3"
+              max="10"
+              @input="onUnitChange"
+            />
+            <input 
+              type="range" 
+              v-model.number="customUnit.meleeArmor" 
+              min="-3"
+              max="10"
+              class="slider"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="pierce-armor">Pierce Armor</label>
+            <input 
+              id="pierce-armor"
+              v-model.number="customUnit.pierceArmor" 
+              type="number" 
+              min="-3"
+              max="10"
+              @input="onUnitChange"
+            />
+            <input 
+              type="range" 
+              v-model.number="customUnit.pierceArmor" 
+              min="-3"
+              max="10"
+              class="slider"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="attack-speed">Attack Speed (seconds)</label>
+            <input 
+              id="attack-speed"
+              v-model.number="customUnit.attackSpeed" 
+              type="number" 
+              min="0.8"
+              max="6"
+              step="0.1"
+              @input="onUnitChange"
+            />
+            <span class="help-text">Lower is faster</span>
+          </div>
+
+          <div class="form-group">
+            <label for="range">Range</label>
+            <input 
+              id="range"
+              v-model.number="customUnit.range" 
+              type="number" 
+              min="0"
+              :max="getRangeMax()"
+              @input="onUnitChange"
+            />
+            <span class="help-text">0 = melee</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Mobility -->
+      <section class="form-section">
+        <h3>Mobility</h3>
+        
+        <div class="stats-grid">
+          <div class="form-group">
+            <label for="speed">Movement Speed</label>
+            <input 
+              id="speed"
+              v-model.number="customUnit.speed" 
+              type="number" 
+              min="0.5"
+              max="1.65"
+              step="0.05"
+              @input="onUnitChange"
+            />
+            <input 
+              type="range" 
+              v-model.number="customUnit.speed" 
+              min="0.5"
+              max="1.65"
+              step="0.05"
+              class="slider"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="los">Line of Sight</label>
+            <input 
+              id="los"
+              v-model.number="customUnit.lineOfSight" 
+              type="number" 
+              min="3"
+              max="12"
+              @input="onUnitChange"
+            />
+          </div>
+        </div>
+      </section>
+
+      <!-- Cost -->
+      <section class="form-section">
+        <h3>Cost & Training</h3>
+        
+        <div class="cost-grid">
+          <div class="form-group">
+            <label for="cost-food">
+              <span class="resource-icon">🌾</span> Food
+            </label>
+            <input 
+              id="cost-food"
+              v-model.number="customUnit.cost.food" 
+              type="number" 
+              min="0"
+              @input="onUnitChange"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="cost-wood">
+              <span class="resource-icon">🪵</span> Wood
+            </label>
+            <input 
+              id="cost-wood"
+              v-model.number="customUnit.cost.wood" 
+              type="number" 
+              min="0"
+              @input="onUnitChange"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="cost-stone">
+              <span class="resource-icon">🪨</span> Stone
+            </label>
+            <input 
+              id="cost-stone"
+              v-model.number="customUnit.cost.stone" 
+              type="number" 
+              min="0"
+              @input="onUnitChange"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="cost-gold">
+              <span class="resource-icon">🪙</span> Gold
+            </label>
+            <input 
+              id="cost-gold"
+              v-model.number="customUnit.cost.gold" 
+              type="number" 
+              min="0"
+              @input="onUnitChange"
+            />
+          </div>
+        </div>
+
+        <div class="cost-info">
+          <div class="total-cost">
+            Total Cost: <strong>{{ totalCost }}</strong> resources
+          </div>
+          <button class="btn-secondary" @click="applyCostRecommendation">
+            Apply Recommended Cost
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label for="train-time">Train Time (seconds)</label>
+          <input 
+            id="train-time"
+            v-model.number="customUnit.trainTime" 
+            type="number" 
+            min="6"
+            max="90"
+            @input="onUnitChange"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input 
+              v-model="customUnit.heroMode" 
+              type="checkbox"
+              @change="onUnitChange"
+            />
+            <span>Hero Mode (only trainable once, higher cost, bonus points)</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Attack Bonuses -->
+      <section class="form-section">
+        <h3>Attack Bonuses</h3>
+        
+        <div class="bonuses-list">
+          <div 
+            v-for="(bonus, index) in customUnit.attackBonuses" 
+            :key="index"
+            class="bonus-item"
+          >
+            <select v-model.number="bonus.class" @change="onUnitChange">
+              <option v-for="(name, id) in ARMOR_CLASS_NAMES" :key="id" :value="parseInt(id)">
+                {{ name }}
+              </option>
+            </select>
+            <input 
+              v-model.number="bonus.amount" 
+              type="number" 
+              min="1"
+              max="30"
+              placeholder="Bonus amount"
+              @input="onUnitChange"
+            />
+            <button class="btn-danger" @click="removeBonus(index)">Remove</button>
+          </div>
+        </div>
+
+        <button 
+          class="btn-secondary" 
+          @click="addBonus"
+          :disabled="customUnit.attackBonuses.length >= getMaxBonuses()"
+        >
+          Add Attack Bonus ({{ customUnit.attackBonuses.length }}/{{ getMaxBonuses() }})
+        </button>
+      </section>
+
+      <!-- Power Budget Info -->
+      <section class="form-section info-section">
+        <h3>Balance Information</h3>
+        <div class="power-info">
+          <div class="power-stat">
+            <span class="label">Power Budget:</span>
+            <span class="value">{{ powerBudget }} points</span>
+          </div>
+          <div class="power-stat">
+            <span class="label">Recommended Cost:</span>
+            <span class="value">{{ formatCost(recommendedCost) }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Validation Errors -->
+      <section v-if="validationErrors.length > 0" class="form-section validation-section">
+        <h3>Validation Messages</h3>
+        <div 
+          v-for="(error, index) in validationErrors" 
+          :key="index"
+          :class="['validation-message', `validation-${error.severity}`]"
+        >
+          <span class="icon">{{ error.severity === 'error' ? '✗' : '⚠' }}</span>
+          <span class="message">{{ error.message }}</span>
+        </div>
+      </section>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button class="btn-primary" @click="saveUnit" :disabled="!isValid">
+          Save Unit
+        </button>
+        <button class="btn-secondary" @click="resetToDefaults">
+          Reset to Defaults
+        </button>
+        <button class="btn-secondary" @click="exportUnit">
+          Export JSON
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue';
+import { useCustomUU, type CustomUUData } from '~/composables/useCustomUU';
+
+const {
+  customUnit,
+  createCustomUnit,
+  validateUnit,
+  calculatePowerBudget,
+  calculateRecommendedCost,
+  exportToTechtree,
+  isValid,
+  hasWarnings,
+  ARMOR_CLASS_NAMES
+} = useCustomUU();
+
+const validationErrors = ref<any[]>([]);
+
+const unitTypes = [
+  {
+    id: 'infantry',
+    name: 'Infantry',
+    icon: '⚔️',
+    description: 'Melee fighters trained in barracks'
+  },
+  {
+    id: 'cavalry',
+    name: 'Cavalry',
+    icon: '🐎',
+    description: 'Fast mounted units from stables'
+  },
+  {
+    id: 'archer',
+    name: 'Archer',
+    icon: '🏹',
+    description: 'Ranged units from archery range'
+  },
+  {
+    id: 'siege',
+    name: 'Siege',
+    icon: '🎯',
+    description: 'Heavy weapons from workshop'
+  }
+];
+
+const selectUnitType = (type: string) => {
+  customUnit.value = createCustomUnit(type as any);
+  onUnitChange();
+};
+
+const resetUnit = () => {
+  customUnit.value = null;
+  validationErrors.value = [];
+};
+
+const resetToDefaults = () => {
+  if (customUnit.value) {
+    const type = customUnit.value.unitType;
+    customUnit.value = createCustomUnit(type);
+    onUnitChange();
+  }
+};
+
+const onUnitChange = () => {
+  if (customUnit.value) {
+    validationErrors.value = validateUnit(customUnit.value);
+  }
+};
+
+const totalCost = computed(() => {
+  if (!customUnit.value) return 0;
+  return customUnit.value.cost.food + 
+         customUnit.value.cost.wood + 
+         customUnit.value.cost.stone + 
+         customUnit.value.cost.gold;
+});
+
+const powerBudget = computed(() => {
+  if (!customUnit.value) return 0;
+  return calculatePowerBudget(customUnit.value);
+});
+
+const recommendedCost = computed(() => {
+  if (!customUnit.value) return { food: 0, wood: 0, stone: 0, gold: 0 };
+  return calculateRecommendedCost(customUnit.value);
+});
+
+const applyCostRecommendation = () => {
+  if (customUnit.value) {
+    customUnit.value.cost = { ...recommendedCost.value };
+    onUnitChange();
+  }
+};
+
+const formatCost = (cost: any) => {
+  const parts = [];
+  if (cost.food > 0) parts.push(`${cost.food}F`);
+  if (cost.wood > 0) parts.push(`${cost.wood}W`);
+  if (cost.stone > 0) parts.push(`${cost.stone}S`);
+  if (cost.gold > 0) parts.push(`${cost.gold}G`);
+  return parts.join(' + ') || '0';
+};
+
+const getRangeMax = () => {
+  if (!customUnit.value) return 12;
+  return customUnit.value.unitType === 'infantry' ? 1 : 12;
+};
+
+const getMaxBonuses = () => {
+  if (!customUnit.value) return 3;
+  return customUnit.value.unitType === 'archer' || customUnit.value.unitType === 'siege' ? 4 : 3;
+};
+
+const addBonus = () => {
+  if (customUnit.value) {
+    customUnit.value.attackBonuses.push({ class: 1, amount: 5 });
+    onUnitChange();
+  }
+};
+
+const removeBonus = (index: number) => {
+  if (customUnit.value) {
+    customUnit.value.attackBonuses.splice(index, 1);
+    onUnitChange();
+  }
+};
+
+const saveUnit = () => {
+  if (customUnit.value && isValid.value) {
+    alert('Unit saved! (This would integrate with the actual save system)');
+    // Emit event or call API
+  }
+};
+
+const exportUnit = () => {
+  if (customUnit.value) {
+    const json = JSON.stringify(customUnit.value, null, 2);
+    console.log('Exported unit:', json);
+    // Copy to clipboard or download
+    navigator.clipboard.writeText(json);
+    alert('Unit JSON copied to clipboard!');
+  }
+};
+
+// Watch for initial load
+watch(() => customUnit.value, (newVal) => {
+  if (newVal) {
+    onUnitChange();
+  }
+});
+</script>
+
+<style scoped>
+.custom-uu-editor {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.editor-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.editor-header h2 {
+  color: #d4af37;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Type Selection */
+.type-selection {
+  text-align: center;
+}
+
+.type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.type-button {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+  border: 2px solid #d4af37;
+  border-radius: 8px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.type-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+  border-color: #b8941f;
+}
+
+.type-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.type-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #4d3617;
+  margin-bottom: 0.25rem;
+}
+
+.type-desc {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Editor Form */
+.editor-form {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #d4af37;
+}
+
+.current-type {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.type-badge {
+  background: #d4af37;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.validation-status .status-valid {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.validation-status .status-warning {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.validation-status .status-error {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+/* Form Sections */
+.form-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.form-section h3 {
+  color: #4d3617;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="number"]:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #d4af37;
+}
+
+.slider {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.char-count,
+.help-text {
+  display: block;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+/* Grids */
+.stats-grid,
+.cost-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+/* Resource Icons */
+.resource-icon {
+  margin-right: 0.25rem;
+}
+
+/* Cost Info */
+.cost-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: white;
+  border-radius: 4px;
+}
+
+.total-cost {
+  font-size: 1.1rem;
+}
+
+/* Checkbox */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-right: 0.5rem;
+  width: auto;
+}
+
+/* Bonuses */
+.bonuses-list {
+  margin-bottom: 1rem;
+}
+
+.bonus-item {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  align-items: center;
+}
+
+.bonus-item select {
+  flex: 2;
+}
+
+.bonus-item input {
+  flex: 1;
+}
+
+/* Power Info */
+.info-section {
+  background: #e8f5e9;
+}
+
+.power-info {
+  display: flex;
+  gap: 2rem;
+}
+
+.power-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.power-stat .label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.power-stat .value {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+/* Validation */
+.validation-section {
+  background: #fff3cd;
+}
+
+.validation-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+}
+
+.validation-error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.validation-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.validation-message .icon {
+  font-weight: bold;
+}
+
+/* Buttons */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: #d4af37;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #b8941f;
+}
+
+.btn-primary:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+  padding: 0.5rem 1rem;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+</style>
