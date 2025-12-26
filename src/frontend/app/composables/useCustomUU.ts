@@ -474,9 +474,13 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     }
   };
 
-  const getMaxStatValue = (stat: string, unitType: string): number => {
+  const getMaxStatValue = (stat: string, unitType: string, maxPointsLimit: number | null = null, unit: CustomUnit | null = null): number => {
+    // Use passed unit or fall back to composable's customUnit
+    const currentUnit = unit || customUnit.value;
+    const pointLimit = maxPointsLimit !== null ? maxPointsLimit : maxPoints.value;
+    
     // If no max points set, return normal max
-    if (!maxPoints.value || !customUnit.value) {
+    if (!pointLimit || !currentUnit) {
       const normalMaxes: Record<string, number> = {
         health: 250,
         attack: 35,
@@ -489,12 +493,12 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     }
 
     // Calculate remaining points
-    const currentPoints = calculatePowerBudget(customUnit.value);
-    const pointsLeft = maxPoints.value - currentPoints;
+    const currentPoints = calculatePowerBudget(currentUnit);
+    const pointsLeft = pointLimit - currentPoints;
 
     // If we're over budget, return current value
     if (pointsLeft < 0) {
-      return (customUnit.value as any)[stat] || 0;
+      return (currentUnit as any)[stat] || 0;
     }
 
     // Calculate how much we can add to this stat
@@ -508,7 +512,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     };
 
     const cost = pointCosts[stat] || 1;
-    const currentValue = (customUnit.value as any)[stat] || 0;
+    const currentValue = (currentUnit as any)[stat] || 0;
     const maxIncrease = Math.floor(pointsLeft / cost);
     
     const normalMaxes: Record<string, number> = {

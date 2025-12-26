@@ -33,25 +33,27 @@
       </div>
     </div>
 
-    <!-- Unit Type Selection -->
-    <div v-if="!customUnit" class="type-selection">
-      <h3>Select Unit Type</h3>
-      <div class="type-grid">
-        <button 
-          v-for="type in unitTypes" 
-          :key="type.id"
-          class="type-button"
-          @click="selectUnitType(type.id)"
-        >
-          <div class="type-icon">{{ type.icon }}</div>
-          <div class="type-name">{{ type.name }}</div>
-          <div class="type-desc">{{ type.description }}</div>
-        </button>
-      </div>
-    </div>
-
     <!-- Editor Form -->
-    <div v-else class="editor-form">
+    <div class="editor-form">
+      <!-- Unit Type Selection (shown first) -->
+      <section v-if="!customUnit" class="form-section type-selection">
+        <h3>Select Unit Type</h3>
+        <div class="type-grid">
+          <button 
+            v-for="type in unitTypes" 
+            :key="type.id"
+            class="type-button"
+            @click="selectUnitType(type.id)"
+          >
+            <div class="type-icon">{{ type.icon }}</div>
+            <div class="type-name">{{ type.name }}</div>
+            <div class="type-desc">{{ type.description }}</div>
+          </button>
+        </div>
+      </section>
+
+      <!-- Unit Properties (shown after type selection) -->
+      <template v-if="customUnit">
       <!-- Header with unit type and reset -->
       <div class="form-header">
         <div class="current-type">
@@ -133,10 +135,9 @@
                 type="range" 
                 v-model.number="customUnit.health" 
                 min="15"
-                max="250"
-                :data-limit="getMaxValue('health')"
+                :max="getMaxValue('health')"
                 class="slider"
-                @input="enforceSliderLimit($event, 'health')"
+                @input="onUnitChange"
               />
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.health }} HP</span>
             </div>
@@ -157,10 +158,9 @@
                 type="range" 
                 v-model.number="customUnit.attack" 
                 min="2"
-                max="35"
-                :data-limit="getMaxValue('attack')"
+                :max="getMaxValue('attack')"
                 class="slider"
-                @input="enforceSliderLimit($event, 'attack')"
+                @input="onUnitChange"
               />
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.attack }} ATK</span>
             </div>
@@ -181,10 +181,9 @@
                 type="range" 
                 v-model.number="customUnit.meleeArmor" 
                 min="-3"
-                max="10"
-                :data-limit="getMaxValue('meleeArmor')"
+                :max="getMaxValue('meleeArmor')"
                 class="slider"
-                @input="enforceSliderLimit($event, 'meleeArmor')"
+                @input="onUnitChange"
               />
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.meleeArmor }} ARM</span>
             </div>
@@ -205,10 +204,9 @@
                 type="range" 
                 v-model.number="customUnit.pierceArmor" 
                 min="-3"
-                max="10"
-                :data-limit="getMaxValue('pierceArmor')"
+                :max="getMaxValue('pierceArmor')"
                 class="slider"
-                @input="enforceSliderLimit($event, 'pierceArmor')"
+                @input="onUnitChange"
               />
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.pierceArmor }} ARM</span>
             </div>
@@ -453,6 +451,7 @@
           Export JSON
         </button>
       </div>
+      </template>
     </div>
   </div>
 </template>
@@ -599,23 +598,7 @@ const getRangeMax = () => {
 
 const getMaxValue = (stat: string) => {
   if (!customUnit.value) return 250;
-  return getMaxStatValue(stat, customUnit.value.unitType);
-};
-
-const enforceSliderLimit = (event: Event, statName: string) => {
-  if (!customUnit.value) return;
-  
-  const target = event.target as HTMLInputElement;
-  const limit = parseInt(target.getAttribute('data-limit') || '999');
-  const value = parseInt(target.value);
-  
-  // Enforce the limit by capping the value
-  if (value > limit) {
-    (customUnit.value as any)[statName] = limit;
-    target.value = String(limit); // Also update the slider visual position
-  }
-  
-  onUnitChange();
+  return getMaxStatValue(stat, customUnit.value.unitType, maxPoints.value, customUnit.value);
 };
 
 const getMaxBonuses = () => {
