@@ -17,6 +17,15 @@ export interface AttackBonus {
   amount: number; // Bonus damage amount
 }
 
+export interface EliteStats {
+  health: number;
+  attack: number;
+  meleeArmor: number;
+  pierceArmor: number;
+  range: number;
+  speed: number;
+}
+
 export interface CustomUUData {
   type: 'custom';
   unitType: 'infantry' | 'cavalry' | 'archer' | 'siege';
@@ -34,12 +43,23 @@ export interface CustomUUData {
   lineOfSight: number;
   heroMode: boolean;
   attackBonuses: AttackBonus[];
+  eliteStats?: EliteStats; // Auto-calculated elite stats
 }
 
 export interface ValidationError {
   field: string;
   message: string;
   severity: 'error' | 'warning';
+}
+
+export type EditorMode = 'demo' | 'build' | 'draft';
+
+export interface BaseUnitOption {
+  id: number;
+  name: string;
+  type: 'infantry' | 'cavalry' | 'archer' | 'siege';
+  isRanged: boolean;
+  icon?: string; // Icon path or identifier
 }
 
 interface UnitTypeDefaults {
@@ -61,7 +81,7 @@ const UNIT_TYPE_DEFAULTS: Record<string, UnitTypeDefaults> = {
     speed: 1.0,
     range: 0,
     armor: { melee: 0, pierce: 0 },
-    cost: { food: 55, wood: 0, stone: 0, gold: 30 },
+    cost: { food: 65, wood: 0, stone: 0, gold: 20 }, // Asymmetrical: more food, less gold
     trainTime: 14
   },
   cavalry: {
@@ -71,7 +91,7 @@ const UNIT_TYPE_DEFAULTS: Record<string, UnitTypeDefaults> = {
     speed: 1.35,
     range: 0,
     armor: { melee: 2, pierce: 1 },
-    cost: { food: 70, wood: 0, stone: 0, gold: 75 },
+    cost: { food: 60, wood: 0, stone: 0, gold: 85 }, // Asymmetrical: less food, more gold
     trainTime: 22
   },
   archer: {
@@ -81,7 +101,7 @@ const UNIT_TYPE_DEFAULTS: Record<string, UnitTypeDefaults> = {
     speed: 0.96,
     range: 4,
     armor: { melee: 0, pierce: 0 },
-    cost: { food: 0, wood: 35, stone: 0, gold: 40 },
+    cost: { food: 0, wood: 55, stone: 0, gold: 20 }, // Asymmetrical: more wood, less gold
     trainTime: 18
   },
   siege: {
@@ -91,7 +111,7 @@ const UNIT_TYPE_DEFAULTS: Record<string, UnitTypeDefaults> = {
     speed: 0.7,
     range: 0,
     armor: { melee: -3, pierce: 7 },
-    cost: { food: 0, wood: 150, stone: 0, gold: 75 },
+    cost: { food: 0, wood: 135, stone: 0, gold: 40 }, // Asymmetrical: much more wood, less gold
     trainTime: 36
   }
 };
@@ -112,10 +132,53 @@ const ARMOR_CLASS_NAMES: Record<number, string> = {
   30: 'War Elephants'
 };
 
-export function useCustomUU() {
+// Base unit options for each type
+const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
+  infantry: [
+    { id: 1067, name: 'Jaguar Warrior', type: 'infantry', isRanged: false },
+    { id: 1723, name: 'Teutonic Knight', type: 'infantry', isRanged: false },
+    { id: 1570, name: 'Woad Raider', type: 'infantry', isRanged: false },
+    { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false },
+    { id: 75, name: 'Militia', type: 'infantry', isRanged: false },
+    { id: 358, name: 'Champion', type: 'infantry', isRanged: false },
+    { id: 93, name: 'Spearman', type: 'infantry', isRanged: false },
+    { id: 359, name: 'Halberdier', type: 'infantry', isRanged: false },
+  ],
+  cavalry: [
+    { id: 1721, name: 'Knight', type: 'cavalry', isRanged: false },
+    { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false },
+    { id: 1269, name: 'Boyar', type: 'cavalry', isRanged: false },
+    { id: 283, name: 'Paladin', type: 'cavalry', isRanged: false },
+    { id: 207, name: 'Camel Rider', type: 'cavalry', isRanged: false },
+    { id: 1132, name: 'Battle Elephant', type: 'cavalry', isRanged: false },
+    { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false },
+    { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false },
+  ],
+  archer: [
+    { id: 850, name: 'Plumed Archer', type: 'archer', isRanged: true },
+    { id: 873, name: 'Longbowman', type: 'archer', isRanged: true },
+    { id: 5, name: 'Archer', type: 'archer', isRanged: true },
+    { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true },
+    { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true },
+    { id: 185, name: 'Skirmisher', type: 'archer', isRanged: true },
+    { id: 1036, name: 'Genitour', type: 'archer', isRanged: true },
+    { id: 5, name: 'Hand Cannoneer', type: 'archer', isRanged: true },
+  ],
+  siege: [
+    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false },
+    { id: 280, name: 'Mangonel', type: 'siege', isRanged: true },
+    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true },
+    { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true },
+    { id: 420, name: 'Petard', type: 'siege', isRanged: false },
+  ]
+};
+
+export function useCustomUU(initialMode: EditorMode = 'demo') {
   const customUnit: Ref<CustomUUData | null> = ref(null);
   const isCustomMode = ref(false);
   const validationErrors: Ref<ValidationError[]> = ref([]);
+  const editorMode: Ref<EditorMode> = ref(initialMode);
+  const maxPoints: Ref<number | null> = ref(null); // null = unlimited
 
   const createCustomUnit = (unitType: 'infantry' | 'cavalry' | 'archer' | 'siege'): CustomUUData => {
     const defaults = UNIT_TYPE_DEFAULTS[unitType];
@@ -342,6 +405,124 @@ export function useCustomUU() {
     return ARMOR_CLASS_NAMES[classId] || `Class ${classId}`;
   };
 
+  const getBaseUnitOptions = (unitType: string): BaseUnitOption[] => {
+    return BASE_UNIT_OPTIONS[unitType] || [];
+  };
+
+  const calculateEliteStats = (unit: CustomUUData): EliteStats => {
+    // Elite units get predictable improvements based on unit type
+    const improvements: Record<string, Partial<EliteStats>> = {
+      infantry: {
+        health: Math.round(unit.health * 1.15), // +15% HP
+        attack: unit.attack + 2,
+        meleeArmor: unit.meleeArmor + 1,
+        pierceArmor: unit.pierceArmor,
+        range: unit.range,
+        speed: unit.speed
+      },
+      cavalry: {
+        health: Math.round(unit.health * 1.20), // +20% HP
+        attack: unit.attack + 2,
+        meleeArmor: unit.meleeArmor + 1,
+        pierceArmor: unit.pierceArmor + 1,
+        range: unit.range,
+        speed: unit.speed
+      },
+      archer: {
+        health: Math.round(unit.health * 1.10), // +10% HP
+        attack: unit.attack + 1,
+        meleeArmor: unit.meleeArmor,
+        pierceArmor: unit.pierceArmor + 1,
+        range: unit.range + 1, // +1 range for archers
+        speed: unit.speed
+      },
+      siege: {
+        health: Math.round(unit.health * 1.25), // +25% HP
+        attack: unit.attack + 3,
+        meleeArmor: unit.meleeArmor,
+        pierceArmor: unit.pierceArmor + 1,
+        range: unit.unitType === 'siege' && unit.range > 0 ? unit.range + 1 : unit.range,
+        speed: unit.speed
+      }
+    };
+
+    return improvements[unit.unitType] as EliteStats;
+  };
+
+  const setMode = (mode: EditorMode) => {
+    editorMode.value = mode;
+    
+    // Set max points based on mode
+    switch (mode) {
+      case 'draft':
+        maxPoints.value = 100; // Strict limit for drafts
+        break;
+      case 'build':
+        maxPoints.value = 150; // More flexible for build mode
+        break;
+      case 'demo':
+      default:
+        maxPoints.value = null; // No limit in demo
+        break;
+    }
+  };
+
+  const getMaxStatValue = (stat: string, unitType: string): number => {
+    // If no max points set, return normal max
+    if (!maxPoints.value || !customUnit.value) {
+      const normalMaxes: Record<string, number> = {
+        health: 250,
+        attack: 35,
+        meleeArmor: 10,
+        pierceArmor: 10,
+        speed: 1.65,
+        range: 12
+      };
+      return normalMaxes[stat] || 100;
+    }
+
+    // Calculate remaining points
+    const currentPoints = calculatePowerBudget(customUnit.value);
+    const pointsLeft = maxPoints.value - currentPoints;
+
+    // If we're over budget, return current value
+    if (pointsLeft < 0) {
+      return (customUnit.value as any)[stat] || 0;
+    }
+
+    // Calculate how much we can add to this stat
+    const pointCosts: Record<string, number> = {
+      health: 0.2, // 2 points per 10 HP
+      attack: 3,   // 3 points per attack
+      meleeArmor: 4,
+      pierceArmor: 4,
+      speed: 50,   // 5 points per 0.1 speed
+      range: 6
+    };
+
+    const cost = pointCosts[stat] || 1;
+    const currentValue = (customUnit.value as any)[stat] || 0;
+    const maxIncrease = Math.floor(pointsLeft / cost);
+    
+    const normalMaxes: Record<string, number> = {
+      health: 250,
+      attack: 35,
+      meleeArmor: 10,
+      pierceArmor: 10,
+      speed: 1.65,
+      range: 12
+    };
+
+    const absoluteMax = normalMaxes[stat] || 100;
+    const calculatedMax = stat === 'health' 
+      ? currentValue + (maxIncrease * 10)
+      : stat === 'speed'
+      ? currentValue + (maxIncrease * 0.1)
+      : currentValue + maxIncrease;
+
+    return Math.min(calculatedMax, absoluteMax);
+  };
+
   const isValid = computed(() => {
     if (!customUnit.value) return false;
     const errors = validateUnit(customUnit.value);
@@ -359,14 +540,21 @@ export function useCustomUU() {
     customUnit,
     isCustomMode,
     validationErrors,
+    editorMode,
+    maxPoints,
     createCustomUnit,
     validateUnit,
     calculatePowerBudget,
     calculateRecommendedCost,
+    calculateEliteStats,
     exportToTechtree,
     getArmorClassName,
+    getBaseUnitOptions,
+    setMode,
+    getMaxStatValue,
     isValid,
     hasWarnings,
-    ARMOR_CLASS_NAMES
+    ARMOR_CLASS_NAMES,
+    BASE_UNIT_OPTIONS
   };
 }

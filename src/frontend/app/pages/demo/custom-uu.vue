@@ -12,7 +12,7 @@
     <div class="demo-content">
       <!-- Main Editor -->
       <div class="editor-container">
-        <CustomUUEditor />
+        <CustomUUEditor :show-mode-selector="true" />
       </div>
 
       <!-- Documentation Sidebar -->
@@ -28,12 +28,43 @@
         </section>
 
         <section class="doc-section">
+          <h3>Editor Modes</h3>
+          <ul>
+            <li><strong>Demo:</strong> Unlimited points for experimentation</li>
+            <li><strong>Build Mode:</strong> 150 points budget for balanced play</li>
+            <li><strong>Draft Mode:</strong> 100 points budget for competitive drafts</li>
+          </ul>
+          <p>In Build and Draft modes, the sliders automatically limit to available points.</p>
+        </section>
+
+        <section class="doc-section">
           <h3>Unit Types</h3>
           <ul>
             <li><strong>Infantry:</strong> Melee units trained in barracks</li>
             <li><strong>Cavalry:</strong> Fast mounted units from stables</li>
             <li><strong>Archer:</strong> Ranged units from archery range</li>
             <li><strong>Siege:</strong> Heavy weapons from workshop</li>
+          </ul>
+        </section>
+
+        <section class="doc-section">
+          <h3>Base Unit Selection</h3>
+          <p>
+            Choose from a list of vanilla units as templates. Each provides different animations and base properties.
+            You can also enter a custom unit ID for advanced use.
+          </p>
+        </section>
+
+        <section class="doc-section">
+          <h3>Elite Units</h3>
+          <p>
+            Elite stats are automatically calculated with predictable improvements:
+          </p>
+          <ul>
+            <li><strong>Infantry:</strong> +15% HP, +2 attack, +1 melee armor</li>
+            <li><strong>Cavalry:</strong> +20% HP, +2 attack, +1 armor (both types)</li>
+            <li><strong>Archer:</strong> +10% HP, +1 attack, +1 range, +1 pierce armor</li>
+            <li><strong>Siege:</strong> +25% HP, +3 attack, +1 pierce armor, +1 range (if ranged)</li>
           </ul>
         </section>
 
@@ -92,6 +123,9 @@
 
         <section class="doc-section">
           <h3>Examples</h3>
+          <p class="help-note">
+            Click an example below to see pre-configured units (feature coming soon - examples will auto-load into editor)
+          </p>
           <div class="example-buttons">
             <button @click="loadExample('infantry')" class="example-btn">Infantry Example</button>
             <button @click="loadExample('cavalry')" class="example-btn">Cavalry Example</button>
@@ -117,9 +151,8 @@
 import CustomUUEditor from '~/components/CustomUUEditor.vue';
 
 const loadExample = (type: string) => {
-  alert(`Loading ${type} example... (This would populate the editor with an example unit)`);
-  // In a real implementation, this would emit an event or update shared state
-  // to populate the editor with the example
+  // Feature to be implemented - would load example unit into editor
+  console.log(`Loading ${type} example...`);
 };
 </script>
 
@@ -267,6 +300,13 @@ const loadExample = (type: string) => {
   flex-direction: column;
   gap: 0.5rem;
   margin-top: 1rem;
+}
+
+.help-note {
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+  margin-bottom: 0.5rem;
 }
 
 .example-btn {

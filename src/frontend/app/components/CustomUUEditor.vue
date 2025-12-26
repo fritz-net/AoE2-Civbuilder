@@ -3,6 +3,34 @@
     <div class="editor-header">
       <h2>Custom Unique Unit Editor</h2>
       <p class="subtitle">Design your own unique unit with customizable stats and abilities</p>
+      
+      <!-- Mode Selector -->
+      <div v-if="showModeSelector" class="mode-selector">
+        <label>Editor Mode:</label>
+        <div class="mode-buttons">
+          <button 
+            :class="['mode-btn', { active: editorMode === 'demo' }]"
+            @click="setMode('demo')"
+          >
+            Demo (Unlimited)
+          </button>
+          <button 
+            :class="['mode-btn', { active: editorMode === 'build' }]"
+            @click="setMode('build')"
+          >
+            Build Mode (150 pts)
+          </button>
+          <button 
+            :class="['mode-btn', { active: editorMode === 'draft' }]"
+            @click="setMode('draft')"
+          >
+            Draft Mode (100 pts)
+          </button>
+        </div>
+        <div v-if="maxPoints" class="points-display">
+          Points: <strong :class="{ 'over-budget': powerBudget > maxPoints }">{{ powerBudget }}</strong> / {{ maxPoints }}
+        </div>
+      </div>
     </div>
 
     <!-- Unit Type Selection -->
@@ -55,98 +83,123 @@
         </div>
 
         <div class="form-group">
-          <label for="base-unit">Base Unit Template</label>
-          <input 
-            id="base-unit"
-            v-model.number="customUnit.baseUnit" 
-            type="number" 
-            min="1"
-            max="2000"
-            @input="onUnitChange"
-          />
-          <span class="help-text">ID of vanilla unit to use as template</span>
+          <label>Base Unit Template</label>
+          <div class="base-unit-grid">
+            <button
+              v-for="option in baseUnitOptions"
+              :key="option.id"
+              :class="['base-unit-option', { selected: customUnit.baseUnit === option.id }]"
+              @click="selectBaseUnit(option.id)"
+            >
+              <div class="unit-icon">🎭</div>
+              <div class="unit-name">{{ option.name }}</div>
+            </button>
+          </div>
+          <div class="custom-id-input">
+            <label for="custom-base">Or enter custom ID:</label>
+            <input 
+              id="custom-base"
+              v-model.number="customUnit.baseUnit" 
+              type="number" 
+              min="1"
+              max="2000"
+              @input="onUnitChange"
+            />
+          </div>
         </div>
       </section>
 
       <!-- Combat Stats -->
       <section class="form-section">
-        <h3>Combat Stats</h3>
+        <h3>Combat Stats <span v-if="eliteStats" class="elite-toggle">(Elite stats shown below)</span></h3>
         
         <div class="stats-grid">
           <div class="form-group">
             <label for="health">Health (HP)</label>
-            <input 
-              id="health"
-              v-model.number="customUnit.health" 
-              type="number" 
-              min="15"
-              max="250"
-              @input="onUnitChange"
-            />
-            <input 
-              type="range" 
-              v-model.number="customUnit.health" 
-              min="15"
-              max="250"
-              class="slider"
-            />
+            <div class="stat-with-elite">
+              <input 
+                id="health"
+                v-model.number="customUnit.health" 
+                type="number" 
+                min="15"
+                :max="getMaxValue('health')"
+                @input="onUnitChange"
+              />
+              <input 
+                type="range" 
+                v-model.number="customUnit.health" 
+                min="15"
+                :max="getMaxValue('health')"
+                class="slider"
+              />
+              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.health }}</span>
+            </div>
           </div>
 
           <div class="form-group">
             <label for="attack">Attack</label>
-            <input 
-              id="attack"
-              v-model.number="customUnit.attack" 
-              type="number" 
-              min="2"
-              max="35"
-              @input="onUnitChange"
-            />
-            <input 
-              type="range" 
-              v-model.number="customUnit.attack" 
-              min="2"
-              max="35"
-              class="slider"
-            />
+            <div class="stat-with-elite">
+              <input 
+                id="attack"
+                v-model.number="customUnit.attack" 
+                type="number" 
+                min="2"
+                :max="getMaxValue('attack')"
+                @input="onUnitChange"
+              />
+              <input 
+                type="range" 
+                v-model.number="customUnit.attack" 
+                min="2"
+                :max="getMaxValue('attack')"
+                class="slider"
+              />
+              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.attack }}</span>
+            </div>
           </div>
 
           <div class="form-group">
             <label for="melee-armor">Melee Armor</label>
-            <input 
-              id="melee-armor"
-              v-model.number="customUnit.meleeArmor" 
-              type="number" 
-              min="-3"
-              max="10"
-              @input="onUnitChange"
-            />
-            <input 
-              type="range" 
-              v-model.number="customUnit.meleeArmor" 
-              min="-3"
-              max="10"
-              class="slider"
-            />
+            <div class="stat-with-elite">
+              <input 
+                id="melee-armor"
+                v-model.number="customUnit.meleeArmor" 
+                type="number" 
+                min="-3"
+                :max="getMaxValue('meleeArmor')"
+                @input="onUnitChange"
+              />
+              <input 
+                type="range" 
+                v-model.number="customUnit.meleeArmor" 
+                min="-3"
+                :max="getMaxValue('meleeArmor')"
+                class="slider"
+              />
+              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.meleeArmor }}</span>
+            </div>
           </div>
 
           <div class="form-group">
             <label for="pierce-armor">Pierce Armor</label>
-            <input 
-              id="pierce-armor"
-              v-model.number="customUnit.pierceArmor" 
-              type="number" 
-              min="-3"
-              max="10"
-              @input="onUnitChange"
-            />
-            <input 
-              type="range" 
-              v-model.number="customUnit.pierceArmor" 
-              min="-3"
-              max="10"
-              class="slider"
-            />
+            <div class="stat-with-elite">
+              <input 
+                id="pierce-armor"
+                v-model.number="customUnit.pierceArmor" 
+                type="number" 
+                min="-3"
+                :max="getMaxValue('pierceArmor')"
+                @input="onUnitChange"
+              />
+              <input 
+                type="range" 
+                v-model.number="customUnit.pierceArmor" 
+                min="-3"
+                :max="getMaxValue('pierceArmor')"
+                class="slider"
+              />
+              <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.pierceArmor }}</span>
+            </div>
           </div>
 
           <div class="form-group">
@@ -165,15 +218,18 @@
 
           <div class="form-group">
             <label for="range">Range</label>
-            <input 
-              id="range"
-              v-model.number="customUnit.range" 
-              type="number" 
-              min="0"
-              :max="getRangeMax()"
-              @input="onUnitChange"
-            />
-            <span class="help-text">0 = melee</span>
+            <div class="stat-with-elite">
+              <input 
+                id="range"
+                v-model.number="customUnit.range" 
+                type="number" 
+                min="0"
+                :max="getRangeMax()"
+                @input="onUnitChange"
+              />
+              <span class="help-text">0 = melee</span>
+              <span v-if="eliteStats && eliteStats.range !== customUnit.range" class="elite-value">Elite: {{ eliteStats.range }}</span>
+            </div>
           </div>
         </div>
       </section>
@@ -393,15 +449,29 @@
 import { ref, computed, watch } from 'vue';
 import { useCustomUU, type CustomUUData } from '~/composables/useCustomUU';
 
+interface Props {
+  showModeSelector?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  showModeSelector: false
+});
+
 const {
   customUnit,
   createCustomUnit,
   validateUnit,
   calculatePowerBudget,
   calculateRecommendedCost,
+  calculateEliteStats,
   exportToTechtree,
+  getBaseUnitOptions,
   isValid,
   hasWarnings,
+  editorMode,
+  maxPoints,
+  setMode,
+  getMaxStatValue,
   ARMOR_CLASS_NAMES
 } = useCustomUU();
 
@@ -458,6 +528,23 @@ const onUnitChange = () => {
   }
 };
 
+const baseUnitOptions = computed(() => {
+  if (!customUnit.value) return [];
+  return getBaseUnitOptions(customUnit.value.unitType);
+});
+
+const selectBaseUnit = (id: number) => {
+  if (customUnit.value) {
+    customUnit.value.baseUnit = id;
+    onUnitChange();
+  }
+};
+
+const eliteStats = computed(() => {
+  if (!customUnit.value) return null;
+  return calculateEliteStats(customUnit.value);
+});
+
 const totalCost = computed(() => {
   if (!customUnit.value) return 0;
   return customUnit.value.cost.food + 
@@ -495,6 +582,11 @@ const formatCost = (cost: any) => {
 const getRangeMax = () => {
   if (!customUnit.value) return 12;
   return customUnit.value.unitType === 'infantry' ? 1 : 12;
+};
+
+const getMaxValue = (stat: string) => {
+  if (!customUnit.value) return 250;
+  return getMaxStatValue(stat, customUnit.value.unitType);
 };
 
 const getMaxBonuses = () => {
@@ -562,6 +654,137 @@ watch(() => customUnit.value, (newVal) => {
 .subtitle {
   color: #666;
   font-size: 1rem;
+}
+
+/* Mode Selector */
+.mode-selector {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f0f0f0;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.mode-selector label {
+  font-weight: bold;
+  color: #4d3617;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.mode-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.mode-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid #d4af37;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mode-btn:hover {
+  background: #f5f5f5;
+}
+
+.mode-btn.active {
+  background: #d4af37;
+  color: white;
+  font-weight: bold;
+}
+
+.points-display {
+  font-size: 1.1rem;
+  color: #4d3617;
+}
+
+.points-display strong {
+  font-size: 1.3rem;
+  color: #28a745;
+}
+
+.points-display strong.over-budget {
+  color: #dc3545;
+}
+
+/* Base Unit Grid */
+.base-unit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.base-unit-option {
+  padding: 0.75rem;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.base-unit-option:hover {
+  border-color: #d4af37;
+  transform: translateY(-2px);
+}
+
+.base-unit-option.selected {
+  border-color: #d4af37;
+  background: #fff9e6;
+  font-weight: bold;
+}
+
+.base-unit-option .unit-icon {
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+}
+
+.base-unit-option .unit-name {
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.custom-id-input {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.custom-id-input label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.custom-id-input input {
+  width: 150px;
+}
+
+/* Elite Stats Display */
+.stat-with-elite {
+  position: relative;
+}
+
+.elite-value {
+  display: block;
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.elite-toggle {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: normal;
 }
 
 /* Type Selection */
