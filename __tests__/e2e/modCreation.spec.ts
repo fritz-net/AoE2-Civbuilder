@@ -115,42 +115,15 @@ test.describe('Combine Page - Multi-Civ Mod Creation', () => {
     const createButton = page.getByRole('button', { name: /Create Combined Mod/i });
     await createButton.click();
     
-    // Wait for either error message or navigation to success page
-    // Use Promise.race to handle both scenarios with a single timeout
-    try {
-      await Promise.race([
-        // Wait for navigation to success page
-        page.waitForURL('**/v2/download-success*', { timeout: 15000 }),
-        // Or wait for error message to appear
-        page.getByText(/Mod creation failed/i).waitFor({ state: 'visible', timeout: 15000 })
-      ]);
-      
-      // Check which scenario occurred
-      const isOnSuccessPage = page.url().includes('/download-success');
-      const errorMessage = page.getByText(/Mod creation failed/i);
-      const isErrorVisible = await errorMessage.isVisible().catch(() => false);
-      
-      if (isErrorVisible) {
-        // This is expected when C++ binary is not available
-        console.log('C++ backend not available - showing error as expected');
-        return;
-      }
-      
-      if (isOnSuccessPage) {
-        // Verify we're on the success page
-        await expect(page.getByText(/Mod Created Successfully/i)).toBeVisible();
-        
-        // Verify civ is listed
-        await expect(page.getByText(/Britons/i)).toBeVisible();
-      }
-    } catch (error) {
-      // If both timeout, the C++ backend might be hanging
-      console.log('Test timed out waiting for either success or error - C++ backend may be unresponsive');
-      // Check current state for debugging
-      const currentUrl = page.url();
-      console.log('Current URL:', currentUrl);
-      throw error;
-    }
+    // Wait for navigation to success page
+    // C++ backend must be running for this test to pass
+    await page.waitForURL('**/v2/download-success*', { timeout: 15000 });
+    
+    // Verify we're on the success page
+    await expect(page.getByText(/Mod Created Successfully/i)).toBeVisible();
+    
+    // Verify civ is listed
+    await expect(page.getByText(/Britons/i)).toBeVisible();
   });
 });
 
