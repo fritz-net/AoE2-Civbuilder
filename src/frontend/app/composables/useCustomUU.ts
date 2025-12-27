@@ -474,6 +474,16 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     }
   };
 
+  // Normal max values for each stat (used in validation and budget calculations)
+  const STAT_MAX_VALUES: Record<string, number> = {
+    health: 250,
+    attack: 35,
+    meleeArmor: 10,
+    pierceArmor: 10,
+    speed: 1.65,
+    range: 12
+  };
+
   const getMaxStatValue = (stat: string, unitType: string, maxPointsLimit: number | null = null, unit: CustomUnit | null = null): number => {
     // Use passed unit or fall back to composable's customUnit
     const currentUnit = unit || customUnit.value;
@@ -481,15 +491,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     
     // If no max points set, return normal max
     if (!pointLimit || !currentUnit) {
-      const normalMaxes: Record<string, number> = {
-        health: 250,
-        attack: 35,
-        meleeArmor: 10,
-        pierceArmor: 10,
-        speed: 1.65,
-        range: 12
-      };
-      return normalMaxes[stat] || 100;
+      return STAT_MAX_VALUES[stat] || 100;
     }
 
     // Calculate remaining points
@@ -520,16 +522,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
       ? pointsLeft / cost 
       : Math.floor(pointsLeft / cost);
     
-    const normalMaxes: Record<string, number> = {
-      health: 250,
-      attack: 35,
-      meleeArmor: 10,
-      pierceArmor: 10,
-      speed: 1.65,
-      range: 12
-    };
-
-    const absoluteMax = normalMaxes[stat] || 100;
+    const absoluteMax = STAT_MAX_VALUES[stat] || 100;
     const calculatedMax = currentValue + maxIncrease;
 
     return Math.min(calculatedMax, absoluteMax);
