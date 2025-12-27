@@ -378,12 +378,7 @@ test.describe('TechTree Functionality - Fortified Wall Dependencies', () => {
     const initialPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
     const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
     
-    // Click somewhere in the castle age university area where fortified wall tech should be
-    // This is an integration test - we verify the behavior works even if we can't precisely locate the element
-    await page.locator('svg.techtree-svg').click({ position: { x: 1450, y: 420 }, timeout: 5000 }).catch(() => {});
-    await page.waitForTimeout(1000);
-    
-    // Alternative: use Fill button and verify the relationships work correctly
+    // Use Fill button to test that fortified wall relationships work correctly
     await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
     await page.waitForTimeout(1000);
     

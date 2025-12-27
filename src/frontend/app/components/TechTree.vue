@@ -852,16 +852,15 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
         if (fromUserClick) {
           const prerequisites = getAllPrerequisites(caretId)
           
-          // Filter to unenabled prerequisites and sort by cost (descending - most expensive first)
+          // Filter to unenabled and affordable prerequisites first
           const affordablePrereqs = prerequisites
-            .filter(prereqId => !isEnabled(prereqId))
+            .filter(prereqId => !isEnabled(prereqId) && getCaretCost(prereqId) <= techtreePoints.value)
             .map(prereqId => ({ id: prereqId, cost: getCaretCost(prereqId) }))
-            .filter(prereq => prereq.cost <= techtreePoints.value)
             .sort((a, b) => b.cost - a.cost)
           
           // Enable the most expensive affordable prerequisite
           if (affordablePrereqs.length > 0) {
-            enableCaret(affordablePrereqs[0].id, true)
+            enableCaret(affordablePrereqs[0].id, false) // Pass false to avoid recursion
             return
           }
         }
