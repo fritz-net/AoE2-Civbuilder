@@ -475,7 +475,7 @@ const civBonusSubtitle = computed(() => {
   // Otherwise, show the default limited message
   return props.disableCivBonusLimit 
     ? 'Select any number of bonuses, each can be multiplied up to 255 times'
-    : 'Select up to 6 bonuses, each can be multiplied up to 255 times'
+    : `Select up to ${bonusMaxSelections.civ.maxUniqueSelections} bonuses, each can be multiplied up to 255 times`
 })
 
 const canProceed = computed(() => {
