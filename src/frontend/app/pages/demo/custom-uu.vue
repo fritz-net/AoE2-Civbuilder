@@ -12,7 +12,16 @@
     <div class="demo-content">
       <!-- Main Editor -->
       <div class="editor-container">
-        <CustomUUEditor :show-mode-selector="true" />
+        <CustomUUEditor :show-mode-selector="true" ref="editorRef" />
+        
+        <!-- Validation Dashboard -->
+        <ValidationDashboard 
+          v-if="editorUnit"
+          :unit="editorUnit"
+          :validation-errors="editorValidationErrors"
+          :current-points="editorPowerBudget"
+          :max-points="editorMaxPoints"
+        />
       </div>
 
       <!-- Documentation Sidebar -->
@@ -148,7 +157,28 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue';
 import CustomUUEditor from '~/components/CustomUUEditor.vue';
+import ValidationDashboard from '~/components/ValidationDashboard.vue';
+import { useCustomUU } from '~/composables/useCustomUU';
+
+// Get shared state from composable
+const {
+  customUnit,
+  validateUnit,
+  calculatePowerBudget,
+  maxPoints
+} = useCustomUU();
+
+// Computed properties for dashboard
+const editorUnit = computed(() => customUnit.value);
+const editorValidationErrors = computed(() => {
+  return customUnit.value ? validateUnit(customUnit.value) : [];
+});
+const editorPowerBudget = computed(() => {
+  return customUnit.value ? calculatePowerBudget(customUnit.value) : 0;
+});
+const editorMaxPoints = computed(() => maxPoints.value);
 
 const loadExample = (type: string) => {
   // Feature to be implemented - would load example unit into editor

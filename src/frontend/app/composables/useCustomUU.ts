@@ -59,7 +59,8 @@ export interface BaseUnitOption {
   name: string;
   type: 'infantry' | 'cavalry' | 'archer' | 'siege';
   isRanged: boolean;
-  uuGraphicId: number; // UU graphic ID for icon (0-87)
+  uuGraphicId: number | null; // UU graphic ID for icon (0-87), null means use techtree
+  techtreeIconId?: number; // Unit ID for techtree icon
 }
 
 interface UnitTypeDefaults {
@@ -133,7 +134,8 @@ const ARMOR_CLASS_NAMES: Record<number, string> = {
 };
 
 // Base unit options for each type with UU graphic IDs
-// UU IDs 0-87 map to unique unit graphics
+// UU IDs 0-87 map to unique unit graphics (/v2/img/unitgraphics/uu_X.jpg)
+// Standard units use techtree icons (/v2/img/unitgraphics/X.jpg where X is unit ID)
 // Vanilla UUs: 0=Longbow, 1=Cataphract, 2=Huskarl, 3=Teutonic, 4=Samurai, 5=War Elephant, 
 // 6=Cataphract, 7=Chu Ko Nu, 8=Mameluke, 9=Janissary, 10=War Wagon, 11=Mangudai, etc.
 const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
@@ -144,18 +146,20 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false, uuGraphicId: 2 },
     { id: 1306, name: 'Samurai', type: 'infantry', isRanged: false, uuGraphicId: 4 },
     { id: 1317, name: 'Berserk', type: 'infantry', isRanged: false, uuGraphicId: 13 },
-    { id: 75, name: 'Militia Line', type: 'infantry', isRanged: false, uuGraphicId: 39 },
-    { id: 93, name: 'Spearman Line', type: 'infantry', isRanged: false, uuGraphicId: 39 },
+    { id: 75, name: 'Militia Line', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 75 },
+    { id: 93, name: 'Spearman Line', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 93 },
+    { id: 473, name: 'Champion', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 473 },
+    { id: 555, name: 'Halberdier', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 555 },
   ],
   cavalry: [
     { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false, uuGraphicId: 6 },
     { id: 1269, name: 'Boyar', type: 'cavalry', isRanged: false, uuGraphicId: 22 },
     { id: 1755, name: 'War Elephant', type: 'cavalry', isRanged: false, uuGraphicId: 5 },
     { id: 1132, name: 'Battle Elephant', type: 'cavalry', isRanged: false, uuGraphicId: 19 },
-    { id: 1721, name: 'Knight Line', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
-    { id: 207, name: 'Camel Line', type: 'cavalry', isRanged: false, uuGraphicId: 8 },
-    { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
-    { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false, uuGraphicId: 1 },
+    { id: 1721, name: 'Knight Line', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 37 }, // Knight
+    { id: 207, name: 'Camel Line', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 207 },
+    { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 546 },
+    { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 441 },
   ],
   archer: [
     { id: 873, name: 'Longbowman', type: 'archer', isRanged: true, uuGraphicId: 0 },
@@ -163,16 +167,16 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 1225, name: 'Chu Ko Nu', type: 'archer', isRanged: true, uuGraphicId: 7 },
     { id: 1231, name: 'Mangudai', type: 'archer', isRanged: true, uuGraphicId: 11 },
     { id: 1036, name: 'Genitour', type: 'archer', isRanged: true, uuGraphicId: 25 },
-    { id: 5, name: 'Archer Line', type: 'archer', isRanged: true, uuGraphicId: 39 },
-    { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true, uuGraphicId: 39 },
-    { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, uuGraphicId: 39 },
+    { id: 5, name: 'Archer Line', type: 'archer', isRanged: true, uuGraphicId: null, techtreeIconId: 5 },
+    { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true, uuGraphicId: null, techtreeIconId: 24 },
+    { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, uuGraphicId: null, techtreeIconId: 943 },
   ],
   siege: [
     { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, uuGraphicId: 10 },
-    { id: 280, name: 'Mangonel Line', type: 'siege', isRanged: true, uuGraphicId: 39 },
-    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, uuGraphicId: 39 },
-    { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, uuGraphicId: 9 },
-    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false, uuGraphicId: 39 },
+    { id: 280, name: 'Mangonel Line', type: 'siege', isRanged: true, uuGraphicId: null, techtreeIconId: 280 },
+    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, uuGraphicId: null, techtreeIconId: 279 },
+    { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, uuGraphicId: null, techtreeIconId: 36 },
+    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false, uuGraphicId: null, techtreeIconId: 706 },
   ]
 };
 
@@ -412,8 +416,16 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     return BASE_UNIT_OPTIONS[unitType] || [];
   };
 
-  const getUnitIconUrl = (uuGraphicId: number): string => {
-    return `/v2/img/unitgraphics/uu_${uuGraphicId}.jpg`;
+  const getUnitIconUrl = (option: BaseUnitOption): string => {
+    if (option.uuGraphicId !== null) {
+      // Use UU graphics for unique units
+      return `/v2/img/unitgraphics/uu_${option.uuGraphicId}.jpg`;
+    } else if (option.techtreeIconId !== undefined) {
+      // Use techtree graphics for standard units
+      return `/v2/img/unitgraphics/${option.techtreeIconId}.jpg`;
+    }
+    // Fallback to generic icon
+    return `/v2/img/unitgraphics/uu_39.jpg`;
   };
 
   const calculateEliteStats = (unit: CustomUUData): EliteStats => {

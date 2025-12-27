@@ -104,7 +104,7 @@
               @click="selectBaseUnit(option.id)"
             >
               <img 
-                :src="getUnitIconUrl(option.uuGraphicId)" 
+                :src="getUnitIconUrl(option)" 
                 :alt="option.name"
                 class="unit-icon-img"
               />
@@ -139,6 +139,7 @@
                 type="number" 
                 min="15"
                 max="250"
+                :class="{ 'over-budget': isStatOverBudget('health', customUnit.health) }"
                 @input="onUnitChange"
               />
               <BudgetSlider
@@ -161,6 +162,7 @@
                 type="number" 
                 min="2"
                 max="35"
+                :class="{ 'over-budget': isStatOverBudget('attack', customUnit.attack) }"
                 @input="onUnitChange"
               />
               <BudgetSlider
@@ -183,6 +185,7 @@
                 type="number" 
                 min="-3"
                 max="10"
+                :class="{ 'over-budget': isStatOverBudget('meleeArmor', customUnit.meleeArmor) }"
                 @input="onUnitChange"
               />
               <BudgetSlider
@@ -205,6 +208,7 @@
                 type="number" 
                 min="-3"
                 max="10"
+                :class="{ 'over-budget': isStatOverBudget('pierceArmor', customUnit.pierceArmor) }"
                 @input="onUnitChange"
               />
               <BudgetSlider
@@ -616,6 +620,12 @@ const getMaxValue = (stat: string) => {
   return getMaxStatValue(stat, customUnit.value.unitType, maxPoints.value, customUnit.value);
 };
 
+const isStatOverBudget = (stat: string, value: number) => {
+  if (!customUnit.value || !maxPoints.value) return false;
+  const maxAllowed = getMaxValue(stat);
+  return value > maxAllowed;
+};
+
 const getMaxBonuses = () => {
   if (!customUnit.value) return 3;
   return customUnit.value.unitType === 'archer' || customUnit.value.unitType === 'siege' ? 4 : 3;
@@ -1002,6 +1012,17 @@ watch(() => customUnit.value, (newVal) => {
 .form-group select:focus {
   outline: none;
   border-color: #d4af37;
+}
+
+.form-group input[type="number"].over-budget {
+  border-color: #dc3545;
+  border-width: 2px;
+  background-color: #fff5f5;
+}
+
+.form-group input[type="number"].over-budget:focus {
+  border-color: #c82333;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
 }
 
 .char-count,
