@@ -14,14 +14,20 @@
       <div class="editor-container">
         <CustomUUEditor :show-mode-selector="true" ref="editorRef" />
         
-        <!-- Validation Dashboard -->
-        <ValidationDashboard 
-          v-if="editorUnit"
-          :unit="editorUnit"
-          :validation-errors="editorValidationErrors"
-          :current-points="editorPowerBudget"
-          :max-points="editorMaxPoints"
-        />
+        <!-- Validation Dashboard - Always visible -->
+        <div class="dashboard-wrapper">
+          <ValidationDashboard 
+            v-if="editorUnit"
+            :unit="editorUnit"
+            :validation-errors="editorValidationErrors"
+            :current-points="editorPowerBudget"
+            :max-points="editorMaxPoints"
+          />
+          <div v-else class="dashboard-placeholder">
+            <h3>Validation Dashboard</h3>
+            <p>Select a unit type to see validation rules and budget status</p>
+          </div>
+        </div>
       </div>
 
       <!-- Documentation Sidebar -->
@@ -372,5 +378,29 @@ const loadExample = (type: string) => {
 
 .documentation::-webkit-scrollbar-thumb:hover {
   background: #b8941f;
+}
+
+/* Dashboard Wrapper */
+.dashboard-wrapper {
+  margin-top: 2rem;
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 2px solid #e0e0e0;
+}
+
+.dashboard-placeholder {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.dashboard-placeholder h3 {
+  color: #4d3617;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-placeholder p {
+  font-style: italic;
 }
 </style>

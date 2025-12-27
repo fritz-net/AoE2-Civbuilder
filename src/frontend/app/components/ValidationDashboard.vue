@@ -1,5 +1,5 @@
 <template>
-  <div class="validation-dashboard">
+  <div class="validation-dashboard" data-testid="validation-dashboard">
     <h3>Validation Dashboard</h3>
     <p class="dashboard-description">Real-time display of all validation rules and their status</p>
     

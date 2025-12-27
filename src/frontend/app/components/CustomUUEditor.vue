@@ -43,6 +43,7 @@
             v-for="type in unitTypes" 
             :key="type.id"
             class="type-button"
+            :data-testid="`type-button-${type.id}`"
             @click="selectUnitType(type.id)"
           >
             <div class="type-icon">{{ type.icon }}</div>
@@ -139,6 +140,7 @@
                 type="number" 
                 min="15"
                 max="250"
+                data-testid="health-input"
                 :class="{ 'over-budget': isStatOverBudget('health', customUnit.health) }"
                 @input="onUnitChange"
               />
@@ -162,6 +164,7 @@
                 type="number" 
                 min="2"
                 max="35"
+                data-testid="attack-input"
                 :class="{ 'over-budget': isStatOverBudget('attack', customUnit.attack) }"
                 @input="onUnitChange"
               />
