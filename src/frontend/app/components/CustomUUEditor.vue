@@ -31,10 +31,18 @@
           Points: <strong :class="{ 'over-budget': powerBudget > maxPoints }">{{ powerBudget }}</strong> / {{ maxPoints }}
         </div>
       </div>
+      
+      <!-- Density Mode Toggle -->
+      <div class="density-toggle">
+        <label>
+          <input type="checkbox" v-model="compactMode" />
+          <span>Compact Mode (Icon-based, Sliders Only)</span>
+        </label>
+      </div>
     </div>
 
     <!-- Editor Form -->
-    <div class="editor-form">
+    <div class="editor-form" :class="{ 'compact-mode': compactMode }">
       <!-- Unit Type Selection (shown first) -->
       <section v-if="!customUnit" class="form-section type-selection">
         <h3>Select Unit Type</h3>
@@ -503,6 +511,7 @@ const {
 } = useCustomUU();
 
 const validationErrors = ref<any[]>([]);
+const compactMode = ref(false);
 
 const unitTypes = [
   {
@@ -1201,5 +1210,63 @@ watch(() => customUnit.value, (newVal) => {
 
 .btn-danger:hover {
   background: #c82333;
+}
+
+/* Density Toggle */
+.density-toggle {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.density-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  margin: 0;
+}
+
+.density-toggle input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+/* Compact Mode Styles */
+.compact-mode .form-section h3 {
+  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+}
+
+.compact-mode .stats-grid,
+.compact-mode .cost-grid {
+  gap: 0.75rem;
+}
+
+.compact-mode .form-group label {
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.compact-mode input[type="number"] {
+  display: none; /* Hide number inputs in compact mode */
+}
+
+.compact-mode .char-count,
+.compact-mode .help-text,
+.compact-mode .base-unit-custom-input {
+  display: none; /* Hide custom ID input in compact mode */
+}
+
+.compact-mode .elite-value {
+  font-size: 0.75rem;
+}
+
+.compact-mode .form-section {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
 }
 </style>

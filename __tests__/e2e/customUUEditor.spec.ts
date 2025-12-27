@@ -57,20 +57,6 @@ test.describe('Custom UU Editor - Unit Type Selection', () => {
     await expect(page.getByText(/Ranged units from archery range/i)).toBeVisible();
   });
 });
-    
-    // Switch to Cavalry
-    await page.getByRole('button', { name: /Cavalry/i }).click();
-    await expect(page.getByText(/Fast mounted units from stables/i)).toBeVisible();
-    
-    // Switch to Archer
-    await page.getByRole('button', { name: /Archer/i }).click();
-    await expect(page.getByText(/Ranged units from archery range/i)).toBeVisible();
-    
-    // Switch to Siege
-    await page.getByRole('button', { name: /Siege/i }).click();
-    await expect(page.getByText(/Heavy weapons from workshop/i)).toBeVisible();
-  });
-});
 
 test.describe('Custom UU Editor - Basic Properties', () => {
   test('should allow editing unit name', async ({ page }) => {
