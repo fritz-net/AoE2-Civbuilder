@@ -852,30 +852,37 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
       techtreePoints.value += techCost
     } else {
       // Draft mode: subtract points (with limit check)
-      // If not enough points for this tech
-      if (techtreePoints.value < techCost) {
-        // If this is from a user click (not recursive), try to enable prerequisites instead
-        if (fromUserClick) {
-          const prerequisites = getAllPrerequisites(caretId)
-          
-          // Cache costs and filter to unenabled and affordable prerequisites
-          const affordablePrereqs = prerequisites
-            .filter(prereqId => !isEnabled(prereqId))
+      // If this is from a user click, check if we should enable prerequisites first
+      if (fromUserClick) {
+        const prerequisites = getAllPrerequisites(caretId)
+        
+        // Check if any prerequisites are not enabled
+        const unenabledPrerequisites = prerequisites.filter(prereqId => !isEnabled(prereqId))
+        
+        if (unenabledPrerequisites.length > 0) {
+          // Cache costs and filter to affordable prerequisites
+          const affordablePrereqs = unenabledPrerequisites
             .map(prereqId => {
               const cost = getCaretCost(prereqId)
               return { id: prereqId, cost }
             })
             .filter(prereq => prereq.cost <= techtreePoints.value)
-            .sort((a, b) => b.cost - a.cost)
+            .sort((a, b) => a.cost - b.cost) // Sort by cost ascending - enable cheapest first
           
-          // Enable the most expensive affordable prerequisite
+          // Enable the cheapest affordable prerequisite
           if (affordablePrereqs.length > 0) {
             enableCaret(affordablePrereqs[0].id, false) // Pass false to avoid recursion
             return
           }
+          
+          // If no affordable prerequisites, don't enable anything
+          return
         }
-        
-        // Not enough points to enable this caret and no affordable prerequisites
+      }
+      
+      // If not enough points for this tech
+      if (techtreePoints.value < techCost) {
+        // Not enough points to enable this caret
         return
       }
       
