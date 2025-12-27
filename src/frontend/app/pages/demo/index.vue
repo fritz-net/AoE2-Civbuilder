@@ -15,6 +15,12 @@
         <h2>Timer Countdown</h2>
         <p>Interactive demo for the Timer Countdown component used in drafts</p>
       </NuxtLink>
+      
+      <NuxtLink to="/demo/custom-uu" class="demo-card">
+        <div class="demo-card-icon">⚔️</div>
+        <h2>Custom UU Editor</h2>
+        <p>Design custom unique units with customizable stats, abilities, and balancing</p>
+      </NuxtLink>
     </div>
   </div>
 </template>
