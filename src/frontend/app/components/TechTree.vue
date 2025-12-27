@@ -298,6 +298,12 @@ const emit = defineEmits<{
 const PASTURE_BUILDING_ID = 1889
 const BUILDINGS_ARRAY_INDEX = 1
 
+// Constants for Fortified Wall group dependencies
+const FORTIFIED_WALL_TECH_ID = 'tech_194'
+const FORTIFIED_WALL_BUILDING_ID = 'building_155'
+const STONE_WALL_ID = 'building_117'
+const GATE_ID = 'building_487'
+
 // Refs
 const techtreeRef = ref<HTMLDivElement | null>(null)
 const svgRef = ref<SVGSVGElement | null>(null)
@@ -852,10 +858,14 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
         if (fromUserClick) {
           const prerequisites = getAllPrerequisites(caretId)
           
-          // Filter to unenabled and affordable prerequisites first
+          // Cache costs and filter to unenabled and affordable prerequisites
           const affordablePrereqs = prerequisites
-            .filter(prereqId => !isEnabled(prereqId) && getCaretCost(prereqId) <= techtreePoints.value)
-            .map(prereqId => ({ id: prereqId, cost: getCaretCost(prereqId) }))
+            .filter(prereqId => !isEnabled(prereqId))
+            .map(prereqId => {
+              const cost = getCaretCost(prereqId)
+              return { id: prereqId, cost }
+            })
+            .filter(prereq => prereq.cost <= techtreePoints.value)
             .sort((a, b) => b.cost - a.cost)
           
           // Enable the most expensive affordable prerequisite
@@ -921,12 +931,15 @@ function disableCaret(caretId: string) {
 }
 
 function handleLinkedCarets(caretId: string, enable: boolean) {
+  // Standard bidirectional linked pairs
+  // Note: Fortified wall tech and building are linked here (tech_194 <-> building_155)
+  // and stone wall and gate are linked here (building_117 <-> building_487)
   const linkedPairs: [string, string][] = [
     ['building_234', 'tech_140'],
     ['tech_64', 'building_236'],
     ['tech_63', 'building_235'],
-    ['tech_194', 'building_155'],
-    ['building_117', 'building_487'],
+    [FORTIFIED_WALL_TECH_ID, FORTIFIED_WALL_BUILDING_ID],  // Fortified wall tech <-> building
+    [STONE_WALL_ID, GATE_ID],  // Stone wall <-> gate
   ]
   
   for (const [a, b] of linkedPairs) {
@@ -937,17 +950,20 @@ function handleLinkedCarets(caretId: string, enable: boolean) {
     }
   }
   
-  // Fortified wall group: tech_194 (fortified wall tech), building_155 (fortified wall), 
-  // building_117 (stone wall), building_487 (gate)
-  // When enabling fortified wall (tech or building), enable stone wall and gate
-  if (enable && (caretId === 'tech_194' || caretId === 'building_155')) {
-    enableCaret('building_117', false)
-    enableCaret('building_487', false)
+  // Additional fortified wall group logic:
+  // When enabling fortified wall (tech or building), also enable stone wall and gate
+  // This creates a one-way dependency: fortified walls require stone wall + gate
+  if (enable && (caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID)) {
+    // Stone wall and gate are already linked via linkedPairs above
+    // So enabling stone wall will automatically enable gate
+    enableCaret(STONE_WALL_ID, false)
   }
-  // When disabling stone wall or gate, disable both fortified walls
-  if (!enable && (caretId === 'building_117' || caretId === 'building_487')) {
-    disableCaret('tech_194')
-    disableCaret('building_155')
+  
+  // When disabling stone wall or gate, also disable both fortified walls
+  // This enforces the requirement: can't have fortified walls without stone wall + gate
+  if (!enable && (caretId === STONE_WALL_ID || caretId === GATE_ID)) {
+    disableCaret(FORTIFIED_WALL_TECH_ID)
+    disableCaret(FORTIFIED_WALL_BUILDING_ID)
   }
   
   // Special cases for trebuchet-related units
