@@ -924,17 +924,17 @@ function disableCaret(caretId: string) {
       // Draft mode: add points back when disabling
       techtreePoints.value += techCost
     }
-  }
-  
-  // Disable children
-  for (const connection of connections.value) {
-    if (connection[0] === caretId) {
-      disableCaret(connection[1])
+    
+    // Disable children
+    for (const connection of connections.value) {
+      if (connection[0] === caretId) {
+        disableCaret(connection[1])
+      }
     }
+    
+    // Disable linked carets (only if this caret was actually removed)
+    handleLinkedCarets(caretId, false)
   }
-  
-  // Disable linked carets
-  handleLinkedCarets(caretId, false)
 }
 
 function handleLinkedCarets(caretId: string, enable: boolean) {
