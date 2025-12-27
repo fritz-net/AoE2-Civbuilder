@@ -5,6 +5,7 @@
       :initial-config="initialConfig"
       :next-button-text="isCreating ? 'Creating Mod...' : 'Create Mod'"
       :is-loading="isCreating"
+      :disable-civ-bonus-limit="true"
       @next="handleNext"
       @download="handleDownload"
       @reset="handleReset"
