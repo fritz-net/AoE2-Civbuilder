@@ -669,6 +669,10 @@ const writeIconsJson = async (req, res, next) => {
 	var blankOthers = false;
 	for (var i = 0; i < civs.length; i++) {
 		var civName = nameArr[i];
+		// Ensure flag_palette exists with default values if missing
+		if (!civs[i]["flag_palette"] || !Array.isArray(civs[i]["flag_palette"]) || civs[i]["flag_palette"].length < 8) {
+			civs[i]["flag_palette"] = [3, 4, 5, 6, 7, 3, 3, 3]; // Default flag palette
+		}
 		if (civs[i]["flag_palette"][0] == -1) {
 			//Secret password unlocked a vanilla flag
 			if (civName == "berber" || civName == "inca") {
