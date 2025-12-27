@@ -343,6 +343,17 @@ export const useDraft = () => {
       error.value = 'An error occurred in the draft'
     })
 
+    // Draft not found handler - redirect to create draft page
+    socket.value.on('draft not found', (roomID: string) => {
+      console.log('Draft not found:', roomID)
+      error.value = 'Draft not found. Redirecting to create draft page...'
+      isLoading.value = false
+      // Redirect to create draft page after a short delay
+      setTimeout(() => {
+        navigateTo('/draft/create')
+      }, 2000)
+    })
+
     // Connection handlers
     socket.value.on('connect', () => {
       isConnected.value = true

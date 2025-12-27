@@ -669,6 +669,10 @@ const writeIconsJson = async (req, res, next) => {
 	var blankOthers = false;
 	for (var i = 0; i < civs.length; i++) {
 		var civName = nameArr[i];
+		// Ensure flag_palette exists with default values if missing
+		if (!civs[i]["flag_palette"] || !Array.isArray(civs[i]["flag_palette"]) || civs[i]["flag_palette"].length < 8) {
+			civs[i]["flag_palette"] = [3, 4, 5, 6, 7, 3, 3, 3]; // Default flag palette
+		}
 		if (civs[i]["flag_palette"][0] == -1) {
 			//Secret password unlocked a vanilla flag
 			if (civName == "berber" || civName == "inca") {
@@ -1063,8 +1067,9 @@ router.post("/download", (req, res) => {
 
 // Helper function to update timer_remaining based on elapsed time
 function updateTimerRemaining(draft) {
-	if (!draft["preset"]["timer_enabled"]) return;
-	if (draft["gamestate"]["phase"] !== 2) return; // Only in picking phase
+	if (!draft || draft === -1) return;
+	if (!draft["preset"] || !draft["preset"]["timer_enabled"]) return;
+	if (!draft["gamestate"] || draft["gamestate"]["phase"] !== 2) return; // Only in picking phase
 	if (draft["gamestate"]["timer_paused"]) return;
 	
 	var lastUpdate = draft["gamestate"]["timer_last_update"];
@@ -1164,6 +1169,13 @@ function draftIO(io) {
 		socket.on("get gamestate", (roomID, playerNumber) => {
 			let draft = getDraft(roomID);
 			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
+			
 			// Update timer based on elapsed time
 			updateTimerRemaining(draft);
 			
@@ -1210,11 +1222,26 @@ function draftIO(io) {
 		});
 		socket.on("get private gamestate", (roomID) => {
 			var draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
+			
 			updateTimerRemaining(draft);
 			io.to(socket.id).emit("set gamestate", draft);
 		});
 		socket.on("toggle ready", (roomID, playerNumber) => {
 			let draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
 
 			if (playerNumber < 0) {
 				console.log("spectator can't be ready");
@@ -1225,6 +1252,13 @@ function draftIO(io) {
 		});
 		socket.on("start draft", (roomID) => {
 			let draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
 
 			draft["gamestate"]["phase"] = 1;
 			for (var i = 0; i < draft["preset"]["slots"]; i++) {
@@ -1235,6 +1269,14 @@ function draftIO(io) {
 		});
 		socket.on("update civ info", (roomID, playerNumber, civ_name, flag_palette, architecture, language) => {
 			let draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
+			
 			var numPlayers = draft["preset"]["slots"];
 
 			draft["players"][playerNumber]["ready"] = 1;
@@ -1310,6 +1352,14 @@ function draftIO(io) {
 		});
 		socket.on("update tree", (roomID, playerNumber, tree) => {
 			let draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
+			
 			var numPlayers = draft["preset"]["slots"];
 
 			draft["players"][playerNumber]["tree"] = tree;
@@ -1566,6 +1616,13 @@ function draftIO(io) {
 		});
 		socket.on("end turn", (roomID, pick, client_turn) => {
 			let draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
 
 			var bug = 0;
 			if (client_turn == draft["gamestate"]["turn"]) {
@@ -1590,6 +1647,14 @@ function draftIO(io) {
 		});
 		socket.on("refill", (roomID) => {
 			let draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
+			
 			var numPlayers = draft["preset"]["slots"];
 
 			//Repopulate empty card slots and keep track of the indices of refilled cards in highlighted array
@@ -1611,6 +1676,14 @@ function draftIO(io) {
 		});
 		socket.on("clear", (roomID) => {
 			let draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
+			
 			var numPlayers = draft["preset"]["slots"];
 			var cardsPerRoll = draft["preset"]["cards_per_roll"] || 3;
 
