@@ -807,14 +807,33 @@ function toggleCaret(caretId: string) {
   if (localtree.value[type].includes(id)) {
     disableCaret(caretId)
   } else {
-    enableCaret(caretId)
+    enableCaret(caretId, true) // Pass true to indicate user click
   }
   
   emit('update:tree', localtree.value)
   emit('update:points', techtreePoints.value)
 }
 
-function enableCaret(caretId: string) {
+function getAllPrerequisites(caretId: string): string[] {
+  const prerequisites: string[] = []
+  const visited = new Set<string>()
+  
+  function collectPrereqs(id: string) {
+    if (visited.has(id)) return
+    visited.add(id)
+    
+    const parentId = parentConnections.value.get(id)
+    if (parentId) {
+      prerequisites.push(parentId)
+      collectPrereqs(parentId)
+    }
+  }
+  
+  collectPrereqs(caretId)
+  return prerequisites
+}
+
+function enableCaret(caretId: string, fromUserClick: boolean = false) {
   const type = idType(caretId)
   const id = idID(caretId)
   
@@ -827,9 +846,27 @@ function enableCaret(caretId: string) {
       techtreePoints.value += techCost
     } else {
       // Draft mode: subtract points (with limit check)
-      // Prevent going negative - check if we have enough points
+      // If not enough points for this tech
       if (techtreePoints.value < techCost) {
-        // Not enough points to enable this caret
+        // If this is from a user click (not recursive), try to enable prerequisites instead
+        if (fromUserClick) {
+          const prerequisites = getAllPrerequisites(caretId)
+          
+          // Filter to unenabled prerequisites and sort by cost (descending - most expensive first)
+          const affordablePrereqs = prerequisites
+            .filter(prereqId => !isEnabled(prereqId))
+            .map(prereqId => ({ id: prereqId, cost: getCaretCost(prereqId) }))
+            .filter(prereq => prereq.cost <= techtreePoints.value)
+            .sort((a, b) => b.cost - a.cost)
+          
+          // Enable the most expensive affordable prerequisite
+          if (affordablePrereqs.length > 0) {
+            enableCaret(affordablePrereqs[0].id, true)
+            return
+          }
+        }
+        
+        // Not enough points to enable this caret and no affordable prerequisites
         return
       }
       
@@ -849,7 +886,7 @@ function enableCaret(caretId: string) {
   // Enable parent
   const parentId = parentConnections.value.get(caretId)
   if (parentId) {
-    enableCaret(parentId)
+    enableCaret(parentId, false)
   }
 }
 
@@ -895,10 +932,23 @@ function handleLinkedCarets(caretId: string, enable: boolean) {
   
   for (const [a, b] of linkedPairs) {
     if (caretId === a) {
-      enable ? enableCaret(b) : disableCaret(b)
+      enable ? enableCaret(b, false) : disableCaret(b)
     } else if (caretId === b) {
-      enable ? enableCaret(a) : disableCaret(a)
+      enable ? enableCaret(a, false) : disableCaret(a)
     }
+  }
+  
+  // Fortified wall group: tech_194 (fortified wall tech), building_155 (fortified wall), 
+  // building_117 (stone wall), building_487 (gate)
+  // When enabling fortified wall (tech or building), enable stone wall and gate
+  if (enable && (caretId === 'tech_194' || caretId === 'building_155')) {
+    enableCaret('building_117', false)
+    enableCaret('building_487', false)
+  }
+  // When disabling stone wall or gate, disable both fortified walls
+  if (!enable && (caretId === 'building_117' || caretId === 'building_487')) {
+    disableCaret('tech_194')
+    disableCaret('building_155')
   }
   
   // Special cases for trebuchet-related units
@@ -908,7 +958,7 @@ function handleLinkedCarets(caretId: string, enable: boolean) {
     disableCaret('unit_36')
   }
   if (enable && (caretId === 'unit_5' || caretId === 'unit_420' || caretId === 'unit_36')) {
-    enableCaret('tech_47')
+    enableCaret('tech_47', false)
   }
 }
 
@@ -941,7 +991,7 @@ function handleFill() {
     if (props.mode === 'build' || cost <= availablePoints) {
       // Check if not already enabled (could have been enabled as parent)
       if (!isEnabled(id)) {
-        enableCaret(id)
+        enableCaret(id, false)
         availablePoints = techtreePoints.value // Update from actual points
       }
     }
