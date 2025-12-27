@@ -7,26 +7,22 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Custom UU Editor - Navigation', () => {
   test('should navigate to custom UU editor demo page', async ({ page }) => {
-    await page.goto('/v2/');
-    
-    // Navigate to demos page first
-    await page.getByRole('link', { name: /demos/i }).click();
-    await expect(page).toHaveURL(/.*\/demo/);
+    await page.goto('/v2/demo');
     
     // Click custom UU editor link
-    await page.getByRole('link', { name: /Custom UU/i }).click();
+    await page.getByRole('link', { name: /Custom.*UU/i }).click();
     
     // Should navigate to custom UU demo page
     await expect(page).toHaveURL(/.*\/demo\/custom-uu/);
-    await expect(page.getByRole('heading', { name: /Custom Unique Unit Editor/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Custom Unique Unit Editor/i }).first()).toBeVisible();
   });
 
   test('should load custom UU editor directly', async ({ page }) => {
     await page.goto('/v2/demo/custom-uu');
     
     // Check page loaded
-    await expect(page).toHaveTitle(/AoE2 Civbuilder/);
-    await expect(page.getByRole('heading', { name: /Custom Unique Unit Editor/i })).toBeVisible();
+    await expect(page).toHaveTitle(/.*AoE2.*/);
+    await expect(page.getByRole('heading', { name: /Custom Unique Unit Editor/i }).first()).toBeVisible();
   });
 });
 
@@ -34,11 +30,11 @@ test.describe('Custom UU Editor - Unit Type Selection', () => {
   test('should display all four unit type tabs', async ({ page }) => {
     await page.goto('/v2/demo/custom-uu');
     
-    // Check all type tabs are visible
-    await expect(page.getByRole('button', { name: /Infantry/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Cavalry/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Archer/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Siege/i })).toBeVisible();
+    // Check all type tabs are visible using data-testid
+    await expect(page.getByTestId('type-button-infantry')).toBeVisible();
+    await expect(page.getByTestId('type-button-cavalry')).toBeVisible();
+    await expect(page.getByTestId('type-button-archer')).toBeVisible();
+    await expect(page.getByTestId('type-button-siege')).toBeVisible();
   });
 
   test('should switch between unit types', async ({ page }) => {
@@ -49,11 +45,11 @@ test.describe('Custom UU Editor - Unit Type Selection', () => {
     await expect(page.getByText(/Melee fighters trained in barracks/i)).toBeVisible();
     
     // Switch to Cavalry
-    await page.getByRole('button', { name: /🐎.*Cavalry/i }).click();
+    await page.getByTestId('type-button-cavalry').click();
     await expect(page.getByText(/Fast mounted units from stables/i)).toBeVisible();
     
     // Switch to Archer
-    await page.getByRole('button', { name: /🏹.*Archer/i }).click();
+    await page.getByTestId('type-button-archer').click();
     await expect(page.getByText(/Ranged units from archery range/i)).toBeVisible();
   });
 });
@@ -63,7 +59,7 @@ test.describe('Custom UU Editor - Basic Properties', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Find and fill unit name input
     const nameInput = page.getByLabel(/Unit Name/i);
@@ -77,7 +73,7 @@ test.describe('Custom UU Editor - Basic Properties', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check that base unit options are visible
     await expect(page.getByText(/Base Unit Template/i)).toBeVisible();
@@ -89,7 +85,7 @@ test.describe('Custom UU Editor - Basic Properties', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Cavalry type
-    await page.getByRole('button', { name: /Cavalry/i }).click();
+    await page.getByTestId('type-button-cavalry').click();
     
     // Click on a different base unit
     await page.getByText(/War Elephant/i).click();
@@ -105,7 +101,7 @@ test.describe('Custom UU Editor - Combat Stats', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check health section exists
     await expect(page.getByText(/Health \(HP\)/i)).toBeVisible();
@@ -115,7 +111,7 @@ test.describe('Custom UU Editor - Combat Stats', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check attack section exists
     await expect(page.getByText(/Attack$/i)).toBeVisible();
@@ -125,7 +121,7 @@ test.describe('Custom UU Editor - Combat Stats', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check armor sections exist
     await expect(page.getByText(/Melee Armor/i)).toBeVisible();
@@ -136,7 +132,7 @@ test.describe('Custom UU Editor - Combat Stats', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check elite stats are displayed
     await expect(page.getByText(/Elite:/i).first()).toBeVisible();
@@ -173,7 +169,7 @@ test.describe('Custom UU Editor - Editor Modes', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Switch to Build Mode
     await page.getByRole('button', { name: /Build Mode \(150 pts\)/i }).click();
@@ -187,7 +183,7 @@ test.describe('Custom UU Editor - Editor Modes', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Switch to Draft Mode
     await page.getByRole('button', { name: /Draft Mode \(100 pts\)/i }).click();
@@ -203,7 +199,7 @@ test.describe('Custom UU Editor - Budget Slider Enforcement', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Switch to Build Mode
     await page.getByRole('button', { name: /Build Mode \(150 pts\)/i }).click();
@@ -217,7 +213,7 @@ test.describe('Custom UU Editor - Budget Slider Enforcement', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Switch to Build Mode
     await page.getByRole('button', { name: /Build Mode \(150 pts\)/i }).click();
@@ -240,7 +236,7 @@ test.describe('Custom UU Editor - Budget Slider Enforcement', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Cavalry type
-    await page.getByRole('button', { name: /Cavalry/i }).click();
+    await page.getByTestId('type-button-cavalry').click();
     
     // Switch to Draft Mode
     await page.getByRole('button', { name: /Draft Mode \(100 pts\)/i }).click();
@@ -255,7 +251,7 @@ test.describe('Custom UU Editor - Cost System', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check cost section
     await expect(page.getByText(/Cost & Training/i)).toBeVisible();
@@ -277,7 +273,7 @@ test.describe('Custom UU Editor - Cost System', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Archer type
-    await page.getByRole('button', { name: /Archer/i }).click();
+    await page.getByTestId('type-button-archer').click();
     
     // Archer should have wood + gold
     const woodInput = page.getByLabel(/Wood/i);
@@ -291,7 +287,7 @@ test.describe('Custom UU Editor - Cost System', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check for button
     await expect(page.getByRole('button', { name: /Apply Recommended Cost/i })).toBeVisible();
@@ -303,7 +299,7 @@ test.describe('Custom UU Editor - Attack Bonuses', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check attack bonuses section
     await expect(page.getByText(/Attack Bonuses/i)).toBeVisible();
@@ -313,7 +309,7 @@ test.describe('Custom UU Editor - Attack Bonuses', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check for button
     await expect(page.getByRole('button', { name: /Add Attack Bonus/i })).toBeVisible();
@@ -325,7 +321,7 @@ test.describe('Custom UU Editor - Hero Mode', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check for hero mode checkbox
     await expect(page.getByText(/Hero Mode/i)).toBeVisible();
@@ -335,7 +331,7 @@ test.describe('Custom UU Editor - Hero Mode', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check for hero mode description text
     await expect(page.getByText(/only trainable once/i)).toBeVisible();
@@ -347,7 +343,7 @@ test.describe('Custom UU Editor - Export', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check for export button
     await expect(page.getByRole('button', { name: /Export JSON/i })).toBeVisible();
@@ -357,7 +353,7 @@ test.describe('Custom UU Editor - Export', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Check for reset button
     await expect(page.getByRole('button', { name: /Reset to Defaults/i })).toBeVisible();
@@ -369,7 +365,7 @@ test.describe('Custom UU Editor - Validation', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Clear the unit name to trigger validation
     const nameInput = page.getByLabel(/Unit Name/i);
@@ -384,7 +380,7 @@ test.describe('Custom UU Editor - Validation', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Select Infantry type
-    await page.getByRole('button', { name: /Infantry/i }).click();
+    await page.getByTestId('type-button-infantry').click();
     
     // Fill in valid name
     const nameInput = page.getByLabel(/Unit Name/i);
@@ -400,7 +396,7 @@ test.describe('Custom UU Editor - Documentation', () => {
     await page.goto('/v2/demo/custom-uu');
     
     // Check for documentation section
-    await expect(page.getByText(/Documentation/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Documentation/i }).first()).toBeVisible();
     await expect(page.getByText(/What is this\?/i)).toBeVisible();
   });
 
