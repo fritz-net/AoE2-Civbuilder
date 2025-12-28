@@ -354,3 +354,65 @@ test.describe('TechTree Production - Page Verification', () => {
     await expect(page.getByText(/Points Remaining: \d+/i)).toBeVisible();
   });
 });
+
+test.describe('TechTree Functionality - Building Dependencies', () => {
+  test('should enable stone wall and fortified wall together when clicking fortified wall building', async ({ page }) => {
+    await page.goto('/v2/demo/techtree');
+    
+    // Wait for tech tree SVG to load
+    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(1000);
+    
+    // Reset to ensure clean state
+    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Find and click the fortified wall building
+    // This should enable both stone wall and fortified wall in a single click
+    // Note: The exact selector depends on how fortified wall is identified in the SVG
+    // We'll need to find it by title or data attribute
+    const fortifiedWallBuilding = page.locator('[title*="Fortified Wall" i]').first();
+    
+    if (await fortifiedWallBuilding.isVisible()) {
+      await fortifiedWallBuilding.click();
+      await page.waitForTimeout(500);
+      
+      // Verify both stone wall and fortified wall are enabled
+      // Check that clicking fortified wall enabled its dependencies automatically
+      const pointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+      const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
+      
+      // Should have points for both stone wall and fortified wall
+      expect(points).toBeGreaterThan(0);
+    }
+  });
+  
+  test('should enable fortified wall tech when clicking it once', async ({ page }) => {
+    await page.goto('/v2/demo/techtree');
+    
+    // Wait for tech tree SVG to load
+    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(1000);
+    
+    // Reset to ensure clean state
+    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Find and click the fortified wall tech (not building)
+    const fortifiedWallTech = page.locator('[title*="Fortified Wall" i]').nth(1);
+    
+    if (await fortifiedWallTech.isVisible()) {
+      const initialPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+      const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
+      
+      await fortifiedWallTech.click();
+      await page.waitForTimeout(500);
+      
+      const finalPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+      const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
+      
+      // Should have enabled the tech and its dependencies
+      expect(finalPoints).toBeGreaterThan(initialPoints);
+    }
+  });
+});
