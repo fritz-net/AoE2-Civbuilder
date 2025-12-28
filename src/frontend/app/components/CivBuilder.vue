@@ -74,12 +74,12 @@
     <div v-show="currentStep === 1" class="step-content">
       <BonusSelectorGrid
         title="Civilization Bonuses"
-        subtitle="Select up to 6 bonuses, each can be multiplied up to 255 times"
+        :subtitle="civBonusSubtitle"
         bonus-type="civ"
         :bonuses="civBonuses"
         v-model="selectedCivBonuses"
         mode="multi"
-        :max-unique-selections="bonusMaxSelections.civ.maxUniqueSelections"
+        :max-unique-selections="civBonusMaxUniqueSelections"
         :max-total-selections="bonusMaxSelections.civ.maxTotalSelections"
         :disabled="readOnly"
         :allow-multiplier="true"
@@ -297,10 +297,12 @@ const props = withDefaults(defineProps<{
   nextButtonText?: string
   readOnly?: boolean
   isLoading?: boolean
+  disableCivBonusLimit?: boolean
 }>(), {
   nextButtonText: 'Create Civilization',
   readOnly: false,
-  isLoading: false
+  isLoading: false,
+  disableCivBonusLimit: false
 })
 
 const emit = defineEmits<{
@@ -459,6 +461,21 @@ const showPasturesInTechtree = computed(() => {
     const bonusId = Array.isArray(entry) ? entry[0] : entry
     return bonusId === PASTURES_BONUS_ID
   })
+})
+
+// Computed properties for civ bonus limit enforcement
+const civBonusMaxUniqueSelections = computed(() => {
+  // If disableCivBonusLimit prop is true, return undefined (no limit)
+  // Otherwise, return the default limit of 6
+  return props.disableCivBonusLimit ? undefined : bonusMaxSelections.civ.maxUniqueSelections
+})
+
+const civBonusSubtitle = computed(() => {
+  // If disableCivBonusLimit prop is true, show unlimited message
+  // Otherwise, show the default limited message
+  return props.disableCivBonusLimit 
+    ? 'Select any number of bonuses, each can be multiplied up to 255 times'
+    : `Select up to ${bonusMaxSelections.civ.maxUniqueSelections} bonuses, each can be multiplied up to 255 times`
 })
 
 const canProceed = computed(() => {

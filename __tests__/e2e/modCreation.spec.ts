@@ -115,20 +115,8 @@ test.describe('Combine Page - Multi-Civ Mod Creation', () => {
     const createButton = page.getByRole('button', { name: /Create Combined Mod/i });
     await createButton.click();
     
-    // Wait a bit for response
-    await page.waitForTimeout(2000);
-    
-    // Check if error message appeared (C++ backend not available)
-    const errorMessage = page.getByText(/Mod creation failed/i);
-    const isErrorVisible = await errorMessage.isVisible().catch(() => false);
-    
-    if (isErrorVisible) {
-      // This is expected when C++ binary is not available
-      console.log('C++ backend not available - showing error as expected');
-      return;
-    }
-    
-    // Otherwise, wait for navigation to success page
+    // Wait for navigation to success page
+    // C++ backend must be running for this test to pass
     await page.waitForURL('**/v2/download-success*', { timeout: 15000 });
     
     // Verify we're on the success page
@@ -492,14 +480,14 @@ test.describe('Build Page - Pasture Bonus Detection', () => {
     // Click on the bonus card to select it
     await bonusCard.click();
     
-    // Verify bonus is selected (counter shows 1)
-    await expect(page.getByText(/1\/6 unique/i)).toBeVisible();
+    // Verify bonus is selected (counter shows 1/1530 selected - no unique limit on build page)
+    await expect(page.getByText(/1\/1530 selected/i)).toBeVisible();
     
     // Click the bonus again to deselect it
     await bonusCard.click();
     
-    // Verify bonus is deselected (counter shows 0)
-    await expect(page.getByText(/0\/6 unique/i)).toBeVisible();
+    // Verify bonus is deselected (counter shows 0/1530 selected)
+    await expect(page.getByText(/0\/1530 selected/i)).toBeVisible();
     
     // Navigate to Tech Tree step by clicking through remaining steps
     // Use explicit waits for each step header
