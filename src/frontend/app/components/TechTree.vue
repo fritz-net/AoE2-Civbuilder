@@ -846,33 +846,23 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
   if (!localtree.value[type].includes(id)) {
     const techCost = getCaretCost(caretId)
     
+    // Special handling for fortified walls: enable stone wall and gate FIRST
+    // This must happen before the tech is added to ensure prerequisites are satisfied
+    if (caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID) {
+      if (!isEnabled(STONE_WALL_ID)) {
+        enableCaret(STONE_WALL_ID, false)
+      }
+      if (!isEnabled(GATE_ID)) {
+        enableCaret(GATE_ID, false)
+      }
+    }
+    
     if (props.mode === 'build') {
       // Build mode: add points (no limit)
-      
-      // Special handling for fortified walls: enable stone wall and gate FIRST
-      if (caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID) {
-        if (!isEnabled(STONE_WALL_ID)) {
-          enableCaret(STONE_WALL_ID, false)
-        }
-        if (!isEnabled(GATE_ID)) {
-          enableCaret(GATE_ID, false)
-        }
-      }
-      
       localtree.value[type].push(id)
       techtreePoints.value += techCost
     } else {
       // Draft mode: subtract points (with limit check)
-      
-      // Special handling for fortified walls: enable stone wall and gate FIRST
-      if (caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID) {
-        if (!isEnabled(STONE_WALL_ID)) {
-          enableCaret(STONE_WALL_ID, false)
-        }
-        if (!isEnabled(GATE_ID)) {
-          enableCaret(GATE_ID, false)
-        }
-      }
       
       // If this is from a user click, enable ALL affordable prerequisites first
       if (fromUserClick) {
