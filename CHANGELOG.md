@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.9.0...v1.10.0) (2025-12-28)
+
+
+### Features
+
+* add custom unique unit design editor with ruleset and API ([#177](https://github.com/fritz-net/AoE2-Civbuilder/issues/177)) ([a003938](https://github.com/fritz-net/AoE2-Civbuilder/commit/a0039381936173635c223653eee155d73a8a4754))
+
+
+### Bug Fixes
+
+* disable 6-bonus limit enforcement for civ bonus selection on /build page ([#182](https://github.com/fritz-net/AoE2-Civbuilder/issues/182)) ([53c75c7](https://github.com/fritz-net/AoE2-Civbuilder/commit/53c75c7434c3462415c7edfdf0091fd97d3ddb53))
+* JSON.parse crash on undefined request body fields ([#188](https://github.com/fritz-net/AoE2-Civbuilder/issues/188)) ([dc16ba0](https://github.com/fritz-net/AoE2-Civbuilder/commit/dc16ba09103b8718cccb093e382ee76693949c73))
+* server crash on invalid draft access ([#178](https://github.com/fritz-net/AoE2-Civbuilder/issues/178)) ([bd1935e](https://github.com/fritz-net/AoE2-Civbuilder/commit/bd1935e33e03a1775e1518b4fbcb18c58ee69041))
+* server crash on missing flag_palette ([#180](https://github.com/fritz-net/AoE2-Civbuilder/issues/180)) ([d42e14e](https://github.com/fritz-net/AoE2-Civbuilder/commit/d42e14ec24675388a046b5b728e75b99c8ff2027))
+
 ## [1.9.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.8.0...v1.9.0) (2025-12-26)
 
 
