@@ -1632,7 +1632,7 @@ function draftIO(io) {
 			// This allows spectators and other players to see real-time updates
 			io.in(roomID).emit("set gamestate", draft);
 		});
-		socket.on("end turn", (roomID, pick, client_turn) {
+		socket.on("end turn", (roomID, pick, client_turn) => {
 			let draft = getDraft(roomID);
 			
 			// Check if draft exists
