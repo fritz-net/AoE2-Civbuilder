@@ -850,23 +850,17 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
   if (!localtree.value[type].includes(id)) {
     const techCost = getCaretCost(caretId)
     
-    // Special handling for fortified walls: enable stone wall and gate FIRST
-    // This must happen before the tech is added to ensure prerequisites are satisfied
+    // Special handling for techs/buildings with non-parent prerequisites
+    // These need to be enabled BEFORE the main prerequisite logic runs
     const isFortifiedWall = caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID
-    if (isFortifiedWall) {
-      if (!isEnabled(STONE_WALL_ID)) {
-        enableCaret(STONE_WALL_ID, false)
-      }
-      if (!isEnabled(GATE_ID)) {
-        enableCaret(GATE_ID, false)
-      }
+    if (isFortifiedWall && !isEnabled(STONE_WALL_ID)) {
+      enableCaret(STONE_WALL_ID, false)
     }
-    
-    // Special handling for bombard tower building: enable chemistry FIRST
-    if (caretId === BOMBARD_TOWER_BUILDING_ID) {
-      if (!isEnabled(CHEMISTRY_ID)) {
-        enableCaret(CHEMISTRY_ID, false)
-      }
+    if (isFortifiedWall && !isEnabled(GATE_ID)) {
+      enableCaret(GATE_ID, false)
+    }
+    if (caretId === BOMBARD_TOWER_BUILDING_ID && !isEnabled(CHEMISTRY_ID)) {
+      enableCaret(CHEMISTRY_ID, false)
     }
     
     if (props.mode === 'build') {
