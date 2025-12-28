@@ -848,7 +848,8 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
     
     // Special handling for fortified walls: enable stone wall and gate FIRST
     // This must happen before the tech is added to ensure prerequisites are satisfied
-    if (caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID) {
+    const isFortifiedWall = caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID
+    if (isFortifiedWall) {
       if (!isEnabled(STONE_WALL_ID)) {
         enableCaret(STONE_WALL_ID, false)
       }
@@ -865,7 +866,8 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
       // Draft mode: subtract points (with limit check)
       
       // If this is from a user click, enable ALL affordable prerequisites first
-      if (fromUserClick) {
+      // BUT skip this logic for fortified walls since we handle them specially above
+      if (fromUserClick && !isFortifiedWall) {
         const prerequisites = getAllPrerequisites(caretId)
         
         // Check if any prerequisites are not enabled

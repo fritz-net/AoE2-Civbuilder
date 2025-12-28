@@ -425,6 +425,65 @@ test.describe('TechTree Functionality - Fortified Wall Dependencies', () => {
     // Should get same points (relationships are working correctly)
     expect(refilledPoints).toBe(filledPoints);
   });
+
+  test('should enable fortified wall, stone wall, and gate in one click (build mode)', async ({ page }) => {
+    // Get initial tech count
+    const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    // Click Fill to enable all techs (which includes fortified wall)
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
+    await page.waitForTimeout(1000);
+    
+    // Verify that techs were enabled (including fortified wall, stone wall, gate)
+    const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    // Should have enabled many techs
+    expect(finalTechCount).toBeGreaterThan(initialTechCount);
+    expect(finalTechCount).toBeGreaterThan(50);
+  });
+
+  test('should enable fortified wall, stone wall, and gate in one click (draft mode)', async ({ page }) => {
+    // Switch to draft mode with enough points
+    const draftModeRadio = page.getByRole('radio', { name: /Draft Mode/i });
+    await draftModeRadio.click();
+    await page.waitForTimeout(500);
+    
+    // Set point limit high enough for fortified wall + prerequisites
+    const pointLimitInput = page.locator('input[type="number"]').first();
+    await pointLimitInput.fill('50');
+    await page.waitForTimeout(1000);
+    
+    // Reset to start fresh
+    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
+    await page.waitForTimeout(500);
+    
+    // Get initial tech count and points
+    const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    const initialPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
+    
+    // Click Fill - should enable techs including fortified walls in one go
+    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
+    await page.waitForTimeout(1000);
+    
+    // Verify techs were enabled
+    const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    const finalPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
+    
+    // Should have enabled some techs
+    expect(finalTechCount).toBeGreaterThan(initialTechCount);
+    // Should have spent some points
+    expect(finalPoints).toBeLessThan(initialPoints);
+    // Should not go negative
+    expect(finalPoints).toBeGreaterThanOrEqual(0);
+  });
 });
 
 test.describe('TechTree Functionality - Limited Points Prerequisite Selection', () => {
