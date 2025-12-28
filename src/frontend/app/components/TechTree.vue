@@ -304,6 +304,10 @@ const FORTIFIED_WALL_BUILDING_ID = 'building_155'
 const STONE_WALL_ID = 'building_117'
 const GATE_ID = 'building_487'
 
+// Constants for other tech/building dependencies
+const BOMBARD_TOWER_BUILDING_ID = 'building_236'
+const CHEMISTRY_ID = 'tech_47'
+
 // Refs
 const techtreeRef = ref<HTMLDivElement | null>(null)
 const svgRef = ref<SVGSVGElement | null>(null)
@@ -858,6 +862,13 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
       }
     }
     
+    // Special handling for bombard tower building: enable chemistry FIRST
+    if (caretId === BOMBARD_TOWER_BUILDING_ID) {
+      if (!isEnabled(CHEMISTRY_ID)) {
+        enableCaret(CHEMISTRY_ID, false)
+      }
+    }
+    
     if (props.mode === 'build') {
       // Build mode: add points (no limit)
       localtree.value[type].push(id)
@@ -866,8 +877,7 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
       // Draft mode: subtract points (with limit check)
       
       // If this is from a user click, enable ALL affordable prerequisites first
-      // BUT skip this logic for fortified walls since we handle them specially above
-      if (fromUserClick && !isFortifiedWall) {
+      if (fromUserClick) {
         const prerequisites = getAllPrerequisites(caretId)
         
         // Check if any prerequisites are not enabled
@@ -884,18 +894,18 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
             .sort((a, b) => a.cost - b.cost) // Sort by cost ascending - enable cheapest first
           
           // Enable ALL affordable prerequisites (not just one)
-          if (affordablePrereqs.length > 0) {
-            for (const prereq of affordablePrereqs) {
-              // Check if we still have enough points after enabling previous prerequisites
-              if (techtreePoints.value >= prereq.cost && !isEnabled(prereq.id)) {
-                enableCaret(prereq.id, false) // Pass false to avoid recursion
-              }
+          for (const prereq of affordablePrereqs) {
+            // Check if we still have enough points after enabling previous prerequisites
+            if (techtreePoints.value >= prereq.cost && !isEnabled(prereq.id)) {
+              enableCaret(prereq.id, false) // Pass false to avoid recursion
             }
-            return
           }
           
-          // If no affordable prerequisites, don't enable anything
-          return
+          // After enabling prerequisites, check if we can still afford the clicked tech
+          // If not, don't enable it (return early)
+          if (techtreePoints.value < techCost) {
+            return
+          }
         }
       }
       
