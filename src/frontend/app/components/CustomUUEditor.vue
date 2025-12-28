@@ -485,11 +485,18 @@ import BudgetSlider from './BudgetSlider.vue';
 
 interface Props {
   showModeSelector?: boolean;
+  initialMode?: 'demo' | 'build' | 'draft';
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  showModeSelector: false
+  showModeSelector: false,
+  initialMode: 'demo'
 });
+
+const emit = defineEmits<{
+  (e: 'update', unit: CustomUUData): void;
+  (e: 'save', unit: CustomUUData): void;
+}>();
 
 const {
   customUnit,
@@ -508,7 +515,10 @@ const {
   setMode,
   getMaxStatValue,
   ARMOR_CLASS_NAMES
-} = useCustomUU();
+} = useCustomUU(props.initialMode);
+
+// Set initial mode
+setMode(props.initialMode);
 
 const validationErrors = ref<any[]>([]);
 const compactMode = ref(false);
@@ -568,6 +578,8 @@ const resetToDefaults = () => {
 const onUnitChange = () => {
   if (customUnit.value) {
     validationErrors.value = validateUnit(customUnit.value);
+    // Emit update event
+    emit('update', customUnit.value);
   }
 };
 
