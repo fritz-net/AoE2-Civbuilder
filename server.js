@@ -659,11 +659,53 @@ function extractBonusId(bonus, context) {
 	return bonus; // Return the number directly
 }
 
+/**
+ * Safely parse JSON from request body
+ * @param {string} fieldName - Name of the field being parsed (for error messages)
+ * @param {string} jsonString - The JSON string to parse
+ * @param {*} defaultValue - Default value to return if parsing fails
+ * @returns {*} Parsed JSON or default value
+ */
+function safeJsonParse(fieldName, jsonString, defaultValue = null) {
+	if (jsonString === undefined || jsonString === null || jsonString === 'undefined') {
+		console.error(`Invalid input: ${fieldName} is ${jsonString}`);
+		return defaultValue;
+	}
+	
+	try {
+		return JSON.parse(jsonString);
+	} catch (error) {
+		console.error(`Failed to parse ${fieldName}: ${error.message}`);
+		return defaultValue;
+	}
+}
+
 const writeIconsJson = async (req, res, next) => {
 	console.log(`[${req.body.seed}]: Writing icons and json...`);
-	console.log(JSON.parse(req.body.modifiers));
+	
+	// Validate required fields
+	if (!req.body.modifiers || req.body.modifiers === 'undefined') {
+		console.error(`[${req.body.seed}]: Missing or invalid modifiers field`);
+		return res.status(400).json({ error: 'Missing or invalid modifiers field' });
+	}
+	
+	if (!req.body.presets || req.body.presets === 'undefined') {
+		console.error(`[${req.body.seed}]: Missing or invalid presets field`);
+		return res.status(400).json({ error: 'Missing or invalid presets field' });
+	}
+	
+	// Parse and validate modifiers
+	const modifiers = safeJsonParse('modifiers', req.body.modifiers);
+	if (!modifiers) {
+		return res.status(400).json({ error: 'Invalid modifiers JSON' });
+	}
+	console.log(modifiers);
+	
 	//Parse multiple Json civ presets
-	var raw_presets = JSON.parse(req.body.presets);
+	var raw_presets = safeJsonParse('presets', req.body.presets);
+	if (!raw_presets || !raw_presets["presets"]) {
+		return res.status(400).json({ error: 'Invalid presets JSON or missing presets array' });
+	}
 	var civs = raw_presets["presets"];
 	//Create Civ Icons
 	var blankOthers = false;
@@ -839,7 +881,7 @@ const writeIconsJson = async (req, res, next) => {
 		mod_data.language = [];
 		mod_data.wonder = [];
 		mod_data.castle = [];
-		mod_data.modifiers = JSON.parse(req.body.modifiers);
+		mod_data.modifiers = modifiers;
 		mod_data.modifyDat = true;
 		for (var i = 0; i < civs.length; i++) {
 			// Name
