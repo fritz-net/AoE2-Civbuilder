@@ -393,14 +393,23 @@
           <label for="train-time">
             <span class="stat-icon">⏱️</span> Train Time (seconds)
           </label>
-          <input 
-            id="train-time"
-            v-model.number="customUnit.trainTime" 
-            type="number" 
-            min="6"
-            max="90"
-            @input="onUnitChange"
-          />
+          <div class="stat-with-slider">
+            <input 
+              id="train-time"
+              v-model.number="customUnit.trainTime" 
+              type="number" 
+              min="6"
+              max="90"
+              @input="onUnitChange"
+            />
+            <BudgetSlider
+              v-model="customUnit.trainTime"
+              :min="6"
+              :max="90"
+              :budget-limit="null"
+              @change="onUnitChange"
+            />
+          </div>
         </div>
 
         <div class="form-group">
@@ -596,6 +605,12 @@ const resetToDefaults = () => {
 const onUnitChange = () => {
   if (customUnit.value) {
     validationErrors.value = validateUnit(customUnit.value);
+    
+    // Auto-apply recommended cost in draft + compact mode
+    if (editorMode.value === 'draft' && compactMode.value) {
+      customUnit.value.cost = { ...recommendedCost.value };
+    }
+    
     // Emit update event
     emit('update', customUnit.value);
   }
@@ -1283,8 +1298,37 @@ watch(() => customUnit.value, (newVal) => {
   gap: 0.25rem;
 }
 
+/* In compact mode, hide label text for stats (keep only icons) */
+.compact-mode .form-group label:not(.checkbox-label) {
+  font-size: 0;
+}
+
+.compact-mode .form-group label .stat-icon,
+.compact-mode .form-group label .resource-icon {
+  font-size: 1.2rem;
+}
+
+/* In compact mode, arrange stat-with-elite in a single line */
+.compact-mode .stat-with-elite {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Also apply to stat-with-slider */
+.compact-mode .stat-with-slider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 /* In compact mode, only hide number inputs that have sliders (stat-with-elite sections) */
 .compact-mode .stat-with-elite input[type="number"] {
+  display: none;
+}
+
+/* Hide train time input in compact mode too */
+.compact-mode .stat-with-slider input[type="number"] {
   display: none;
 }
 
@@ -1306,10 +1350,16 @@ watch(() => customUnit.value, (newVal) => {
 
 .compact-mode .elite-value {
   font-size: 0.75rem;
+  white-space: nowrap;
 }
 
 .compact-mode .form-section {
   margin-bottom: 1rem;
   padding: 0.75rem;
+}
+
+/* In compact mode + draft mode, hide apply cost button (auto-calculated) */
+.compact-mode .cost-info button {
+  display: none;
 }
 </style>
