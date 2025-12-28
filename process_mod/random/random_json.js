@@ -17,6 +17,7 @@ const DEFAULT_MODIFIERS = {
 
 module.exports = {
 	createJson,
+	DEFAULT_MODIFIERS,
 };
 
 function createJson(output_path, randomCivs, modifiers) {

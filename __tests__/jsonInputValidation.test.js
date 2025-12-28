@@ -7,7 +7,7 @@
 
 describe('JSON Input Validation', () => {
   describe('random_json.js createJson function', () => {
-    const { createJson } = require('../process_mod/random/random_json.js');
+    const { createJson, DEFAULT_MODIFIERS } = require('../process_mod/random/random_json.js');
     const fs = require('fs');
     const os = require('os');
     const path = require('path');
@@ -38,14 +38,7 @@ describe('JSON Input Validation', () => {
       expect(fs.existsSync(outputPath)).toBe(true);
       const data = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
       expect(data.modifiers).toBeDefined();
-      expect(data.modifiers).toEqual({
-        randomCosts: false,
-        hp: 1.0,
-        speed: 1.0,
-        blind: false,
-        infinity: false,
-        building: 1.0
-      });
+      expect(data.modifiers).toEqual(DEFAULT_MODIFIERS);
     });
     
     it('should handle string "undefined" modifiers gracefully', () => {
@@ -62,14 +55,7 @@ describe('JSON Input Validation', () => {
       expect(fs.existsSync(outputPath)).toBe(true);
       const data = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
       expect(data.modifiers).toBeDefined();
-      expect(data.modifiers).toEqual({
-        randomCosts: false,
-        hp: 1.0,
-        speed: 1.0,
-        blind: false,
-        infinity: false,
-        building: 1.0
-      });
+      expect(data.modifiers).toEqual(DEFAULT_MODIFIERS);
     });
     
     it('should handle null modifiers gracefully', () => {
@@ -86,14 +72,7 @@ describe('JSON Input Validation', () => {
       expect(fs.existsSync(outputPath)).toBe(true);
       const data = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
       expect(data.modifiers).toBeDefined();
-      expect(data.modifiers).toEqual({
-        randomCosts: false,
-        hp: 1.0,
-        speed: 1.0,
-        blind: false,
-        infinity: false,
-        building: 1.0
-      });
+      expect(data.modifiers).toEqual(DEFAULT_MODIFIERS);
     });
     
     it('should handle invalid JSON string modifiers gracefully', () => {
@@ -110,14 +89,7 @@ describe('JSON Input Validation', () => {
       expect(fs.existsSync(outputPath)).toBe(true);
       const data = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
       expect(data.modifiers).toBeDefined();
-      expect(data.modifiers).toEqual({
-        randomCosts: false,
-        hp: 1.0,
-        speed: 1.0,
-        blind: false,
-        infinity: false,
-        building: 1.0
-      });
+      expect(data.modifiers).toEqual(DEFAULT_MODIFIERS);
     });
     
     it('should accept valid modifiers JSON string', () => {
