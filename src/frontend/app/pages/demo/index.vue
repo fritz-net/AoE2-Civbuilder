@@ -21,6 +21,12 @@
         <h2>Custom UU Editor</h2>
         <p>Design custom unique units with customizable stats, abilities, and balancing</p>
       </NuxtLink>
+      
+      <NuxtLink to="/demo/validation-rules" class="demo-card">
+        <div class="demo-card-icon">📋</div>
+        <h2>Validation Rules Dashboard</h2>
+        <p>Complete ruleset for custom UU validation including constraints, examples, and balancing</p>
+      </NuxtLink>
     </div>
   </div>
 </template>

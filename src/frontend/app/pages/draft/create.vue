@@ -82,6 +82,21 @@
           </div>
         </div>
 
+        <div class="form-section custom-uu-mode-section">
+          <label class="form-label">
+            <input
+              v-model="draftSettings.customUUMode"
+              type="checkbox"
+              id="customUUMode"
+              class="timer-checkbox"
+            />
+            Enable Custom UU Designer Mode
+          </label>
+          <div class="timer-help-text">
+            When enabled, players design their own custom unique units during the draft instead of selecting from existing ones. Each player creates their own custom UU with a 100 point budget.
+          </div>
+        </div>
+
         <div class="form-section timer-section">
           <label class="form-label">
             <input
@@ -268,6 +283,7 @@ const draftSettings = ref({
   allowedRarities: [true, true, true, true, true],
   allowBaseEditionUU: true, // Base Edition (Vanilla Civs) unique units
   allowFirstEditionUU: true, // First Edition (Custom Civs) unique units
+  customUUMode: false, // Enable custom UU designer mode
   timerEnabled: false,
   timerDuration: 60,
   blindPicks: false,
@@ -303,6 +319,7 @@ const createDraft = async () => {
         allowed_rarities: draftSettings.value.allowedRarities.join(','),
         allow_base_edition_uu: draftSettings.value.allowBaseEditionUU.toString(),
         allow_first_edition_uu: draftSettings.value.allowFirstEditionUU.toString(),
+        custom_uu_mode: draftSettings.value.customUUMode.toString(),
         timer_enabled: draftSettings.value.timerEnabled.toString(),
         timer_duration: draftSettings.value.timerDuration.toString(),
         blind_picks: draftSettings.value.blindPicks.toString(),
@@ -798,6 +815,13 @@ details[open] .collapsible-summary::after {
   width: 20px;
   height: 20px;
   cursor: pointer;
+}
+
+.custom-uu-mode-section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
 }
 
 .form-help {
