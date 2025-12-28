@@ -46,7 +46,34 @@ function createJson(output_path, randomCivs, modifiers) {
 	random_data.castle = [];
 
 	//0 = don't give random costs, 1 = do give random costs
-	random_data.modifiers = JSON.parse(modifiers);
+	// Safely parse modifiers with validation
+	let parsedModifiers;
+	if (modifiers === undefined || modifiers === null || modifiers === 'undefined' || modifiers === 'null') {
+		console.error('Invalid modifiers provided, using defaults');
+		parsedModifiers = {
+			randomCosts: false,
+			hp: 1.0,
+			speed: 1.0,
+			blind: false,
+			infinity: false,
+			building: 1.0
+		};
+	} else {
+		try {
+			parsedModifiers = JSON.parse(modifiers);
+		} catch (error) {
+			console.error('Failed to parse modifiers, using defaults:', error.message);
+			parsedModifiers = {
+				randomCosts: false,
+				hp: 1.0,
+				speed: 1.0,
+				blind: false,
+				infinity: false,
+				building: 1.0
+			};
+		}
+	}
+	random_data.modifiers = parsedModifiers;
 	random_data.modifyDat = randomCivs == "true";
 
 	random_data.name = names.generateNames(numCivs).sort();
