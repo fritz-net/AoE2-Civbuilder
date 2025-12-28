@@ -5,6 +5,16 @@ const { numBonuses, numCivs, numWonders, numCastles } = require("../constants.js
 
 //const writeFile = (filename, content) => {fs.writeFile(filename, content, () => {})}
 
+// Default modifiers when none are provided or parsing fails
+const DEFAULT_MODIFIERS = {
+	randomCosts: false,
+	hp: 1.0,
+	speed: 1.0,
+	blind: false,
+	infinity: false,
+	building: 1.0
+};
+
 module.exports = {
 	createJson,
 };
@@ -48,29 +58,15 @@ function createJson(output_path, randomCivs, modifiers) {
 	//0 = don't give random costs, 1 = do give random costs
 	// Safely parse modifiers with validation
 	let parsedModifiers;
-	if (modifiers === undefined || modifiers === null || modifiers === 'undefined' || modifiers === 'null') {
+	if (modifiers === undefined || modifiers === null || modifiers === 'undefined') {
 		console.error('Invalid modifiers provided, using defaults');
-		parsedModifiers = {
-			randomCosts: false,
-			hp: 1.0,
-			speed: 1.0,
-			blind: false,
-			infinity: false,
-			building: 1.0
-		};
+		parsedModifiers = DEFAULT_MODIFIERS;
 	} else {
 		try {
 			parsedModifiers = JSON.parse(modifiers);
 		} catch (error) {
 			console.error('Failed to parse modifiers, using defaults:', error.message);
-			parsedModifiers = {
-				randomCosts: false,
-				hp: 1.0,
-				speed: 1.0,
-				blind: false,
-				infinity: false,
-				building: 1.0
-			};
+			parsedModifiers = DEFAULT_MODIFIERS;
 		}
 	}
 	random_data.modifiers = parsedModifiers;

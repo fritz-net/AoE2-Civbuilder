@@ -5,8 +5,6 @@
  * JSON fields in POST requests, preventing crashes from JSON.parse errors.
  */
 
-const { safeJsonParse } = require('../process_mod/random/random_json.js');
-
 describe('JSON Input Validation', () => {
   describe('random_json.js createJson function', () => {
     const { createJson } = require('../process_mod/random/random_json.js');

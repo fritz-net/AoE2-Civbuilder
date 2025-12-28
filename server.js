@@ -667,7 +667,7 @@ function extractBonusId(bonus, context) {
  * @returns {*} Parsed JSON or default value
  */
 function safeJsonParse(fieldName, jsonString, defaultValue = null) {
-	if (jsonString === undefined || jsonString === null || jsonString === 'undefined' || jsonString === 'null') {
+	if (jsonString === undefined || jsonString === null || jsonString === 'undefined') {
 		console.error(`Invalid input: ${fieldName} is ${jsonString}`);
 		return defaultValue;
 	}
