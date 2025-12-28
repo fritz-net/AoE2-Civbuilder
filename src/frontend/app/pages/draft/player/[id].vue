@@ -190,7 +190,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDraft } from '~/composables/useDraft'
 import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
@@ -244,6 +244,7 @@ const {
   updateReady,
   startDraft,
   updateTree,
+  updateTreeProgress,
   updateCivInfo,
   selectCard,
   refillCards,
@@ -607,6 +608,16 @@ const getCookie = (name: string): string | null => {
   }
   return null
 }
+
+// Watch for tech tree changes and emit intermediate updates to server
+// This allows spectators and other players to see real-time updates as techs are selected
+watch(() => civConfig.value.tree, (newTree) => {
+  // Only send intermediate updates when in phase 3 (tech tree selection)
+  // and when the player hasn't marked themselves as ready yet
+  if (currentPhase.value === 3 && currentPlayer.value && currentPlayer.value.ready === 0) {
+    updateTreeProgress(playerNumber.value, newTree as number[][])
+  }
+}, { deep: true })
 
 onMounted(async () => {
   // Check if already joined (has playerNumber cookie for this draft)
