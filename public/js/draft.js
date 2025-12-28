@@ -983,6 +983,10 @@ function updateTree(playerNumber, tree, techtree_points) {
 	socket.emit("update tree", roomID, playerNumber, tree);
 }
 
+function updateTreeProgress(playerNumber, tree) {
+	socket.emit("update tree progress", roomID, playerNumber, tree);
+}
+
 function updateCivInfo(playerNumber) {
 	socket.emit("update civ info", roomID, playerNumber, client_alias, client_palette, client_architecture, client_language);
 }
