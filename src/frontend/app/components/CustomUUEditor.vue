@@ -140,7 +140,9 @@
         
         <div class="stats-grid">
           <div class="form-group">
-            <label for="health">Health (HP)</label>
+            <label for="health">
+              <span class="stat-icon">❤️</span> Health (HP)
+            </label>
             <div class="stat-with-elite">
               <input 
                 id="health"
@@ -164,7 +166,9 @@
           </div>
 
           <div class="form-group">
-            <label for="attack">Attack</label>
+            <label for="attack">
+              <span class="stat-icon">⚔️</span> Attack
+            </label>
             <div class="stat-with-elite">
               <input 
                 id="attack"
@@ -188,7 +192,9 @@
           </div>
 
           <div class="form-group">
-            <label for="melee-armor">Melee Armor</label>
+            <label for="melee-armor">
+              <span class="stat-icon">🛡️</span> Melee Armor
+            </label>
             <div class="stat-with-elite">
               <input 
                 id="melee-armor"
@@ -211,7 +217,9 @@
           </div>
 
           <div class="form-group">
-            <label for="pierce-armor">Pierce Armor</label>
+            <label for="pierce-armor">
+              <span class="stat-icon">🏹</span> Pierce Armor
+            </label>
             <div class="stat-with-elite">
               <input 
                 id="pierce-armor"
@@ -234,7 +242,9 @@
           </div>
 
           <div class="form-group">
-            <label for="attack-speed">Attack Speed (seconds)</label>
+            <label for="attack-speed">
+              <span class="stat-icon">⚡</span> Attack Speed (seconds)
+            </label>
             <input 
               id="attack-speed"
               v-model.number="customUnit.attackSpeed" 
@@ -248,7 +258,9 @@
           </div>
 
           <div class="form-group">
-            <label for="range">Range</label>
+            <label for="range">
+              <span class="stat-icon">🎯</span> Range
+            </label>
             <div class="stat-with-elite">
               <input 
                 id="range"
@@ -271,7 +283,9 @@
         
         <div class="stats-grid">
           <div class="form-group">
-            <label for="speed">Movement Speed</label>
+            <label for="speed">
+              <span class="stat-icon">🏃</span> Movement Speed
+            </label>
             <input 
               id="speed"
               v-model.number="customUnit.speed" 
@@ -293,7 +307,9 @@
           </div>
 
           <div class="form-group">
-            <label for="los">Line of Sight</label>
+            <label for="los">
+              <span class="stat-icon">👁️</span> Line of Sight
+            </label>
             <input 
               id="los"
               v-model.number="customUnit.lineOfSight" 
@@ -374,7 +390,9 @@
         </div>
 
         <div class="form-group">
-          <label for="train-time">Train Time (seconds)</label>
+          <label for="train-time">
+            <span class="stat-icon">⏱️</span> Train Time (seconds)
+          </label>
           <input 
             id="train-time"
             v-model.number="customUnit.trainTime" 
@@ -1238,6 +1256,8 @@ watch(() => customUnit.value, (newVal) => {
   gap: 0.5rem;
   cursor: pointer;
   margin: 0;
+  color: #333; /* Better contrast for readability */
+  font-weight: 500;
 }
 
 .density-toggle input[type="checkbox"] {
@@ -1263,14 +1283,25 @@ watch(() => customUnit.value, (newVal) => {
   gap: 0.25rem;
 }
 
-.compact-mode input[type="number"] {
-  display: none; /* Hide number inputs in compact mode */
+/* In compact mode, only hide number inputs that have sliders (stat-with-elite sections) */
+.compact-mode .stat-with-elite input[type="number"] {
+  display: none;
+}
+
+/* In compact mode, hide speed input since it has a BudgetSlider */
+.compact-mode #speed {
+  display: none;
+}
+
+/* Keep unit name visible but smaller */
+.compact-mode #unit-name {
+  font-size: 0.9rem;
 }
 
 .compact-mode .char-count,
 .compact-mode .help-text,
-.compact-mode .base-unit-custom-input {
-  display: none; /* Hide custom ID input in compact mode */
+.compact-mode .custom-id-input {
+  display: none; /* Hide help text and custom ID input in compact mode */
 }
 
 .compact-mode .elite-value {
