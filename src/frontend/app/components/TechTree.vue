@@ -848,11 +848,33 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
     
     if (props.mode === 'build') {
       // Build mode: add points (no limit)
+      
+      // Special handling for fortified walls: enable stone wall and gate FIRST
+      if (caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID) {
+        if (!isEnabled(STONE_WALL_ID)) {
+          enableCaret(STONE_WALL_ID, false)
+        }
+        if (!isEnabled(GATE_ID)) {
+          enableCaret(GATE_ID, false)
+        }
+      }
+      
       localtree.value[type].push(id)
       techtreePoints.value += techCost
     } else {
       // Draft mode: subtract points (with limit check)
-      // If this is from a user click, check if we should enable prerequisites first
+      
+      // Special handling for fortified walls: enable stone wall and gate FIRST
+      if (caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID) {
+        if (!isEnabled(STONE_WALL_ID)) {
+          enableCaret(STONE_WALL_ID, false)
+        }
+        if (!isEnabled(GATE_ID)) {
+          enableCaret(GATE_ID, false)
+        }
+      }
+      
+      // If this is from a user click, enable ALL affordable prerequisites first
       if (fromUserClick) {
         const prerequisites = getAllPrerequisites(caretId)
         
@@ -869,9 +891,14 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
             .filter(prereq => prereq.cost <= techtreePoints.value)
             .sort((a, b) => a.cost - b.cost) // Sort by cost ascending - enable cheapest first
           
-          // Enable the cheapest affordable prerequisite
+          // Enable ALL affordable prerequisites (not just one)
           if (affordablePrereqs.length > 0) {
-            enableCaret(affordablePrereqs[0].id, false) // Pass false to avoid recursion
+            for (const prereq of affordablePrereqs) {
+              // Check if we still have enough points after enabling previous prerequisites
+              if (techtreePoints.value >= prereq.cost && !isEnabled(prereq.id)) {
+                enableCaret(prereq.id, false) // Pass false to avoid recursion
+              }
+            }
             return
           }
           
@@ -955,15 +982,6 @@ function handleLinkedCarets(caretId: string, enable: boolean) {
     } else if (caretId === b) {
       enable ? enableCaret(a, false) : disableCaret(a)
     }
-  }
-  
-  // Additional fortified wall group logic:
-  // When enabling fortified wall (tech or building), also enable stone wall and gate
-  // This creates a one-way dependency: fortified walls require stone wall + gate
-  if (enable && (caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID)) {
-    // Stone wall and gate are already linked via linkedPairs above
-    // So enabling stone wall will automatically enable gate
-    enableCaret(STONE_WALL_ID, false)
   }
   
   // When disabling stone wall or gate, also disable both fortified walls
