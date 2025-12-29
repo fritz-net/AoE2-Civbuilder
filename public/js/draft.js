@@ -102,15 +102,127 @@ function renderTechtree(draft) {
 		document.getElementsByTagName("body")[0].appendChild(waiting);
 		showTechtree(draft["players"][playerNumber]["tree"], playerNumber, 1, draft["preset"]["points"], "", "..");
 	} else {
-		var waiting = document.createElement("div");
-		waiting.id = "wrapping";
+		// Spectators and players who are ready see the player overview
+		document.body.style.backgroundImage = "url('../img/draftbackground.jpg')";
 
-		var title = document.createElement("h1");
-		title.id = "title";
-		title.innerHTML = "Waiting For Players";
+		var header = document.createElement("div");
+		header.id = "phaseheader";
 
-		waiting.appendChild(title);
-		document.getElementsByTagName("body")[0].appendChild(waiting);
+		var phase = document.createElement("h1");
+		phase.id = "phase";
+		phase.innerHTML = "Tech Tree Customization";
+
+		var round = document.createElement("div");
+		round.id = "round";
+		round.innerHTML = "Waiting for Players";
+
+		header.appendChild(phase);
+		header.appendChild(round);
+
+		var game = document.createElement("div");
+		game.id = "game";
+		game.style.height = "auto";
+
+		var players = document.createElement("div");
+		players.id = "players";
+
+		var numPlayers = draft["preset"]["slots"];
+
+		// Show tech tree of a particular player
+		function getFun1(val) {
+			return function () {
+				var description = `<span><b>${draft["players"][val]["alias"]}</b></span><br><br>`;
+				for (var a = 0; a < draft["players"][val]["bonuses"][0].length; a++) {
+					description += "•";
+					description += card_descriptions[0][draft["players"][val]["bonuses"][0][a]][0];
+					description += "<br>";
+				}
+				description += "<br><span><b>Unique Unit:</b></span><br>";
+				if (draft["players"][val]["bonuses"][1].length != 0) {
+					description += card_descriptions[1][draft["players"][val]["bonuses"][1][0]][0];
+					description += "<br>";
+				}
+				description += "<br><span><b>Unique Techs:</b></span><br>";
+				if (draft["players"][val]["bonuses"][2].length != 0) {
+					description += "•";
+					description += card_descriptions[2][draft["players"][val]["bonuses"][2][0]][0];
+					description += "<br>";
+				}
+				if (draft["players"][val]["bonuses"][3].length != 0) {
+					description += "•";
+					description += card_descriptions[3][draft["players"][val]["bonuses"][3][0]][0];
+					description += "<br>";
+				}
+				description += "<br><span><b>Team Bonus:</b></span><br>";
+				if (draft["players"][val]["bonuses"][4].length != 0) {
+					description += card_descriptions[4][draft["players"][val]["bonuses"][4][0]][0];
+				}
+				showTechtree(draft["players"][val]["tree"], val, 0, 1, description, "..");
+			};
+		}
+
+		// Show player information
+		for (var n = 0; n < numPlayers; n++) {
+			var i = draft["gamestate"]["order"][n];
+
+			var player = document.createElement("div");
+			player.className = "playercard";
+			player.id = "player" + i;
+			player.style.cursor = "pointer";
+			player.onclick = getFun1(i);
+
+			var image = document.createElement("div");
+			image.className = "image";
+			image.style.border = "solid 8px rgba(0, 0, 0, 0)";
+
+			var canvas = document.createElement("canvas");
+			canvas.id = "flag" + i;
+			canvas.width = "256";
+			canvas.height = "256";
+
+			image.appendChild(canvas);
+
+			var alias = document.createElement("div");
+			alias.className = "alias";
+			alias.innerHTML = draft["players"][i]["alias"];
+
+			// Show ready status
+			var status = document.createElement("div");
+			status.className = "status";
+			if (draft["players"][i]["ready"] === 1) {
+				status.innerHTML = "✓ Ready";
+				status.style.color = "#00ff00";
+			} else {
+				status.innerHTML = "Editing...";
+				status.style.color = "#ffaa00";
+			}
+
+			player.appendChild(image);
+			player.appendChild(alias);
+			player.appendChild(status);
+
+			players.appendChild(player);
+		}
+
+		var boardplaceholder = document.createElement("div");
+		boardplaceholder.id = "board";
+		boardplaceholder.style.display = "flex";
+		boardplaceholder.style.alignItems = "center";
+		boardplaceholder.style.justifyContent = "center";
+		boardplaceholder.style.fontSize = "24px";
+		boardplaceholder.style.color = "#fff";
+		boardplaceholder.innerHTML = "Click on a player to view their tech tree";
+
+		game.appendChild(players);
+		game.appendChild(boardplaceholder);
+
+		document.getElementsByTagName("body")[0].appendChild(header);
+		document.getElementsByTagName("body")[0].appendChild(game);
+
+		// Render flags
+		for (var i = 0; i < draft["preset"]["slots"]; i++) {
+			clientFlag(draft["players"][i]["flag_palette"], "flag" + i, 85 / 256, "..");
+		}
 	}
 }
 
@@ -867,13 +979,99 @@ function renderHelp() {
 	document.getElementsByTagName("body")[0].appendChild(title);
 }
 
-function renderDownload() {
+function renderDownload(draft) {
 	$("body").contents().not("script").remove();
-	document.body.style.backgroundImage = "url('../img/aoe2background.jpg')";
+	document.body.style.backgroundImage = "url('../img/draftbackground.jpg')";
 
-	var title = document.createElement("h1");
-	title.id = "title";
-	title.innerHTML = "Mod Created!";
+	var header = document.createElement("div");
+	header.id = "phaseheader";
+
+	var phase = document.createElement("h1");
+	phase.id = "phase";
+	phase.innerHTML = "Mod Created!";
+
+	header.appendChild(phase);
+
+	var game = document.createElement("div");
+	game.id = "game";
+	game.style.height = "auto";
+
+	var players = document.createElement("div");
+	players.id = "players";
+
+	var numPlayers = draft["preset"]["slots"];
+
+	// Show tech tree of a particular player
+	function getFun1(val) {
+		return function () {
+			var description = `<span><b>${draft["players"][val]["alias"]}</b></span><br><br>`;
+			for (var a = 0; a < draft["players"][val]["bonuses"][0].length; a++) {
+				description += "•";
+				description += card_descriptions[0][draft["players"][val]["bonuses"][0][a]][0];
+				description += "<br>";
+			}
+			description += "<br><span><b>Unique Unit:</b></span><br>";
+			if (draft["players"][val]["bonuses"][1].length != 0) {
+				description += card_descriptions[1][draft["players"][val]["bonuses"][1][0]][0];
+				description += "<br>";
+			}
+			description += "<br><span><b>Unique Techs:</b></span><br>";
+			if (draft["players"][val]["bonuses"][2].length != 0) {
+				description += "•";
+				description += card_descriptions[2][draft["players"][val]["bonuses"][2][0]][0];
+				description += "<br>";
+			}
+			if (draft["players"][val]["bonuses"][3].length != 0) {
+				description += "•";
+				description += card_descriptions[3][draft["players"][val]["bonuses"][3][0]][0];
+				description += "<br>";
+			}
+			description += "<br><span><b>Team Bonus:</b></span><br>";
+			if (draft["players"][val]["bonuses"][4].length != 0) {
+				description += card_descriptions[4][draft["players"][val]["bonuses"][4][0]][0];
+			}
+			showTechtree(draft["players"][val]["tree"], val, 0, 1, description, "..");
+		};
+	}
+
+	// Show player information
+	for (var n = 0; n < numPlayers; n++) {
+		var i = draft["gamestate"]["order"][n];
+
+		var player = document.createElement("div");
+		player.className = "playercard";
+		player.id = "player" + i;
+		player.style.cursor = "pointer";
+		player.onclick = getFun1(i);
+
+		var image = document.createElement("div");
+		image.className = "image";
+		image.style.border = "solid 8px rgba(0, 0, 0, 0)";
+
+		var canvas = document.createElement("canvas");
+		canvas.id = "flag" + i;
+		canvas.width = "256";
+		canvas.height = "256";
+
+		image.appendChild(canvas);
+
+		var alias = document.createElement("div");
+		alias.className = "alias";
+		alias.innerHTML = draft["players"][i]["alias"];
+
+		player.appendChild(image);
+		player.appendChild(alias);
+
+		players.appendChild(player);
+	}
+
+	var board = document.createElement("div");
+	board.id = "board";
+	board.style.display = "flex";
+	board.style.flexDirection = "column";
+	board.style.alignItems = "center";
+	board.style.justifyContent = "center";
+	board.style.padding = "20px";
 
 	function getFun(val) {
 		return function () {
@@ -885,6 +1083,7 @@ function renderDownload() {
 	download.id = "download";
 	download.innerHTML = "Download Mod";
 	download.onclick = getFun(getCookie("draftID"));
+	download.style.marginBottom = "20px";
 
 	var instructionsbox = document.createElement("div");
 	instructionsbox.id = "instructionsbox";
@@ -908,9 +1107,26 @@ function renderDownload() {
 	instructionsbox.appendChild(instructionstitle);
 	instructionsbox.appendChild(instructionstext);
 
-	document.getElementsByTagName("body")[0].appendChild(title);
-	document.getElementsByTagName("body")[0].appendChild(download);
-	document.getElementsByTagName("body")[0].appendChild(instructionsbox);
+	var playerViewHint = document.createElement("p");
+	playerViewHint.style.marginTop = "20px";
+	playerViewHint.style.fontSize = "18px";
+	playerViewHint.style.color = "#fff";
+	playerViewHint.innerHTML = "Click on a player card to view their final tech tree";
+
+	board.appendChild(download);
+	board.appendChild(instructionsbox);
+	board.appendChild(playerViewHint);
+
+	game.appendChild(players);
+	game.appendChild(board);
+
+	document.getElementsByTagName("body")[0].appendChild(header);
+	document.getElementsByTagName("body")[0].appendChild(game);
+
+	// Render flags
+	for (var i = 0; i < draft["preset"]["slots"]; i++) {
+		clientFlag(draft["players"][i]["flag_palette"], "flag" + i, 85 / 256, "..");
+	}
 }
 
 function renderGame(draft) {
@@ -934,7 +1150,7 @@ function renderGame(draft) {
 			renderHelp();
 			break;
 		case 6:
-			renderDownload();
+			renderDownload(draft);
 			break;
 	}
 }
