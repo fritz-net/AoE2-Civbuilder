@@ -124,6 +124,7 @@
           v-for="caret in allCarets"
           :key="caret.id"
           :class="['node', { 'is-highlight': isHighlighted(caret.id) }]"
+          :data-caret-id="caret.id"
         >
           <!-- Background -->
           <rect
@@ -204,6 +205,7 @@
             :width="caret.width"
             :height="caret.height"
             class="node__overlay"
+            :data-caret-id="caret.id"
             @mouseover="showHelp(caret)"
             @mouseout="resetHighlight"
             @click="handleCaretClick(caret)"

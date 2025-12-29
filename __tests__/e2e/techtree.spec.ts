@@ -651,78 +651,175 @@ test.describe('TechTree Functionality - Stone Wall and Gate Linking', () => {
   });
 });
 
-test.describe('TechTree Functionality - One-Click Tech Enabling', () => {
+test.describe('TechTree Functionality - One-Click Tech Enabling with Direct Caret Clicks', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
+    // Wait for tech tree to load
+    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForTimeout(1000);
+  });
+
+  test('clicking fortified wall tech should enable stone wall, gate, and fortified wall in one click (build mode)', async ({ page }) => {
+    // Switch to build mode
+    const buildModeRadio = page.getByRole('radio', { name: /Build Mode/i });
+    await buildModeRadio.click();
+    await page.waitForTimeout(500);
+    
+    // Get initial state
+    const initialPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+    const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
+    const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    // Click on fortified wall tech (tech_194)
+    await page.locator('[data-caret-id="tech_194"]').click();
+    await page.waitForTimeout(500);
+    
+    // Verify points increased (stone wall + gate + fortified wall tech were enabled)
+    const finalPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+    const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
+    
+    // Verify tech count increased by at least 3 (stone wall, gate, fortified wall tech)
+    const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    expect(finalPoints).toBeGreaterThan(initialPoints);
+    expect(finalTechCount).toBeGreaterThanOrEqual(initialTechCount + 3);
+  });
+
+  test('clicking fortified wall building should enable stone wall, gate, and fortified wall in one click (build mode)', async ({ page }) => {
+    // Switch to build mode
+    const buildModeRadio = page.getByRole('radio', { name: /Build Mode/i });
+    await buildModeRadio.click();
+    await page.waitForTimeout(500);
+    
+    // Get initial state
+    const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    // Click on fortified wall building (building_155)
+    await page.locator('[data-caret-id="building_155"]').click();
+    await page.waitForTimeout(500);
+    
+    // Verify tech count increased by at least 3
+    const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    expect(finalTechCount).toBeGreaterThanOrEqual(initialTechCount + 3);
+  });
+
+  test('clicking fortified wall tech should enable stone wall, gate, and fortified wall in one click (draft mode with enough points)', async ({ page }) => {
+    // Switch to draft mode with plenty of points
+    const draftModeRadio = page.getByRole('radio', { name: /Draft Mode/i });
+    await draftModeRadio.click();
+    await page.waitForTimeout(500);
+    
+    const pointLimitInput = page.locator('input[type="number"]').first();
+    await pointLimitInput.fill('100');
+    await page.waitForTimeout(1000);
+    
+    // Get initial state
+    const initialPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
+    expect(initialPoints).toBe(100);
+    
+    const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    // Click on fortified wall tech (tech_194)
+    await page.locator('[data-caret-id="tech_194"]').click();
+    await page.waitForTimeout(500);
+    
+    // Verify points decreased (stone wall + gate + fortified wall tech cost points)
+    const finalPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
+    
+    // Verify tech count increased by at least 3
+    const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    expect(finalPoints).toBeLessThan(initialPoints);
+    expect(finalTechCount).toBeGreaterThanOrEqual(initialTechCount + 3);
+  });
+
+  test('clicking arbalester should enable archer, crossbow, and arbalester in one click (draft mode)', async ({ page }) => {
     // Switch to draft mode with enough points
     const draftModeRadio = page.getByRole('radio', { name: /Draft Mode/i });
     await draftModeRadio.click();
     await page.waitForTimeout(500);
     
-    // Set point limit high enough
     const pointLimitInput = page.locator('input[type="number"]').first();
-    await pointLimitInput.fill('100');
+    await pointLimitInput.fill('50');
     await page.waitForTimeout(1000);
     
-    // Wait for tech tree to load
-    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000);
+    // Get initial state
+    const initialPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
+    const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
     
-    // Reset to clean state
-    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
+    const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    // Click on arbalester (unit_492)
+    await page.locator('[data-caret-id="unit_492"]').click();
     await page.waitForTimeout(500);
-  });
-
-  test('fortified wall and prerequisites should enable in one click', async ({ page }) => {
-    // Verify we have enough points (100)
-    const initialPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
-    const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
-    expect(initialPoints).toBe(100);
     
-    // Click Fill to enable all techs (which includes fortified wall with prerequisites)
-    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(1000);
-    
-    // Verify techs were enabled
-    const techCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
-    const techCount = parseInt(techCountText?.match(/\d+/)?.[0] || '0');
-    
-    // Should have enabled many techs
-    expect(techCount).toBeGreaterThan(50);
-  });
-
-  test('arbalester and prerequisites should enable in one click', async ({ page }) => {
-    // Get initial counts
-    const initialPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
-    const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
-    
-    // Click Fill to test that arbalester enables with prerequisites
-    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(1000);
-    
-    // Verify points were spent
+    // Verify points decreased
     const finalPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
     const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
     
+    // Verify tech count increased by at least 3 (archer, crossbow, arbalester)
+    const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
+    
     expect(finalPoints).toBeLessThan(initialPoints);
-    expect(finalPoints).toBeGreaterThanOrEqual(0);
+    expect(finalTechCount).toBeGreaterThanOrEqual(initialTechCount + 3);
   });
 
-  test('bombard tower building should enable chemistry', async ({ page }) => {
-    // Reset and fill - this should enable bombard tower and chemistry
-    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(1000);
+  test('clicking bombard tower building should enable chemistry and bombard tower in one click (build mode)', async ({ page }) => {
+    // Switch to build mode
+    const buildModeRadio = page.getByRole('radio', { name: /Build Mode/i });
+    await buildModeRadio.click();
+    await page.waitForTimeout(500);
     
-    // Verify techs were enabled (integration test)
-    const techCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
-    const techCount = parseInt(techCountText?.match(/\d+/)?.[0] || '0');
+    // Get initial state
+    const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
     
-    expect(techCount).toBeGreaterThan(50);
+    // Click on bombard tower building (building_236)
+    await page.locator('[data-caret-id="building_236"]').click();
+    await page.waitForTimeout(500);
+    
+    // Verify tech count increased by at least 2 (chemistry + bombard tower)
+    const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    expect(finalTechCount).toBeGreaterThanOrEqual(initialTechCount + 2);
+  });
+
+  test('clicking keep tech should enable prerequisites and keep in one click (build mode)', async ({ page }) => {
+    // Switch to build mode
+    const buildModeRadio = page.getByRole('radio', { name: /Build Mode/i });
+    await buildModeRadio.click();
+    await page.waitForTimeout(500);
+    
+    // Get initial state
+    const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    // Click on keep tech (tech_63)
+    await page.locator('[data-caret-id="tech_63"]').click();
+    await page.waitForTimeout(500);
+    
+    // Verify tech count increased (keep and any prerequisites)
+    const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    expect(finalTechCount).toBeGreaterThan(initialTechCount);
   });
 });
 
-test.describe('TechTree Functionality - Limited Points Edge Cases', () => {
+test.describe('TechTree Functionality - Limited Points Edge Cases with Direct Caret Clicks', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
@@ -736,246 +833,89 @@ test.describe('TechTree Functionality - Limited Points Edge Cases', () => {
     await page.waitForTimeout(1000);
   });
 
-  test('with 3 points, fortified wall should not enable (only prerequisites)', async ({ page }) => {
+  test('with 3 points, clicking fortified wall tech should only enable stone wall and gate (not fortified wall)', async ({ page }) => {
     // Set point limit to 3
     const pointLimitInput = page.locator('input[type="number"]').first();
     await pointLimitInput.fill('3');
     await page.waitForTimeout(1000);
-    
-    // Reset to apply new limit
-    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
-    await page.waitForTimeout(500);
     
     // Verify we have 3 points
     const initialPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
     const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
     expect(initialPoints).toBe(3);
     
-    // Try to fill - with 3 points, we can enable some base techs but not fortified wall
-    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(1000);
+    const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
     
-    // Verify some points were spent
+    // Click on fortified wall tech (tech_194)
+    await page.locator('[data-caret-id="tech_194"]').click();
+    await page.waitForTimeout(500);
+    
+    // Verify points decreased but fortified wall itself was not enabled
     const finalPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
     const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
     
-    // Should have spent some or all points
-    expect(finalPoints).toBeLessThanOrEqual(initialPoints);
+    const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    // Should have spent 2 points (stone wall + gate), leaving 1 point
     expect(finalPoints).toBeGreaterThanOrEqual(0);
+    expect(finalPoints).toBeLessThan(3);
+    // Should have enabled 2 techs (stone wall + gate), not fortified wall
+    expect(finalTechCount).toBe(initialTechCount + 2);
   });
 
-  test('with 12 points, clicking two-man-saw should enable prerequisites in order', async ({ page }) => {
+  test('with 12 points, clicking two-man-saw should enable double-bit-axe and bow-saw first (not two-man-saw)', async ({ page }) => {
     // Set point limit to 12
     const pointLimitInput = page.locator('input[type="number"]').first();
     await pointLimitInput.fill('12');
     await page.waitForTimeout(1000);
-    
-    // Reset to apply new limit
-    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
-    await page.waitForTimeout(500);
     
     // Verify we have 12 points
     const initialPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
     const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
     expect(initialPoints).toBe(12);
     
-    // Click Fill - should enable techs in prerequisite order
-    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(1000);
+    const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
     
-    // Verify points were spent correctly
+    // Click on two-man-saw (tech_221)
+    await page.locator('[data-caret-id="tech_221"]').click();
+    await page.waitForTimeout(500);
+    
+    // Verify points decreased
     const finalPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
     const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
     
+    const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
+    
+    // Should have enabled prerequisites in order (double-bit-axe, bow-saw)
     expect(finalPoints).toBeLessThan(initialPoints);
     expect(finalPoints).toBeGreaterThanOrEqual(0);
-  });
-});
-
-test.describe('TechTree Functionality - Direct Caret Clicking Tests', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
-    
-    // Wait for tech tree to load
-    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000);
+    expect(finalTechCount).toBeGreaterThan(initialTechCount);
   });
 
-  test('clicking carets directly should enable tech and prerequisites in one click (build mode)', async ({ page }) => {
-    // Switch to build mode
-    const buildModeRadio = page.getByRole('radio', { name: /Build Mode/i });
-    await buildModeRadio.click();
-    await page.waitForTimeout(500);
-    
-    // Reset to clean state
-    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
-    await page.waitForTimeout(500);
-    
-    // Get initial state
-    const initialPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
-    const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
-    
-    // Click anywhere on the SVG to test caret clicking (integration test)
-    // We can't easily target specific carets, so we test the Fill functionality which uses the same logic
-    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(1000);
-    
-    // Verify techs were enabled
-    const finalPointsText = await page.getByText(/Points Spent: \d+/i).textContent();
-    const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
-    
-    expect(finalPoints).toBeGreaterThan(initialPoints);
-  });
-
-  test('clicking carets directly should enable tech and prerequisites in one click (draft mode with enough points)', async ({ page }) => {
-    // Switch to draft mode with plenty of points
-    const draftModeRadio = page.getByRole('radio', { name: /Draft Mode/i });
-    await draftModeRadio.click();
-    await page.waitForTimeout(500);
-    
-    const pointLimitInput = page.locator('input[type="number"]').first();
-    await pointLimitInput.fill('200');
-    await page.waitForTimeout(1000);
-    
-    // Reset to clean state
-    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
-    await page.waitForTimeout(500);
-    
-    // Verify we have points
-    const initialPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
-    const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
-    expect(initialPoints).toBe(200);
-    
-    // Click Fill to simulate clicking individual carets
-    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(1000);
-    
-    // Verify points were spent and techs enabled
-    const finalPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
-    const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
-    
-    expect(finalPoints).toBeLessThan(initialPoints);
-    expect(finalPoints).toBeGreaterThanOrEqual(0);
-    
-    // Verify many techs were enabled
-    const techCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
-    const techCount = parseInt(techCountText?.match(/\d+/)?.[0] || '0');
-    
-    expect(techCount).toBeGreaterThan(50);
-  });
-
-  test('with limited points (18), wood techs should enable earliest tech first', async ({ page }) => {
-    // Switch to draft mode with 18 points
-    const draftModeRadio = page.getByRole('radio', { name: /Draft Mode/i });
-    await draftModeRadio.click();
-    await page.waitForTimeout(500);
-    
+  test('with 18 points, wood techs should enable earliest tech first', async ({ page }) => {
+    // Set point limit to 18
     const pointLimitInput = page.locator('input[type="number"]').first();
     await pointLimitInput.fill('18');
     await page.waitForTimeout(1000);
-    
-    // Reset to apply limit
-    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
-    await page.waitForTimeout(500);
     
     // Verify we have 18 points
     const initialPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
     const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
     expect(initialPoints).toBe(18);
     
-    // Click Fill - should enable techs in order, starting with earliest/cheapest
-    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(1000);
+    // Click on two-man-saw (tech_221)
+    await page.locator('[data-caret-id="tech_221"]').click();
+    await page.waitForTimeout(500);
     
-    // Verify points were spent correctly
+    // Verify points were spent correctly (should enable all prerequisites)
     const finalPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
     const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
     
     expect(finalPoints).toBeLessThan(initialPoints);
     expect(finalPoints).toBeGreaterThanOrEqual(0);
-  });
-
-  test('fortified wall should enable in one click with stone wall and gate (build mode)', async ({ page }) => {
-    // Switch to build mode
-    const buildModeRadio = page.getByRole('radio', { name: /Build Mode/i });
-    await buildModeRadio.click();
-    await page.waitForTimeout(500);
-    
-    // Reset to clean state
-    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
-    await page.waitForTimeout(500);
-    
-    // Get initial tech count
-    const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
-    const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
-    
-    // Click Fill which will enable all techs including fortified wall
-    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(1000);
-    
-    // Verify techs were enabled (including fortified wall, stone wall, gate)
-    const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
-    const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
-    
-    expect(finalTechCount).toBeGreaterThan(initialTechCount);
-    expect(finalTechCount).toBeGreaterThan(50);
-  });
-
-  test('fortified wall should enable in one click with stone wall and gate (draft mode with enough points)', async ({ page }) => {
-    // Switch to draft mode with plenty of points
-    const draftModeRadio = page.getByRole('radio', { name: /Draft Mode/i });
-    await draftModeRadio.click();
-    await page.waitForTimeout(500);
-    
-    const pointLimitInput = page.locator('input[type="number"]').first();
-    await pointLimitInput.fill('200');
-    await page.waitForTimeout(1000);
-    
-    // Reset to apply limit
-    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
-    await page.waitForTimeout(500);
-    
-    // Verify we have 200 points
-    const initialPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
-    const initialPoints = parseInt(initialPointsText?.match(/\d+/)?.[0] || '0');
-    expect(initialPoints).toBe(200);
-    
-    // Click Fill to enable all techs including fortified wall
-    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(1000);
-    
-    // Verify points were spent
-    const finalPointsText = await page.getByText(/Points Remaining: \d+/i).textContent();
-    const finalPoints = parseInt(finalPointsText?.match(/\d+/)?.[0] || '0');
-    
-    expect(finalPoints).toBeLessThan(initialPoints);
-    expect(finalPoints).toBeGreaterThanOrEqual(0);
-    
-    // Verify many techs were enabled
-    const techCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
-    const techCount = parseInt(techCountText?.match(/\d+/)?.[0] || '0');
-    
-    expect(techCount).toBeGreaterThan(50);
-  });
-
-  test('keep should enable in one click with prerequisites', async ({ page }) => {
-    // Switch to build mode for simpler testing
-    const buildModeRadio = page.getByRole('radio', { name: /Build Mode/i });
-    await buildModeRadio.click();
-    await page.waitForTimeout(500);
-    
-    // Reset to clean state
-    await page.locator('.techtree-toolbar button', { hasText: /Reset/i }).click();
-    await page.waitForTimeout(500);
-    
-    // Click Fill to enable all techs including keep
-    await page.locator('.techtree-toolbar button', { hasText: /Fill/i }).click();
-    await page.waitForTimeout(1000);
-    
-    // Verify techs were enabled
-    const techCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
-    const techCount = parseInt(techCountText?.match(/\d+/)?.[0] || '0');
-    
-    expect(techCount).toBeGreaterThan(50);
   });
 });
