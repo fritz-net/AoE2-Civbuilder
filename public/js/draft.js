@@ -85,6 +85,98 @@ function renderLobby(draft) {
 
 function renderSnipe(draft) {}
 
+// Helper function to create tech tree viewer for a specific player
+function createPlayerTechtreeViewer(draft, playerIndex) {
+	return function () {
+		var description = `<span><b>${draft["players"][playerIndex]["alias"]}</b></span><br><br>`;
+		for (var a = 0; a < draft["players"][playerIndex]["bonuses"][0].length; a++) {
+			description += "•";
+			description += card_descriptions[0][draft["players"][playerIndex]["bonuses"][0][a]][0];
+			description += "<br>";
+		}
+		description += "<br><span><b>Unique Unit:</b></span><br>";
+		if (draft["players"][playerIndex]["bonuses"][1].length != 0) {
+			description += card_descriptions[1][draft["players"][playerIndex]["bonuses"][1][0]][0];
+			description += "<br>";
+		}
+		description += "<br><span><b>Unique Techs:</b></span><br>";
+		if (draft["players"][playerIndex]["bonuses"][2].length != 0) {
+			description += "•";
+			description += card_descriptions[2][draft["players"][playerIndex]["bonuses"][2][0]][0];
+			description += "<br>";
+		}
+		if (draft["players"][playerIndex]["bonuses"][3].length != 0) {
+			description += "•";
+			description += card_descriptions[3][draft["players"][playerIndex]["bonuses"][3][0]][0];
+			description += "<br>";
+		}
+		description += "<br><span><b>Team Bonus:</b></span><br>";
+		if (draft["players"][playerIndex]["bonuses"][4].length != 0) {
+			description += card_descriptions[4][draft["players"][playerIndex]["bonuses"][4][0]][0];
+		}
+		showTechtree(draft["players"][playerIndex]["tree"], playerIndex, 0, 1, description, "..");
+	};
+}
+
+// Helper function to create player cards for spectator view
+function createPlayerCards(draft, showStatus) {
+	var players = document.createElement("div");
+	players.id = "players";
+
+	var numPlayers = draft["preset"]["slots"];
+
+	for (var n = 0; n < numPlayers; n++) {
+		var i = draft["gamestate"]["order"][n];
+
+		var player = document.createElement("div");
+		player.className = "playercard";
+		player.id = "player" + i;
+		player.style.cursor = "pointer";
+		player.onclick = createPlayerTechtreeViewer(draft, i);
+
+		var image = document.createElement("div");
+		image.className = "image";
+		image.style.border = "solid 8px rgba(0, 0, 0, 0)";
+
+		var canvas = document.createElement("canvas");
+		canvas.id = "flag" + i;
+		canvas.width = "256";
+		canvas.height = "256";
+
+		image.appendChild(canvas);
+
+		var alias = document.createElement("div");
+		alias.className = "alias";
+		alias.innerHTML = draft["players"][i]["alias"];
+
+		player.appendChild(image);
+		player.appendChild(alias);
+
+		// Show status only in phase 3
+		if (showStatus) {
+			var status = document.createElement("div");
+			status.className = "status";
+			if (draft["players"][i]["ready"] === 1) {
+				status.innerHTML = "✓ Ready";
+				status.style.color = "#00ff00";
+			} else {
+				status.innerHTML = "Editing...";
+				status.style.color = "#ffaa00";
+			}
+			player.appendChild(status);
+		}
+
+		players.appendChild(player);
+	}
+
+	// Render flags
+	for (var i = 0; i < draft["preset"]["slots"]; i++) {
+		clientFlag(draft["players"][i]["flag_palette"], "flag" + i, 85 / 256, "..");
+	}
+
+	return players;
+}
+
 function renderTechtree(draft) {
 	$("body").contents().not("script").remove();
 
@@ -123,86 +215,7 @@ function renderTechtree(draft) {
 		game.id = "game";
 		game.style.height = "auto";
 
-		var players = document.createElement("div");
-		players.id = "players";
-
-		var numPlayers = draft["preset"]["slots"];
-
-		// Show tech tree of a particular player
-		function getFun1(val) {
-			return function () {
-				var description = `<span><b>${draft["players"][val]["alias"]}</b></span><br><br>`;
-				for (var a = 0; a < draft["players"][val]["bonuses"][0].length; a++) {
-					description += "•";
-					description += card_descriptions[0][draft["players"][val]["bonuses"][0][a]][0];
-					description += "<br>";
-				}
-				description += "<br><span><b>Unique Unit:</b></span><br>";
-				if (draft["players"][val]["bonuses"][1].length != 0) {
-					description += card_descriptions[1][draft["players"][val]["bonuses"][1][0]][0];
-					description += "<br>";
-				}
-				description += "<br><span><b>Unique Techs:</b></span><br>";
-				if (draft["players"][val]["bonuses"][2].length != 0) {
-					description += "•";
-					description += card_descriptions[2][draft["players"][val]["bonuses"][2][0]][0];
-					description += "<br>";
-				}
-				if (draft["players"][val]["bonuses"][3].length != 0) {
-					description += "•";
-					description += card_descriptions[3][draft["players"][val]["bonuses"][3][0]][0];
-					description += "<br>";
-				}
-				description += "<br><span><b>Team Bonus:</b></span><br>";
-				if (draft["players"][val]["bonuses"][4].length != 0) {
-					description += card_descriptions[4][draft["players"][val]["bonuses"][4][0]][0];
-				}
-				showTechtree(draft["players"][val]["tree"], val, 0, 1, description, "..");
-			};
-		}
-
-		// Show player information
-		for (var n = 0; n < numPlayers; n++) {
-			var i = draft["gamestate"]["order"][n];
-
-			var player = document.createElement("div");
-			player.className = "playercard";
-			player.id = "player" + i;
-			player.style.cursor = "pointer";
-			player.onclick = getFun1(i);
-
-			var image = document.createElement("div");
-			image.className = "image";
-			image.style.border = "solid 8px rgba(0, 0, 0, 0)";
-
-			var canvas = document.createElement("canvas");
-			canvas.id = "flag" + i;
-			canvas.width = "256";
-			canvas.height = "256";
-
-			image.appendChild(canvas);
-
-			var alias = document.createElement("div");
-			alias.className = "alias";
-			alias.innerHTML = draft["players"][i]["alias"];
-
-			// Show ready status
-			var status = document.createElement("div");
-			status.className = "status";
-			if (draft["players"][i]["ready"] === 1) {
-				status.innerHTML = "✓ Ready";
-				status.style.color = "#00ff00";
-			} else {
-				status.innerHTML = "Editing...";
-				status.style.color = "#ffaa00";
-			}
-
-			player.appendChild(image);
-			player.appendChild(alias);
-			player.appendChild(status);
-
-			players.appendChild(player);
-		}
+		var players = createPlayerCards(draft, true);
 
 		var boardplaceholder = document.createElement("div");
 		boardplaceholder.id = "board";
@@ -218,11 +231,6 @@ function renderTechtree(draft) {
 
 		document.getElementsByTagName("body")[0].appendChild(header);
 		document.getElementsByTagName("body")[0].appendChild(game);
-
-		// Render flags
-		for (var i = 0; i < draft["preset"]["slots"]; i++) {
-			clientFlag(draft["players"][i]["flag_palette"], "flag" + i, 85 / 256, "..");
-		}
 	}
 }
 
@@ -996,74 +1004,7 @@ function renderDownload(draft) {
 	game.id = "game";
 	game.style.height = "auto";
 
-	var players = document.createElement("div");
-	players.id = "players";
-
-	var numPlayers = draft["preset"]["slots"];
-
-	// Show tech tree of a particular player
-	function getFun1(val) {
-		return function () {
-			var description = `<span><b>${draft["players"][val]["alias"]}</b></span><br><br>`;
-			for (var a = 0; a < draft["players"][val]["bonuses"][0].length; a++) {
-				description += "•";
-				description += card_descriptions[0][draft["players"][val]["bonuses"][0][a]][0];
-				description += "<br>";
-			}
-			description += "<br><span><b>Unique Unit:</b></span><br>";
-			if (draft["players"][val]["bonuses"][1].length != 0) {
-				description += card_descriptions[1][draft["players"][val]["bonuses"][1][0]][0];
-				description += "<br>";
-			}
-			description += "<br><span><b>Unique Techs:</b></span><br>";
-			if (draft["players"][val]["bonuses"][2].length != 0) {
-				description += "•";
-				description += card_descriptions[2][draft["players"][val]["bonuses"][2][0]][0];
-				description += "<br>";
-			}
-			if (draft["players"][val]["bonuses"][3].length != 0) {
-				description += "•";
-				description += card_descriptions[3][draft["players"][val]["bonuses"][3][0]][0];
-				description += "<br>";
-			}
-			description += "<br><span><b>Team Bonus:</b></span><br>";
-			if (draft["players"][val]["bonuses"][4].length != 0) {
-				description += card_descriptions[4][draft["players"][val]["bonuses"][4][0]][0];
-			}
-			showTechtree(draft["players"][val]["tree"], val, 0, 1, description, "..");
-		};
-	}
-
-	// Show player information
-	for (var n = 0; n < numPlayers; n++) {
-		var i = draft["gamestate"]["order"][n];
-
-		var player = document.createElement("div");
-		player.className = "playercard";
-		player.id = "player" + i;
-		player.style.cursor = "pointer";
-		player.onclick = getFun1(i);
-
-		var image = document.createElement("div");
-		image.className = "image";
-		image.style.border = "solid 8px rgba(0, 0, 0, 0)";
-
-		var canvas = document.createElement("canvas");
-		canvas.id = "flag" + i;
-		canvas.width = "256";
-		canvas.height = "256";
-
-		image.appendChild(canvas);
-
-		var alias = document.createElement("div");
-		alias.className = "alias";
-		alias.innerHTML = draft["players"][i]["alias"];
-
-		player.appendChild(image);
-		player.appendChild(alias);
-
-		players.appendChild(player);
-	}
+	var players = createPlayerCards(draft, false);
 
 	var board = document.createElement("div");
 	board.id = "board";
@@ -1122,11 +1063,6 @@ function renderDownload(draft) {
 
 	document.getElementsByTagName("body")[0].appendChild(header);
 	document.getElementsByTagName("body")[0].appendChild(game);
-
-	// Render flags
-	for (var i = 0; i < draft["preset"]["slots"]; i++) {
-		clientFlag(draft["players"][i]["flag_palette"], "flag" + i, 85 / 256, "..");
-	}
 }
 
 function renderGame(draft) {
