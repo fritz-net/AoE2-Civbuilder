@@ -124,7 +124,6 @@
           v-for="caret in allCarets"
           :key="caret.id"
           :class="['node', { 'is-highlight': isHighlighted(caret.id) }]"
-          :data-caret-id="caret.id"
         >
           <!-- Background -->
           <rect
