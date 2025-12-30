@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.1](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.10.0...v1.10.1) (2025-12-30)
+
+
+### Bug Fixes
+
+* add defensive checks for undefined bonuses to prevent server crash ([#192](https://github.com/fritz-net/AoE2-Civbuilder/issues/192)) ([cda6422](https://github.com/fritz-net/AoE2-Civbuilder/commit/cda642250fd063ac2f576527f3a9cc0ad162182f))
+
 ## [1.10.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.9.0...v1.10.0) (2025-12-28)
 
 
