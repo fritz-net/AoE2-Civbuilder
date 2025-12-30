@@ -911,7 +911,7 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Unique Unit
-			if (civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT].length != 0) {
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT] && civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT].length != 0) {
 				// Extract ID from bonus data (could be number or [id, multiplier])
 				player_techtree[0] = extractBonusId(civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT][0], `unique unit for civ ${i}`);
 			} else {
@@ -919,7 +919,7 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Castle Tech
-				if (civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length != 0) {
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH] && civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length != 0) {
 				var castletechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length; j++) {
 					// Preserve the original entry so multipliers ([id, copies]) are kept for the C++ builder
@@ -931,7 +931,7 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Imp Tech
-			if (civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length != 0) {
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH] && civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length != 0) {
 				var imptechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length; j++) {
 					// Preserve [id, multiplier] tuples when provided
