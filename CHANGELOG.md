@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.2](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.10.1...v1.10.2) (2025-12-30)
+
+
+### Bug Fixes
+
+* TypeError when processing civs without tree property ([#195](https://github.com/fritz-net/AoE2-Civbuilder/issues/195)) ([56dede1](https://github.com/fritz-net/AoE2-Civbuilder/commit/56dede12fcf09b6e9f3c354a4483dc117f9207e5))
+
 ## [1.10.1](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.10.0...v1.10.1) (2025-12-30)
 
 
