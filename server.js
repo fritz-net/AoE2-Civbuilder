@@ -943,9 +943,11 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Tech Tree
-			for (var j = 0; j < civs[i]["tree"].length; j++) {
-				for (var k = 0; k < civs[i]["tree"][j].length; k++) {
-					player_techtree[indexDictionary[j][civs[i]["tree"][j][k].toString()]] = 1;
+			if (civs[i]["tree"] && Array.isArray(civs[i]["tree"])) {
+				for (var j = 0; j < civs[i]["tree"].length; j++) {
+					for (var k = 0; k < civs[i]["tree"][j].length; k++) {
+						player_techtree[indexDictionary[j][civs[i]["tree"][j][k].toString()]] = 1;
+					}
 				}
 			}
 			mod_data.techtree.push(player_techtree);
