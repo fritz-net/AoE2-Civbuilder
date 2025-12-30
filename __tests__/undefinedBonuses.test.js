@@ -32,7 +32,7 @@ describe('Undefined Bonuses Handling', () => {
       teamBonuses: []
     };
     
-    for (var i = 0; i < civs.length; i++) {
+    for (let i = 0; i < civs.length; i++) {
       // Unique Unit (server.js line ~914)
       if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT] && civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT].length != 0) {
         results.uniqueUnits.push(civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT][0]);
@@ -42,8 +42,8 @@ describe('Undefined Bonuses Handling', () => {
       
       // Castle Tech (server.js line ~922)
       if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH] && civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length != 0) {
-        var castletechs = [];
-        for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length; j++) {
+        const castletechs = [];
+        for (let j = 0; j < civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length; j++) {
           castletechs.push(civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH][j]);
         }
         results.castleTechs.push(castletechs);
@@ -53,8 +53,8 @@ describe('Undefined Bonuses Handling', () => {
       
       // Imperial Tech (server.js line ~934)
       if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH] && civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length != 0) {
-        var imptechs = [];
-        for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length; j++) {
+        const imptechs = [];
+        for (let j = 0; j < civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length; j++) {
           imptechs.push(civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH][j]);
         }
         results.impTechs.push(imptechs);
@@ -63,9 +63,9 @@ describe('Undefined Bonuses Handling', () => {
       }
       
       // Civ bonuses (server.js line ~955)
-      var civBonuses = [];
+      const civBonuses = [];
       if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.CIV] && Array.isArray(civs[i]["bonuses"][BONUS_INDEX.CIV])) {
-        for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.CIV].length; j++) {
+        for (let j = 0; j < civs[i]["bonuses"][BONUS_INDEX.CIV].length; j++) {
           civBonuses.push(civs[i]["bonuses"][BONUS_INDEX.CIV][j]);
         }
       }
@@ -73,8 +73,8 @@ describe('Undefined Bonuses Handling', () => {
       
       // Team bonuses (server.js line ~963)
       if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.TEAM] && civs[i]["bonuses"][BONUS_INDEX.TEAM].length != 0) {
-        var team_bonuses = [];
-        for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.TEAM].length; j++) {
+        const team_bonuses = [];
+        for (let j = 0; j < civs[i]["bonuses"][BONUS_INDEX.TEAM].length; j++) {
           team_bonuses.push(civs[i]["bonuses"][BONUS_INDEX.TEAM][j]);
         }
         results.teamBonuses.push(team_bonuses);
