@@ -155,8 +155,6 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const civs = ref<CivConfig[]>([])
 const isDragging = ref(false)
 const mode = ref<'empty' | 'vanilla'>('empty')
-const replaceInputRef = ref<HTMLInputElement | null>(null)
-const replaceIndex = ref<number>(-1)
 
 // List of vanilla civ names in alphabetical order
 const vanillaCivNames = [
@@ -213,23 +211,25 @@ const vanillaCivNames = [
 ]
 
 async function loadVanillaCivs() {
-  const loadedCivs: CivConfig[] = []
-  
-  for (const civName of vanillaCivNames) {
+  // Load all vanilla civs in parallel for better performance
+  const promises = vanillaCivNames.map(async (civName) => {
     try {
-      // Try to fetch the vanilla civ JSON file
       const response = await fetch(`/v2/vanillaFiles/vanillaCivs/VanillaJson/${civName}.json`)
       if (response.ok) {
         const config = await response.json() as CivConfig
         config.description = normalizeDescription(config.description)
-        loadedCivs.push(config)
+        return config
       }
+      return null
     } catch (err) {
       console.error(`Failed to load vanilla civ: ${civName}`, err)
+      return null
     }
-  }
+  })
   
-  return loadedCivs
+  const results = await Promise.all(promises)
+  // Filter out any failed loads (null values)
+  return results.filter((civ): civ is CivConfig => civ !== null)
 }
 
 async function switchMode(newMode: 'empty' | 'vanilla') {
