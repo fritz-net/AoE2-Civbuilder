@@ -1,0 +1,1 @@
+/usr/bin/c++  -static-libstdc++ -ljsoncpp -Wl,--dependency-file=CMakeFiles/generate-enums.dir/link.d "CMakeFiles/generate-enums.dir/generate-enums.cpp.o" -o generate-enums  -ljsoncpp
