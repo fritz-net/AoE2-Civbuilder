@@ -10,9 +10,12 @@ const path = require('path');
 const { normalizeDescription } = require('../process_mod/civDataUtils.js');
 
 describe('Issue: Array Description Bug', () => {
+  const fixturesDir = path.join(__dirname, 'fixtures');
+  const cumansPath = path.join(fixturesDir, 'better-cumans.json');
+  const britonsPath = path.join(fixturesDir, 'better-britons-drill.json');
+  
   it('should process better-cumans.json with array description', () => {
-    const jsonPath = '/tmp/better-cumans.json';
-    const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+    const jsonData = JSON.parse(fs.readFileSync(cumansPath, 'utf8'));
     
     // Verify the issue: description is an array
     expect(Array.isArray(jsonData.description)).toBe(true);
@@ -27,8 +30,7 @@ describe('Issue: Array Description Bug', () => {
   });
   
   it('should process better-britons-drill.json with multi-element array description', () => {
-    const jsonPath = '/tmp/better-britons-drill.json';
-    const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+    const jsonData = JSON.parse(fs.readFileSync(britonsPath, 'utf8'));
     
     // Verify the issue: description is an array
     expect(Array.isArray(jsonData.description)).toBe(true);
@@ -49,8 +51,8 @@ describe('Issue: Array Description Bug', () => {
     };
     
     // Load the two problematic JSONs
-    const cumans = JSON.parse(fs.readFileSync('/tmp/better-cumans.json', 'utf8'));
-    const britons = JSON.parse(fs.readFileSync('/tmp/better-britons-drill.json', 'utf8'));
+    const cumans = JSON.parse(fs.readFileSync(cumansPath, 'utf8'));
+    const britons = JSON.parse(fs.readFileSync(britonsPath, 'utf8'));
     
     presets.presets.push(cumans);
     presets.presets.push(britons);
@@ -71,8 +73,8 @@ describe('Issue: Array Description Bug', () => {
   it('should generate valid mod_data.description array with normalized strings', () => {
     // Simulate the mod creation process
     const civs = [
-      JSON.parse(fs.readFileSync('/tmp/better-cumans.json', 'utf8')),
-      JSON.parse(fs.readFileSync('/tmp/better-britons-drill.json', 'utf8'))
+      JSON.parse(fs.readFileSync(cumansPath, 'utf8')),
+      JSON.parse(fs.readFileSync(britonsPath, 'utf8'))
     ];
     
     const mod_data = {

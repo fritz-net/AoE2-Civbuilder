@@ -9,9 +9,9 @@
  * @returns {string} - A normalized string description
  */
 function normalizeDescription(description) {
-	// If description is an array, join its elements with ", " or take the first element
+	// If description is an array, join its elements with ", "
 	if (Array.isArray(description)) {
-		// If array has elements, join them or take first one
+		// If array has elements, join them
 		if (description.length > 0) {
 			// Join all elements with comma-space separator
 			return description.join(', ');
