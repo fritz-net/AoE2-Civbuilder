@@ -16,7 +16,7 @@
           <input
             v-if="index < 5"
             type="color"
-            :value="rgbToHex(colours[localPalette[index]])"
+            :value="rgbToHex(getColorForPicker(index))"
             @input="handleColorPick(index, $event)"
             class="color-picker"
             :disabled="disabled || useCustomFlag"
@@ -109,17 +109,29 @@ function decrementPalette(index: number) {
 
 // Helper function to convert RGB array to hex color
 function rgbToHex(rgb: number[]): string {
-  const r = rgb[0].toString(16).padStart(2, '0')
-  const g = rgb[1].toString(16).padStart(2, '0')
-  const b = rgb[2].toString(16).padStart(2, '0')
+  if (!rgb || rgb.length < 3) {
+    return '#000000' // Default to black if invalid
+  }
+  const r = Math.max(0, Math.min(255, rgb[0])).toString(16).padStart(2, '0')
+  const g = Math.max(0, Math.min(255, rgb[1])).toString(16).padStart(2, '0')
+  const b = Math.max(0, Math.min(255, rgb[2])).toString(16).padStart(2, '0')
   return `#${r}${g}${b}`
 }
 
 // Helper function to convert hex color to RGB array
 function hexToRgb(hex: string): number[] {
+  if (!hex || typeof hex !== 'string' || hex.length < 7) {
+    return [0, 0, 0] // Default to black if invalid
+  }
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
   const b = parseInt(hex.slice(5, 7), 16)
+  
+  // Return black if parsing failed
+  if (isNaN(r) || isNaN(g) || isNaN(b)) {
+    return [0, 0, 0]
+  }
+  
   return [r, g, b]
 }
 
@@ -146,7 +158,21 @@ function getColor(index: number): number[] {
     return customColors.value.get(index)!
   }
   // Otherwise use the predefined color from colours array
-  return colours[localPalette.value[index]]
+  const paletteIndex = localPalette.value[index]
+  if (paletteIndex >= 0 && paletteIndex < colours.length) {
+    return colours[paletteIndex]
+  }
+  // Fallback to black if index is out of bounds
+  return [0, 0, 0]
+}
+
+// Get color for the color picker input (similar to getColor but for display)
+function getColorForPicker(index: number): number[] {
+  const paletteIndex = localPalette.value[index]
+  if (paletteIndex >= 0 && paletteIndex < colours.length) {
+    return colours[paletteIndex]
+  }
+  return [0, 0, 0]
 }
 
 function handleCustomFlagToggle() {
