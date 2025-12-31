@@ -27,6 +27,22 @@ EffectCommand createEC(int type, int A, int B, int C, float D) {
     return effect_command;
 }
 
+// Helper function to safely extract integer from JSON value that could be array or scalar
+int getJsonInt(const Json::Value& value, int index) {
+    if (value.isArray() && value.size() > index) {
+        return value[index].asInt();
+    } else if (value.isInt()) {
+        return value.asInt();
+    } else if (value.isUInt()) {
+        return value.asUInt();
+    } else if (value.isDouble()) {
+        return static_cast<int>(value.asDouble());
+    }
+    // Default to 0 if we can't convert
+    std::cerr << "[C++]: WARNING - Could not convert JSON value to int, using default 0" << std::endl;
+    return 0;
+}
+
 void recalculateTechDiscounts(DatFile *df) {
     for (Effect &effect : df->Effects) {
         if (effect.Name.find("Elite costs -20%") != string::npos) {
