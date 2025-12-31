@@ -71,12 +71,22 @@
         <p class="empty-hint">Upload JSON files to get started</p>
       </div>
 
+      <!-- Warning/Error Messages for Civ Limit -->
+      <div v-if="civs.length >= 45" class="limit-warning">
+        <div v-if="civs.length <= 50" class="warning-message">
+          <p>⚠️ <strong>Warning:</strong> You have {{ civs.length }}/50 civilizations loaded. Age of Empires II currently does not support more than 50 civilizations in a single mod.</p>
+        </div>
+        <div v-else class="error-message-limit">
+          <p>❌ <strong>Limit Exceeded:</strong> You have {{ civs.length }} civilizations loaded, but Age of Empires II does not support more than 50 civilizations in a single mod. Please remove {{ civs.length - 50 }} civilization{{ civs.length - 50 > 1 ? 's' : '' }} before creating your mod.</p>
+        </div>
+      </div>
+
       <!-- Actions -->
       <div v-if="civs.length > 0" class="actions-section">
         <button 
           class="action-btn primary-btn"
           @click="handleCreateMod"
-          :disabled="isCreating || civs.length === 0"
+          :disabled="isCreating || civs.length === 0 || civs.length > 50"
         >
           {{ isCreating ? 'Creating Mod...' : `Create Combined Mod (${civs.length} ${civs.length === 1 ? 'Civ' : 'Civs'})` }}
         </button>
@@ -144,6 +154,14 @@ function handleDrop(event: DragEvent) {
 }
 
 function processFiles(files: File[]) {
+  // Check if adding these files would exceed the 50 civ limit
+  const totalAfterAdd = civs.value.length + files.length
+  if (totalAfterAdd > 50) {
+    const available = 50 - civs.value.length
+    alert(`Cannot add ${files.length} civilization${files.length > 1 ? 's' : ''}. You currently have ${civs.value.length} civilizations loaded. You can only add ${available} more to reach the maximum of 50 civilizations.`)
+    return
+  }
+
   const readers = files.map(file => {
     return new Promise<CivConfig>((resolve, reject) => {
       const reader = new FileReader()
@@ -486,6 +504,53 @@ function handleDownloadVanilla() {
 .error-message p {
   color: hsl(52, 100%, 50%);
   font-size: 1.1rem;
+}
+
+.error-message {
+  padding: 1rem;
+  background: rgba(200, 50, 50, 0.2);
+  border: 2px solid rgba(200, 50, 50, 0.5);
+  border-radius: 4px;
+  text-align: center;
+}
+
+.error-message p {
+  color: hsl(52, 100%, 50%);
+  font-size: 1.1rem;
+}
+
+.limit-warning {
+  margin-top: 1rem;
+}
+
+.warning-message {
+  padding: 1rem;
+  background: rgba(139, 69, 19, 0.3);
+  border-left: 4px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.warning-message p {
+  color: #ffffff;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.error-message-limit {
+  padding: 1rem;
+  background: rgba(200, 50, 50, 0.2);
+  border: 2px solid rgba(200, 50, 50, 0.5);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.error-message-limit p {
+  color: hsl(52, 100%, 50%);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
 }
 
 @media (max-width: 768px) {
