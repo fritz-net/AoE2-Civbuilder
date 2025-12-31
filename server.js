@@ -19,6 +19,7 @@ const createTechtreeJson = require("./process_mod/createTechtreeJson.js");
 const makeai = require("./process_mod/modAI.js");
 const { numBonuses, numBasicTechs, nameArr, colours, iconids, blanks, indexDictionary } = require("./process_mod/constants.js");
 const { createCivilizationsJson } = require("./process_mod/createCivilizationsJson.js");
+const { normalizeDescription } = require("./process_mod/civDataUtils.js");
 const commonJs = require("./public/js/common.js");
 const { integrateNuxt } = require("./nuxt-integration.js");
 const { BONUS_INDEX } = require("./src/shared/bonusConstants.js");
@@ -887,10 +888,8 @@ const writeIconsJson = async (req, res, next) => {
 			// Name
 			mod_data.name.push(civs[i]["alias"]);
 
-			// Description
-			if (!civs[i]["description"]) {
-				civs[i]["description"] = "";
-			}
+			// Description - normalize to ensure it's always a string
+			civs[i]["description"] = normalizeDescription(civs[i]["description"]);
 			mod_data.description.push(civs[i]["description"]);
 
 			// Wonder
@@ -911,7 +910,7 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Unique Unit
-			if (civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT].length != 0) {
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT] && civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT].length != 0) {
 				// Extract ID from bonus data (could be number or [id, multiplier])
 				player_techtree[0] = extractBonusId(civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT][0], `unique unit for civ ${i}`);
 			} else {
@@ -919,7 +918,7 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Castle Tech
-				if (civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length != 0) {
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH] && civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length != 0) {
 				var castletechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length; j++) {
 					// Preserve the original entry so multipliers ([id, copies]) are kept for the C++ builder
@@ -931,7 +930,7 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Imp Tech
-			if (civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length != 0) {
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH] && civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length != 0) {
 				var imptechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length; j++) {
 					// Preserve [id, multiplier] tuples when provided
@@ -943,9 +942,11 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Tech Tree
-			for (var j = 0; j < civs[i]["tree"].length; j++) {
-				for (var k = 0; k < civs[i]["tree"][j].length; k++) {
-					player_techtree[indexDictionary[j][civs[i]["tree"][j][k].toString()]] = 1;
+			if (civs[i]["tree"] && Array.isArray(civs[i]["tree"])) {
+				for (var j = 0; j < civs[i]["tree"].length; j++) {
+					for (var k = 0; k < civs[i]["tree"][j].length; k++) {
+						player_techtree[indexDictionary[j][civs[i]["tree"][j][k].toString()]] = 1;
+					}
 				}
 			}
 			mod_data.techtree.push(player_techtree);
@@ -1498,6 +1499,8 @@ function draftIO(io) {
 							for (var j = 0; j < numBasicTechs; j++) {
 								player_techtree.push(0);
 							}
+							// Normalize description to ensure it's always a string
+							draft["players"][i]["description"] = normalizeDescription(draft["players"][i]["description"]);
 							mod_data.description.push(draft["players"][i]["description"]);
 							mod_data.castle.push(draft["players"][i]["castle"]);
 							mod_data.wonder.push(draft["players"][i]["wonder"]);
@@ -1655,6 +1658,24 @@ function draftIO(io) {
 			} else {
 				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			}
+		});
+		socket.on("update tree progress", (roomID, playerNumber, tree) => {
+			let draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
+			
+			// Only update the tree in memory, don't mark player as ready
+			// This is for intermediate updates while player is still editing
+			draft["players"][playerNumber]["tree"] = tree;
+			
+			// Broadcast the updated gamestate to all clients in the room
+			// This allows spectators and other players to see real-time updates
+			io.in(roomID).emit("set gamestate", draft);
 		});
 		socket.on("end turn", (roomID, pick, client_turn) => {
 			let draft = getDraft(roomID);
