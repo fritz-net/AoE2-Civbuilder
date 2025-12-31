@@ -12,6 +12,24 @@
           <button class="nav-btn" @click="decrementPalette(index)">&lt;</button>
           <span class="category-label">{{ category }}</span>
           <button class="nav-btn" @click="incrementPalette(index)">&gt;</button>
+          <!-- Add dropdown for color selection (0-4) -->
+          <select
+            v-if="index < 5"
+            :value="localPalette[index]"
+            @change="handleDropdownChange(index, $event)"
+            class="color-dropdown"
+            :disabled="disabled || useCustomFlag"
+            title="Select a preset color"
+          >
+            <option 
+              v-for="(color, colorIndex) in colours" 
+              :key="colorIndex" 
+              :value="colorIndex"
+              :style="{ backgroundColor: rgbToHex(color) }"
+            >
+              {{ getColorName(colorIndex) }}
+            </option>
+          </select>
           <!-- Add color picker for color categories (0-4) -->
           <input
             v-if="index < 5"
@@ -161,6 +179,46 @@ function handleColorPick(index: number, event: Event) {
   if (!useCustomFlag.value) {
     renderFlag()
   }
+}
+
+// Handle dropdown change for preset color selection
+function handleDropdownChange(index: number, event: Event) {
+  if (props.disabled || useCustomFlag.value) return
+  
+  const select = event.target as HTMLSelectElement
+  const newPalette = [...localPalette.value]
+  newPalette[index] = parseInt(select.value)
+  localPalette.value = newPalette
+  emit('update:modelValue', newPalette)
+  
+  // Clear custom color when selecting a preset
+  customColors.value.delete(index)
+  
+  if (!useCustomFlag.value) {
+    renderFlag()
+  }
+}
+
+// Get a friendly name for a color
+function getColorName(colorIndex: number): string {
+  const colorNames = [
+    'Black',
+    'White', 
+    'Red',
+    'Green',
+    'Yellow',
+    'Blue',
+    'Orange',
+    'Cyan',
+    'Purple',
+    'Magenta',
+    'Mint',
+    'Brown',
+    'Gray',
+    'Pink',
+    'Light Blue',
+  ]
+  return colorNames[colorIndex] || `Color ${colorIndex + 1}`
 }
 
 // Helper to get color from palette with bounds checking (shared logic)
@@ -729,6 +787,34 @@ onMounted(() => {
   text-align: center;
   color: hsl(52, 100%, 50%);
   font-size: 0.9rem;
+}
+
+.color-dropdown {
+  width: 120px;
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  color: hsl(52, 100%, 50%);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.color-dropdown:hover:not(:disabled) {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
+.color-dropdown:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.color-dropdown option {
+  background: rgba(139, 69, 19, 0.95);
+  color: hsl(52, 100%, 50%);
+  padding: 0.25rem;
 }
 
 .color-picker {

@@ -6,7 +6,20 @@
       <button class="nav-btn" @click="previous">&lt;</button>
       
       <div class="language-display">
-        <span class="language-name">{{ currentLanguageName }}</span>
+        <select 
+          v-model="selectedLanguage" 
+          @change="handleDropdownChange"
+          class="language-dropdown"
+          :disabled="disabled"
+        >
+          <option 
+            v-for="(language, index) in languages" 
+            :key="index" 
+            :value="index"
+          >
+            {{ language }}
+          </option>
+        </select>
       </div>
       
       <button class="nav-btn" @click="next">&gt;</button>
@@ -15,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { languages } from '~/composables/useCivData'
 
 const props = withDefaults(defineProps<{
@@ -29,7 +42,16 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void
 }>()
 
-const currentLanguageName = computed(() => languages[props.modelValue])
+const selectedLanguage = ref(props.modelValue)
+
+// Watch for external changes to modelValue
+watch(() => props.modelValue, (newVal) => {
+  selectedLanguage.value = newVal
+})
+
+function handleDropdownChange() {
+  emit('update:modelValue', selectedLanguage.value)
+}
 
 function next() {
   if (props.disabled) return
@@ -91,8 +113,31 @@ function previous() {
   text-align: center;
 }
 
-.language-name {
+.language-dropdown {
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
   color: hsl(52, 100%, 50%);
   font-size: 1rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.language-dropdown:hover:not(:disabled) {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
+.language-dropdown:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.language-dropdown option {
+  background: rgba(139, 69, 19, 0.95);
+  color: hsl(52, 100%, 50%);
 }
 </style>
