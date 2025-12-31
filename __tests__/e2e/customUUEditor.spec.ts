@@ -104,8 +104,8 @@ test.describe('Custom UU Editor - Combat Stats', () => {
     // Select Infantry type
     await page.getByTestId('type-button-infantry').click();
     
-    // Check attack section exists (label now includes icon)
-    await expect(page.getByText(/Attack/i)).toBeVisible();
+    // Check attack section exists - use label selector for specificity
+    await expect(page.locator('label[for="attack"]')).toBeVisible();
   });
 
   test('should display armor sliders', async ({ page }) => {
