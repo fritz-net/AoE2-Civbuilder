@@ -7,28 +7,9 @@
 
 const fs = require('fs');
 const path = require('path');
+const { normalizeDescription } = require('../process_mod/civDataUtils.js');
 
 describe('Issue: Array Description Bug', () => {
-  // Helper function to normalize descriptions (matching server.js implementation)
-  function normalizeDescription(description) {
-    if (Array.isArray(description)) {
-      if (description.length > 0) {
-        return description.join(', ');
-      }
-      return '';
-    }
-    
-    if (description === null || description === undefined) {
-      return '';
-    }
-    
-    if (typeof description === 'string') {
-      return description;
-    }
-    
-    return String(description);
-  }
-  
   it('should process better-cumans.json with array description', () => {
     const jsonPath = '/tmp/better-cumans.json';
     const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));

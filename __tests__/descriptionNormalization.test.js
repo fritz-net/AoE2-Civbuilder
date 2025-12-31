@@ -5,39 +5,9 @@
  * to a string, regardless of the input type (array, null, undefined, string, etc.)
  */
 
+const { normalizeDescription } = require('../process_mod/civDataUtils.js');
+
 describe('Description Normalization', () => {
-  // Load server.js to access the normalizeDescription function
-  // We'll need to extract it or test it indirectly through the API
-  
-  // Since normalizeDescription is not exported, we'll create a local version for testing
-  // that matches the implementation in server.js
-  function normalizeDescription(description) {
-    // If description is an array, join its elements with ", " or take the first element
-    if (Array.isArray(description)) {
-      // If array has elements, join them or take first one
-      if (description.length > 0) {
-        // Join all elements with comma-space separator
-        return description.join(', ');
-      }
-      // Empty array becomes empty string
-      return '';
-    }
-    
-    // If description is null or undefined, return empty string
-    if (description === null || description === undefined) {
-      return '';
-    }
-    
-    // If description is already a string, return it
-    if (typeof description === 'string') {
-      return description;
-    }
-    
-    // For any other type (number, object, etc.), convert to string
-    // This handles edge cases gracefully
-    return String(description);
-  }
-  
   describe('normalizeDescription function', () => {
     it('should convert array with single element to string', () => {
       expect(normalizeDescription(['CAV ARCHER'])).toBe('CAV ARCHER');
