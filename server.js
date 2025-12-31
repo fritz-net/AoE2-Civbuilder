@@ -1659,6 +1659,24 @@ function draftIO(io) {
 				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			}
 		});
+		socket.on("update tree progress", (roomID, playerNumber, tree) => {
+			let draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
+			
+			// Only update the tree in memory, don't mark player as ready
+			// This is for intermediate updates while player is still editing
+			draft["players"][playerNumber]["tree"] = tree;
+			
+			// Broadcast the updated gamestate to all clients in the room
+			// This allows spectators and other players to see real-time updates
+			io.in(roomID).emit("set gamestate", draft);
+		});
 		socket.on("end turn", (roomID, pick, client_turn) => {
 			let draft = getDraft(roomID);
 			

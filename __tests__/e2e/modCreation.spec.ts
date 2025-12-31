@@ -162,7 +162,7 @@ test.describe('Combine Page - Multi-Civ Mod Creation', () => {
     
     // Wait for navigation to success page
     // C++ backend must be running for this test to pass
-    await page.waitForURL('**/v2/download-success*', { timeout: 15000 });
+    await page.waitForURL(/.*\/download-success/, { timeout: 15000 });
     
     // Verify we're on the success page
     await expect(page.getByText(/Mod Created Successfully/i)).toBeVisible();
@@ -288,7 +288,7 @@ test.describe('Build Page - Single Civ Mod Creation', () => {
     }
     
     // Otherwise, wait for navigation to success page
-    await page.waitForURL('**/v2/download-success*', { timeout: 15000 });
+    await page.waitForURL(/.*\/download-success/, { timeout: 15000 });
     
     // Verify we're on the success page
     await expect(page.getByText(/Mod Created Successfully/i)).toBeVisible();
