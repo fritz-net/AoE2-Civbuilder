@@ -99,6 +99,51 @@ test.describe('Combine Page - Multi-Civ Mod Creation', () => {
     await expect(page.getByText(/No civilizations loaded yet/i)).toBeVisible();
   });
 
+  test('should enforce 50 civilization limit', async ({ page }) => {
+    await page.goto('/v2/combine');
+    
+    // Get 50 vanilla civ files
+    const vanillaCivs = fs.readdirSync(VANILLA_CIVS_DIR).filter(f => f.endsWith('.json'));
+    const first50Civs = vanillaCivs.slice(0, 50).map(f => path.join(VANILLA_CIVS_DIR, f));
+    
+    // Upload 50 civs
+    const fileInput = page.locator('input[type="file"]');
+    await fileInput.setInputFiles(first50Civs);
+    
+    // Wait for files to be processed
+    await page.waitForTimeout(2000);
+    
+    // Verify 50 civs are loaded
+    await expect(page.getByText(/Loaded Civilizations \(50\)/i)).toBeVisible();
+    
+    // Verify warning message is shown
+    await expect(page.getByText(/Warning:/i)).toBeVisible();
+    await expect(page.getByText(/50\/50 civilizations loaded/i)).toBeVisible();
+    
+    // Verify create button is still enabled at 50 civs
+    const createButton = page.getByRole('button', { name: /Create Combined Mod \(50 Civs\)/i });
+    await expect(createButton).toBeEnabled();
+    
+    // Try to upload one more civ (should show alert and prevent)
+    const extraCivPath = path.join(VANILLA_CIVS_DIR, vanillaCivs[50]);
+    
+    // Set up dialog handler to accept the alert
+    page.on('dialog', async dialog => {
+      expect(dialog.message()).toContain('Cannot add 1 civilization');
+      expect(dialog.message()).toContain('You can only add 0 more');
+      await dialog.accept();
+    });
+    
+    // Try to upload the 51st civ
+    await fileInput.setInputFiles([extraCivPath]);
+    
+    // Wait a moment to ensure dialog was shown
+    await page.waitForTimeout(500);
+    
+    // Verify still only 50 civs (upload was prevented)
+    await expect(page.getByText(/Loaded Civilizations \(50\)/i)).toBeVisible();
+  });
+
   // Note: The following test requires C++ binary to be built
   // It's enabled in CI where the binary is available
   (shouldSkipDownloadTests ? test.skip : test)('should create combined mod and navigate to success page', async ({ page }) => {
