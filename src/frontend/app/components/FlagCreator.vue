@@ -16,7 +16,7 @@
           <input
             v-if="index < 5"
             type="color"
-            :value="rgbToHex(getColorForPicker(index))"
+            :value="rgbToHex(getColor(index))"
             @input="handleColorPick(index, $event)"
             class="color-picker"
             :disabled="disabled || useCustomFlag"
@@ -175,16 +175,8 @@ function getPaletteColor(index: number): number[] {
 // Get the actual color to use (custom or from palette)
 function getColor(index: number): number[] {
   // Check if there's a custom color for this palette index
-  if (customColors.value.has(index)) {
-    return customColors.value.get(index)!
-  }
-  // Otherwise use the predefined color from colours array
-  return getPaletteColor(index)
-}
-
-// Get color for the color picker input - shows current active color (custom or preset)
-function getColorForPicker(index: number): number[] {
-  return getColor(index)
+  // Use optional chaining with fallback for safety
+  return customColors.value.get(index) ?? getPaletteColor(index)
 }
 
 function handleCustomFlagToggle() {
