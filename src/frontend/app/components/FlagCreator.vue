@@ -165,6 +165,11 @@ function handleColorPick(index: number, event: Event) {
 
 // Helper to get color from palette with bounds checking (shared logic)
 function getPaletteColor(index: number): number[] {
+  // Validate index is within bounds for localPalette
+  if (index < 0 || index >= localPalette.value.length) {
+    return [0, 0, 0]
+  }
+  
   const paletteIndex = localPalette.value[index]
   if (paletteIndex >= 0 && paletteIndex < colours.length) {
     return colours[paletteIndex]
@@ -174,6 +179,11 @@ function getPaletteColor(index: number): number[] {
 
 // Get the actual color to use (custom or from palette)
 function getColor(index: number): number[] {
+  // Validate index is within bounds
+  if (index < 0 || index >= localPalette.value.length) {
+    return [0, 0, 0]
+  }
+  
   // Check if there's a custom color for this palette index
   // Use optional chaining with fallback for safety
   return customColors.value.get(index) ?? getPaletteColor(index)
