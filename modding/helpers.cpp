@@ -29,17 +29,56 @@ EffectCommand createEC(int type, int A, int B, int C, float D) {
 
 // Helper function to safely extract integer from JSON value that could be array or scalar
 int getJsonInt(const Json::Value& value, int index) {
-    if (value.isArray() && value.size() > index) {
-        return value[index].asInt();
-    } else if (value.isInt()) {
+    // Handle negative index
+    if (index < 0) {
+        std::cerr << "[C++]: WARNING - Negative index " << index << " provided to getJsonInt, using default 0" << std::endl;
+        return 0;
+    }
+    
+    // Handle array values
+    if (value.isArray()) {
+        if (value.size() > static_cast<Json::ArrayIndex>(index)) {
+            const Json::Value& element = value[index];
+            // Check if array element is convertible to int
+            if (element.isInt()) {
+                return element.asInt();
+            } else if (element.isUInt()) {
+                return static_cast<int>(element.asUInt());
+            } else if (element.isDouble()) {
+                return static_cast<int>(element.asDouble());
+            } else if (element.isString()) {
+                // Try to parse string as integer
+                try {
+                    return std::stoi(element.asString());
+                } catch (...) {
+                    std::cerr << "[C++]: WARNING - Could not convert JSON array string element to int, using default 0" << std::endl;
+                    return 0;
+                }
+            }
+        }
+        std::cerr << "[C++]: WARNING - Array index " << index << " out of bounds or element not convertible, using default 0" << std::endl;
+        return 0;
+    }
+    
+    // Handle scalar values
+    if (value.isInt()) {
         return value.asInt();
     } else if (value.isUInt()) {
-        return value.asUInt();
+        return static_cast<int>(value.asUInt());
     } else if (value.isDouble()) {
         return static_cast<int>(value.asDouble());
+    } else if (value.isString()) {
+        // Try to parse string as integer
+        try {
+            return std::stoi(value.asString());
+        } catch (...) {
+            std::cerr << "[C++]: WARNING - Could not convert JSON string to int, using default 0" << std::endl;
+            return 0;
+        }
     }
-    // Default to 0 if we can't convert
-    std::cerr << "[C++]: WARNING - Could not convert JSON value to int, using default 0" << std::endl;
+    
+    // Default case
+    std::cerr << "[C++]: WARNING - Could not convert JSON value to int (type: " << value.type() << "), using default 0" << std::endl;
     return 0;
 }
 
