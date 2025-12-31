@@ -85,9 +85,16 @@ get_latest_release_tag() {
         fi
     else
         # For staging, get the absolute latest release
-        tag=$(curl -s -f "${GITHUB_API}/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null | \
-            grep '"tag_name":' | \
-            sed -E 's/.*"tag_name": *"([^"]+)".*/\1/' || echo "")
+        # Try jq first for robust JSON parsing, fall back to grep/sed if not available
+        if command -v jq &> /dev/null; then
+            tag=$(curl -s -f "${GITHUB_API}/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null | \
+                jq -r '.tag_name // empty' || echo "")
+        else
+            # Fallback to grep/sed with improved error handling
+            tag=$(curl -s -f "${GITHUB_API}/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null | \
+                grep '"tag_name":' | head -1 | \
+                sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/' || echo "")
+        fi
         echo "$tag"
     fi
 }
@@ -179,7 +186,20 @@ fi
 # Clean up old images (keep last 3 versions)
 echo ""
 echo "Cleaning up old images..."
-docker images "${IMAGE_NAME}" --format "{{.Tag}}" | grep -v "^latest$" | grep "^v" | tail -n +4 | xargs -r -I {} docker rmi "${IMAGE_NAME}:{}" || true
+# Get list of image tags, filter for version tags, and remove old ones
+IMAGE_TAGS=$(docker images "${IMAGE_NAME}" --format "{{.Tag}}" | grep -v "^latest$" | grep "^v" || true)
+IMAGE_COUNT=$(echo "$IMAGE_TAGS" | grep -v '^$' | wc -l)
+
+if [ "$IMAGE_COUNT" -gt 3 ]; then
+    echo "$IMAGE_TAGS" | tail -n +4 | while read -r tag; do
+        if [ -n "$tag" ]; then
+            docker rmi "${IMAGE_NAME}:${tag}" 2>/dev/null || true
+        fi
+    done
+    echo "Cleaned up old images (kept last 3 versions)"
+else
+    echo "No old images to clean up (keeping all $IMAGE_COUNT version(s))"
+fi
 
 echo ""
 echo "Update complete!"

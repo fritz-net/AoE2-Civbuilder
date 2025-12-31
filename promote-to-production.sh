@@ -21,11 +21,31 @@ GITHUB_REPO="fritz-net/AoE2-Civbuilder"
 GITHUB_API="https://api.github.com"
 
 echo "Checking if version $VERSION exists..."
-RELEASE_INFO=$(curl -s -f "${GITHUB_API}/repos/${GITHUB_REPO}/releases/tags/${VERSION}" 2>/dev/null || echo '{"message": "Not Found"}')
 
-if echo "$RELEASE_INFO" | grep -q '"message".*"Not Found"'; then
+# Check HTTP status code and response
+HTTP_STATUS=$(curl -s -o /tmp/release-check-$$.json -w "%{http_code}" "${GITHUB_API}/repos/${GITHUB_REPO}/releases/tags/${VERSION}" 2>/dev/null || echo "000")
+
+if [ "$HTTP_STATUS" = "404" ] || [ "$HTTP_STATUS" = "000" ]; then
     echo "Error: Version $VERSION not found in GitHub releases"
     echo "Please check https://github.com/${GITHUB_REPO}/releases for available versions"
+    rm -f /tmp/release-check-$$.json
+    exit 1
+fi
+
+# Verify it's a valid release JSON (should have a tag_name field)
+if command -v jq &> /dev/null; then
+    RELEASE_TAG=$(jq -r '.tag_name // empty' /tmp/release-check-$$.json 2>/dev/null)
+elif grep -q '"tag_name"' /tmp/release-check-$$.json 2>/dev/null; then
+    RELEASE_TAG="found"
+else
+    RELEASE_TAG=""
+fi
+
+rm -f /tmp/release-check-$$.json
+
+if [ -z "$RELEASE_TAG" ]; then
+    echo "Error: Could not verify version $VERSION in GitHub releases"
+    echo "The API response may be invalid or the release may not exist"
     exit 1
 fi
 

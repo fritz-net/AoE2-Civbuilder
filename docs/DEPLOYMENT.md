@@ -31,6 +31,22 @@ The deployment system supports:
 1. Docker installed on your host system
 2. Access to pull from `ghcr.io/fritz-net/aoe2-civbuilder`
 3. Bash shell (Linux/macOS or WSL on Windows)
+4. `curl` for making HTTP requests
+5. (Optional but recommended) `jq` for robust JSON parsing
+
+To install jq on common platforms:
+```bash
+# Ubuntu/Debian
+sudo apt-get install jq
+
+# CentOS/RHEL
+sudo yum install jq
+
+# macOS
+brew install jq
+```
+
+Note: The scripts will work without `jq` using fallback parsing, but `jq` provides more reliable JSON handling.
 
 ### Setup Scripts
 
