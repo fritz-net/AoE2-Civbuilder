@@ -512,7 +512,7 @@ void Civbuilder::assignWonders() {
             cerr << "[C++]: WARNING - Cannot assign wonder to Civ " << (i+1) << endl;
             continue;
         }
-        int wonderIndex = this->config["wonder"][i].asInt();
+        int wonderIndex = getJsonInt(this->config["wonder"][i]);
         if (wonderIndex >= 0 && wonderIndex < wonderGraphics.size()) {
             this->df->Civs[i + 1].Units[276] = wonderGraphics[wonderIndex];
         } else {
@@ -550,7 +550,7 @@ void Civbuilder::assignCastles() {
             cerr << "[C++]: WARNING - Cannot assign castle to Civ " << (i+1) << endl;
             continue;
         }
-        int castleIndex = this->config["castle"][i].asInt();
+        int castleIndex = getJsonInt(this->config["castle"][i]);
         if (castleIndex >= 0 && castleIndex < castleGraphics.size()) {
             this->df->Civs[i + 1].Units[82] = castleGraphics[castleIndex];
         } else {
@@ -569,7 +569,7 @@ void Civbuilder::assignLanguages() {
         for (int j = 0; j < this->df->Sounds.size(); j++) {
             int soundSize = this->df->Sounds[j].Items.size();
             for (int k = 0; k < soundSize; k++) {
-                if (this->df->Sounds[j].Items[k].Civilization == (this->config["language"][i].asInt() + 1)) {
+                if (this->df->Sounds[j].Items[k].Civilization == (getJsonInt(this->config["language"][i]) + 1)) {
                     // Make a copy, but change its civilization so that it doesn't get re-copied
                     SoundItem copySound = this->df->Sounds[j].Items[k];
                     copySound.Civilization = i + 1 + civOffset;
@@ -606,7 +606,7 @@ void Civbuilder::assignArchitectures() {
     
     vector<int> dest = {};
     for (int i = 0; i < this->config["architecture"].size(); i++) {
-        dest.push_back(this->config["architecture"][i].asInt());
+        dest.push_back(getJsonInt(this->config["architecture"][i]));
     }
     
     cout << "[C++]: Config has " << dest.size() << " architecture entries" << endl;
