@@ -14,13 +14,13 @@
         <div class="drop-zone-content">
           <span class="drop-zone-icon">📁</span>
           <p class="drop-zone-text">
-            <strong>Drop draft-config.json or zip file here</strong>
+            <strong>Drop draft-config.json here</strong>
           </p>
           <p class="drop-zone-subtext">or click to browse</p>
           <input
             ref="fileInput"
             type="file"
-            accept=".json,.zip"
+            accept=".json"
             @change="handleFileSelect"
             class="file-input-hidden"
           />
@@ -358,19 +358,38 @@ const processFile = async (file: File) => {
   uploadError.value = null
   
   try {
-    let configData: any = null
+    // Define interface for draft config structure
+    interface DraftConfig {
+      preset?: {
+        slots?: number
+        rounds?: number
+        points?: number
+        rarities?: boolean[]
+        allow_base_edition_uu?: boolean
+        allow_first_edition_uu?: boolean
+        timer_enabled?: boolean
+        timer_duration?: number
+        blind_picks?: boolean
+        snake_draft?: boolean
+        cards_per_roll?: number
+        bonuses_per_page?: number
+        required_first_roll?: number[]
+      }
+    }
+    
+    let configData: DraftConfig | null = null
     
     if (file.name.endsWith('.json')) {
       // Direct JSON file
       const text = await file.text()
-      configData = JSON.parse(text)
-    } else if (file.name.endsWith('.zip')) {
-      // ZIP file - we need to extract draft-config.json
-      // Using JSZip library (we'll need to add this)
-      uploadError.value = 'ZIP file support requires extracting draft-config.json first. Please extract the file and upload draft-config.json directly.'
-      return
+      try {
+        configData = JSON.parse(text) as DraftConfig
+      } catch (parseError) {
+        uploadError.value = 'Failed to parse JSON file. Please ensure it\'s a valid draft-config.json file.'
+        return
+      }
     } else {
-      uploadError.value = 'Invalid file type. Please upload a .json or .zip file.'
+      uploadError.value = 'Invalid file type. Please upload a .json file.'
       return
     }
     
@@ -418,10 +437,11 @@ const processFile = async (file: File) => {
         uploadSuccess.value = false
       }, 3000)
     } else {
-      uploadError.value = 'Invalid draft config format. Expected a draft-config.json file.'
+      uploadError.value = 'Invalid draft config format. The file must contain a "preset" field with draft settings.'
     }
   } catch (err) {
-    uploadError.value = err instanceof Error ? err.message : 'Failed to parse file'
+    const errorMessage = err instanceof Error ? err.message : 'Unexpected error while processing file'
+    uploadError.value = `Failed to process file: ${errorMessage}`
     console.error('Failed to process file:', err)
   }
 }

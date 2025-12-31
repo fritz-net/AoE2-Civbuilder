@@ -1173,7 +1173,7 @@ function processCardPick(draft, pick) {
 			draft["gamestate"]["phase"] = 3;
 		} else {
 			draft["gamestate"]["cards"] = [];
-			// Use configurable bonuses_per_page, default to 20 for backward compatibility
+			// Use configurable bonuses_per_page, default to 30 for backward compatibility
 			var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
 			// For subsequent rounds after first, use a smaller base value (2/3 of bonuses_per_page rounded down)
 			var subsequentBase = Math.floor(bonusesPerPage * 2 / 3);
