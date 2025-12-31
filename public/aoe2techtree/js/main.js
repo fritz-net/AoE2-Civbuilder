@@ -622,6 +622,11 @@ function toggleCaret(caretId, relativepath = ".") {
 		enableCaret(caretId);
 	}
 	displayData(relativepath);
+	
+	// Send intermediate tree update to server when in draft mode (canEdit == 1)
+	if (canEdit == 1 && typeof updateTreeProgress === 'function' && typeof player !== 'undefined') {
+		updateTreeProgress(player, localtree);
+	}
 }
 
 function displayHelp(caretId) {
