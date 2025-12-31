@@ -5,6 +5,25 @@ module.exports = {
 	createTechtreeJson,
 };
 
+/**
+ * Extract bonus ID from bonus data
+ * Bonus data can be either a number (legacy) or [id, multiplier] (new UI)
+ * @param {number|number[]} bonus - Either a number or [id, multiplier] array
+ * @returns {number} - The bonus ID
+ */
+function extractBonusId(bonus) {
+	if (Array.isArray(bonus)) {
+		if (bonus.length === 0) {
+			return 0;
+		}
+		return bonus[0]; // Return the ID from [id, multiplier]
+	}
+	if (bonus === null || bonus === undefined) {
+		return 0;
+	}
+	return bonus; // Return the number directly
+}
+
 function addSpecialNodes(specialNodes, nodeList, prerequisite, beforeNode = "") {
 	for (let specialNode of specialNodes) {
 		let node = JSON.parse(JSON.stringify(specialNode));
@@ -102,7 +121,10 @@ function createTechtreeJson(data_json, techtree_json) {
 
 		//Add special technology nodes for civ bonuses
 		for (let j = 0; j < civ.civ_bonus[i].length; j++) {
-			switch (civ.civ_bonus[i][j]) {
+			const bonusId = extractBonusId(civ.civ_bonus[i][j]);
+			// Debug: uncomment to see bonus processing
+			console.log(`Processing bonus ${bonusId} for civ ${i}, typeof: ${typeof bonusId}, value === 356: ${bonusId === 356}`);
+			switch (bonusId) {
 				case 43:
 					addSpecialNodes([specialNodes["missionary"]], techtree.civ_techs_units, civ.techtree[i][146]);
 					break;
@@ -303,17 +325,26 @@ function createTechtreeJson(data_json, techtree_json) {
 					break;
 				case 356:
 					// Pastures replace Farms and Mill upgrades
-					removeNode("Mill", techtree.civ_techs_buildings);
-					removeNode("Farm", techtree.civ_techs_buildings);
-					addSpecialNodes([specialNodes["pasture"]], techtree.civ_techs_buildings, 1);
-					// Add pasture upgrade techs
-					addSpecialNodes([specialNodes["domestication"]], techtree.civ_techs_units, 1);
-					addSpecialNodes([specialNodes["pastoralism"]], techtree.civ_techs_units, 1);
-					addSpecialNodes([specialNodes["transhumance"]], techtree.civ_techs_units, 1);
-					// Remove farm upgrades (they're replaced by pasture upgrades)
-					removeNode("Horse Collar", techtree.civ_techs_units);
-					removeNode("Heavy Plow", techtree.civ_techs_units);
-					removeNode("Crop Rotation", techtree.civ_techs_units);
+					console.log('DEBUG: Matched case 356, processing pastures');
+					try {
+						removeNode("Mill", techtree.civ_techs_buildings);
+						removeNode("Farm", techtree.civ_techs_buildings);
+						addSpecialNodes([specialNodes["pasture"]], techtree.civ_techs_buildings, 1);
+						// Add pasture upgrade techs
+						addSpecialNodes([specialNodes["domestication"]], techtree.civ_techs_units, 1);
+						addSpecialNodes([specialNodes["pastoralism"]], techtree.civ_techs_units, 1);
+						addSpecialNodes([specialNodes["transhumance"]], techtree.civ_techs_units, 1);
+						// Remove farm upgrades (they're replaced by pasture upgrades)
+						removeNode("Horse Collar", techtree.civ_techs_units);
+						removeNode("Heavy Plow", techtree.civ_techs_units);
+						removeNode("Crop Rotation", techtree.civ_techs_units);
+						console.log('DEBUG: Finished processing pastures');
+					} catch (error) {
+						console.error('DEBUG: Error processing pastures:', error);
+					}
+					break;
+				default:
+					// Do nothing for unhandled bonuses
 					break;
 			}
 		}
