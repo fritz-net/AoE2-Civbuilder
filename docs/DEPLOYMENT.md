@@ -54,6 +54,18 @@ sudo mkdir -p /var/lib/aoe2-civbuilder
 
 ### Manual Deployment
 
+#### Check for Updates (Dry Run)
+
+Before making changes, you can check what would be updated:
+
+```bash
+# Check staging for updates without making changes
+/opt/aoe2-civbuilder/update-docker.sh staging --dry-run
+
+# Check production for updates without making changes
+/opt/aoe2-civbuilder/update-docker.sh production --dry-run
+```
+
 #### Deploy Staging
 
 ```bash
@@ -312,3 +324,20 @@ For issues or questions:
 - GitHub Issues: https://github.com/fritz-net/AoE2-Civbuilder/issues
 - Check logs: `/var/log/aoe2-civbuilder-*-update.log`
 - Review container logs: `docker logs aoe2-civbuilder-staging` or `docker logs aoe2-civbuilder-prod`
+
+## Testing
+
+A test script is provided to verify the deployment scripts work correctly:
+
+```bash
+./test-deployment-scripts.sh
+```
+
+This will test:
+- Script syntax validation
+- Help message display
+- Dry-run mode execution
+- Documentation file presence
+- Script executability
+
+The test script does not require Docker or network access and is safe to run in any environment.

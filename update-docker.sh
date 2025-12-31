@@ -5,14 +5,40 @@
 
 set -e
 
+# Parse command line arguments
+DRY_RUN=false
+ENVIRONMENT=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --dry-run)
+            DRY_RUN=true
+            shift
+            ;;
+        staging|production)
+            ENVIRONMENT="$1"
+            shift
+            ;;
+        *)
+            echo "Usage: $0 [staging|production] [--dry-run]"
+            echo ""
+            echo "Examples:"
+            echo "  $0 staging              # Update staging to latest release"
+            echo "  $0 production           # Update production to promoted version"
+            echo "  $0 staging --dry-run    # Check for updates without applying"
+            exit 1
+            ;;
+    esac
+done
+
+# Default to staging if not specified
+ENVIRONMENT="${ENVIRONMENT:-staging}"
+
 # Configuration
 GITHUB_REPO="fritz-net/AoE2-Civbuilder"
 GITHUB_API="https://api.github.com"
 IMAGE_NAME="ghcr.io/fritz-net/aoe2-civbuilder"
 CONTAINER_NAME_PREFIX="aoe2-civbuilder"
-
-# Environment (staging or production)
-ENVIRONMENT="${1:-staging}"
 
 # Get configuration based on environment
 if [ "$ENVIRONMENT" = "production" ]; then
@@ -37,6 +63,9 @@ echo "Environment: $ENVIRONMENT"
 echo "Container: $CONTAINER_NAME"
 echo "Port: $PORT"
 echo "Hostname: $HOSTNAME"
+if [ "$DRY_RUN" = true ]; then
+    echo "Mode: DRY RUN (no changes will be made)"
+fi
 echo ""
 
 # Function to get the latest release tag for the environment
@@ -46,9 +75,9 @@ get_latest_release_tag() {
     if [ "$env" = "production" ]; then
         # For production, check for a file that specifies the production version
         # This file should be updated manually or via a promotion workflow
-        prod_file="/var/lib/aoe2-civbuilder/production-version.txt"
+        prod_file="${PROD_VERSION_FILE:-/var/lib/aoe2-civbuilder/production-version.txt}"
         if [ -f "$prod_file" ]; then
-            tag=$(cat "$prod_file")
+            tag=$(cat "$prod_file" 2>/dev/null)
             echo "$tag"
         else
             # If no production file exists, don't update
@@ -56,9 +85,9 @@ get_latest_release_tag() {
         fi
     else
         # For staging, get the absolute latest release
-        tag=$(curl -s "${GITHUB_API}/repos/${GITHUB_REPO}/releases/latest" | \
+        tag=$(curl -s -f "${GITHUB_API}/repos/${GITHUB_REPO}/releases/latest" 2>/dev/null | \
             grep '"tag_name":' | \
-            sed -E 's/.*"tag_name": *"([^"]+)".*/\1/')
+            sed -E 's/.*"tag_name": *"([^"]+)".*/\1/' || echo "")
         echo "$tag"
     fi
 }
@@ -96,6 +125,23 @@ fi
 
 echo ""
 echo "Update available: $CURRENT_VERSION -> $LATEST_TAG"
+
+if [ "$DRY_RUN" = true ]; then
+    echo ""
+    echo "[DRY RUN] Would perform the following actions:"
+    echo "  1. Pull image: ${IMAGE_NAME}:${LATEST_TAG}"
+    echo "  2. Stop container: $CONTAINER_NAME"
+    echo "  3. Remove container: $CONTAINER_NAME"
+    echo "  4. Start new container with:"
+    echo "     - Name: $CONTAINER_NAME"
+    echo "     - Port: ${PORT}:4000"
+    echo "     - Env: CIVBUILDER_HOSTNAME=$HOSTNAME"
+    echo "     - Image: ${IMAGE_NAME}:${LATEST_TAG}"
+    echo ""
+    echo "Run without --dry-run to apply changes"
+    exit 0
+fi
+
 echo "Pulling new image..."
 
 # Pull the new image
