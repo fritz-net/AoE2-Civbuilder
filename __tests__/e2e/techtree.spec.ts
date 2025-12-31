@@ -771,19 +771,32 @@ test.describe('TechTree Functionality - One-Click Tech Enabling with Direct Care
     await buildModeRadio.click();
     await page.waitForTimeout(500);
     
-    // Get initial state
+    // Check initial state of bombard tower
+    const bombardTowerElement = page.locator('[data-caret-id="building_236"]');
+    const wasInitiallyEnabled = await bombardTowerElement.evaluate((el) => {
+      return el.parentElement?.classList.contains('enabled') || false;
+    });
+    
+    if (wasInitiallyEnabled) {
+      // Disable it first so we can test enabling it
+      await bombardTowerElement.click();
+      await page.waitForTimeout(500);
+    }
+    
+    // Get initial state AFTER ensuring bombard tower is disabled
     const initialTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
     const initialTechCount = parseInt(initialTechCountText?.match(/\d+/)?.[0] || '0');
     
-    // Click on bombard tower building (building_236)
-    await page.locator('[data-caret-id="building_236"]').click();
+    // Click on bombard tower building (building_236) to enable it
+    await bombardTowerElement.click();
     await page.waitForTimeout(2000);
     
-    // Verify tech count increased (at least bombard tower, chemistry might already be enabled)
+    // Verify tech count increased
     const finalTechCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
     const finalTechCount = parseInt(finalTechCountText?.match(/\d+/)?.[0] || '0');
     
-    expect(finalTechCount).toBeGreaterThan(initialTechCount);
+    // Should have enabled at least bombard tower (chemistry might already have been enabled)
+    expect(finalTechCount).toBeGreaterThanOrEqual(initialTechCount + 1);
   });
 
   test('clicking keep tech should enable prerequisites and keep in one click (build mode)', async ({ page }) => {
