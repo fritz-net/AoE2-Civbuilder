@@ -91,6 +91,12 @@ function incrementPalette(index: number) {
   newPalette[index] = (newPalette[index] + 1) % paletteSizes[index]
   localPalette.value = newPalette
   emit('update:modelValue', newPalette)
+  
+  // Clear custom color when cycling through presets
+  if (index < 5) {
+    customColors.value.delete(index)
+  }
+  
   if (!useCustomFlag.value) {
     renderFlag()
   }
@@ -102,6 +108,12 @@ function decrementPalette(index: number) {
   newPalette[index] = (newPalette[index] - 1 + paletteSizes[index]) % paletteSizes[index]
   localPalette.value = newPalette
   emit('update:modelValue', newPalette)
+  
+  // Clear custom color when cycling through presets
+  if (index < 5) {
+    customColors.value.delete(index)
+  }
+  
   if (!useCustomFlag.value) {
     renderFlag()
   }
@@ -151,6 +163,15 @@ function handleColorPick(index: number, event: Event) {
   }
 }
 
+// Helper to get color from palette with bounds checking (shared logic)
+function getPaletteColor(index: number): number[] {
+  const paletteIndex = localPalette.value[index]
+  if (paletteIndex >= 0 && paletteIndex < colours.length) {
+    return colours[paletteIndex]
+  }
+  return [0, 0, 0] // Fallback to black if index is out of bounds
+}
+
 // Get the actual color to use (custom or from palette)
 function getColor(index: number): number[] {
   // Check if there's a custom color for this palette index
@@ -158,21 +179,12 @@ function getColor(index: number): number[] {
     return customColors.value.get(index)!
   }
   // Otherwise use the predefined color from colours array
-  const paletteIndex = localPalette.value[index]
-  if (paletteIndex >= 0 && paletteIndex < colours.length) {
-    return colours[paletteIndex]
-  }
-  // Fallback to black if index is out of bounds
-  return [0, 0, 0]
+  return getPaletteColor(index)
 }
 
-// Get color for the color picker input (similar to getColor but for display)
+// Get color for the color picker input - shows current active color (custom or preset)
 function getColorForPicker(index: number): number[] {
-  const paletteIndex = localPalette.value[index]
-  if (paletteIndex >= 0 && paletteIndex < colours.length) {
-    return colours[paletteIndex]
-  }
-  return [0, 0, 0]
+  return getColor(index)
 }
 
 function handleCustomFlagToggle() {
