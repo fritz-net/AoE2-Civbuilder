@@ -293,6 +293,28 @@ function createTechtreeJson(data_json, techtree_json) {
 				case 35:
 					addSpecialNodes([specialNodes["imperial_skirmisher"]], techtree.civ_techs_units, civ.techtree[i][22]);
 					break;
+				case 309:
+					// Can upgrade Elite Battle Elephants to Royal Battle Elephants
+					addSpecialNodes([specialNodes["royal_elephant"]], techtree.civ_techs_units, civ.techtree[i][38]);
+					break;
+				case 310:
+					// Can upgrade Elite Steppe Lancers to Royal Lancers
+					addSpecialNodes([specialNodes["royal_lancer"]], techtree.civ_techs_units, civ.techtree[i][40]);
+					break;
+				case 356:
+					// Pastures replace Farms and Mill upgrades
+					removeNode("Mill", techtree.civ_techs_buildings);
+					removeNode("Farm", techtree.civ_techs_buildings);
+					addSpecialNodes([specialNodes["pasture"]], techtree.civ_techs_buildings, 1);
+					// Add pasture upgrade techs
+					addSpecialNodes([specialNodes["domestication"]], techtree.civ_techs_units, 1);
+					addSpecialNodes([specialNodes["pastoralism"]], techtree.civ_techs_units, 1);
+					addSpecialNodes([specialNodes["transhumance"]], techtree.civ_techs_units, 1);
+					// Remove farm upgrades (they're replaced by pasture upgrades)
+					removeNode("Horse Collar", techtree.civ_techs_units);
+					removeNode("Heavy Plow", techtree.civ_techs_units);
+					removeNode("Crop Rotation", techtree.civ_techs_units);
+					break;
 			}
 		}
 
@@ -1064,6 +1086,116 @@ const specialNodes = {
 		"Node Status": "ResearchedCompleted",
 		"Node Type": "UniqueUnit",
 		"Picture Index": 270,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	pasture: {
+		"Age ID": 1,
+		"Building ID": 1889,
+		"Building in new column": false,
+		"Building upgraded from ID": -1,
+		"Draw Node Type": "Building",
+		"Help String ID": 105000,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Pasture",
+		"Name String ID": 14000,
+		"Node ID": 1889,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "BuildingTech",
+		"Picture Index": 0,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Building",
+	},
+	domestication: {
+		"Age ID": 1,
+		"Building ID": 1889,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101014,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Domestication",
+		"Name String ID": 1014,
+		"Node ID": 1014,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "Research",
+		"Picture Index": 0,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Tech",
+	},
+	pastoralism: {
+		"Age ID": 2,
+		"Building ID": 1889,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101013,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Pastoralism",
+		"Name String ID": 1013,
+		"Node ID": 1013,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "Research",
+		"Picture Index": 0,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Tech",
+	},
+	transhumance: {
+		"Age ID": 3,
+		"Building ID": 1889,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101012,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Transhumance",
+		"Name String ID": 1012,
+		"Node ID": 1012,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "Research",
+		"Picture Index": 0,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Tech",
+	},
+	royal_elephant: {
+		"Age ID": 4,
+		"Building ID": 82,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 105309,
+		"Link ID": 1134,
+		"Link Node Type": "UnitUpgrade",
+		Name: "Royal Battle Elephant",
+		"Name String ID": 14309,
+		"Node ID": 1180,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UnitUpgrade",
+		"Picture Index": 246,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	royal_lancer: {
+		"Age ID": 4,
+		"Building ID": 82,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 105310,
+		"Link ID": 1372,
+		"Link Node Type": "UnitUpgrade",
+		Name: "Royal Lancer",
+		"Name String ID": 14310,
+		"Node ID": 1181,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UnitUpgrade",
+		"Picture Index": 274,
 		"Prerequisite IDs": [0, 0, 0, 0, 0],
 		"Prerequisite Types": ["None", "None", "None", "None", "None"],
 		"Trigger Tech ID": -1,
