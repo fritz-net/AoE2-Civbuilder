@@ -4727,8 +4727,17 @@ void Civbuilder::createCivBonuses() {
     this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_HORSE_COLLAR));
     this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_HEAVY_PLOW));
     this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_CROP_ROTATION));
-    // enable pastures + its techs (requirement techs already added earlier in createCivBonuses)
+    // enable pastures + its techs
+    // Note: Pasture requirement techs (domesticationReqTech, pastoralismReqTech, transhumanceReqTech) are added
+    // to this bonus earlier in createCivBonuses() (around line 3470) to ensure they're only available with pasture bonus
     this->civBonuses[CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES].push_back(TECH_C_BONUS_PASTURES);
+    
+    // Reference for context - these are set via techtree, cause currently they are free tech points:
+    //TECH_TRANSHUMANCE, 
+    //TECH_PASTORALISM,
+    //TECH_DOMESTICATION
+    // These are now added via requirement techs earlier in the function instead of here
+    // Pastures don't need mill as requirement - kithans can do it without mill too
 
     // Shepherds and Herders generate +10% additional food
     this->civBonuses[CIV_BONUS_357_SHEPHERDS_AND_HERDERS_GENERATE_10_ADDITIONAL_FOOD] = {TECH_RESERVED_20};
