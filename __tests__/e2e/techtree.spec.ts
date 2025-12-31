@@ -771,8 +771,8 @@ test.describe('TechTree Functionality - One-Click Tech Enabling with Direct Care
     await buildModeRadio.click();
     await page.waitForTimeout(500);
     
-    // Click Reset to ensure clean state
-    const resetButton = page.getByRole('button', { name: /Reset/i });
+    // Click Reset to ensure clean state (use exact name to avoid strict mode violation)
+    const resetButton = page.getByRole('button', { name: '🔄 Reset Tree' });
     await resetButton.click();
     await page.waitForTimeout(2000);
     
