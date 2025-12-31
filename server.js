@@ -660,6 +660,39 @@ function extractBonusId(bonus, context) {
 }
 
 /**
+ * Normalize description field to ensure it's always a string
+ * Handles cases where description might be an array, null, undefined, or other types
+ * @param {*} description - The description value to normalize
+ * @returns {string} - A normalized string description
+ */
+function normalizeDescription(description) {
+	// If description is an array, join its elements with ", " or take the first element
+	if (Array.isArray(description)) {
+		// If array has elements, join them or take first one
+		if (description.length > 0) {
+			// Join all elements with comma-space separator
+			return description.join(', ');
+		}
+		// Empty array becomes empty string
+		return '';
+	}
+	
+	// If description is null or undefined, return empty string
+	if (description === null || description === undefined) {
+		return '';
+	}
+	
+	// If description is already a string, return it
+	if (typeof description === 'string') {
+		return description;
+	}
+	
+	// For any other type (number, object, etc.), convert to string
+	// This handles edge cases gracefully
+	return String(description);
+}
+
+/**
  * Safely parse JSON from request body
  * @param {string} fieldName - Name of the field being parsed (for error messages)
  * @param {string} jsonString - The JSON string to parse
@@ -887,10 +920,8 @@ const writeIconsJson = async (req, res, next) => {
 			// Name
 			mod_data.name.push(civs[i]["alias"]);
 
-			// Description
-			if (!civs[i]["description"]) {
-				civs[i]["description"] = "";
-			}
+			// Description - normalize to ensure it's always a string
+			civs[i]["description"] = normalizeDescription(civs[i]["description"]);
 			mod_data.description.push(civs[i]["description"]);
 
 			// Wonder
@@ -1500,6 +1531,8 @@ function draftIO(io) {
 							for (var j = 0; j < numBasicTechs; j++) {
 								player_techtree.push(0);
 							}
+							// Normalize description to ensure it's always a string
+							draft["players"][i]["description"] = normalizeDescription(draft["players"][i]["description"]);
 							mod_data.description.push(draft["players"][i]["description"]);
 							mod_data.castle.push(draft["players"][i]["castle"]);
 							mod_data.wonder.push(draft["players"][i]["wonder"]);
