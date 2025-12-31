@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.3](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.10.2...v1.10.3) (2025-12-31)
+
+
+### Bug Fixes
+
+* enforce 50 civilization limit on combine page with user feedback ([#201](https://github.com/fritz-net/AoE2-Civbuilder/issues/201)) ([4f405ac](https://github.com/fritz-net/AoE2-Civbuilder/commit/4f405ac94b526b1ec357f033df8464ec41e3977d))
+* Json::LogicError from mixed array/scalar JSON values ([#205](https://github.com/fritz-net/AoE2-Civbuilder/issues/205)) ([b150871](https://github.com/fritz-net/AoE2-Civbuilder/commit/b15087194529758285989b2ae953be4ade5570ae))
+* mod creation failure when civ description is an array ([#203](https://github.com/fritz-net/AoE2-Civbuilder/issues/203)) ([ab4fe8d](https://github.com/fritz-net/AoE2-Civbuilder/commit/ab4fe8da0b7c4ed99ea96f9a7f19e0d5ff151f00))
+* pasture eco techs gated incorrectly in mod generation ([#199](https://github.com/fritz-net/AoE2-Civbuilder/issues/199)) ([1dc3749](https://github.com/fritz-net/AoE2-Civbuilder/commit/1dc3749219881cc1840f07c5e213a421a6e3fa18))
+* real-time tech tree sync and spectator UI for draft mode ([#190](https://github.com/fritz-net/AoE2-Civbuilder/issues/190)) ([ce53697](https://github.com/fritz-net/AoE2-Civbuilder/commit/ce5369783d973714c6b27d9c23c822769f21f76c))
+
 ## [1.10.2](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.10.1...v1.10.2) (2025-12-30)
 
 

@@ -512,7 +512,7 @@ void Civbuilder::assignWonders() {
             cerr << "[C++]: WARNING - Cannot assign wonder to Civ " << (i+1) << endl;
             continue;
         }
-        int wonderIndex = this->config["wonder"][i].asInt();
+        int wonderIndex = getJsonInt(this->config["wonder"][i]);
         if (wonderIndex >= 0 && wonderIndex < wonderGraphics.size()) {
             this->df->Civs[i + 1].Units[276] = wonderGraphics[wonderIndex];
         } else {
@@ -550,7 +550,7 @@ void Civbuilder::assignCastles() {
             cerr << "[C++]: WARNING - Cannot assign castle to Civ " << (i+1) << endl;
             continue;
         }
-        int castleIndex = this->config["castle"][i].asInt();
+        int castleIndex = getJsonInt(this->config["castle"][i]);
         if (castleIndex >= 0 && castleIndex < castleGraphics.size()) {
             this->df->Civs[i + 1].Units[82] = castleGraphics[castleIndex];
         } else {
@@ -569,7 +569,7 @@ void Civbuilder::assignLanguages() {
         for (int j = 0; j < this->df->Sounds.size(); j++) {
             int soundSize = this->df->Sounds[j].Items.size();
             for (int k = 0; k < soundSize; k++) {
-                if (this->df->Sounds[j].Items[k].Civilization == (this->config["language"][i].asInt() + 1)) {
+                if (this->df->Sounds[j].Items[k].Civilization == (getJsonInt(this->config["language"][i]) + 1)) {
                     // Make a copy, but change its civilization so that it doesn't get re-copied
                     SoundItem copySound = this->df->Sounds[j].Items[k];
                     copySound.Civilization = i + 1 + civOffset;
@@ -606,7 +606,7 @@ void Civbuilder::assignArchitectures() {
     
     vector<int> dest = {};
     for (int i = 0; i < this->config["architecture"].size(); i++) {
-        dest.push_back(this->config["architecture"][i].asInt());
+        dest.push_back(getJsonInt(this->config["architecture"][i]));
     }
     
     cout << "[C++]: Config has " << dest.size() << " architecture entries" << endl;
@@ -3429,9 +3429,8 @@ void Civbuilder::createCivBonuses() {
     // Melee cavalry +2 vs skirmishers
     this->civBonuses[CIV_BONUS_220_MELEE_CAVALRY_GAIN_2_BONUS_DAMAGE_VS_SKIRMISHERS] = {877};
 
-    // Pasture upgrades earlier
-    // this does not work cause we are likly not burgundians
-    //this->df->Techs[TECH_DOMESTICATION].RequiredTechs.push_back(TECH_FEUDAL_ECO_TECH_REQUIREMENT);
+    // Pasture upgrades earlier - these requirement techs are added to the pasture bonus only
+    // NOT to CIV_BONUS_105 to avoid enabling pasture techs for civs that don't have the pasture bonus
 
     t = Tech();
     t.Name = "Domestication requirement";
@@ -3441,8 +3440,8 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechCount = 2;
     setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
-    this->df->Techs[TECH_DOMESTICATION].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
-    this->civBonuses[CIV_BONUS_105_ECONOMIC_UPGRADES_COST_33_FOOD_AND_AVAILABLE].push_back((int)(this->df->Techs.size() - 1));
+    int domesticationReqTech = (int)(this->df->Techs.size() - 1);
+    this->df->Techs[TECH_DOMESTICATION].RequiredTechs[2] = domesticationReqTech;
 
     t = Tech();
     t.Name = "Pastoralism requirement";
@@ -3452,8 +3451,8 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechCount = 2;
     setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
-    this->df->Techs[TECH_PASTORALISM].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
-    this->civBonuses[CIV_BONUS_105_ECONOMIC_UPGRADES_COST_33_FOOD_AND_AVAILABLE].push_back((int)(this->df->Techs.size() - 1));
+    int pastoralismReqTech = (int)(this->df->Techs.size() - 1);
+    this->df->Techs[TECH_PASTORALISM].RequiredTechs[2] = pastoralismReqTech;
 
     t = Tech();
     t.Name = "Transhumance requirement";
@@ -3463,8 +3462,16 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechCount = 2;
     setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
-    this->df->Techs[TECH_TRANSHUMANCE].RequiredTechs[2] = (int)(this->df->Techs.size() - 1);
-    this->civBonuses[CIV_BONUS_105_ECONOMIC_UPGRADES_COST_33_FOOD_AND_AVAILABLE].push_back((int)(this->df->Techs.size() - 1));
+    int transhumanceReqTech = (int)(this->df->Techs.size() - 1);
+    this->df->Techs[TECH_TRANSHUMANCE].RequiredTechs[2] = transhumanceReqTech;
+
+    // Add pasture requirement techs to the pasture bonus so they get allocated when a civ has pastures
+    // This ensures pasture techs are only available to civs with the pasture bonus
+    this->civBonuses[CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES] = {
+        domesticationReqTech,
+        pastoralismReqTech,
+        transhumanceReqTech
+    };
 
     // Barracks upgrades earlier
     vector<int> techIDs = {950, 951, 952, 953, 954, 955, 956};
@@ -4715,20 +4722,22 @@ void Civbuilder::createCivBonuses() {
 
     // Pastures
 
-    // disable farms
+    // disable farms and farm eco upgrades
     this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_FARMS_MAKE_AVAIL)); // 102 = disable tech
+    this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_HORSE_COLLAR));
+    this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_HEAVY_PLOW));
+    this->df->Effects[EFFECT_C_BONUS_PASTURES].EffectCommands.push_back(createEC(102, -1, -1, -1, TECH_CROP_ROTATION));
     // enable pastures + its techs
-    this->civBonuses[CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES] = {
-        TECH_C_BONUS_PASTURES,
-
-        // set via techtree, cause currently they are free tech points
-        //TECH_TRANSHUMANCE, 
-        //TECH_PASTORALISM,
-        //TECH_DOMESTICATION
-    };
-    // TODO (do) we need to disable farm techs???
-    // TODO (de) pastures need mill as requirement??? - no - kithans can do it without mill too
-    //this->df->Techs[TECH_C_BONUS_PASTURES].RequiredTechs[2] = TECH_MILL_MAKE_AVAIL;
+    // Note: Pasture requirement techs (domesticationReqTech, pastoralismReqTech, transhumanceReqTech) are added
+    // to this bonus earlier in createCivBonuses() (around line 3470) to ensure they're only available with pasture bonus
+    this->civBonuses[CIV_BONUS_356_PASTURES_REPLACE_FARMS_AND_MILL_UPGRADES].push_back(TECH_C_BONUS_PASTURES);
+    
+    // Reference for context - these are set via techtree, cause currently they are free tech points:
+    //TECH_TRANSHUMANCE, 
+    //TECH_PASTORALISM,
+    //TECH_DOMESTICATION
+    // These are now added via requirement techs earlier in the function instead of here
+    // Pastures don't need mill as requirement - kithans can do it without mill too
 
     // Shepherds and Herders generate +10% additional food
     this->civBonuses[CIV_BONUS_357_SHEPHERDS_AND_HERDERS_GENERATE_10_ADDITIONAL_FOOD] = {TECH_RESERVED_20};
