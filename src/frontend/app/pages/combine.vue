@@ -35,10 +35,13 @@
             @click="switchMode('vanilla')"
             title="Load all vanilla Age of Empires II civilizations"
           >
-            🏰 Get Vanilla Civs
+            🏰 Use Vanilla Civs
           </button>
         </div>
         <p class="upload-hint">Select one or more .json civilization files</p>
+        <p class="download-hint">
+          or <a href="/vanilla" @click.prevent="handleDownloadVanilla" class="download-link">download vanilla civs</a> to customize locally
+        </p>
         <p class="drag-hint">or drag and drop JSON files here</p>
       </div>
 
@@ -392,6 +395,21 @@ async function handleCreateMod() {
     alert(`Failed to create mod: ${error.value || 'Unknown error'}`)
   }
 }
+
+function handleDownloadVanilla() {
+  // Create a form and submit it to download the vanilla civs zip
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = '/vanilla'
+  form.style.display = 'none'
+  document.body.appendChild(form)
+  try {
+    form.submit()
+  } finally {
+    // Clean up the form element
+    document.body.removeChild(form)
+  }
+}
 </script>
 
 <style scoped>
@@ -493,6 +511,23 @@ async function handleCreateMod() {
   margin-top: 1rem;
   color: hsla(52, 100%, 50%, 0.7);
   font-size: 0.9rem;
+}
+
+.download-hint {
+  margin-top: 0.5rem;
+  color: hsla(52, 100%, 50%, 0.7);
+  font-size: 0.9rem;
+}
+
+.download-link {
+  color: hsl(52, 100%, 60%);
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.download-link:hover {
+  color: hsl(52, 100%, 70%);
 }
 
 .drag-hint {
