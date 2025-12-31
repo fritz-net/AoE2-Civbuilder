@@ -1,0 +1,80 @@
+#!/bin/bash
+# Script to promote a staging release to production
+# This creates/updates a file that the update-docker.sh script reads for production updates
+
+set -e
+
+VERSION="$1"
+PROD_VERSION_FILE="${PROD_VERSION_FILE:-/var/lib/aoe2-civbuilder/production-version.txt}"
+
+if [ -z "$VERSION" ]; then
+    echo "Usage: $0 <version-tag>"
+    echo "Example: $0 v1.10.2"
+    echo ""
+    echo "This will mark the specified version as the production version."
+    echo "The update-docker.sh script will then update the production container to this version."
+    exit 1
+fi
+
+# Verify the version exists in GitHub releases
+GITHUB_REPO="fritz-net/AoE2-Civbuilder"
+GITHUB_API="https://api.github.com"
+
+echo "Checking if version $VERSION exists..."
+
+# Check HTTP status code and response
+HTTP_STATUS=$(curl -s -o /tmp/release-check-$$.json -w "%{http_code}" "${GITHUB_API}/repos/${GITHUB_REPO}/releases/tags/${VERSION}" 2>/dev/null || echo "000")
+
+if [ "$HTTP_STATUS" = "404" ] || [ "$HTTP_STATUS" = "000" ]; then
+    echo "Error: Version $VERSION not found in GitHub releases"
+    echo "Please check https://github.com/${GITHUB_REPO}/releases for available versions"
+    rm -f /tmp/release-check-$$.json
+    exit 1
+fi
+
+# Verify it's a valid release JSON (should have a tag_name field)
+if command -v jq &> /dev/null; then
+    RELEASE_TAG=$(jq -r '.tag_name // empty' /tmp/release-check-$$.json 2>/dev/null)
+elif grep -q '"tag_name"' /tmp/release-check-$$.json 2>/dev/null; then
+    RELEASE_TAG="found"
+else
+    RELEASE_TAG=""
+fi
+
+rm -f /tmp/release-check-$$.json
+
+if [ -z "$RELEASE_TAG" ]; then
+    echo "Error: Could not verify version $VERSION in GitHub releases"
+    echo "The API response may be invalid or the release may not exist"
+    exit 1
+fi
+
+echo "✓ Version $VERSION found"
+
+# Create directory if it doesn't exist (try with sudo if needed)
+PROD_DIR=$(dirname "$PROD_VERSION_FILE")
+if [ ! -d "$PROD_DIR" ]; then
+    if mkdir -p "$PROD_DIR" 2>/dev/null; then
+        echo "✓ Created directory $PROD_DIR"
+    elif [ "$EUID" -ne 0 ]; then
+        echo "Directory $PROD_DIR doesn't exist and couldn't be created."
+        echo "You may need to run with sudo or create it manually:"
+        echo "  sudo mkdir -p $PROD_DIR"
+        echo "  sudo chmod 755 $PROD_DIR"
+        exit 1
+    fi
+fi
+
+# Write the version to the file
+if echo "$VERSION" > "$PROD_VERSION_FILE" 2>/dev/null; then
+    echo "✓ Production version set to $VERSION"
+else
+    echo "Error: Could not write to $PROD_VERSION_FILE"
+    echo "You may need to run with sudo or adjust permissions:"
+    echo "  sudo chown $(whoami) $PROD_VERSION_FILE"
+    exit 1
+fi
+
+echo ""
+echo "The next time update-docker.sh runs in production mode, it will update to $VERSION"
+echo "You can also run it manually: ./update-docker.sh production"

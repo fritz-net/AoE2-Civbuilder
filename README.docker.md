@@ -107,6 +107,37 @@ docker run -p 4000:4000 -e CIVBUILDER_HOSTNAME=http://localhost:4000/ aoe2-civbu
 
 ---
 
+## Automated Deployment
+
+For production deployments with automatic updates, see the **[Deployment Guide](docs/DEPLOYMENT.md)**.
+
+The deployment guide covers:
+- Setting up automated container updates via cron jobs
+- Separate staging and production environments
+- Manual promotion workflow from staging to production
+- No Personal Access Tokens (PATs) required
+- Zero-downtime updates
+
+Quick start for automated deployment:
+
+```bash
+# Install the update scripts
+sudo mkdir -p /opt/aoe2-civbuilder
+sudo cp update-docker.sh promote-to-production.sh /opt/aoe2-civbuilder/
+sudo chmod +x /opt/aoe2-civbuilder/*.sh
+
+# Deploy staging (auto-updates to latest release)
+/opt/aoe2-civbuilder/update-docker.sh staging
+
+# Promote a version to production
+/opt/aoe2-civbuilder/promote-to-production.sh v1.10.2
+
+# Deploy production (uses promoted version)
+/opt/aoe2-civbuilder/update-docker.sh production
+```
+
+---
+
 ## Additional Notes
 
 - For development or debugging, you may want to mount the entire project directory as a volume.
