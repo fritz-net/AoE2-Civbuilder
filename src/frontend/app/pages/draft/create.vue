@@ -3,6 +3,39 @@
     <h1 class="page-title">Create Draft</h1>
 
     <div class="draft-form">
+      <!-- Drop Zone for Draft Settings -->
+      <div 
+        class="drop-zone"
+        :class="{ 'drop-zone-active': isDragging, 'drop-zone-error': uploadError }"
+        @drop.prevent="handleDrop"
+        @dragover.prevent="isDragging = true"
+        @dragleave.prevent="isDragging = false"
+      >
+        <div class="drop-zone-content">
+          <span class="drop-zone-icon">📁</span>
+          <p class="drop-zone-text">
+            <strong>Drop draft-config.json or zip file here</strong>
+          </p>
+          <p class="drop-zone-subtext">or click to browse</p>
+          <input
+            ref="fileInput"
+            type="file"
+            accept=".json,.zip"
+            @change="handleFileSelect"
+            class="file-input-hidden"
+          />
+          <button 
+            type="button"
+            @click="$refs.fileInput.click()"
+            class="browse-button"
+          >
+            Browse Files
+          </button>
+        </div>
+        <p v-if="uploadSuccess" class="upload-message success">✓ Settings loaded successfully!</p>
+        <p v-if="uploadError" class="upload-message error">{{ uploadError }}</p>
+      </div>
+
       <div class="form-section">
         <label for="numPlayers" class="form-label">Number of Players:</label>
         <input
@@ -150,6 +183,19 @@
           />
           <p class="form-help">Number of highlighted cards after refill/clear (default: 3)</p>
         </div>
+
+        <div class="form-section">
+          <label for="bonusesPerPage" class="form-label">Bonuses Per Page:</label>
+          <input
+            id="bonusesPerPage"
+            v-model.number="draftSettings.bonusesPerPage"
+            type="number"
+            min="10"
+            max="100"
+            class="form-input"
+          />
+          <p class="form-help">Total number of bonus cards displayed on the draft board (default: 30)</p>
+        </div>
       </details>
       
       <!-- Testing Settings (collapsed by default) -->
@@ -273,6 +319,7 @@ const draftSettings = ref({
   blindPicks: false,
   snakeDraft: false,
   cardsPerRoll: 3, // Optional: number of cards to show per roll
+  bonusesPerPage: 30, // Optional: total number of bonus cards displayed on the draft board
   requiredFirstRoll: '', // Optional: comma-separated bonus IDs for testing (e.g., "356" for pasture bonus)
 })
 
@@ -285,6 +332,99 @@ const draftLinks = ref<{
 const isCreating = ref(false)
 const error = ref<string | null>(null)
 const copiedLink = ref<string | null>(null)
+const isDragging = ref(false)
+const uploadSuccess = ref(false)
+const uploadError = ref<string | null>(null)
+const fileInput = ref<HTMLInputElement | null>(null)
+
+const handleFileSelect = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const files = target.files
+  if (files && files.length > 0) {
+    await processFile(files[0])
+  }
+}
+
+const handleDrop = async (event: DragEvent) => {
+  isDragging.value = false
+  const files = event.dataTransfer?.files
+  if (files && files.length > 0) {
+    await processFile(files[0])
+  }
+}
+
+const processFile = async (file: File) => {
+  uploadSuccess.value = false
+  uploadError.value = null
+  
+  try {
+    let configData: any = null
+    
+    if (file.name.endsWith('.json')) {
+      // Direct JSON file
+      const text = await file.text()
+      configData = JSON.parse(text)
+    } else if (file.name.endsWith('.zip')) {
+      // ZIP file - we need to extract draft-config.json
+      // Using JSZip library (we'll need to add this)
+      uploadError.value = 'ZIP file support requires extracting draft-config.json first. Please extract the file and upload draft-config.json directly.'
+      return
+    } else {
+      uploadError.value = 'Invalid file type. Please upload a .json or .zip file.'
+      return
+    }
+    
+    // Load settings from config
+    if (configData && configData.preset) {
+      const preset = configData.preset
+      
+      // Map preset fields to draftSettings
+      if (preset.slots !== undefined) draftSettings.value.numPlayers = preset.slots
+      if (preset.rounds !== undefined) draftSettings.value.rounds = preset.rounds
+      if (preset.points !== undefined) draftSettings.value.techTreePoints = preset.points
+      if (preset.rarities !== undefined && Array.isArray(preset.rarities)) {
+        draftSettings.value.allowedRarities = preset.rarities
+      }
+      if (preset.allow_base_edition_uu !== undefined) {
+        draftSettings.value.allowBaseEditionUU = preset.allow_base_edition_uu
+      }
+      if (preset.allow_first_edition_uu !== undefined) {
+        draftSettings.value.allowFirstEditionUU = preset.allow_first_edition_uu
+      }
+      if (preset.timer_enabled !== undefined) {
+        draftSettings.value.timerEnabled = preset.timer_enabled
+      }
+      if (preset.timer_duration !== undefined) {
+        draftSettings.value.timerDuration = preset.timer_duration
+      }
+      if (preset.blind_picks !== undefined) {
+        draftSettings.value.blindPicks = preset.blind_picks
+      }
+      if (preset.snake_draft !== undefined) {
+        draftSettings.value.snakeDraft = preset.snake_draft
+      }
+      if (preset.cards_per_roll !== undefined) {
+        draftSettings.value.cardsPerRoll = preset.cards_per_roll
+      }
+      if (preset.bonuses_per_page !== undefined) {
+        draftSettings.value.bonusesPerPage = preset.bonuses_per_page
+      }
+      if (preset.required_first_roll !== undefined && Array.isArray(preset.required_first_roll)) {
+        draftSettings.value.requiredFirstRoll = preset.required_first_roll.join(',')
+      }
+      
+      uploadSuccess.value = true
+      setTimeout(() => {
+        uploadSuccess.value = false
+      }, 3000)
+    } else {
+      uploadError.value = 'Invalid draft config format. Expected a draft-config.json file.'
+    }
+  } catch (err) {
+    uploadError.value = err instanceof Error ? err.message : 'Failed to parse file'
+    console.error('Failed to process file:', err)
+  }
+}
 
 const createDraft = async () => {
   isCreating.value = true
@@ -308,6 +448,7 @@ const createDraft = async () => {
         blind_picks: draftSettings.value.blindPicks.toString(),
         snake_draft: draftSettings.value.snakeDraft.toString(),
         cards_per_roll: draftSettings.value.cardsPerRoll.toString(),
+        bonuses_per_page: draftSettings.value.bonusesPerPage.toString(),
         required_first_roll: draftSettings.value.requiredFirstRoll,
       }).toString(),
     })
@@ -806,4 +947,96 @@ details[open] .collapsible-summary::after {
   margin-top: 0.25rem;
   font-style: italic;
 }
+
+/* Drop Zone Styles */
+.drop-zone {
+  margin-bottom: 2rem;
+  padding: 2rem;
+  border: 2px dashed rgba(255, 204, 0, 0.5);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.drop-zone:hover {
+  border-color: hsl(52, 100%, 50%);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.drop-zone-active {
+  border-color: hsl(52, 100%, 50%);
+  background: rgba(255, 204, 0, 0.1);
+  transform: scale(1.02);
+}
+
+.drop-zone-error {
+  border-color: rgba(255, 0, 0, 0.7);
+}
+
+.drop-zone-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.drop-zone-icon {
+  font-size: 3rem;
+  opacity: 0.7;
+}
+
+.drop-zone-text {
+  color: #f0e6d2;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.drop-zone-subtext {
+  color: rgba(240, 230, 210, 0.6);
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.file-input-hidden {
+  display: none;
+}
+
+.browse-button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 204, 0, 0.5);
+  border-radius: 4px;
+  color: hsl(52, 100%, 50%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.browse-button:hover {
+  background: hsl(52, 100%, 50%);
+  color: #1a0f0a;
+}
+
+.upload-message {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.upload-message.success {
+  background: rgba(0, 200, 0, 0.2);
+  border: 1px solid rgba(0, 255, 0, 0.5);
+  color: #90EE90;
+}
+
+.upload-message.error {
+  background: rgba(200, 0, 0, 0.2);
+  border: 1px solid rgba(255, 0, 0, 0.5);
+  color: #FFB6C1;
+}
+
 </style>
