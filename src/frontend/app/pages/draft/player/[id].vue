@@ -58,6 +58,7 @@
 
             <ArchitectureSelector v-model="civConfig.architecture" />
             <LanguageSelector v-model="civConfig.language" />
+            <WonderSelector v-model="civConfig.wonder" />
             
             <div class="civ-name-input">
               <label for="civName">Civilization Name</label>
@@ -201,6 +202,7 @@ import DraftBoard from '~/components/draft/DraftBoard.vue'
 import FlagCreator from '~/components/FlagCreator.vue'
 import ArchitectureSelector from '~/components/ArchitectureSelector.vue'
 import LanguageSelector from '~/components/LanguageSelector.vue'
+import WonderSelector from '~/components/WonderSelector.vue'
 import TechTree from '~/components/TechTree.vue'
 import PlayerViewModal from '~/components/draft/PlayerViewModal.vue'
 
@@ -471,7 +473,7 @@ const handleToggleReady = () => {
   }
 }
 
-// Phase 1: Save civ info (flag, architecture, language, civ name) - NO tech tree
+// Phase 1: Save civ info (flag, architecture, language, wonder, civ name) - NO tech tree
 const handleSaveCivInfo = () => {
   if (playerNumber.value >= 0) {
     // Immediately show waiting screen (optimistic update like legacy code)
@@ -482,7 +484,8 @@ const handleSaveCivInfo = () => {
       civConfig.value.alias,
       civConfig.value.flag_palette,
       civConfig.value.architecture,
-      civConfig.value.language
+      civConfig.value.language,
+      civConfig.value.wonder
     )
   }
 }

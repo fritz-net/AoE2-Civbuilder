@@ -1310,7 +1310,7 @@ function draftIO(io) {
 			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			io.in(roomID).emit("set gamestate", draft);
 		});
-		socket.on("update civ info", (roomID, playerNumber, civ_name, flag_palette, architecture, language) => {
+		socket.on("update civ info", (roomID, playerNumber, civ_name, flag_palette, architecture, language, wonder = 0) => {
 			let draft = getDraft(roomID);
 			
 			// Check if draft exists
@@ -1327,6 +1327,7 @@ function draftIO(io) {
 			draft["players"][playerNumber]["flag_palette"] = flag_palette;
 			draft["players"][playerNumber]["architecture"] = architecture;
 			draft["players"][playerNumber]["language"] = language;
+			draft["players"][playerNumber]["wonder"] = wonder;
 
 			var nextPhase = 1;
 			for (var i = 0; i < numPlayers; i++) {
