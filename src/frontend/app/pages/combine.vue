@@ -8,36 +8,9 @@
     </div>
 
     <div class="combine-content">
-      <!-- Mode Toggle -->
-      <div class="mode-toggle-section">
-        <h2>Mode</h2>
-        <div class="mode-buttons">
-          <button 
-            class="mode-btn"
-            :class="{ active: mode === 'empty' }"
-            @click="switchMode('empty')"
-          >
-            📂 Empty Mode
-          </button>
-          <button 
-            class="mode-btn"
-            :class="{ active: mode === 'vanilla' }"
-            @click="switchMode('vanilla')"
-          >
-            🏰 Vanilla Mode
-          </button>
-        </div>
-        <p class="mode-description">
-          {{ mode === 'empty' 
-            ? 'Start with no civilizations. Upload JSON files to add them.' 
-            : 'Start with all vanilla Age of Empires II civilizations pre-loaded. Replace any civilization by clicking the replace button.' 
-          }}
-        </p>
-      </div>
-
-      <!-- Upload Section (Empty Mode) -->
+      <!-- Upload Section (Custom Mode) -->
       <div 
-        v-if="mode === 'empty'"
+        v-if="mode === 'custom'"
         class="upload-section"
         @drop.prevent="handleDrop"
         @dragover.prevent="handleDragOver"
@@ -59,10 +32,10 @@
           </label>
           <button 
             class="vanilla-btn"
-            @click="handleDownloadVanilla"
-            title="Download all vanilla Age of Empires II civilizations as JSON files"
+            @click="switchMode('vanilla')"
+            title="Load all vanilla Age of Empires II civilizations"
           >
-            ⬇️ Get Vanilla Civs
+            🏰 Get Vanilla Civs
           </button>
         </div>
         <p class="upload-hint">Select one or more .json civilization files</p>
@@ -71,7 +44,17 @@
 
       <!-- Civs List -->
       <div v-if="civs.length > 0" class="civs-section">
-        <h2>Loaded Civilizations ({{ civs.length }})</h2>
+        <div class="civs-header">
+          <h2>Loaded Civilizations ({{ civs.length }})</h2>
+          <button 
+            v-if="mode === 'vanilla'"
+            class="switch-mode-btn"
+            @click="switchMode('custom')"
+            title="Switch to custom mode"
+          >
+            📂 Switch to Custom Mode
+          </button>
+        </div>
         <div class="civs-list">
           <div 
             v-for="(civ, index) in civs" 
@@ -154,7 +137,7 @@ const { isCreating, error, createMod } = useModApi()
 const fileInput = ref<HTMLInputElement | null>(null)
 const civs = ref<CivConfig[]>([])
 const isDragging = ref(false)
-const mode = ref<'empty' | 'vanilla'>('empty')
+const mode = ref<'custom' | 'vanilla'>('custom')
 
 // List of vanilla civ names in alphabetical order
 const vanillaCivNames = [
@@ -232,13 +215,13 @@ async function loadVanillaCivs() {
   return results.filter((civ): civ is CivConfig => civ !== null)
 }
 
-async function switchMode(newMode: 'empty' | 'vanilla') {
+async function switchMode(newMode: 'custom' | 'vanilla') {
   if (newMode === mode.value) return
   
   // Warn user if switching away from a mode with loaded civs
-  if (civs.value.length > 0) {
+  if (civs.value.length > 0 && newMode === 'custom') {
     const confirmSwitch = confirm(
-      `Switching modes will clear all currently loaded civilizations. Are you sure?`
+      `Switching to Custom Mode will clear all currently loaded civilizations. Are you sure?`
     )
     if (!confirmSwitch) return
   }
@@ -249,7 +232,7 @@ async function switchMode(newMode: 'empty' | 'vanilla') {
     // Load all vanilla civs
     civs.value = await loadVanillaCivs()
   } else {
-    // Clear civs for empty mode
+    // Clear civs for custom mode
     civs.value = []
   }
 }
@@ -409,21 +392,6 @@ async function handleCreateMod() {
     alert(`Failed to create mod: ${error.value || 'Unknown error'}`)
   }
 }
-
-function handleDownloadVanilla() {
-  // Create a form and submit it to download the vanilla civs zip
-  const form = document.createElement('form')
-  form.method = 'POST'
-  form.action = '/vanilla'
-  form.style.display = 'none'
-  document.body.appendChild(form)
-  try {
-    form.submit()
-  } finally {
-    // Clean up the form element
-    document.body.removeChild(form)
-  }
-}
 </script>
 
 <style scoped>
@@ -456,61 +424,6 @@ function handleDownloadVanilla() {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-}
-
-.mode-toggle-section {
-  background: rgba(139, 69, 19, 0.75);
-  border: 2px solid hsl(52, 100%, 50%);
-  padding: 2rem;
-  border-radius: 8px;
-  text-align: center;
-}
-
-.mode-toggle-section h2 {
-  color: hsl(52, 100%, 50%);
-  margin-bottom: 1.5rem;
-}
-
-.mode-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-
-.mode-btn {
-  padding: 1rem 2rem;
-  background: rgba(0, 0, 0, 0.4);
-  color: hsla(52, 100%, 50%, 0.7);
-  border: 2px solid hsla(52, 100%, 50%, 0.3);
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: 'Cinzel', serif;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
-  min-width: 200px;
-}
-
-.mode-btn:hover {
-  background: rgba(0, 0, 0, 0.5);
-  border-color: hsla(52, 100%, 50%, 0.5);
-  transform: translateY(-2px);
-}
-
-.mode-btn.active {
-  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
-  color: hsl(52, 100%, 50%);
-  border-color: hsl(52, 100%, 50%);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-}
-
-.mode-description {
-  color: hsla(52, 100%, 50%, 0.8);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 .upload-section {
@@ -605,9 +518,36 @@ function handleDownloadVanilla() {
   border-radius: 8px;
 }
 
+.civs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
 .civs-section h2 {
   color: hsl(52, 100%, 50%);
-  margin-bottom: 1.5rem;
+  margin: 0;
+}
+
+.switch-mode-btn {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  color: hsl(52, 100%, 50%);
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.switch-mode-btn:hover {
+  background: linear-gradient(to bottom, rgba(160, 82, 45, 0.95), rgba(139, 69, 19, 0.95));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 .civs-list {
