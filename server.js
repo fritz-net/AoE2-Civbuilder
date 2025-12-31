@@ -19,6 +19,7 @@ const createTechtreeJson = require("./process_mod/createTechtreeJson.js");
 const makeai = require("./process_mod/modAI.js");
 const { numBonuses, numBasicTechs, nameArr, colours, iconids, blanks, indexDictionary } = require("./process_mod/constants.js");
 const { createCivilizationsJson } = require("./process_mod/createCivilizationsJson.js");
+const { normalizeDescription } = require("./process_mod/civDataUtils.js");
 const commonJs = require("./public/js/common.js");
 const { integrateNuxt } = require("./nuxt-integration.js");
 const { BONUS_INDEX } = require("./src/shared/bonusConstants.js");
@@ -887,10 +888,8 @@ const writeIconsJson = async (req, res, next) => {
 			// Name
 			mod_data.name.push(civs[i]["alias"]);
 
-			// Description
-			if (!civs[i]["description"]) {
-				civs[i]["description"] = "";
-			}
+			// Description - normalize to ensure it's always a string
+			civs[i]["description"] = normalizeDescription(civs[i]["description"]);
 			mod_data.description.push(civs[i]["description"]);
 
 			// Wonder
@@ -1500,6 +1499,8 @@ function draftIO(io) {
 							for (var j = 0; j < numBasicTechs; j++) {
 								player_techtree.push(0);
 							}
+							// Normalize description to ensure it's always a string
+							draft["players"][i]["description"] = normalizeDescription(draft["players"][i]["description"]);
 							mod_data.description.push(draft["players"][i]["description"]);
 							mod_data.castle.push(draft["players"][i]["castle"]);
 							mod_data.wonder.push(draft["players"][i]["wonder"]);

@@ -110,6 +110,7 @@
 <script setup lang="ts">
 import type { CivConfig } from '~/composables/useCivData'
 import { useModApi } from '~/composables/useModApi'
+import { normalizeDescription } from '~/utils/civDataUtils'
 
 const { isCreating, error, createMod } = useModApi()
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -169,6 +170,10 @@ function processFiles(files: File[]) {
         try {
           const content = e.target?.result as string
           const config = JSON.parse(content) as CivConfig
+          
+          // Normalize description field using shared utility
+          config.description = normalizeDescription(config.description)
+          
           resolve(config)
         } catch (err) {
           console.error('Failed to parse file:', file.name, err)
