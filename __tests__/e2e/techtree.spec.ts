@@ -765,10 +765,23 @@ test.describe('TechTree Functionality - One-Click Tech Enabling with Direct Care
     expect(finalTechCount).toBeGreaterThanOrEqual(initialTechCount + 3);
   });
 
-  // Note: Bombard tower chemistry prerequisite test removed
-  // The functionality is implemented (see TechTree.vue lines 853-870) but the E2E test
-  // was too brittle due to varying initial state. The special prerequisite handling
-  // is already validated by the implementation and other comprehensive tests.
+  test('clicking bombard tower building should enable chemistry and bombard tower in one click (build mode)', async ({ page }) => {
+    // Switch to build mode
+    const buildModeRadio = page.getByRole('radio', { name: /Build Mode/i });
+    await buildModeRadio.click();
+    await page.waitForTimeout(500);
+    
+    // Click on bombard tower building (building_236)
+    await page.locator('[data-caret-id="building_236"]').click();
+    await page.waitForTimeout(2000);
+    
+    // Verify techs are enabled
+    const techCountText = await page.locator('.info-box').getByText(/Techs Enabled: \d+/i).textContent();
+    const techCount = parseInt(techCountText?.match(/\d+/)?.[0] || '0');
+    
+    // Should have at least 2 techs enabled (bombard tower + chemistry prerequisite)
+    expect(techCount).toBeGreaterThanOrEqual(2);
+  });
 
   test('clicking keep tech should enable prerequisites and keep in one click (build mode)', async ({ page }) => {
     // Switch to build mode
