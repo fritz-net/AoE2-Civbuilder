@@ -100,6 +100,7 @@
 <script setup lang="ts">
 import type { CivConfig } from '~/composables/useCivData'
 import { useModApi } from '~/composables/useModApi'
+import { normalizeDescription } from '~/utils/civDataUtils'
 
 const { isCreating, error, createMod } = useModApi()
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -152,14 +153,8 @@ function processFiles(files: File[]) {
           const content = e.target?.result as string
           const config = JSON.parse(content) as CivConfig
           
-          // Normalize description field in case it's an array or other type
-          if (Array.isArray(config.description)) {
-            config.description = config.description.join(', ')
-          } else if (config.description === null || config.description === undefined) {
-            config.description = ''
-          } else if (typeof config.description !== 'string') {
-            config.description = String(config.description)
-          }
+          // Normalize description field using shared utility
+          config.description = normalizeDescription(config.description)
           
           resolve(config)
         } catch (err) {
