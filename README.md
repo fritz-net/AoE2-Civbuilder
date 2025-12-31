@@ -53,9 +53,26 @@ npm run dev:nuxt
 npm run dev:nuxt
 ```
 
-# run with Docker
+# Run with Docker
+
+## Quick Start
 ```bash
 docker run --rm -e CIVBUILDER_HOSTNAME=http://localhost:4000 -p 4000:4000 ghcr.io/fritz-net/aoe2-civbuilder:latest
 ```
+
+## Automated Deployment
+
+For production deployments with automated updates and separate staging/production environments:
+
+```bash
+# Update staging (auto-updates to latest release)
+./update-docker.sh staging
+
+# Promote and deploy to production
+./promote-to-production.sh v1.10.2
+./update-docker.sh production
+```
+
+See [DEPLOYMENT-SCRIPTS.md](DEPLOYMENT-SCRIPTS.md) and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete documentation.
 
 Both frontends (old and new Vue3) are included in the Docker image.

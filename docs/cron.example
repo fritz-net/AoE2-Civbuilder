@@ -1,0 +1,35 @@
+# Example cron configuration for AoE2-Civbuilder automated Docker updates
+# 
+# Installation:
+# 1. Copy this file to /etc/cron.d/aoe2-civbuilder (requires root)
+# 2. Ensure scripts are in /opt/aoe2-civbuilder/
+# 3. Logs will be written to /var/log/aoe2-civbuilder/
+#
+# OR manually add to crontab:
+# sudo crontab -e
+# Then copy the cron entries below (without SHELL and PATH lines if already set)
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# Environment configuration (optional)
+# Uncomment and adjust these if needed:
+# STAGING_PORT=4001
+# CIVBUILDER_HOSTNAME_STAGING=https://staging.civbuilder.velarix.space
+# CIVBUILDER_HOSTNAME_PROD=https://civbuilder.velarix.space
+
+# Check for staging updates every 10 minutes
+# Staging auto-updates to the latest release
+*/10 * * * * root /opt/aoe2-civbuilder/update-docker.sh staging >> /var/log/aoe2-civbuilder/staging-update.log 2>&1
+
+# Check for production updates every 30 minutes  
+# Production only updates to manually promoted versions
+*/30 * * * * root /opt/aoe2-civbuilder/update-docker.sh production >> /var/log/aoe2-civbuilder/prod-update.log 2>&1
+
+# Optional: Clean up old logs (runs daily at 2 AM)
+# Keeps only the last 30 days of logs
+0 2 * * * root find /var/log/aoe2-civbuilder/ -name "*.log" -mtime +30 -delete
+
+# Optional: Clean up old Docker images (runs weekly on Sunday at 3 AM)
+# Removes dangling images to free up disk space
+0 3 * * 0 root docker image prune -af --filter "until=168h" >> /var/log/aoe2-civbuilder/cleanup.log 2>&1
