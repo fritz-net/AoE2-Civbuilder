@@ -13,6 +13,7 @@
 
 #include "genie/dat/DatFile.h"
 #include "enums/unit_ids.h"
+#include <jsoncpp/json/json.h>
 
 #define SLOBYTE(x) (*((int8_t *)&(x)))
 #define HIBYTE(x) (*((uint8_t *)&(x) + 1))
@@ -69,6 +70,7 @@ extern vector<int> uniqueUnits;
 float amountTypetoD(int32_t value, int32_t type);
 int vectorSum(vector<int> v);
 EffectCommand createEC(int type, int A, int B, int C, float D);
+int getJsonInt(const Json::Value& value, int index = 0);
 void recalculateTechDiscounts(DatFile *df);
 void copyArchitecture(DatFile *df, int copyFrom, int copyTo);
 void giveClassNewBonus(DatFile *df, int classID, int bonusID);

@@ -265,6 +265,12 @@ export const useDraft = () => {
     socket.value.emit('update tree', draft.value.id, playerId, tree)
   }
 
+  // Update player tech tree progress (intermediate updates)
+  const updateTreeProgress = (playerId: number, tree: number[][]) => {
+    if (!socket.value || !draft.value) return
+    socket.value.emit('update tree progress', draft.value.id, playerId, tree)
+  }
+
   // Update player civilization info
   const updateCivInfo = (playerId: number, civName: string, flagPalette: number[], architecture: number, language: number) => {
     if (!socket.value || !draft.value) return
@@ -395,6 +401,7 @@ export const useDraft = () => {
     updateReady,
     startDraft,
     updateTree,
+    updateTreeProgress,
     updateCivInfo,
     selectCard,
     getPrivateGamestate,
