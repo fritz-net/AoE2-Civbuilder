@@ -151,6 +151,16 @@ function processFiles(files: File[]) {
         try {
           const content = e.target?.result as string
           const config = JSON.parse(content) as CivConfig
+          
+          // Normalize description field in case it's an array or other type
+          if (Array.isArray(config.description)) {
+            config.description = config.description.join(', ')
+          } else if (config.description === null || config.description === undefined) {
+            config.description = ''
+          } else if (typeof config.description !== 'string') {
+            config.description = String(config.description)
+          }
+          
           resolve(config)
         } catch (err) {
           console.error('Failed to parse file:', file.name, err)
