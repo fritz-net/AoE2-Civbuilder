@@ -8,8 +8,36 @@
     </div>
 
     <div class="combine-content">
-      <!-- Upload Section -->
+      <!-- Mode Toggle -->
+      <div class="mode-toggle-section">
+        <h2>Mode</h2>
+        <div class="mode-buttons">
+          <button 
+            class="mode-btn"
+            :class="{ active: mode === 'empty' }"
+            @click="switchMode('empty')"
+          >
+            📂 Empty Mode
+          </button>
+          <button 
+            class="mode-btn"
+            :class="{ active: mode === 'vanilla' }"
+            @click="switchMode('vanilla')"
+          >
+            🏰 Vanilla Mode
+          </button>
+        </div>
+        <p class="mode-description">
+          {{ mode === 'empty' 
+            ? 'Start with no civilizations. Upload JSON files to add them.' 
+            : 'Start with all vanilla Age of Empires II civilizations pre-loaded. Replace any civilization by clicking the replace button.' 
+          }}
+        </p>
+      </div>
+
+      <!-- Upload Section (Empty Mode) -->
       <div 
+        v-if="mode === 'empty'"
         class="upload-section"
         @drop.prevent="handleDrop"
         @dragover.prevent="handleDragOver"
@@ -54,13 +82,23 @@
               <h3>{{ civ.alias || 'Unnamed Civ' }}</h3>
               <p>{{ civ.description || 'No description' }}</p>
             </div>
-            <button 
-              class="remove-btn"
-              @click="removeCiv(index)"
-              title="Remove civilization"
-            >
-              ✕
-            </button>
+            <div class="civ-actions">
+              <button 
+                v-if="mode === 'vanilla'"
+                class="replace-btn"
+                @click="replaceCiv(index)"
+                title="Replace this civilization with a custom one"
+              >
+                🔄 Replace
+              </button>
+              <button 
+                class="remove-btn"
+                @click="removeCiv(index)"
+                :title="mode === 'vanilla' ? 'Remove civilization (will not be replaced)' : 'Remove civilization'"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -116,6 +154,105 @@ const { isCreating, error, createMod } = useModApi()
 const fileInput = ref<HTMLInputElement | null>(null)
 const civs = ref<CivConfig[]>([])
 const isDragging = ref(false)
+const mode = ref<'empty' | 'vanilla'>('empty')
+const replaceInputRef = ref<HTMLInputElement | null>(null)
+const replaceIndex = ref<number>(-1)
+
+// List of vanilla civ names in alphabetical order
+const vanillaCivNames = [
+  'Armenians',
+  'Aztecs',
+  'Bengalis',
+  'Berbers',
+  'Bohemians',
+  'Britons',
+  'Bulgarians',
+  'Burgundians',
+  'Burmese',
+  'Byzantines',
+  'Celts',
+  'Chinese',
+  'Cumans',
+  'Dravidians',
+  'Ethiopians',
+  'Franks',
+  'Georgians',
+  'Goths',
+  'Gurjaras',
+  'Hindustanis',
+  'Huns',
+  'Incas',
+  'Italians',
+  'Japanese',
+  'Jurchens',
+  'Khitans',
+  'Khmer',
+  'Koreans',
+  'Lithuanians',
+  'Magyars',
+  'Malay',
+  'Malians',
+  'Mayans',
+  'Mongols',
+  'Persians',
+  'Poles',
+  'Portuguese',
+  'Romans',
+  'Saracens',
+  'Shu',
+  'Sicilians',
+  'Slavs',
+  'Spanish',
+  'Tatars',
+  'Teutons',
+  'Turks',
+  'Vietnamese',
+  'Vikings',
+  'Wei',
+  'Wu',
+]
+
+async function loadVanillaCivs() {
+  const loadedCivs: CivConfig[] = []
+  
+  for (const civName of vanillaCivNames) {
+    try {
+      // Try to fetch the vanilla civ JSON file
+      const response = await fetch(`/v2/vanillaFiles/vanillaCivs/VanillaJson/${civName}.json`)
+      if (response.ok) {
+        const config = await response.json() as CivConfig
+        config.description = normalizeDescription(config.description)
+        loadedCivs.push(config)
+      }
+    } catch (err) {
+      console.error(`Failed to load vanilla civ: ${civName}`, err)
+    }
+  }
+  
+  return loadedCivs
+}
+
+async function switchMode(newMode: 'empty' | 'vanilla') {
+  if (newMode === mode.value) return
+  
+  // Warn user if switching away from a mode with loaded civs
+  if (civs.value.length > 0) {
+    const confirmSwitch = confirm(
+      `Switching modes will clear all currently loaded civilizations. Are you sure?`
+    )
+    if (!confirmSwitch) return
+  }
+  
+  mode.value = newMode
+  
+  if (newMode === 'vanilla') {
+    // Load all vanilla civs
+    civs.value = await loadVanillaCivs()
+  } else {
+    // Clear civs for empty mode
+    civs.value = []
+  }
+}
 
 function handleDragOver(event: DragEvent) {
   event.preventDefault()
@@ -209,6 +346,39 @@ function removeCiv(index: number) {
   civs.value.splice(index, 1)
 }
 
+function replaceCiv(index: number) {
+  // Create a hidden file input for replacing a specific civ
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.json'
+  input.onchange = async (event: Event) => {
+    const target = event.target as HTMLInputElement
+    if (!target.files || target.files.length === 0) return
+    
+    const file = target.files[0]
+    try {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string
+          const config = JSON.parse(content) as CivConfig
+          config.description = normalizeDescription(config.description)
+          
+          // Replace the civ at the specified index
+          civs.value[index] = config
+        } catch (err) {
+          console.error('Failed to parse file:', file.name, err)
+          alert(`Failed to parse ${file.name}`)
+        }
+      }
+      reader.readAsText(file)
+    } catch (err) {
+      alert(`Error loading file: ${err}`)
+    }
+  }
+  input.click()
+}
+
 function handleClearAll() {
   if (confirm('Are you sure you want to clear all loaded civilizations?')) {
     civs.value = []
@@ -286,6 +456,61 @@ function handleDownloadVanilla() {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+}
+
+.mode-toggle-section {
+  background: rgba(139, 69, 19, 0.75);
+  border: 2px solid hsl(52, 100%, 50%);
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.mode-toggle-section h2 {
+  color: hsl(52, 100%, 50%);
+  margin-bottom: 1.5rem;
+}
+
+.mode-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.mode-btn {
+  padding: 1rem 2rem;
+  background: rgba(0, 0, 0, 0.4);
+  color: hsla(52, 100%, 50%, 0.7);
+  border: 2px solid hsla(52, 100%, 50%, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.mode-btn:hover {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: hsla(52, 100%, 50%, 0.5);
+  transform: translateY(-2px);
+}
+
+.mode-btn.active {
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  color: hsl(52, 100%, 50%);
+  border-color: hsl(52, 100%, 50%);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.mode-description {
+  color: hsla(52, 100%, 50%, 0.8);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .upload-section {
@@ -407,6 +632,10 @@ function handleDownloadVanilla() {
   border-color: hsla(52, 100%, 50%, 0.5);
 }
 
+.civ-info {
+  flex: 1;
+}
+
 .civ-info h3 {
   color: hsl(52, 100%, 50%);
   font-size: 1.2rem;
@@ -416,6 +645,29 @@ function handleDownloadVanilla() {
 .civ-info p {
   color: hsla(52, 100%, 50%, 0.7);
   font-size: 0.9rem;
+}
+
+.civ-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.replace-btn {
+  padding: 0.5rem 1rem;
+  background: rgba(50, 150, 200, 0.6);
+  color: white;
+  border: 1px solid rgba(50, 150, 200, 0.8);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.replace-btn:hover {
+  background: rgba(50, 150, 200, 0.8);
+  transform: scale(1.05);
 }
 
 .remove-btn {
