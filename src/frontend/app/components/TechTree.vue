@@ -204,6 +204,7 @@
             :width="caret.width"
             :height="caret.height"
             class="node__overlay"
+            :data-caret-id="caret.id"
             @mouseover="showHelp(caret)"
             @mouseout="resetHighlight"
             @click="handleCaretClick(caret)"
@@ -297,6 +298,16 @@ const emit = defineEmits<{
 // Constants for Pasture building management
 const PASTURE_BUILDING_ID = 1889
 const BUILDINGS_ARRAY_INDEX = 1
+
+// Constants for Fortified Wall group dependencies
+const FORTIFIED_WALL_TECH_ID = 'tech_194'
+const FORTIFIED_WALL_BUILDING_ID = 'building_155'
+const STONE_WALL_ID = 'building_117'
+const GATE_ID = 'building_487'
+
+// Constants for other tech/building dependencies
+const BOMBARD_TOWER_BUILDING_ID = 'building_236'
+const CHEMISTRY_ID = 'tech_47'
 
 // Refs
 const techtreeRef = ref<HTMLDivElement | null>(null)
@@ -807,19 +818,51 @@ function toggleCaret(caretId: string) {
   if (localtree.value[type].includes(id)) {
     disableCaret(caretId)
   } else {
-    enableCaret(caretId)
+    enableCaret(caretId, true) // Pass true to indicate user click
   }
   
   emit('update:tree', localtree.value)
   emit('update:points', techtreePoints.value)
 }
 
-function enableCaret(caretId: string) {
+function getAllPrerequisites(caretId: string): string[] {
+  const prerequisites: string[] = []
+  const visited = new Set<string>()
+  
+  function collectPrereqs(id: string) {
+    if (visited.has(id)) return
+    visited.add(id)
+    
+    const parentId = parentConnections.value.get(id)
+    if (parentId) {
+      prerequisites.push(parentId)
+      collectPrereqs(parentId)
+    }
+  }
+  
+  collectPrereqs(caretId)
+  return prerequisites
+}
+
+function enableCaret(caretId: string, fromUserClick: boolean = false) {
   const type = idType(caretId)
   const id = idID(caretId)
   
   if (!localtree.value[type].includes(id)) {
     const techCost = getCaretCost(caretId)
+    
+    // Special handling for techs/buildings with non-parent prerequisites
+    // These need to be enabled BEFORE the main prerequisite logic runs
+    const isFortifiedWall = caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID
+    if (isFortifiedWall && !isEnabled(STONE_WALL_ID)) {
+      enableCaret(STONE_WALL_ID, false)
+    }
+    if (isFortifiedWall && !isEnabled(GATE_ID)) {
+      enableCaret(GATE_ID, false)
+    }
+    if (caretId === BOMBARD_TOWER_BUILDING_ID && !isEnabled(CHEMISTRY_ID)) {
+      enableCaret(CHEMISTRY_ID, false)
+    }
     
     if (props.mode === 'build') {
       // Build mode: add points (no limit)
@@ -827,7 +870,41 @@ function enableCaret(caretId: string) {
       techtreePoints.value += techCost
     } else {
       // Draft mode: subtract points (with limit check)
-      // Prevent going negative - check if we have enough points
+      
+      // If this is from a user click, enable ALL affordable prerequisites first
+      if (fromUserClick) {
+        const prerequisites = getAllPrerequisites(caretId)
+        
+        // Check if any prerequisites are not enabled
+        const unenabledPrerequisites = prerequisites.filter(prereqId => !isEnabled(prereqId))
+        
+        if (unenabledPrerequisites.length > 0) {
+          // Cache costs and filter to affordable prerequisites
+          const affordablePrereqs = unenabledPrerequisites
+            .map(prereqId => {
+              const cost = getCaretCost(prereqId)
+              return { id: prereqId, cost }
+            })
+            .filter(prereq => prereq.cost <= techtreePoints.value)
+            .sort((a, b) => a.cost - b.cost) // Sort by cost ascending - enable cheapest first
+          
+          // Enable ALL affordable prerequisites (not just one)
+          for (const prereq of affordablePrereqs) {
+            // Check if we still have enough points after enabling previous prerequisites
+            if (techtreePoints.value >= prereq.cost && !isEnabled(prereq.id)) {
+              enableCaret(prereq.id, false) // Pass false to avoid recursion
+            }
+          }
+          
+          // After enabling prerequisites, check if we can still afford the clicked tech
+          // If not, don't enable it (return early)
+          if (techtreePoints.value < techCost) {
+            return
+          }
+        }
+      }
+      
+      // If not enough points for this tech
       if (techtreePoints.value < techCost) {
         // Not enough points to enable this caret
         return
@@ -849,7 +926,7 @@ function enableCaret(caretId: string) {
   // Enable parent
   const parentId = parentConnections.value.get(caretId)
   if (parentId) {
-    enableCaret(parentId)
+    enableCaret(parentId, false)
   }
 }
 
@@ -871,34 +948,44 @@ function disableCaret(caretId: string) {
       // Draft mode: add points back when disabling
       techtreePoints.value += techCost
     }
-  }
-  
-  // Disable children
-  for (const connection of connections.value) {
-    if (connection[0] === caretId) {
-      disableCaret(connection[1])
+    
+    // Disable children
+    for (const connection of connections.value) {
+      if (connection[0] === caretId) {
+        disableCaret(connection[1])
+      }
     }
+    
+    // Disable linked carets (only if this caret was actually removed)
+    handleLinkedCarets(caretId, false)
   }
-  
-  // Disable linked carets
-  handleLinkedCarets(caretId, false)
 }
 
 function handleLinkedCarets(caretId: string, enable: boolean) {
+  // Standard bidirectional linked pairs
+  // Note: Fortified wall tech and building are linked here (tech_194 <-> building_155)
+  // and stone wall and gate are linked here (building_117 <-> building_487)
   const linkedPairs: [string, string][] = [
     ['building_234', 'tech_140'],
     ['tech_64', 'building_236'],
     ['tech_63', 'building_235'],
-    ['tech_194', 'building_155'],
-    ['building_117', 'building_487'],
+    [FORTIFIED_WALL_TECH_ID, FORTIFIED_WALL_BUILDING_ID],  // Fortified wall tech <-> building
+    [STONE_WALL_ID, GATE_ID],  // Stone wall <-> gate
   ]
   
   for (const [a, b] of linkedPairs) {
     if (caretId === a) {
-      enable ? enableCaret(b) : disableCaret(b)
+      enable ? enableCaret(b, false) : disableCaret(b)
     } else if (caretId === b) {
-      enable ? enableCaret(a) : disableCaret(a)
+      enable ? enableCaret(a, false) : disableCaret(a)
     }
+  }
+  
+  // When disabling stone wall or gate, also disable both fortified walls
+  // This enforces the requirement: can't have fortified walls without stone wall + gate
+  if (!enable && (caretId === STONE_WALL_ID || caretId === GATE_ID)) {
+    disableCaret(FORTIFIED_WALL_TECH_ID)
+    disableCaret(FORTIFIED_WALL_BUILDING_ID)
   }
   
   // Special cases for trebuchet-related units
@@ -908,7 +995,7 @@ function handleLinkedCarets(caretId: string, enable: boolean) {
     disableCaret('unit_36')
   }
   if (enable && (caretId === 'unit_5' || caretId === 'unit_420' || caretId === 'unit_36')) {
-    enableCaret('tech_47')
+    enableCaret('tech_47', false)
   }
 }
 
@@ -941,7 +1028,7 @@ function handleFill() {
     if (props.mode === 'build' || cost <= availablePoints) {
       // Check if not already enabled (could have been enabled as parent)
       if (!isEnabled(id)) {
-        enableCaret(id)
+        enableCaret(id, false)
         availablePoints = techtreePoints.value // Update from actual points
       }
     }
