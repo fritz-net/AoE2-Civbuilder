@@ -19,6 +19,7 @@ const createTechtreeJson = require("./process_mod/createTechtreeJson.js");
 const makeai = require("./process_mod/modAI.js");
 const { numBonuses, numBasicTechs, nameArr, colours, iconids, blanks, indexDictionary } = require("./process_mod/constants.js");
 const { createCivilizationsJson } = require("./process_mod/createCivilizationsJson.js");
+const { normalizeDescription } = require("./process_mod/civDataUtils.js");
 const commonJs = require("./public/js/common.js");
 const { integrateNuxt } = require("./nuxt-integration.js");
 const { BONUS_INDEX } = require("./src/shared/bonusConstants.js");
@@ -659,11 +660,53 @@ function extractBonusId(bonus, context) {
 	return bonus; // Return the number directly
 }
 
+/**
+ * Safely parse JSON from request body
+ * @param {string} fieldName - Name of the field being parsed (for error messages)
+ * @param {string} jsonString - The JSON string to parse
+ * @param {*} defaultValue - Default value to return if parsing fails
+ * @returns {*} Parsed JSON or default value
+ */
+function safeJsonParse(fieldName, jsonString, defaultValue = null) {
+	if (jsonString === undefined || jsonString === null || jsonString === 'undefined') {
+		console.error(`Invalid input: ${fieldName} is ${jsonString}`);
+		return defaultValue;
+	}
+	
+	try {
+		return JSON.parse(jsonString);
+	} catch (error) {
+		console.error(`Failed to parse ${fieldName}: ${error.message}`);
+		return defaultValue;
+	}
+}
+
 const writeIconsJson = async (req, res, next) => {
 	console.log(`[${req.body.seed}]: Writing icons and json...`);
-	console.log(JSON.parse(req.body.modifiers));
+	
+	// Validate required fields
+	if (!req.body.modifiers || req.body.modifiers === 'undefined') {
+		console.error(`[${req.body.seed}]: Missing or invalid modifiers field`);
+		return res.status(400).json({ error: 'Missing or invalid modifiers field' });
+	}
+	
+	if (!req.body.presets || req.body.presets === 'undefined') {
+		console.error(`[${req.body.seed}]: Missing or invalid presets field`);
+		return res.status(400).json({ error: 'Missing or invalid presets field' });
+	}
+	
+	// Parse and validate modifiers
+	const modifiers = safeJsonParse('modifiers', req.body.modifiers);
+	if (!modifiers) {
+		return res.status(400).json({ error: 'Invalid modifiers JSON' });
+	}
+	console.log(modifiers);
+	
 	//Parse multiple Json civ presets
-	var raw_presets = JSON.parse(req.body.presets);
+	var raw_presets = safeJsonParse('presets', req.body.presets);
+	if (!raw_presets || !raw_presets["presets"]) {
+		return res.status(400).json({ error: 'Invalid presets JSON or missing presets array' });
+	}
 	var civs = raw_presets["presets"];
 	//Create Civ Icons
 	var blankOthers = false;
@@ -839,16 +882,14 @@ const writeIconsJson = async (req, res, next) => {
 		mod_data.language = [];
 		mod_data.wonder = [];
 		mod_data.castle = [];
-		mod_data.modifiers = JSON.parse(req.body.modifiers);
+		mod_data.modifiers = modifiers;
 		mod_data.modifyDat = true;
 		for (var i = 0; i < civs.length; i++) {
 			// Name
 			mod_data.name.push(civs[i]["alias"]);
 
-			// Description
-			if (!civs[i]["description"]) {
-				civs[i]["description"] = "";
-			}
+			// Description - normalize to ensure it's always a string
+			civs[i]["description"] = normalizeDescription(civs[i]["description"]);
 			mod_data.description.push(civs[i]["description"]);
 
 			// Wonder
@@ -869,7 +910,7 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Unique Unit
-			if (civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT].length != 0) {
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT] && civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT].length != 0) {
 				// Extract ID from bonus data (could be number or [id, multiplier])
 				player_techtree[0] = extractBonusId(civs[i]["bonuses"][BONUS_INDEX.UNIQUE_UNIT][0], `unique unit for civ ${i}`);
 			} else {
@@ -877,7 +918,7 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Castle Tech
-				if (civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length != 0) {
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH] && civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length != 0) {
 				var castletechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.CASTLE_TECH].length; j++) {
 					// Preserve the original entry so multipliers ([id, copies]) are kept for the C++ builder
@@ -889,7 +930,7 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Imp Tech
-			if (civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length != 0) {
+			if (civs[i]["bonuses"] && civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH] && civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length != 0) {
 				var imptechs = [];
 				for (var j = 0; j < civs[i]["bonuses"][BONUS_INDEX.IMPERIAL_TECH].length; j++) {
 					// Preserve [id, multiplier] tuples when provided
@@ -901,9 +942,11 @@ const writeIconsJson = async (req, res, next) => {
 			}
 
 			//Tech Tree
-			for (var j = 0; j < civs[i]["tree"].length; j++) {
-				for (var k = 0; k < civs[i]["tree"][j].length; k++) {
-					player_techtree[indexDictionary[j][civs[i]["tree"][j][k].toString()]] = 1;
+			if (civs[i]["tree"] && Array.isArray(civs[i]["tree"])) {
+				for (var j = 0; j < civs[i]["tree"].length; j++) {
+					for (var k = 0; k < civs[i]["tree"][j].length; k++) {
+						player_techtree[indexDictionary[j][civs[i]["tree"][j][k].toString()]] = 1;
+					}
 				}
 			}
 			mod_data.techtree.push(player_techtree);
@@ -1456,6 +1499,8 @@ function draftIO(io) {
 							for (var j = 0; j < numBasicTechs; j++) {
 								player_techtree.push(0);
 							}
+							// Normalize description to ensure it's always a string
+							draft["players"][i]["description"] = normalizeDescription(draft["players"][i]["description"]);
 							mod_data.description.push(draft["players"][i]["description"]);
 							mod_data.castle.push(draft["players"][i]["castle"]);
 							mod_data.wonder.push(draft["players"][i]["wonder"]);
