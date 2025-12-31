@@ -12,6 +12,16 @@
           <button class="nav-btn" @click="decrementPalette(index)">&lt;</button>
           <span class="category-label">{{ category }}</span>
           <button class="nav-btn" @click="incrementPalette(index)">&gt;</button>
+          <!-- Add color picker for color categories (0-4) -->
+          <input
+            v-if="index < 5"
+            type="color"
+            :value="rgbToHex(colours[localPalette[index]])"
+            @input="handleColorPick(index, $event)"
+            class="color-picker"
+            :disabled="disabled || useCustomFlag"
+            title="Pick a custom color"
+          />
         </div>
       </div>
       
@@ -73,6 +83,7 @@ const useCustomFlag = ref(props.customFlag)
 const customImage = ref<HTMLImageElement | null>(null)
 
 const localPalette = ref([...props.modelValue])
+const customColors = ref<Map<number, number[]>>(new Map())
 
 function incrementPalette(index: number) {
   if (props.disabled) return
@@ -94,6 +105,48 @@ function decrementPalette(index: number) {
   if (!useCustomFlag.value) {
     renderFlag()
   }
+}
+
+// Helper function to convert RGB array to hex color
+function rgbToHex(rgb: number[]): string {
+  const r = rgb[0].toString(16).padStart(2, '0')
+  const g = rgb[1].toString(16).padStart(2, '0')
+  const b = rgb[2].toString(16).padStart(2, '0')
+  return `#${r}${g}${b}`
+}
+
+// Helper function to convert hex color to RGB array
+function hexToRgb(hex: string): number[] {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return [r, g, b]
+}
+
+// Handle color picker input
+function handleColorPick(index: number, event: Event) {
+  if (props.disabled || useCustomFlag.value) return
+  
+  const input = event.target as HTMLInputElement
+  const rgb = hexToRgb(input.value)
+  
+  // Store custom color for this index
+  customColors.value.set(index, rgb)
+  
+  // Render flag with custom color
+  if (!useCustomFlag.value) {
+    renderFlag()
+  }
+}
+
+// Get the actual color to use (custom or from palette)
+function getColor(index: number): number[] {
+  // Check if there's a custom color for this palette index
+  if (customColors.value.has(index)) {
+    return customColors.value.get(index)!
+  }
+  // Otherwise use the predefined color from colours array
+  return colours[localPalette.value[index]]
 }
 
 function handleCustomFlagToggle() {
@@ -172,11 +225,11 @@ function renderFlag() {
   
   // Draw base colors based on division pattern
   const division = palette[5]
-  const color1 = colours[palette[0]]
-  const color2 = colours[palette[1]]
-  const color3 = colours[palette[2]]
-  const color4 = colours[palette[3]]
-  const color5 = colours[palette[4]]
+  const color1 = getColor(0)
+  const color2 = getColor(1)
+  const color3 = getColor(2)
+  const color4 = getColor(3)
+  const color5 = getColor(4)
   
   // Simple division patterns
   ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
@@ -636,6 +689,26 @@ onMounted(() => {
   text-align: center;
   color: hsl(52, 100%, 50%);
   font-size: 0.9rem;
+}
+
+.color-picker {
+  width: 40px;
+  height: 30px;
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.color-picker:hover:not(:disabled) {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
+.color-picker:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .flag-preview {

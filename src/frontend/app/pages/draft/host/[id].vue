@@ -492,7 +492,9 @@ const handleSaveCivInfo = () => {
       civConfig.value.alias,
       civConfig.value.flag_palette,
       civConfig.value.architecture,
-      civConfig.value.language
+      civConfig.value.language,
+      civConfig.value.customFlag,
+      civConfig.value.customFlagData
     )
   }
 }
