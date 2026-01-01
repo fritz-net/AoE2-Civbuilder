@@ -380,14 +380,44 @@ const sidebarContent = computed(() => {
     html += '</ul>'
   }
   
-  // Unique Unit
+  // Unique Unit - handle both legacy (number) and custom (object) formats
   if (player.bonuses[1] && Array.isArray(player.bonuses[1]) && player.bonuses[1].length > 0) {
-    const unitId = player.bonuses[1][0]
-    const unit = allCards.uniqueUnits[unitId]
-    if (unit && unit.name) {
+    const unitData = player.bonuses[1][0]
+    
+    // Check if it's a custom UU object
+    if (typeof unitData === 'object' && unitData.type === 'custom') {
       if (hasAnyBonus) html += '<hr>'
-      html += `<h3>Unique Unit</h3><p>${unit.name}</p>`
+      html += `<h3>Custom Unique Unit</h3>`
+      html += `<p><strong>${unitData.name}</strong></p>`
+      html += `<p style="color: rgba(240, 230, 210, 0.7); font-style: italic; font-size: 0.9em;">${unitData.unitType.charAt(0).toUpperCase() + unitData.unitType.slice(1)}</p>`
+      html += '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(0, 0, 0, 0.2); border-radius: 4px; border-left: 3px solid hsl(52, 100%, 50%);">'
+      html += `<p><strong>HP:</strong> ${unitData.health} | <strong>Attack:</strong> ${unitData.attack}</p>`
+      html += `<p><strong>Armor:</strong> ${unitData.meleeArmor}/${unitData.pierceArmor} | <strong>Speed:</strong> ${unitData.speed}</p>`
+      if (unitData.range > 0) {
+        html += `<p><strong>Range:</strong> ${unitData.range}</p>`
+      }
+      html += `<p><strong>Cost:</strong> ${unitData.cost.food}F `
+      if (unitData.cost.wood > 0) html += `${unitData.cost.wood}W `
+      if (unitData.cost.gold > 0) html += `${unitData.cost.gold}G `
+      if (unitData.cost.stone > 0) html += `${unitData.cost.stone}S`
+      html += `</p>`
+      if (unitData.attackBonuses && unitData.attackBonuses.length > 0) {
+        html += '<p><strong>Bonuses:</strong></p><ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">'
+        unitData.attackBonuses.forEach((bonus: any) => {
+          html += `<li style="margin: 0.25rem 0; font-size: 0.85em;">+${bonus.amount} vs armor class ${bonus.class}</li>`
+        })
+        html += '</ul>'
+      }
+      html += '</div>'
       hasAnyBonus = true
+    } else if (typeof unitData === 'number') {
+      // Legacy format: numeric unit ID
+      const unit = allCards.uniqueUnits[unitData]
+      if (unit && unit.name) {
+        if (hasAnyBonus) html += '<hr>'
+        html += `<h3>Unique Unit</h3><p>${unit.name}</p>`
+        hasAnyBonus = true
+      }
     }
   }
   
