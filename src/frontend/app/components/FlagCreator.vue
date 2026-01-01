@@ -10,9 +10,7 @@
           class="flag-control-row"
         >
           <button class="nav-btn" @click="decrementPalette(index)">&lt;</button>
-          <span class="category-label">{{ category }}</span>
-          <button class="nav-btn" @click="incrementPalette(index)">&gt;</button>
-          <!-- Add dropdown for color selection (0-4) -->
+          <!-- For colors (0-4), show dropdown instead of label -->
           <select
             v-if="index < 5"
             :value="localPalette[index]"
@@ -30,6 +28,9 @@
               {{ getColorName(colorIndex) }}
             </option>
           </select>
+          <!-- For other categories (5-7), show label -->
+          <span v-else class="category-label">{{ category }}</span>
+          <button class="nav-btn" @click="incrementPalette(index)">&gt;</button>
           <!-- Add color picker for color categories (0-4) -->
           <input
             v-if="index < 5"

@@ -56,13 +56,7 @@
         <div class="builder-column selectors-column">
           <ArchitectureSelector v-model="civConfig.architecture" :disabled="readOnly" />
           
-          <div class="advanced-toggle">
-            <button class="toggle-btn" @click="showAdvanced = !showAdvanced">
-              {{ showAdvanced ? 'Hide Advanced' : 'Show Advanced' }}
-            </button>
-          </div>
-          
-          <div v-if="showAdvanced" class="advanced-options">
+          <div class="advanced-options">
             <LanguageSelector v-model="civConfig.language" :disabled="readOnly" />
             <WonderSelector v-model="civConfig.wonder" :disabled="readOnly" />
           </div>
@@ -319,7 +313,6 @@ const AUTOSAVE_KEY = 'aoe2-civbuilder-autosave'
 // Steps: Basic Info, Civ Bonuses, Unique Unit, Castle Tech, Imperial Tech, Team Bonus, Tech Tree, Review
 const stepLabels = ['Basic Info', 'Civ Bonuses', 'Unique Unit', 'Castle Tech', 'Imperial Tech', 'Team Bonus', 'Tech Tree', 'Review']
 const currentStep = ref(0)
-const showAdvanced = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const autosaveEnabled = ref(false)
 const lastSaved = ref<Date | null>(null)
