@@ -140,7 +140,9 @@
         
         <div class="stats-grid">
           <div class="form-group">
-            <label for="health">Health (HP)</label>
+            <label for="health">
+              <span class="stat-icon">❤️</span> Health (HP)
+            </label>
             <div class="stat-with-elite">
               <input 
                 id="health"
@@ -164,7 +166,9 @@
           </div>
 
           <div class="form-group">
-            <label for="attack">Attack</label>
+            <label for="attack">
+              <span class="stat-icon">⚔️</span> Attack
+            </label>
             <div class="stat-with-elite">
               <input 
                 id="attack"
@@ -188,7 +192,9 @@
           </div>
 
           <div class="form-group">
-            <label for="melee-armor">Melee Armor</label>
+            <label for="melee-armor">
+              <span class="stat-icon">🛡️</span> Melee Armor
+            </label>
             <div class="stat-with-elite">
               <input 
                 id="melee-armor"
@@ -211,7 +217,9 @@
           </div>
 
           <div class="form-group">
-            <label for="pierce-armor">Pierce Armor</label>
+            <label for="pierce-armor">
+              <span class="stat-icon">🏹</span> Pierce Armor
+            </label>
             <div class="stat-with-elite">
               <input 
                 id="pierce-armor"
@@ -234,7 +242,9 @@
           </div>
 
           <div class="form-group">
-            <label for="attack-speed">Attack Speed (seconds)</label>
+            <label for="attack-speed">
+              <span class="stat-icon">⚡</span> Attack Speed (seconds)
+            </label>
             <input 
               id="attack-speed"
               v-model.number="customUnit.attackSpeed" 
@@ -248,7 +258,9 @@
           </div>
 
           <div class="form-group">
-            <label for="range">Range</label>
+            <label for="range">
+              <span class="stat-icon">🎯</span> Range
+            </label>
             <div class="stat-with-elite">
               <input 
                 id="range"
@@ -271,7 +283,9 @@
         
         <div class="stats-grid">
           <div class="form-group">
-            <label for="speed">Movement Speed</label>
+            <label for="speed">
+              <span class="stat-icon">🏃</span> Movement Speed
+            </label>
             <input 
               id="speed"
               v-model.number="customUnit.speed" 
@@ -293,7 +307,9 @@
           </div>
 
           <div class="form-group">
-            <label for="los">Line of Sight</label>
+            <label for="los">
+              <span class="stat-icon">👁️</span> Line of Sight
+            </label>
             <input 
               id="los"
               v-model.number="customUnit.lineOfSight" 
@@ -374,15 +390,26 @@
         </div>
 
         <div class="form-group">
-          <label for="train-time">Train Time (seconds)</label>
-          <input 
-            id="train-time"
-            v-model.number="customUnit.trainTime" 
-            type="number" 
-            min="6"
-            max="90"
-            @input="onUnitChange"
-          />
+          <label for="train-time">
+            <span class="stat-icon">⏱️</span> Train Time (seconds)
+          </label>
+          <div class="stat-with-slider">
+            <input 
+              id="train-time"
+              v-model.number="customUnit.trainTime" 
+              type="number" 
+              min="6"
+              max="90"
+              @input="onUnitChange"
+            />
+            <BudgetSlider
+              v-model="customUnit.trainTime"
+              :min="6"
+              :max="90"
+              :budget-limit="null"
+              @change="onUnitChange"
+            />
+          </div>
         </div>
 
         <div class="form-group">
@@ -485,11 +512,18 @@ import BudgetSlider from './BudgetSlider.vue';
 
 interface Props {
   showModeSelector?: boolean;
+  initialMode?: 'demo' | 'build' | 'draft';
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  showModeSelector: false
+  showModeSelector: false,
+  initialMode: 'demo'
 });
+
+const emit = defineEmits<{
+  (e: 'update', unit: CustomUUData): void;
+  (e: 'save', unit: CustomUUData): void;
+}>();
 
 const {
   customUnit,
@@ -508,7 +542,10 @@ const {
   setMode,
   getMaxStatValue,
   ARMOR_CLASS_NAMES
-} = useCustomUU();
+} = useCustomUU(props.initialMode);
+
+// Set initial mode
+setMode(props.initialMode);
 
 const validationErrors = ref<any[]>([]);
 const compactMode = ref(false);
@@ -568,6 +605,14 @@ const resetToDefaults = () => {
 const onUnitChange = () => {
   if (customUnit.value) {
     validationErrors.value = validateUnit(customUnit.value);
+    
+    // Auto-apply recommended cost in draft + compact mode
+    if (editorMode.value === 'draft' && compactMode.value) {
+      customUnit.value.cost = { ...recommendedCost.value };
+    }
+    
+    // Emit update event
+    emit('update', customUnit.value);
   }
 };
 
@@ -1226,6 +1271,8 @@ watch(() => customUnit.value, (newVal) => {
   gap: 0.5rem;
   cursor: pointer;
   margin: 0;
+  color: #333; /* Better contrast for readability */
+  font-weight: 500;
 }
 
 .density-toggle input[type="checkbox"] {
@@ -1251,22 +1298,68 @@ watch(() => customUnit.value, (newVal) => {
   gap: 0.25rem;
 }
 
-.compact-mode input[type="number"] {
-  display: none; /* Hide number inputs in compact mode */
+/* In compact mode, hide label text for stats (keep only icons) */
+.compact-mode .form-group label:not(.checkbox-label) {
+  font-size: 0;
+}
+
+.compact-mode .form-group label .stat-icon,
+.compact-mode .form-group label .resource-icon {
+  font-size: 1.2rem;
+}
+
+/* In compact mode, arrange stat-with-elite in a single line */
+.compact-mode .stat-with-elite {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Also apply to stat-with-slider */
+.compact-mode .stat-with-slider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* In compact mode, only hide number inputs that have sliders (stat-with-elite sections) */
+.compact-mode .stat-with-elite input[type="number"] {
+  display: none;
+}
+
+/* Hide train time input in compact mode too */
+.compact-mode .stat-with-slider input[type="number"] {
+  display: none;
+}
+
+/* In compact mode, hide speed input since it has a BudgetSlider */
+.compact-mode #speed {
+  display: none;
+}
+
+/* Keep unit name visible but smaller */
+.compact-mode #unit-name {
+  font-size: 0.9rem;
 }
 
 .compact-mode .char-count,
 .compact-mode .help-text,
-.compact-mode .base-unit-custom-input {
-  display: none; /* Hide custom ID input in compact mode */
+.compact-mode .custom-id-input {
+  display: none; /* Hide help text and custom ID input in compact mode */
 }
 
 .compact-mode .elite-value {
   font-size: 0.75rem;
+  white-space: nowrap;
 }
 
 .compact-mode .form-section {
   margin-bottom: 1rem;
   padding: 0.75rem;
+}
+
+/* In compact mode + draft mode, hide apply cost button (auto-calculated) */
+.compact-mode .cost-info button {
+  display: none;
 }
 </style>

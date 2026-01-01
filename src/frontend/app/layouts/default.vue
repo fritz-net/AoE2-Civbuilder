@@ -58,9 +58,9 @@ const v1Url = computed(() => {
   return base
 })
 
-// Hide navigation on certain pages (e.g., draft pages)
+// Hide navigation on certain pages (e.g., draft pages, demo pages)
 const showNavigation = computed(() => {
-  return !route.path.includes('/draft/')
+  return !route.path.includes('/draft/') && !route.path.includes('/demo/')
 })
 </script>
 

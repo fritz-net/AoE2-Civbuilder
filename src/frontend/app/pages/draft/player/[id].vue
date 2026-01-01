@@ -58,6 +58,7 @@
 
             <ArchitectureSelector v-model="civConfig.architecture" />
             <LanguageSelector v-model="civConfig.language" />
+            <WonderSelector v-model="civConfig.wonder" />
             
             <div class="civ-name-input">
               <label for="civName">Civilization Name</label>
@@ -190,7 +191,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDraft } from '~/composables/useDraft'
 import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
@@ -201,6 +202,7 @@ import DraftBoard from '~/components/draft/DraftBoard.vue'
 import FlagCreator from '~/components/FlagCreator.vue'
 import ArchitectureSelector from '~/components/ArchitectureSelector.vue'
 import LanguageSelector from '~/components/LanguageSelector.vue'
+import WonderSelector from '~/components/WonderSelector.vue'
 import TechTree from '~/components/TechTree.vue'
 import PlayerViewModal from '~/components/draft/PlayerViewModal.vue'
 
@@ -244,6 +246,7 @@ const {
   updateReady,
   startDraft,
   updateTree,
+  updateTreeProgress,
   updateCivInfo,
   selectCard,
   refillCards,
@@ -470,7 +473,7 @@ const handleToggleReady = () => {
   }
 }
 
-// Phase 1: Save civ info (flag, architecture, language, civ name) - NO tech tree
+// Phase 1: Save civ info (flag, architecture, language, wonder, civ name) - NO tech tree
 const handleSaveCivInfo = () => {
   if (playerNumber.value >= 0) {
     // Immediately show waiting screen (optimistic update like legacy code)
@@ -481,7 +484,8 @@ const handleSaveCivInfo = () => {
       civConfig.value.alias,
       civConfig.value.flag_palette,
       civConfig.value.architecture,
-      civConfig.value.language
+      civConfig.value.language,
+      civConfig.value.wonder
     )
   }
 }
@@ -607,6 +611,16 @@ const getCookie = (name: string): string | null => {
   }
   return null
 }
+
+// Watch for tech tree changes and emit intermediate updates to server
+// This allows spectators and other players to see real-time updates as techs are selected
+watch(() => civConfig.value.tree, (newTree) => {
+  // Only send intermediate updates when in phase 3 (tech tree selection)
+  // and when the player hasn't marked themselves as ready yet
+  if (currentPhase.value === 3 && currentPlayer.value && currentPlayer.value.ready === 0) {
+    updateTreeProgress(playerNumber.value, newTree as number[][])
+  }
+}, { deep: true })
 
 onMounted(async () => {
   // Check if already joined (has playerNumber cookie for this draft)

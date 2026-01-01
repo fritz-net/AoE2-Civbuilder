@@ -14,6 +14,18 @@ process_mod/randomName.js
 modding/_codeql_build_dir/
 _codeql_detected_source_root
 modding/scripts/sample_output.json
+# CMake build artifacts
+# Note: These files were previously committed to the repo but should not have been.
+# They are generated during compilation and should be ignored to prevent accidental commits.
+# Some older build files (3.22.1) remain in the repo history but will not be modified going forward.
+modding/CMakeCache.txt
+modding/CMakeFiles/
+modding/cmake_install.cmake
+modding/Makefile
+modding/create-data-mod
+modding/extract-dat-info
+modding/generate-enums
+modding/genieutils/libgenieutils.so
 
 # Nuxt build outputs
 .output-nuxt

@@ -235,6 +235,8 @@ const createDraft = (req, res, next) => {
 	preset["snake_draft"] = req.body.snake_draft === "true";
 	// Number of cards to show per roll (default 3 if not specified)
 	preset["cards_per_roll"] = req.body.cards_per_roll ? parseInt(req.body.cards_per_roll, 10) : 3;
+	// Number of bonuses displayed per page/round (default 30 if not specified)
+	preset["bonuses_per_page"] = req.body.bonuses_per_page ? parseInt(req.body.bonuses_per_page, 10) : 30;
 	// Optional: Force specific bonuses to appear in first roll (for testing)
 	// Expected format: comma-separated bonus IDs like "356,123" or empty string
 	preset["required_first_roll"] = req.body.required_first_roll ? req.body.required_first_roll.split(",").map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id)) : [];
@@ -1171,7 +1173,11 @@ function processCardPick(draft, pick) {
 			draft["gamestate"]["phase"] = 3;
 		} else {
 			draft["gamestate"]["cards"] = [];
-			for (var i = 0; i < 2 * numPlayers + 20; i++) {
+			// Use configurable bonuses_per_page, default to 30 for backward compatibility
+			var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
+			// For subsequent rounds after first, use a smaller base value (2/3 of bonuses_per_page rounded down)
+			var subsequentBase = Math.floor(bonusesPerPage * 2 / 3);
+			for (var i = 0; i < 2 * numPlayers + subsequentBase; i++) {
 				var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][roundType + 1].length);
 				draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][roundType + 1][rand]);
 				draft["gamestate"]["available_cards"][roundType + 1].splice(rand, 1);
@@ -1310,7 +1316,7 @@ function draftIO(io) {
 			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			io.in(roomID).emit("set gamestate", draft);
 		});
-		socket.on("update civ info", (roomID, playerNumber, civ_name, flag_palette, architecture, language) => {
+		socket.on("update civ info", (roomID, playerNumber, civ_name, flag_palette, architecture, language, wonder = 0) => {
 			let draft = getDraft(roomID);
 			
 			// Check if draft exists
@@ -1327,6 +1333,7 @@ function draftIO(io) {
 			draft["players"][playerNumber]["flag_palette"] = flag_palette;
 			draft["players"][playerNumber]["architecture"] = architecture;
 			draft["players"][playerNumber]["language"] = language;
+			draft["players"][playerNumber]["wonder"] = wonder;
 
 			var nextPhase = 1;
 			for (var i = 0; i < numPlayers; i++) {
@@ -1355,7 +1362,9 @@ function draftIO(io) {
 				}
 				
 				// Then fill the rest randomly
-				var cardsNeeded = (draft["preset"]["rounds"] - 1) * numPlayers + 30 - draft["gamestate"]["cards"].length;
+				// Use configurable bonuses_per_page, default to 30 for backward compatibility
+				var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
+				var cardsNeeded = (draft["preset"]["rounds"] - 1) * numPlayers + bonusesPerPage - draft["gamestate"]["cards"].length;
 				for (var i = 0; i < cardsNeeded; i++) {
 					if (draft["gamestate"]["available_cards"][0].length > 0) {
 						var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
@@ -1658,6 +1667,24 @@ function draftIO(io) {
 			} else {
 				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			}
+		});
+		socket.on("update tree progress", (roomID, playerNumber, tree) => {
+			let draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
+			
+			// Only update the tree in memory, don't mark player as ready
+			// This is for intermediate updates while player is still editing
+			draft["players"][playerNumber]["tree"] = tree;
+			
+			// Broadcast the updated gamestate to all clients in the room
+			// This allows spectators and other players to see real-time updates
+			io.in(roomID).emit("set gamestate", draft);
 		});
 		socket.on("end turn", (roomID, pick, client_turn) => {
 			let draft = getDraft(roomID);
