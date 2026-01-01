@@ -10,7 +10,7 @@
           class="flag-control-row"
         >
           <button class="nav-btn" @click="decrementPalette(index)">&lt;</button>
-          <!-- For colors (0-4), show dropdown instead of label -->
+          <!-- For colors (0-4), show dropdown with color names -->
           <select
             v-if="index < 5"
             :value="localPalette[index]"
@@ -28,8 +28,23 @@
               {{ getColorName(colorIndex) }}
             </option>
           </select>
-          <!-- For other categories (5-7), show label -->
-          <span v-else class="category-label">{{ category }}</span>
+          <!-- For Division, Overlay, Symbol (5-7), show dropdown with category as placeholder -->
+          <select
+            v-else
+            :value="localPalette[index]"
+            @change="handleDropdownChange(index, $event)"
+            class="flag-dropdown"
+            :disabled="disabled || useCustomFlag"
+            :title="`Select ${category}`"
+          >
+            <option 
+              v-for="optionIndex in paletteSizes[index]" 
+              :key="optionIndex - 1" 
+              :value="optionIndex - 1"
+            >
+              {{ category }} {{ optionIndex }}
+            </option>
+          </select>
           <button class="nav-btn" @click="incrementPalette(index)">&gt;</button>
           <!-- Add color picker for color categories (0-4) -->
           <input
@@ -813,6 +828,34 @@ onMounted(() => {
 }
 
 .color-dropdown option {
+  background: rgba(139, 69, 19, 0.95);
+  color: hsl(52, 100%, 50%);
+  padding: 0.25rem;
+}
+
+.flag-dropdown {
+  width: 120px;
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  color: hsl(52, 100%, 50%);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flag-dropdown:hover:not(:disabled) {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
+.flag-dropdown:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.flag-dropdown option {
   background: rgba(139, 69, 19, 0.95);
   color: hsl(52, 100%, 50%);
   padding: 0.25rem;
