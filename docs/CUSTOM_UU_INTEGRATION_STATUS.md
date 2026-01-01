@@ -84,19 +84,20 @@ Created comprehensive validation rules dashboard at `/demo/validation-rules`:
      - Displays all players' progress and submission status
      - Shows custom UU names once submitted
      - Provides visual feedback for ready/designing states
+     - Shows custom UU details in sidebar during draft
 
-4. **Testing**:
+4. **Custom UU Results Display**:
+   - ✅ **PlayerViewModal**: Shows custom UU details with stats
+   - ✅ **Draft Sidebar**: Displays custom UU info in tech tree sidebar
+   - ✅ Shows custom UU name, type, HP, attack, armor, speed, range, cost
+   - ✅ Displays attack bonuses if present
+   - ✅ Styled display with visual distinction from legacy UUs
+   - ✅ Maintains backwards compatibility with numeric unit IDs
+
+5. **Testing**:
    - ✅ Created `__tests__/customUUDraft.test.js` with 8 passing tests
    - ✅ Tests validate data structures and validation logic
    - ✅ Server.js syntax validation passes
-
-#### Remaining Work:
-
-##### Backend Changes Still Needed:
-1. **Mod Export/Generation**:
-   - Add `customUUMode: boolean` to draft settings
-   - Store custom UU data per player instead of single selection
-   - Handle serialization/deserialization of custom UU objects
 
 #### Remaining Work:
 
@@ -107,17 +108,10 @@ Created comprehensive validation rules dashboard at `/demo/validation-rules`:
    - Support in C++ backend for custom unit creation
    - Include custom UUs in `data.json` export
 
-##### Frontend Changes Still Needed:
-
-1. **Draft Results Display**:
-   - Show custom UU details in draft completion screen
-   - Include custom UUs in export/download functionality
-   - Display custom unit stats in final results
-
-2. **Optional Enhancements**:
-   - Random base unit assignment in draft mode
-   - Parallel mode where all players can pick any base unit
-   - Import/export custom UU designs between drafts
+##### Optional Enhancements:
+- Random base unit assignment in draft mode
+- Parallel mode where all players can pick any base unit
+- Import/export custom UU designs between drafts
 
 ## Socket Events Implementation
 
@@ -395,8 +389,10 @@ socket.on('submit_custom_uu', (data) => {
 - [x] Phase advances to bonus selection after all submit
 - [x] Host view shows all player statuses
 - [x] Host view displays custom UU names
-- [ ] Custom UU data included in final export/mod
-- [ ] Draft results display custom UU details
+- [x] Draft results display custom UU details
+- [x] PlayerViewModal shows custom UU stats
+- [x] Sidebar displays custom UU info during draft
+- [ ] Custom UU data included in final export/mod (needs C++ backend)
 
 ### Validation Dashboard
 - [x] Page loads at /demo/validation-rules
@@ -412,19 +408,12 @@ socket.on('submit_custom_uu', (data) => {
    - Converted to techtree format for data.json
    - Passed to C++ backend for unit creation
    - Included in final mod package
+   - **This requires C++ modding backend work (separate PR)**
 
 2. **Base Unit Draft**: The "random base units draft" is not implemented. This would require:
    - Additional draft phase for base unit selection
    - Random assignment logic
    - UI for base unit picking
-
-3. **Draft Results Display**: Custom UUs not yet shown in:
-   - Draft completion screen
-   - Export/download functionality
-   - Final results summary
-   - How to show multiple custom UUs
-   - Real-time updates as players design
-   - Comparison view
 
 ## Future Enhancements
 
