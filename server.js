@@ -233,6 +233,8 @@ const createDraft = (req, res, next) => {
 	preset["blind_picks"] = req.body.blind_picks === "true";
 	// Snake draft setting (default disabled for backward compatibility)
 	preset["snake_draft"] = req.body.snake_draft === "true";
+	// Custom UU mode setting (default disabled for backward compatibility)
+	preset["custom_uu_mode"] = req.body.custom_uu_mode === "true";
 	// Number of cards to show per roll (default 3 if not specified)
 	preset["cards_per_roll"] = req.body.cards_per_roll ? parseInt(req.body.cards_per_roll, 10) : 3;
 	// Number of bonuses displayed per page/round (default 30 if not specified)
@@ -263,6 +265,8 @@ const createDraft = (req, res, next) => {
 		player["language"] = 0;
 		player["priority"] = -1;
 		player["bonuses"] = [[], [], [], [], []];
+		// Custom UU data for custom UU mode (will be populated during draft)
+		player["custom_uu"] = null;
 		players.push(player);
 	}
 	draft["players"] = players;
@@ -270,6 +274,7 @@ const createDraft = (req, res, next) => {
 	var gamestate = {};
 	gamestate["phase"] = 0;
 	gamestate["turn"] = 0;
+	gamestate["custom_uu_phase"] = false; // Flag to track if we're in custom UU design phase
 	gamestate["available_cards"] = [];
 	for (var i = 0; i < 5; i++) {
 		var available_bonuses = [];
@@ -1343,58 +1348,71 @@ function draftIO(io) {
 			}
 
 			if (nextPhase == 1) {
-				draft["gamestate"]["phase"] = 2;
-				for (var i = 0; i < numPlayers; i++) {
-					draft["players"][i]["ready"] = 0;
-				}
-
-				//Distribute the first set of civ bonus cards
-				// First, add any required cards for testing
-				if (draft["preset"]["required_first_roll"] && draft["preset"]["required_first_roll"].length > 0) {
-					for (var reqCard of draft["preset"]["required_first_roll"]) {
-						// Check if card is available
-						var cardIndex = draft["gamestate"]["available_cards"][0].indexOf(reqCard);
-						if (cardIndex !== -1) {
-							draft["gamestate"]["cards"].push(reqCard);
-							draft["gamestate"]["available_cards"][0].splice(cardIndex, 1);
-						}
+				// Check if custom UU mode is enabled
+				if (draft["preset"]["custom_uu_mode"]) {
+					// Move to custom UU design phase (still phase 2, but players design UUs first)
+					draft["gamestate"]["phase"] = 2;
+					draft["gamestate"]["custom_uu_phase"] = true; // Flag to indicate we're in custom UU phase
+					for (var i = 0; i < numPlayers; i++) {
+						draft["players"][i]["ready"] = 0;
 					}
-				}
-				
-				// Then fill the rest randomly
-				// Use configurable bonuses_per_page, default to 30 for backward compatibility
-				var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
-				var cardsNeeded = (draft["preset"]["rounds"] - 1) * numPlayers + bonusesPerPage - draft["gamestate"]["cards"].length;
-				for (var i = 0; i < cardsNeeded; i++) {
-					if (draft["gamestate"]["available_cards"][0].length > 0) {
-						var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
-						draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][0][rand]);
-						draft["gamestate"]["available_cards"][0].splice(rand, 1);
+					console.log("Moving to custom UU design phase");
+				} else {
+					// Normal flow: move directly to bonus selection
+					draft["gamestate"]["phase"] = 2;
+					draft["gamestate"]["custom_uu_phase"] = false;
+					for (var i = 0; i < numPlayers; i++) {
+						draft["players"][i]["ready"] = 0;
 					}
-				}
 
-				//Give each player a ranking based off how many techtree points they spent
-				//Edit: we do this randomly now because techtrees are made afterwards
-				var priorities = [];
-				for (var i = 0; i < numPlayers; i++) {
-					priorities.push(Math.random());
-				}
-				for (var i = 0; i < numPlayers; i++) {
-					var maxIndex = 0;
-					for (var j = 0; j < numPlayers; j++) {
-						if (priorities[j] > priorities[maxIndex]) {
-							maxIndex = j;
-						} else if (priorities[j] == priorities[maxIndex]) {
-							//50/50 switching in ties is good enough *cries in perfectionist*
-							//In the long run it advantages players that join the later
-							var rand = Math.floor(Math.random() * 2);
-							if (rand == 0) {
-								maxIndex = j;
+					//Distribute the first set of civ bonus cards
+					// First, add any required cards for testing
+					if (draft["preset"]["required_first_roll"] && draft["preset"]["required_first_roll"].length > 0) {
+						for (var reqCard of draft["preset"]["required_first_roll"]) {
+							// Check if card is available
+							var cardIndex = draft["gamestate"]["available_cards"][0].indexOf(reqCard);
+							if (cardIndex !== -1) {
+								draft["gamestate"]["cards"].push(reqCard);
+								draft["gamestate"]["available_cards"][0].splice(cardIndex, 1);
 							}
 						}
 					}
-					draft["gamestate"]["order"].push(maxIndex);
-					priorities[maxIndex] = -1;
+					
+					// Then fill the rest randomly
+					// Use configurable bonuses_per_page, default to 30 for backward compatibility
+					var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
+					var cardsNeeded = (draft["preset"]["rounds"] - 1) * numPlayers + bonusesPerPage - draft["gamestate"]["cards"].length;
+					for (var i = 0; i < cardsNeeded; i++) {
+						if (draft["gamestate"]["available_cards"][0].length > 0) {
+							var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
+							draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][0][rand]);
+							draft["gamestate"]["available_cards"][0].splice(rand, 1);
+						}
+					}
+
+					//Give each player a ranking based off how many techtree points they spent
+					//Edit: we do this randomly now because techtrees are made afterwards
+					var priorities = [];
+					for (var i = 0; i < numPlayers; i++) {
+						priorities.push(Math.random());
+					}
+					for (var i = 0; i < numPlayers; i++) {
+						var maxIndex = 0;
+						for (var j = 0; j < numPlayers; j++) {
+							if (priorities[j] > priorities[maxIndex]) {
+								maxIndex = j;
+							} else if (priorities[j] == priorities[maxIndex]) {
+								//50/50 switching in ties is good enough *cries in perfectionist*
+								//In the long run it advantages players that join the later
+								var rand = Math.floor(Math.random() * 2);
+								if (rand == 0) {
+									maxIndex = j;
+								}
+							}
+						}
+						draft["gamestate"]["order"].push(maxIndex);
+						priorities[maxIndex] = -1;
+					}
 				}
 				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 				io.in(roomID).emit("set gamestate", draft);
@@ -1904,6 +1922,148 @@ function draftIO(io) {
 			
 			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			io.in(roomID).emit("set gamestate", draft);
+		});
+		
+		// Custom UU - Submit custom unique unit
+		socket.on("submit custom uu", (roomID, playerNumber, customUU) => {
+			let draft = getDraft(roomID);
+			
+			// Check if draft exists
+			if (!draft || draft === -1) {
+				console.log(`Draft not found: ${roomID}`);
+				io.to(socket.id).emit("draft not found", roomID);
+				return;
+			}
+			
+			// Validate custom UU mode is enabled
+			if (!draft["preset"]["custom_uu_mode"]) {
+				console.log("Custom UU mode not enabled for this draft");
+				io.to(socket.id).emit("custom uu error", "Custom UU mode is not enabled for this draft");
+				return;
+			}
+			
+			// Validate player number
+			if (playerNumber < 0 || playerNumber >= draft["preset"]["slots"]) {
+				console.log(`Invalid player number: ${playerNumber}`);
+				io.to(socket.id).emit("custom uu error", "Invalid player number");
+				return;
+			}
+			
+			// Basic validation of custom UU data
+			if (!customUU || typeof customUU !== 'object' || customUU.type !== 'custom') {
+				console.log("Invalid custom UU data");
+				io.to(socket.id).emit("custom uu error", "Invalid custom UU data");
+				return;
+			}
+			
+			// Store custom UU for the player
+			draft["players"][playerNumber]["custom_uu"] = customUU;
+			draft["players"][playerNumber]["ready"] = 1;
+			
+			console.log(`Player ${playerNumber} submitted custom UU: ${customUU.name}`);
+			
+			// Save draft state
+			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+			
+			// Notify success to submitting player
+			io.to(socket.id).emit("custom uu submitted");
+			
+			// Broadcast update to all players (for status display)
+			io.in(roomID).emit("set gamestate", draft);
+			
+			// Check if all players have submitted their custom UUs
+			var allSubmitted = true;
+			for (var i = 0; i < draft["preset"]["slots"]; i++) {
+				if (!draft["players"][i]["custom_uu"] || draft["players"][i]["ready"] !== 1) {
+					allSubmitted = false;
+					break;
+				}
+			}
+			
+			// If all players submitted, move to next phase
+			if (allSubmitted) {
+				console.log("All players submitted custom UUs, advancing to bonus selection phase");
+				// Keep phase as 2, but transition from custom UU to bonus selection
+				draft["gamestate"]["custom_uu_phase"] = false;
+				
+				// Reset ready flags for next phase
+				for (var i = 0; i < draft["preset"]["slots"]; i++) {
+					draft["players"][i]["ready"] = 0;
+				}
+				
+				// Initialize cards for bonus selection phase
+				if (draft["preset"]["required_first_roll"] && draft["preset"]["required_first_roll"].length > 0) {
+					for (var reqCard of draft["preset"]["required_first_roll"]) {
+						var cardIndex = draft["gamestate"]["available_cards"][0].indexOf(reqCard);
+						if (cardIndex !== -1) {
+							draft["gamestate"]["cards"].push(reqCard);
+							draft["gamestate"]["available_cards"][0].splice(cardIndex, 1);
+						}
+					}
+				}
+				
+				var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
+				var cardsNeeded = (draft["preset"]["rounds"] - 1) * draft["preset"]["slots"] + bonusesPerPage - draft["gamestate"]["cards"].length;
+				for (var i = 0; i < cardsNeeded; i++) {
+					if (draft["gamestate"]["available_cards"][0].length > 0) {
+						var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
+						draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][0][rand]);
+						draft["gamestate"]["available_cards"][0].splice(rand, 1);
+					}
+				}
+				
+				// Set draft order (same as normal flow)
+				var priorities = [];
+				for (var i = 0; i < draft["preset"]["slots"]; i++) {
+					priorities.push(Math.random());
+				}
+				for (var i = 0; i < draft["preset"]["slots"]; i++) {
+					var maxIndex = 0;
+					for (var j = 0; j < draft["preset"]["slots"]; j++) {
+						if (priorities[j] > priorities[maxIndex]) {
+							maxIndex = j;
+						} else if (priorities[j] == priorities[maxIndex]) {
+							var rand = Math.floor(Math.random() * 2);
+							if (rand == 0) {
+								maxIndex = j;
+							}
+						}
+					}
+					draft["gamestate"]["order"].push(maxIndex);
+					priorities[maxIndex] = -1;
+				}
+				
+				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+				io.in(roomID).emit("set gamestate", draft);
+			}
+		});
+		
+		// Custom UU - Update custom unique unit (optional real-time updates)
+		socket.on("update custom uu", (roomID, playerNumber, customUU) => {
+			let draft = getDraft(roomID);
+			
+			if (!draft || draft === -1) {
+				return;
+			}
+			
+			if (!draft["preset"]["custom_uu_mode"]) {
+				return;
+			}
+			
+			if (playerNumber < 0 || playerNumber >= draft["preset"]["slots"]) {
+				return;
+			}
+			
+			// Store the work-in-progress custom UU (without marking as ready)
+			draft["players"][playerNumber]["custom_uu"] = customUU;
+			
+			// Save draft state
+			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+			
+			// Broadcast update to other players if not blind picks
+			if (!draft["preset"]["blind_picks"]) {
+				io.in(roomID).emit("custom uu update", playerNumber, customUU);
+			}
 		});
 	});
 }
