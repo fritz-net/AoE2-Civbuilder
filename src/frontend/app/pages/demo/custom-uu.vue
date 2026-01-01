@@ -12,9 +12,7 @@
     <div class="demo-content">
       <!-- Main Editor -->
       <div class="editor-container">
-        <CustomUUEditor :show-mode-selector="true" ref="editorRef" />
-        
-        <!-- Validation Dashboard - Always visible -->
+        <!-- Validation Dashboard - Always visible, positioned above editor -->
         <div class="dashboard-wrapper">
           <ValidationDashboard 
             v-if="editorUnit"
@@ -25,9 +23,12 @@
           />
           <div v-else class="dashboard-placeholder">
             <h3>Validation Dashboard</h3>
-            <p>Select a unit type to see validation rules and budget status</p>
+            <p>This dashboard will show real-time validation rules and budget status once you select a unit type below.</p>
+            <p class="help-hint">👇 Click on a unit type (Infantry, Cavalry, Archer, or Siege) to get started</p>
           </div>
         </div>
+        
+        <CustomUUEditor :show-mode-selector="true" ref="editorRef" />
       </div>
 
       <!-- Documentation Sidebar -->
@@ -382,7 +383,7 @@ const loadExample = (type: string) => {
 
 /* Dashboard Wrapper */
 .dashboard-wrapper {
-  margin-top: 2rem;
+  margin-bottom: 2rem; /* Changed from margin-top to margin-bottom since it's now above editor */
   background: white;
   border-radius: 8px;
   padding: 1.5rem;
@@ -402,5 +403,13 @@ const loadExample = (type: string) => {
 
 .dashboard-placeholder p {
   font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-placeholder .help-hint {
+  font-size: 1.1rem;
+  color: #d4af37;
+  font-weight: 500;
+  margin-top: 1rem;
 }
 </style>
