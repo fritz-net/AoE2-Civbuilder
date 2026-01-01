@@ -244,14 +244,10 @@ test.describe('Architecture Selector - Dropdown', () => {
 });
 
 test.describe('Language Selector - Dropdown', () => {
-  test('should display language dropdown when advanced is shown', async ({ page }) => {
+  test('should display language dropdown', async ({ page }) => {
     await goToBuildPage(page);
     
-    // Click "Show Advanced" button
-    await page.getByRole('button', { name: /Show Advanced/i }).click();
-    await page.waitForTimeout(300);
-    
-    // Check that language dropdown is visible
+    // Language selector should be visible without needing to show advanced
     const languageDropdown = page.locator('.language-selector select.language-dropdown');
     await expect(languageDropdown).toBeVisible();
   });
@@ -259,11 +255,7 @@ test.describe('Language Selector - Dropdown', () => {
   test('should have all 43 language options', async ({ page }) => {
     await goToBuildPage(page);
     
-    // Show advanced settings
-    await page.getByRole('button', { name: /Show Advanced/i }).click();
-    await page.waitForTimeout(300);
-    
-    // Get language dropdown
+    // Get language dropdown (no need to show advanced settings)
     const dropdown = page.locator('.language-selector select.language-dropdown');
     
     // Get all options
@@ -279,11 +271,7 @@ test.describe('Language Selector - Dropdown', () => {
   test('should update when language is selected from dropdown', async ({ page }) => {
     await goToBuildPage(page);
     
-    // Show advanced settings
-    await page.getByRole('button', { name: /Show Advanced/i }).click();
-    await page.waitForTimeout(300);
-    
-    // Get language dropdown
+    // Get language dropdown (no need to show advanced settings)
     const dropdown = page.locator('.language-selector select.language-dropdown');
     
     // Select French Language (index 1)
@@ -298,11 +286,7 @@ test.describe('Language Selector - Dropdown', () => {
   test('should synchronize dropdown with arrow navigation', async ({ page }) => {
     await goToBuildPage(page);
     
-    // Show advanced settings
-    await page.getByRole('button', { name: /Show Advanced/i }).click();
-    await page.waitForTimeout(300);
-    
-    // Get dropdown and arrow buttons
+    // Get dropdown and arrow buttons (no need to show advanced settings)
     const dropdown = page.locator('.language-selector select.language-dropdown');
     const nextButton = page.locator('.language-selector button').nth(1);
     
