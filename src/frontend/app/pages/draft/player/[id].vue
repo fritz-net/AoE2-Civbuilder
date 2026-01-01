@@ -609,8 +609,8 @@ const handleSubmitCustomUU = async () => {
   isSubmittingUU.value = true
   
   try {
-    // Get socket from useDraft composable
-    const socket = (draft.value as any)?.socket
+    // Get socket from draft state
+    const socket = initSocket()
     if (!socket) {
       throw new Error('Socket not available')
     }
@@ -638,7 +638,8 @@ const handleSubmitCustomUU = async () => {
     console.log('Custom UU submitted successfully')
   } catch (err) {
     console.error('Failed to submit custom UU:', err)
-    alert('Failed to submit custom UU: ' + (err instanceof Error ? err.message : 'Unknown error'))
+    // Show error in a more user-friendly way
+    error.value = 'Failed to submit custom UU: ' + (err instanceof Error ? err.message : 'Unknown error')
   } finally {
     isSubmittingUU.value = false
   }
