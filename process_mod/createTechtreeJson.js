@@ -122,8 +122,6 @@ function createTechtreeJson(data_json, techtree_json) {
 		//Add special technology nodes for civ bonuses
 		for (let j = 0; j < civ.civ_bonus[i].length; j++) {
 			const bonusId = extractBonusId(civ.civ_bonus[i][j]);
-			// Debug: uncomment to see bonus processing
-			console.log(`Processing bonus ${bonusId} for civ ${i}, typeof: ${typeof bonusId}, value === 356: ${bonusId === 356}`);
 			switch (bonusId) {
 				case 43:
 					addSpecialNodes([specialNodes["missionary"]], techtree.civ_techs_units, civ.techtree[i][146]);
@@ -300,6 +298,28 @@ function createTechtreeJson(data_json, techtree_json) {
 						}
 					}
 					break;
+				case 309:
+					// Can upgrade Elite Battle Elephants to Royal Battle Elephants
+					addSpecialNodes([specialNodes["royal_elephant"]], techtree.civ_techs_units, civ.techtree[i][38]);
+					break;
+				case 310:
+					// Can upgrade Elite Steppe Lancers to Royal Lancers
+					addSpecialNodes([specialNodes["royal_lancer"]], techtree.civ_techs_units, civ.techtree[i][40]);
+					break;
+				case 356:
+					// Pastures replace Farms and Mill upgrades
+					removeNode("Mill", techtree.civ_techs_buildings);
+					removeNode("Farm", techtree.civ_techs_buildings);
+					addSpecialNodes([specialNodes["pasture"]], techtree.civ_techs_buildings, 1);
+					// Add pasture upgrade techs
+					addSpecialNodes([specialNodes["domestication"]], techtree.civ_techs_units, 1);
+					addSpecialNodes([specialNodes["pastoralism"]], techtree.civ_techs_units, 1);
+					addSpecialNodes([specialNodes["transhumance"]], techtree.civ_techs_units, 1);
+					// Remove farm upgrades (they're replaced by pasture upgrades)
+					removeNode("Horse Collar", techtree.civ_techs_units);
+					removeNode("Heavy Plow", techtree.civ_techs_units);
+					removeNode("Crop Rotation", techtree.civ_techs_units);
+					break;
 			}
 		}
 
@@ -314,37 +334,6 @@ function createTechtreeJson(data_json, techtree_json) {
 					break;
 				case 35:
 					addSpecialNodes([specialNodes["imperial_skirmisher"]], techtree.civ_techs_units, civ.techtree[i][22]);
-					break;
-				case 309:
-					// Can upgrade Elite Battle Elephants to Royal Battle Elephants
-					addSpecialNodes([specialNodes["royal_elephant"]], techtree.civ_techs_units, civ.techtree[i][38]);
-					break;
-				case 310:
-					// Can upgrade Elite Steppe Lancers to Royal Lancers
-					addSpecialNodes([specialNodes["royal_lancer"]], techtree.civ_techs_units, civ.techtree[i][40]);
-					break;
-				case 356:
-					// Pastures replace Farms and Mill upgrades
-					console.log('DEBUG: Matched case 356, processing pastures');
-					try {
-						removeNode("Mill", techtree.civ_techs_buildings);
-						removeNode("Farm", techtree.civ_techs_buildings);
-						addSpecialNodes([specialNodes["pasture"]], techtree.civ_techs_buildings, 1);
-						// Add pasture upgrade techs
-						addSpecialNodes([specialNodes["domestication"]], techtree.civ_techs_units, 1);
-						addSpecialNodes([specialNodes["pastoralism"]], techtree.civ_techs_units, 1);
-						addSpecialNodes([specialNodes["transhumance"]], techtree.civ_techs_units, 1);
-						// Remove farm upgrades (they're replaced by pasture upgrades)
-						removeNode("Horse Collar", techtree.civ_techs_units);
-						removeNode("Heavy Plow", techtree.civ_techs_units);
-						removeNode("Crop Rotation", techtree.civ_techs_units);
-						console.log('DEBUG: Finished processing pastures');
-					} catch (error) {
-						console.error('DEBUG: Error processing pastures:', error);
-					}
-					break;
-				default:
-					// Do nothing for unhandled bonuses
 					break;
 			}
 		}
