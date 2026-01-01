@@ -342,6 +342,7 @@ const AUTOSAVE_KEY = 'aoe2-civbuilder-autosave'
 // Steps: Basic Info, Civ Bonuses, Unique Unit, Castle Tech, Imperial Tech, Team Bonus, Tech Tree, Review
 const stepLabels = ['Basic Info', 'Civ Bonuses', 'Unique Unit', 'Castle Tech', 'Imperial Tech', 'Team Bonus', 'Tech Tree', 'Review']
 const currentStep = ref(0)
+const showAdvanced = ref(true)
 const fileInput = ref<HTMLInputElement | null>(null)
 const autosaveEnabled = ref(false)
 const lastSaved = ref<Date | null>(null)

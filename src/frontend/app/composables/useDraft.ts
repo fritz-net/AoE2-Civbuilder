@@ -272,9 +272,9 @@ export const useDraft = () => {
   }
 
   // Update player civilization info
-  const updateCivInfo = (playerId: number, civName: string, flagPalette: number[], architecture: number, language: number, customFlag?: boolean, customFlagData?: string) => {
+  const updateCivInfo = (playerId: number, civName: string, flagPalette: number[], customFlag?: boolean, customFlagData?: string, architecture: number, language: number, wonder: number = 0) => {
     if (!socket.value || !draft.value) return
-    socket.value.emit('update civ info', draft.value.id, playerId, civName, flagPalette, architecture, language, customFlag, customFlagData)
+    socket.value.emit('update civ info', draft.value.id, playerId, civName, flagPalette, customFlag, customFlagData, architecture, language, wonder)
   }
 
   // End turn and select card
