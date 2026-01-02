@@ -1356,7 +1356,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1800px; /* Increased from 1200px by 50% */
   margin: 0 auto;
 }
 
@@ -1370,7 +1370,7 @@ onUnmounted(() => {
 
 .custom-uu-actions {
   width: 100%;
-  max-width: 800px;
+  max-width: 1200px; /* Increased from 800px by 50% */
   margin-top: 2rem;
   display: flex;
   flex-direction: column;
