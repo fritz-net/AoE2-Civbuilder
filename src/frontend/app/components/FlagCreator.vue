@@ -11,40 +11,43 @@
         >
           <button class="nav-btn" @click="decrementPalette(index)">&lt;</button>
           <!-- For colors (0-4), show dropdown with color names -->
-          <select
-            v-if="index < 5"
-            :value="localPalette[index]"
-            @change="handleDropdownChange(index, $event)"
-            class="color-dropdown"
-            :disabled="disabled || useCustomFlag"
-            title="Select a preset color"
-          >
-            <option 
-              v-for="(color, colorIndex) in colours" 
-              :key="colorIndex" 
-              :value="colorIndex"
-              :style="{ backgroundColor: rgbToHex(color) }"
+          <div v-if="index < 5" class="dropdown-container">
+            <select
+              :value="localPalette[index]"
+              @change="handleDropdownChange(index, $event)"
+              class="color-dropdown"
+              :disabled="disabled || useCustomFlag"
+              title="Select a preset color"
             >
-              {{ getColorName(colorIndex) }}
-            </option>
-          </select>
-          <!-- For Division, Overlay, Symbol (5-7), show dropdown with category as placeholder -->
-          <select
-            v-else
-            :value="localPalette[index]"
-            @change="handleDropdownChange(index, $event)"
-            class="flag-dropdown"
-            :disabled="disabled || useCustomFlag"
-            :title="`Select ${category}`"
-          >
-            <option 
-              v-for="optionIndex in paletteSizes[index]" 
-              :key="optionIndex - 1" 
-              :value="optionIndex - 1"
+              <option 
+                v-for="(color, colorIndex) in colours" 
+                :key="colorIndex" 
+                :value="colorIndex"
+                :style="{ backgroundColor: rgbToHex(color) }"
+              >
+                {{ getColorName(colorIndex) }}
+              </option>
+            </select>
+          </div>
+          <!-- For Division, Overlay, Symbol (5-7), show category name with dropdown -->
+          <div v-else class="dropdown-container">
+            <span class="category-label">{{ category.replace(/Color \d+|/, '').trim() }}</span>
+            <select
+              :value="localPalette[index]"
+              @change="handleDropdownChange(index, $event)"
+              class="flag-dropdown"
+              :disabled="disabled || useCustomFlag"
+              :title="`Select ${category}`"
             >
-              {{ category }} {{ optionIndex }}
-            </option>
-          </select>
+              <option 
+                v-for="optionIndex in paletteSizes[index]" 
+                :key="optionIndex - 1" 
+                :value="optionIndex - 1"
+              >
+                {{ optionIndex }}
+              </option>
+            </select>
+          </div>
           <button class="nav-btn" @click="incrementPalette(index)">&gt;</button>
           <!-- Add color picker for color categories (0-4) -->
           <input
@@ -798,11 +801,18 @@ onMounted(() => {
   transform: translateY(-2px);
 }
 
+.dropdown-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .category-label {
-  width: 100px;
-  text-align: center;
+  min-width: 60px;
+  text-align: left;
   color: hsl(52, 100%, 50%);
   font-size: 0.9rem;
+  font-weight: bold;
 }
 
 .color-dropdown {
@@ -834,7 +844,7 @@ onMounted(() => {
 }
 
 .flag-dropdown {
-  width: 120px;
+  width: 80px;
   padding: 0.25rem 0.5rem;
   background: rgba(0, 0, 0, 0.4);
   border: 2px solid hsl(52, 100%, 50%);
