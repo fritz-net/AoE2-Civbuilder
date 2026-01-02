@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { expandAdvancedSettings } from './helpers/draftHelpers';
+import { DraftCreatePage } from './helpers/DraftCreatePage';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -10,10 +10,11 @@ import * as fs from 'fs';
 
 test.describe('Draft Mode - Config File Upload UI', () => {
   test('should display drop zone at top of form', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Drop zone should be visible
-    const dropZone = page.locator('.drop-zone');
+    const dropZone = draftCreatePage.getDropZone();
     await expect(dropZone).toBeVisible();
     
     // Check for drop zone icon
@@ -31,9 +32,10 @@ test.describe('Draft Mode - Config File Upload UI', () => {
   });
 
   test('should show subtext with instructions', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
-    const dropZone = page.locator('.drop-zone');
+    const dropZone = draftCreatePage.getDropZone();
     const subtext = dropZone.locator('.drop-zone-subtext');
     
     await expect(subtext).toBeVisible();
@@ -41,10 +43,11 @@ test.describe('Draft Mode - Config File Upload UI', () => {
   });
 
   test('should have hidden file input accepting .json files', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // File input should exist but be hidden
-    const fileInput = page.locator('.file-input-hidden');
+    const fileInput = draftCreatePage.getFileInput();
     await expect(fileInput).toBeAttached();
     
     // Check accept attribute
@@ -52,9 +55,10 @@ test.describe('Draft Mode - Config File Upload UI', () => {
   });
 
   test('should apply hover styles when hovering over drop zone', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
-    const dropZone = page.locator('.drop-zone');
+    const dropZone = draftCreatePage.getDropZone();
     
     // Hover over drop zone
     await dropZone.hover();
@@ -92,7 +96,8 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
   }
 
   test('should pre-fill form fields when valid JSON is uploaded', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Create test config
     const testConfig = createTestDraftConfig();
@@ -103,25 +108,16 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
     fs.writeFileSync(tempFilePath, configJson);
     
     try {
-      // Use the file input to upload
-      const fileInput = page.locator('.file-input-hidden');
-      await fileInput.setInputFiles(tempFilePath);
-      
-      // Wait for processing
-      await page.waitForTimeout(1000);
+      // Upload file
+      await draftCreatePage.uploadConfigFile(tempFilePath);
       
       // Verify main fields are populated
-      const numPlayersInput = page.locator('#numPlayers');
-      await expect(numPlayersInput).toHaveValue('2');
-      
-      const bonusesInput = page.locator('#bonusesPerPlayer');
-      await expect(bonusesInput).toHaveValue('3');
-      
-      const techTreeInput = page.locator('#techTreePoints');
-      await expect(techTreeInput).toHaveValue('250');
+      await expect(page.locator('#numPlayers')).toHaveValue('2');
+      await expect(page.locator('#bonusesPerPlayer')).toHaveValue('3');
+      await expect(page.locator('#techTreePoints')).toHaveValue('250');
       
       // Check success message
-      const successMessage = page.locator('.upload-message.success');
+      const successMessage = draftCreatePage.getSuccessMessage();
       await expect(successMessage).toBeVisible();
       await expect(successMessage).toContainText(/loaded successfully/i);
     } finally {
@@ -133,7 +129,8 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
   });
 
   test('should pre-fill advanced settings from uploaded config', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Create test config with custom advanced settings
     const testConfig = createTestDraftConfig({
@@ -151,37 +148,26 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
     
     try {
       // Upload file
-      const fileInput = page.locator('.file-input-hidden');
-      await fileInput.setInputFiles(tempFilePath);
-      
-      // Wait for processing
-      await page.waitForTimeout(1000);
+      await draftCreatePage.uploadConfigFile(tempFilePath);
       
       // Expand Advanced Settings to verify
-      await expandAdvancedSettings(page);
+      await draftCreatePage.expandAdvancedSettings();
       
       // Verify timer settings
-      const timerCheckbox = page.locator('#timerEnabled');
-      await expect(timerCheckbox).toBeChecked();
-      
-      const timerDuration = page.locator('#timerDuration');
-      await expect(timerDuration).toHaveValue('120');
+      await expect(page.locator('#timerEnabled')).toBeChecked();
+      await expect(page.locator('#timerDuration')).toHaveValue('120');
       
       // Verify blind picks
-      const blindPicksCheckbox = page.locator('#blindPicks');
-      await expect(blindPicksCheckbox).toBeChecked();
+      await expect(page.locator('#blindPicks')).toBeChecked();
       
       // Verify snake draft
-      const snakeDraftCheckbox = page.locator('#snakeDraft');
-      await expect(snakeDraftCheckbox).toBeChecked();
+      await expect(page.locator('#snakeDraft')).toBeChecked();
       
       // Verify cards per roll
-      const cardsPerRoll = page.locator('#cardsPerRoll');
-      await expect(cardsPerRoll).toHaveValue('7');
+      await expect(page.locator('#cardsPerRoll')).toHaveValue('7');
       
       // Verify bonuses per page
-      const bonusesPerPage = page.locator('#bonusesPerPage');
-      await expect(bonusesPerPage).toHaveValue('60');
+      await expect(page.locator('#bonusesPerPage')).toHaveValue('60');
     } finally {
       if (fs.existsSync(tempFilePath)) {
         fs.unlinkSync(tempFilePath);
@@ -190,7 +176,8 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
   });
 
   test('should pre-fill rarity checkboxes from uploaded config', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Create test config with specific rarities disabled
     const testConfig = createTestDraftConfig({
@@ -203,21 +190,17 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
     
     try {
       // Upload file
-      const fileInput = page.locator('.file-input-hidden');
-      await fileInput.setInputFiles(tempFilePath);
-      
-      // Wait for processing
-      await page.waitForTimeout(1000);
+      await draftCreatePage.uploadConfigFile(tempFilePath);
       
       // Expand Advanced Settings
-      await expandAdvancedSettings(page);
+      await draftCreatePage.expandAdvancedSettings();
       
       // Verify checkboxes match config
-      await expect(page.locator('#rarity-0')).toBeChecked(); // Ordinary
-      await expect(page.locator('#rarity-1')).toBeChecked(); // Distinguished
-      await expect(page.locator('#rarity-2')).not.toBeChecked(); // Superior
-      await expect(page.locator('#rarity-3')).not.toBeChecked(); // Epic
-      await expect(page.locator('#rarity-4')).toBeChecked(); // Legendary
+      await expect(draftCreatePage.getRarityCheckbox(0)).toBeChecked(); // Ordinary
+      await expect(draftCreatePage.getRarityCheckbox(1)).toBeChecked(); // Distinguished
+      await expect(draftCreatePage.getRarityCheckbox(2)).not.toBeChecked(); // Superior
+      await expect(draftCreatePage.getRarityCheckbox(3)).not.toBeChecked(); // Epic
+      await expect(draftCreatePage.getRarityCheckbox(4)).toBeChecked(); // Legendary
     } finally {
       if (fs.existsSync(tempFilePath)) {
         fs.unlinkSync(tempFilePath);
@@ -226,7 +209,8 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
   });
 
   test('should show error for invalid JSON file', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Create invalid JSON file
     const invalidJson = '{ this is not valid json }';
@@ -235,14 +219,10 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
     
     try {
       // Upload file
-      const fileInput = page.locator('.file-input-hidden');
-      await fileInput.setInputFiles(tempFilePath);
-      
-      // Wait for processing
-      await page.waitForTimeout(1000);
+      await draftCreatePage.uploadConfigFile(tempFilePath);
       
       // Check for error message
-      const errorMessage = page.locator('.upload-message.error');
+      const errorMessage = draftCreatePage.getErrorMessage();
       await expect(errorMessage).toBeVisible();
       await expect(errorMessage).toContainText(/parse JSON/i);
     } finally {
@@ -253,7 +233,8 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
   });
 
   test('should show error for JSON without preset field', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Create JSON without preset field
     const invalidConfig = {
@@ -267,14 +248,10 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
     
     try {
       // Upload file
-      const fileInput = page.locator('.file-input-hidden');
-      await fileInput.setInputFiles(tempFilePath);
-      
-      // Wait for processing
-      await page.waitForTimeout(1000);
+      await draftCreatePage.uploadConfigFile(tempFilePath);
       
       // Check for error message
-      const errorMessage = page.locator('.upload-message.error');
+      const errorMessage = draftCreatePage.getErrorMessage();
       await expect(errorMessage).toBeVisible();
       await expect(errorMessage).toContainText(/preset/i);
     } finally {
@@ -285,7 +262,8 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
   });
 
   test('should show error for non-JSON file', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Create a text file
     const textContent = 'This is just a text file';
@@ -294,14 +272,10 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
     
     try {
       // Try to upload text file
-      const fileInput = page.locator('.file-input-hidden');
-      await fileInput.setInputFiles(tempFilePath);
-      
-      // Wait for processing
-      await page.waitForTimeout(1000);
+      await draftCreatePage.uploadConfigFile(tempFilePath);
       
       // Check for error message about invalid file type
-      const errorMessage = page.locator('.upload-message.error');
+      const errorMessage = draftCreatePage.getErrorMessage();
       await expect(errorMessage).toBeVisible();
       await expect(errorMessage).toContainText(/Invalid file type/i);
     } finally {
@@ -312,7 +286,8 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
   });
 
   test('should clear success message after 3 seconds', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     const testConfig = createTestDraftConfig();
     const configJson = JSON.stringify(testConfig, null, 2);
@@ -321,11 +296,10 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
     
     try {
       // Upload file
-      const fileInput = page.locator('.file-input-hidden');
-      await fileInput.setInputFiles(tempFilePath);
+      await draftCreatePage.uploadConfigFile(tempFilePath);
       
       // Wait for success message to appear
-      const successMessage = page.locator('.upload-message.success');
+      const successMessage = draftCreatePage.getSuccessMessage();
       await expect(successMessage).toBeVisible();
       
       // Wait for it to disappear (3 seconds + buffer)
@@ -341,9 +315,11 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
   });
 
   test('should trigger file input when browse button is clicked', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
-    const browseButton = page.getByRole('button', { name: /Browse Files/i });
+    const dropZone = draftCreatePage.getDropZone();
+    const browseButton = dropZone.getByRole('button', { name: /Browse Files/i });
     
     // Set up file chooser handler before clicking
     const fileChooserPromise = page.waitForEvent('filechooser');
@@ -354,16 +330,13 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
     // Verify file chooser was triggered
     const fileChooser = await fileChooserPromise;
     expect(fileChooser).toBeTruthy();
-    
-    // Verify accept attribute is correct
-    const accept = fileChooser.isMultiple() ? [] : ['.json'];
-    // File chooser was opened successfully
   });
 });
 
 test.describe('Draft Mode - Config File Upload Integration', () => {
   test('should allow creating draft after uploading config', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Create and upload test config
     const testConfig = {
@@ -381,19 +354,13 @@ test.describe('Draft Mode - Config File Upload Integration', () => {
     
     try {
       // Upload file
-      const fileInput = page.locator('.file-input-hidden');
-      await fileInput.setInputFiles(tempFilePath);
-      
-      // Wait for processing
-      await page.waitForTimeout(1000);
+      await draftCreatePage.uploadConfigFile(tempFilePath);
       
       // Verify values were populated
-      const numPlayersInput = page.locator('#numPlayers');
-      await expect(numPlayersInput).toHaveValue('1');
+      await expect(page.locator('#numPlayers')).toHaveValue('1');
       
       // Create draft
-      const startButton = page.getByRole('button', { name: /Start Draft/i });
-      await startButton.click();
+      await draftCreatePage.clickStartDraft();
       
       // Wait for response
       await page.waitForTimeout(2000);

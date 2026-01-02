@@ -18,6 +18,8 @@ export class DraftCreatePage extends BasePage {
     heading: 'h1, h2',
     timerCheckbox: '#timerEnabled',
     timerDurationInput: '#timerDuration',
+    blindPicksCheckbox: '#blindPicks',
+    snakeDraftCheckbox: '#snakeDraft',
     modalOverlay: '.modal-overlay',
     hostLinkInput: '#hostLink',
     playerLinkInput: '#playerLink',
@@ -26,6 +28,13 @@ export class DraftCreatePage extends BasePage {
     testingSettings: 'summary:has-text("Testing Settings")',
     requiredFirstRollInput: '#requiredFirstRoll',
     advancedSection: '.advanced-section',
+    dropZone: '.drop-zone',
+    dropZoneIcon: '.drop-zone-icon',
+    dropZoneText: '.drop-zone-text',
+    dropZoneSubtext: '.drop-zone-subtext',
+    fileInputHidden: '.file-input-hidden',
+    uploadMessageSuccess: '.upload-message.success',
+    uploadMessageError: '.upload-message.error',
   };
 
   constructor(page: Page) {
@@ -86,6 +95,56 @@ export class DraftCreatePage extends BasePage {
    */
   getAdvancedSection() {
     return this.page.locator(this.selectors.advancedSection);
+  }
+
+  /**
+   * Get drop zone element
+   */
+  getDropZone() {
+    return this.page.locator(this.selectors.dropZone);
+  }
+
+  /**
+   * Get file input (hidden) element
+   */
+  getFileInput() {
+    return this.page.locator(this.selectors.fileInputHidden);
+  }
+
+  /**
+   * Upload a draft config file
+   */
+  async uploadConfigFile(filePath: string): Promise<void> {
+    await this.getFileInput().setInputFiles(filePath);
+    await this.wait(1000); // Wait for processing
+  }
+
+  /**
+   * Get success message element
+   */
+  getSuccessMessage() {
+    return this.page.locator(this.selectors.uploadMessageSuccess);
+  }
+
+  /**
+   * Get error message element
+   */
+  getErrorMessage() {
+    return this.page.locator(this.selectors.uploadMessageError);
+  }
+
+  /**
+   * Check if a checkbox is checked by ID
+   */
+  async isCheckboxChecked(id: string): Promise<boolean> {
+    return await this.page.locator(`#${id}`).isChecked();
+  }
+
+  /**
+   * Get rarity checkbox by index
+   */
+  getRarityCheckbox(index: number) {
+    return this.page.locator(`#rarity-${index}`);
   }
 
   /**
