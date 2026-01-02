@@ -9,8 +9,10 @@
         <img 
           :src="wonderImageSrc" 
           :alt="currentWonderName"
-          class="wonder-image"
+          class="wonder-image clickable"
           @error="handleImageError"
+          @click="showOverlay = true"
+          title="Click to view all wonders"
         />
         <select 
           v-model="selectedWonder" 
@@ -30,12 +32,24 @@
       
       <button class="nav-btn" @click="next">&gt;</button>
     </div>
+    
+    <ImageGridOverlay
+      :show="showOverlay"
+      title="Select Wonder"
+      :items="wonders"
+      :selected-index="props.modelValue"
+      :image-path-template="`${baseURL}img/wonders/wonder_{index}.png`"
+      :index-offset="0"
+      @close="showOverlay = false"
+      @select="handleOverlaySelect"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { wonders } from '~/composables/useCivData'
+import ImageGridOverlay from './ImageGridOverlay.vue'
 
 const props = withDefaults(defineProps<{
   modelValue: number
@@ -52,6 +66,7 @@ const config = useRuntimeConfig()
 const baseURL = config.app.baseURL || '/v2/'
 
 const selectedWonder = ref(props.modelValue)
+const showOverlay = ref(false)
 
 // Watch for external changes to modelValue
 watch(() => props.modelValue, (newVal) => {
@@ -71,6 +86,11 @@ function handleDropdownChange() {
   emit('update:modelValue', selectedWonder.value)
 }
 
+function handleOverlaySelect(index: number) {
+  // Wonders are 0-indexed, so use the index directly
+  emit('update:modelValue', index)
+}
+
 function next() {
   if (props.disabled) return
   const newValue = (props.modelValue + 1) % wonders.length
@@ -82,6 +102,7 @@ function previous() {
   const newValue = (props.modelValue - 1 + wonders.length) % wonders.length
   emit('update:modelValue', newValue)
 }
+
 </script>
 
 <style scoped>
@@ -141,6 +162,17 @@ function previous() {
   object-fit: contain;
   border: 2px solid hsl(52, 100%, 50%);
   border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.wonder-image.clickable {
+  cursor: pointer;
+}
+
+.wonder-image.clickable:hover {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
+  transform: scale(1.05);
 }
 
 .wonder-dropdown {

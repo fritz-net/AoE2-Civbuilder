@@ -9,8 +9,10 @@
         <img 
           :src="architectureImageSrc" 
           :alt="currentArchitectureName"
-          class="architecture-image"
+          class="architecture-image clickable"
           @error="handleImageError"
+          @click="showOverlay = true"
+          title="Click to view all architectures"
         />
         <select 
           v-model="selectedArchitecture" 
@@ -30,12 +32,24 @@
       
       <button class="nav-btn" @click="next">&gt;</button>
     </div>
+    
+    <ImageGridOverlay
+      :show="showOverlay"
+      title="Select Architecture"
+      :items="architectures"
+      :selected-index="props.modelValue - 1"
+      :image-path-template="`${baseURL}img/architectures/tc_{index}.png`"
+      :index-offset="1"
+      @close="showOverlay = false"
+      @select="handleOverlaySelect"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { architectures } from '~/composables/useCivData'
+import ImageGridOverlay from './ImageGridOverlay.vue'
 
 const props = withDefaults(defineProps<{
   modelValue: number
@@ -52,6 +66,7 @@ const config = useRuntimeConfig()
 const baseURL = config.app.baseURL || '/v2/'
 
 const selectedArchitecture = ref(props.modelValue)
+const showOverlay = ref(false)
 
 // Watch for external changes to modelValue
 watch(() => props.modelValue, (newVal) => {
@@ -72,6 +87,11 @@ function handleDropdownChange() {
   emit('update:modelValue', selectedArchitecture.value)
 }
 
+function handleOverlaySelect(index: number) {
+  // Architecture is 1-indexed, so add 1 to the 0-based index
+  emit('update:modelValue', index + 1)
+}
+
 function next() {
   if (props.disabled) return
   // Architecture is 1-indexed, cycles through 1-11
@@ -85,6 +105,7 @@ function previous() {
   const newValue = ((props.modelValue - 2 + 11) % 11) + 1
   emit('update:modelValue', newValue)
 }
+
 </script>
 
 <style scoped>
@@ -144,6 +165,17 @@ function previous() {
   object-fit: contain;
   border: 2px solid hsl(52, 100%, 50%);
   border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.architecture-image.clickable {
+  cursor: pointer;
+}
+
+.architecture-image.clickable:hover {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
+  transform: scale(1.05);
 }
 
 .architecture-dropdown {
