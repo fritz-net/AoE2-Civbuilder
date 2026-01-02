@@ -60,6 +60,7 @@ test.describe('Vanilla Civs Mode', () => {
     await combinePage.clickUseVanillaCivs();
     
     // Get all civ cards
+    const civCards = combinePage.getCivCards();
     const count = await combinePage.getCivCount();
     expect(count).toBe(50);
     
