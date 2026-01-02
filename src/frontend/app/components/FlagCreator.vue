@@ -11,40 +11,45 @@
         >
           <button class="nav-btn" @click="decrementPalette(index)">&lt;</button>
           <!-- For colors (0-4), show dropdown with color names -->
-          <select
-            v-if="index < 5"
-            :value="localPalette[index]"
-            @change="handleDropdownChange(index, $event)"
-            class="color-dropdown"
-            :disabled="disabled || useCustomFlag"
-            title="Select a preset color"
-          >
-            <option 
-              v-for="(color, colorIndex) in colours" 
-              :key="colorIndex" 
-              :value="colorIndex"
-              :style="{ backgroundColor: rgbToHex(color) }"
+          <div v-if="index < 5" class="dropdown-container">
+            <select
+              :value="localPalette[index]"
+              @change="handleDropdownChange(index, $event)"
+              class="color-dropdown"
+              :disabled="disabled || useCustomFlag"
+              title="Select a preset color"
             >
-              {{ getColorName(colorIndex) }}
-            </option>
-          </select>
-          <!-- For Division, Overlay, Symbol (5-7), show dropdown with category as placeholder -->
-          <select
-            v-else
-            :value="localPalette[index]"
-            @change="handleDropdownChange(index, $event)"
-            class="flag-dropdown"
-            :disabled="disabled || useCustomFlag"
-            :title="`Select ${category}`"
-          >
-            <option 
-              v-for="optionIndex in paletteSizes[index]" 
-              :key="optionIndex - 1" 
-              :value="optionIndex - 1"
+              <option 
+                v-for="(color, colorIndex) in colours" 
+                :key="colorIndex" 
+                :value="colorIndex"
+                :style="{ backgroundColor: rgbToHex(color) }"
+              >
+                {{ getColorName(colorIndex) }}
+              </option>
+            </select>
+          </div>
+          <!-- For Division, Overlay, Symbol (5-7), show category name with dropdown -->
+          <div v-else class="dropdown-container">
+            <span class="category-label">{{ category.replace(/Color \d+|/, '').trim() }}</span>
+            <select
+              :value="localPalette[index]"
+              @change="handleDropdownChange(index, $event)"
+              class="flag-dropdown"
+              :disabled="disabled || useCustomFlag"
+              :title="`Select ${category}`"
             >
-              {{ category }} {{ optionIndex }}
-            </option>
-          </select>
+              <option 
+                v-for="optionIndex in paletteSizes[index]" 
+                :key="optionIndex - 1" 
+                :value="optionIndex - 1"
+              >
+                {{ index === 5 ? getDivisionName(optionIndex - 1) : 
+                   index === 6 ? getOverlayName(optionIndex - 1) : 
+                   getSymbolName(optionIndex - 1) }}
+              </option>
+            </select>
+          </div>
           <button class="nav-btn" @click="incrementPalette(index)">&gt;</button>
           <!-- Add color picker for color categories (0-4) -->
           <input
@@ -235,6 +240,82 @@ function getColorName(colorIndex: number): string {
     'Light Blue',
   ]
   return colorNames[colorIndex] || `Color ${colorIndex + 1}`
+}
+
+// Get a friendly name for a division
+function getDivisionName(divisionIndex: number): string {
+  const divisionNames = [
+    'Plain',
+    'Horizontal Split',
+    'Vertical Split', 
+    'Diagonal Split (Top-Left)',
+    'Diagonal Split (Top-Right)',
+    'Quartered',
+    'Horizontal Thirds',
+    'Vertical Thirds',
+    'Cross',
+    'Saltire (X)',
+    'Border',
+    'Circle'
+  ]
+  return divisionNames[divisionIndex] || `Division ${divisionIndex + 1}`
+}
+
+// Get a friendly name for an overlay
+function getOverlayName(overlayIndex: number): string {
+  const overlayNames = [
+    'None',
+    'Horizontal Stripe',
+    'Vertical Stripe',
+    'Diagonal Stripe',
+    'Cross Pattern',
+    'Border Pattern',
+    'Checkered',
+    'Dots',
+    'Diamond',
+    'Triangle',
+    'Chevron',
+    'Wave'
+  ]
+  return overlayNames[overlayIndex] || `Overlay ${overlayIndex + 1}`
+}
+
+// Get a friendly name for a symbol
+function getSymbolName(symbolIndex: number): string {
+  const symbolNames = [
+    'None',
+    'Cross',
+    'Star',
+    'Circle',
+    'Square',
+    'Diamond',
+    'Triangle',
+    'Crown',
+    'Lion',
+    'Eagle',
+    'Dragon',
+    'Sword',
+    'Shield',
+    'Castle',
+    'Tower',
+    'Ship',
+    'Horse',
+    'Tree',
+    'Sun',
+    'Moon',
+    'Rose',
+    'Fleur-de-lis',
+    'Anchor',
+    'Arrow',
+    'Axe',
+    'Flame',
+    'Heart',
+    'Key',
+    'Scales',
+    'Snake'
+  ]
+  // For symbols beyond the predefined list, use generic name
+  return symbolNames[symbolIndex] || `Symbol ${symbolIndex + 1}`
 }
 
 // Helper to get color from palette with bounds checking (shared logic)
@@ -798,11 +879,18 @@ onMounted(() => {
   transform: translateY(-2px);
 }
 
+.dropdown-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .category-label {
-  width: 100px;
-  text-align: center;
+  min-width: 60px;
+  text-align: left;
   color: hsl(52, 100%, 50%);
   font-size: 0.9rem;
+  font-weight: bold;
 }
 
 .color-dropdown {
@@ -834,7 +922,7 @@ onMounted(() => {
 }
 
 .flag-dropdown {
-  width: 120px;
+  min-width: 150px;
   padding: 0.25rem 0.5rem;
   background: rgba(0, 0, 0, 0.4);
   border: 2px solid hsl(52, 100%, 50%);

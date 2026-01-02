@@ -54,11 +54,12 @@
               v-model="civConfig.flag_palette"
               v-model:custom-flag="civConfig.customFlag"
               v-model:custom-flag-data="civConfig.customFlagData"
+              class="selector-spacing"
             />
 
-            <ArchitectureSelector v-model="civConfig.architecture" />
-            <LanguageSelector v-model="civConfig.language" />
-            <WonderSelector v-model="civConfig.wonder" />
+            <ArchitectureSelector v-model="civConfig.architecture" class="selector-spacing" />
+            <LanguageSelector v-model="civConfig.language" class="selector-spacing" />
+            <WonderSelector v-model="civConfig.wonder" class="selector-spacing" />
             
             <div class="civ-name-input">
               <label for="civName">Civilization Name</label>
@@ -1000,6 +1001,10 @@ onUnmounted(() => {
   max-height: 70vh;
 }
 
+.selector-spacing {
+  margin-bottom: 1.5rem;
+}
+
 .civ-name-input {
   margin: 1.5rem 0;
 }
@@ -1351,8 +1356,9 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 1200px;
+  max-width: min(1800px, 95vw); /* Responsive: 1800px for HD screens, 95vw for smaller screens */
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .phase-subtitle {
@@ -1365,7 +1371,7 @@ onUnmounted(() => {
 
 .custom-uu-actions {
   width: 100%;
-  max-width: 800px;
+  max-width: min(1200px, 90vw); /* Responsive: 1200px for HD screens, 90vw for smaller screens */
   margin-top: 2rem;
   display: flex;
   flex-direction: column;

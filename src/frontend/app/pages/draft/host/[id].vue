@@ -45,11 +45,12 @@
               v-model="civConfig.flag_palette"
               v-model:custom-flag="civConfig.customFlag"
               v-model:custom-flag-data="civConfig.customFlagData"
+              class="selector-spacing"
             />
             
-            <ArchitectureSelector v-model="civConfig.architecture" />
-            <LanguageSelector v-model="civConfig.language" />
-            <WonderSelector v-model="civConfig.wonder" />
+            <ArchitectureSelector v-model="civConfig.architecture" class="selector-spacing" />
+            <LanguageSelector v-model="civConfig.language" class="selector-spacing" />
+            <WonderSelector v-model="civConfig.wonder" class="selector-spacing" />
             
             <div class="civ-name-input">
               <label for="civName">Civilization Name</label>
@@ -83,30 +84,64 @@
     <div v-if="currentPhase === 2 && draft">
       <!-- Custom UU Design Phase -->
       <div v-if="draft.gamestate.custom_uu_phase" class="custom-uu-phase">
-        <h1 class="phase-title">Players Designing Custom Unique Units</h1>
-        <p class="phase-subtitle">Each player is creating their own unique unit (100 point budget)</p>
-        
-        <div class="players-status-container">
-          <h3>Player Progress:</h3>
-          <div class="players-status-grid">
-            <div v-for="(player, idx) in draft.players" :key="idx" class="player-status-card">
-              <div class="player-info">
-                <span class="player-name">{{ player.alias || `Player ${idx + 1}` }}</span>
-                <span class="status-badge" :class="{ 'status-ready': player.ready === 1 }">
-                  {{ player.ready === 1 ? '✓ Ready' : 'Designing...' }}
-                </span>
-              </div>
-              <div v-if="player.custom_uu && player.custom_uu.name" class="uu-preview">
-                <strong>{{ player.custom_uu.name }}</strong>
-                <span class="uu-type">({{ player.custom_uu.unitType }})</span>
+        <!-- If host has submitted, show waiting/spectator screen -->
+        <div v-if="currentPlayer?.ready === 1">
+          <h1 class="phase-title">Players Designing Custom Unique Units</h1>
+          <p class="phase-subtitle">Each player is creating their own unique unit (100 point budget)</p>
+          
+          <div class="players-status-container">
+            <h3>Player Progress:</h3>
+            <div class="players-status-grid">
+              <div v-for="(player, idx) in draft.players" :key="idx" class="player-status-card">
+                <div class="player-info">
+                  <span class="player-name">{{ player.alias || `Player ${idx + 1}` }}</span>
+                  <span class="status-badge" :class="{ 'status-ready': player.ready === 1 }">
+                    {{ player.ready === 1 ? '✓ Ready' : 'Designing...' }}
+                  </span>
+                </div>
+                <div v-if="player.custom_uu && player.custom_uu.name" class="uu-preview">
+                  <strong>{{ player.custom_uu.name }}</strong>
+                  <span class="uu-type">({{ player.custom_uu.unitType }})</span>
+                </div>
               </div>
             </div>
           </div>
+          
+          <div class="waiting-phase-box">
+            <div class="loading-spinner"></div>
+            <p class="waiting-text">Waiting for all players to submit their custom units...</p>
+          </div>
         </div>
         
-        <div class="waiting-phase-box">
-          <div class="loading-spinner"></div>
-          <p class="waiting-text">Waiting for all players to submit their custom units...</p>
+        <!-- Otherwise, show Custom UU Editor for host to design their own unit -->
+        <div v-else class="custom-uu-editor-container">
+          <h1 class="phase-title">Design Your Custom Unique Unit</h1>
+          <p class="phase-subtitle">Create your civilization's unique unit with a 100 point budget</p>
+          
+          <CustomUUEditor
+            :initial-mode="'draft'"
+            :show-mode-selector="false"
+            @update="handleCustomUUUpdate"
+          />
+          
+          <div class="custom-uu-actions">
+            <button
+              class="submit-uu-button"
+              :disabled="!isValidCustomUU || isSubmittingUU"
+              @click="handleSubmitCustomUU"
+            >
+              {{ isSubmittingUU ? 'Submitting...' : 'Submit Custom Unit' }}
+            </button>
+            
+            <div v-if="customUUValidationErrors.length > 0" class="validation-errors">
+              <h4>Please fix these errors before submitting:</h4>
+              <ul>
+                <li v-for="(err, idx) in customUUValidationErrors" :key="idx" class="error-item">
+                  {{ err.message }}
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
       
@@ -242,6 +277,7 @@ import { useDraft } from '~/composables/useDraft'
 import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
 import { PASTURES_BONUS_ID } from '~/composables/useCivConstants'
 import type { CivConfig } from '~/composables/useCivData'
+import { useCustomUU, type CustomUUData } from '~/composables/useCustomUU'
 import DraftLobby from '~/components/draft/DraftLobby.vue'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
 import FlagCreator from '~/components/FlagCreator.vue'
@@ -250,6 +286,7 @@ import LanguageSelector from '~/components/LanguageSelector.vue'
 import WonderSelector from '~/components/WonderSelector.vue'
 import TechTree from '~/components/TechTree.vue'
 import PlayerViewModal from '~/components/draft/PlayerViewModal.vue'
+import CustomUUEditor from '~/components/CustomUUEditor.vue'
 
 const config = useRuntimeConfig()
 const route = useRoute()
@@ -336,6 +373,19 @@ const selectedPlayer = computed(() => {
     return draft.value.players[selectedPlayerIndex.value]
   }
   return null
+})
+
+// Custom UU state and handlers
+const { validateUnit } = useCustomUU('draft')
+const customUU = ref<CustomUUData | null>(null)
+const isSubmittingUU = ref(false)
+const customUUValidationErrors = computed(() => {
+  if (!customUU.value) return []
+  const errors = validateUnit(customUU.value)
+  return errors.filter(e => e.severity === 'error')
+})
+const isValidCustomUU = computed(() => {
+  return customUU.value !== null && customUUValidationErrors.value.length === 0
 })
 
 const showPasturesInTechtree = computed(() => {
@@ -647,6 +697,60 @@ const handleResumeTimer = () => {
   resumeTimer()
 }
 
+// Custom UU handlers
+const handleCustomUUUpdate = (unit: CustomUUData) => {
+  customUU.value = unit
+}
+
+const handleSubmitCustomUU = async () => {
+  if (!customUU.value || !isValidCustomUU.value) {
+    console.error('Cannot submit invalid custom UU')
+    return
+  }
+  
+  if (playerNumber.value < 0) {
+    console.error('Invalid player number')
+    return
+  }
+  
+  isSubmittingUU.value = true
+  
+  try {
+    // Get socket from draft state
+    const socket = initSocket()
+    if (!socket) {
+      throw new Error('Socket not available')
+    }
+    
+    // Emit submit event to server
+    socket.emit('submit custom uu', draftId.value, playerNumber.value, customUU.value)
+    
+    // Wait for confirmation from server
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Submission timeout'))
+      }, 10000)
+      
+      socket.once('custom uu submitted', () => {
+        clearTimeout(timeout)
+        resolve()
+      })
+      
+      socket.once('error', (err: any) => {
+        clearTimeout(timeout)
+        reject(err)
+      })
+    })
+    
+    console.log('Custom UU submitted successfully')
+  } catch (err) {
+    console.error('Failed to submit custom UU:', err)
+    error.value = err instanceof Error ? err.message : 'Failed to submit custom UU'
+  } finally {
+    isSubmittingUU.value = false
+  }
+}
+
 const handleDownload = () => {
   if (!draft.value) return
   
@@ -911,6 +1015,10 @@ onUnmounted(() => {
 .tech-tree-section {
   overflow: auto;
   max-height: 70vh;
+}
+
+.selector-spacing {
+  margin-bottom: 1.5rem;
 }
 
 .civ-name-input {
@@ -1294,5 +1402,77 @@ onUnmounted(() => {
   font-size: 0.85rem;
   color: rgba(240, 230, 210, 0.6);
   text-transform: capitalize;
+}
+
+.custom-uu-editor-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: min(1800px, 95vw); /* Responsive: 1800px for HD screens, 95vw for smaller screens */
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.custom-uu-actions {
+  width: 100%;
+  max-width: min(1200px, 90vw); /* Responsive: 1200px for HD screens, 90vw for smaller screens */
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.submit-uu-button {
+  width: 100%;
+  max-width: 400px;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  color: hsl(52, 100%, 50%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-uu-button:hover:not(:disabled) {
+  background: hsl(52, 100%, 50%);
+  color: #1a0f0a;
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
+}
+
+.submit-uu-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.validation-errors {
+  width: 100%;
+  max-width: 600px;
+  background: rgba(200, 0, 0, 0.2);
+  border: 2px solid rgba(255, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.validation-errors h4 {
+  color: #ffb6c1;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+}
+
+.validation-errors ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.error-item {
+  color: #ffb6c1;
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
 }
 </style>

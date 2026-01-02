@@ -2,39 +2,39 @@
   <div class="create-draft-page">
     <h1 class="page-title">Create Draft</h1>
 
-    <div class="draft-form">
-      <!-- Drop Zone for Draft Settings -->
+    <div 
+      class="draft-form"
+      @drop.prevent="handleDrop"
+      @dragover.prevent="isDragging = true"
+      @dragenter.prevent="isDragging = true"
+      @dragleave.prevent="handleDragLeave"
+    >
+      <!-- Overlay drop zone (only shows when dragging) -->
       <div 
-        class="drop-zone"
-        :class="{ 'drop-zone-active': isDragging, 'drop-zone-error': uploadError }"
-        @drop.prevent="handleDrop"
-        @dragover.prevent="isDragging = true"
-        @dragleave.prevent="isDragging = false"
+        v-if="isDragging"
+        class="drop-zone-overlay"
+        :class="{ 'drop-zone-error': uploadError }"
       >
         <div class="drop-zone-content">
           <span class="drop-zone-icon">📁</span>
           <p class="drop-zone-text">
             <strong>Drop draft-config.json here</strong>
           </p>
-          <p class="drop-zone-subtext">or click to browse</p>
-          <input
-            ref="fileInput"
-            type="file"
-            accept=".json"
-            @change="handleFileSelect"
-            class="file-input-hidden"
-          />
-          <button 
-            type="button"
-            @click="$refs.fileInput.click()"
-            class="browse-button"
-          >
-            Browse Files
-          </button>
         </div>
-        <p v-if="uploadSuccess" class="upload-message success">✓ Settings loaded successfully!</p>
-        <p v-if="uploadError" class="upload-message error">{{ uploadError }}</p>
       </div>
+
+      <!-- Hidden file input -->
+      <input
+        ref="fileInput"
+        type="file"
+        accept=".json"
+        @change="handleFileSelect"
+        class="file-input-hidden"
+      />
+
+      <!-- Success/Error messages -->
+      <div v-if="uploadSuccess" class="upload-message success">✓ Settings loaded successfully!</div>
+      <div v-if="uploadError" class="upload-message error">{{ uploadError }}</div>
 
       <div class="form-section">
         <label for="numPlayers" class="form-label">Number of Players:</label>
@@ -238,6 +238,14 @@
         {{ isCreating ? 'Creating...' : 'Start Draft' }}
       </button>
 
+      <button 
+        type="button"
+        @click="$refs.fileInput.click()"
+        class="browse-config-button"
+      >
+        Browse Config
+      </button>
+
       <button
         class="back-button"
         @click="goBack"
@@ -352,6 +360,14 @@ const isDragging = ref(false)
 const uploadSuccess = ref(false)
 const uploadError = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
+
+const handleDragLeave = (event: DragEvent) => {
+  // Only set isDragging to false if we're leaving the draft-form container
+  const target = event.target as HTMLElement
+  if (target.classList.contains('draft-form')) {
+    isDragging.value = false
+  }
+}
 
 const handleFileSelect = async (event: Event) => {
   const target = event.target as HTMLInputElement
@@ -580,6 +596,7 @@ const goBack = () => {
   max-width: 600px;
   width: 100%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  position: relative;
 }
 
 .form-section {
@@ -724,6 +741,24 @@ const goBack = () => {
 }
 
 .back-button:hover {
+  border-color: hsl(52, 100%, 50%);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.browse-config-button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(255, 204, 0, 0.5);
+  border-radius: 4px;
+  color: #f0e6d2;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1rem;
+}
+
+.browse-config-button:hover {
   border-color: hsl(52, 100%, 50%);
   background: rgba(0, 0, 0, 0.6);
 }
@@ -992,31 +1027,26 @@ details[open] .collapsible-summary::after {
   font-style: italic;
 }
 
-/* Drop Zone Styles */
-.drop-zone {
-  margin-bottom: 2rem;
-  padding: 2rem;
-  border: 2px dashed rgba(255, 204, 0, 0.5);
+/* Drop Zone Overlay Styles */
+.drop-zone-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 204, 0, 0.15);
+  border: 3px dashed hsl(52, 100%, 50%);
   border-radius: 8px;
-  background: rgba(0, 0, 0, 0.3);
-  text-align: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.drop-zone:hover {
-  border-color: hsl(52, 100%, 50%);
-  background: rgba(0, 0, 0, 0.4);
-}
-
-.drop-zone-active {
-  border-color: hsl(52, 100%, 50%);
-  background: rgba(255, 204, 0, 0.1);
-  transform: scale(1.02);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .drop-zone-error {
   border-color: rgba(255, 0, 0, 0.7);
+  background: rgba(255, 0, 0, 0.1);
 }
 
 .drop-zone-content {
@@ -1027,45 +1057,23 @@ details[open] .collapsible-summary::after {
 }
 
 .drop-zone-icon {
-  font-size: 3rem;
-  opacity: 0.7;
+  font-size: 4rem;
+  opacity: 0.9;
 }
 
 .drop-zone-text {
-  color: #f0e6d2;
+  color: hsl(52, 100%, 50%);
   margin: 0;
-  font-size: 1rem;
-}
-
-.drop-zone-subtext {
-  color: rgba(240, 230, 210, 0.6);
-  margin: 0;
-  font-size: 0.9rem;
+  font-size: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .file-input-hidden {
   display: none;
 }
 
-.browse-button {
-  margin-top: 0.5rem;
-  padding: 0.5rem 1.5rem;
-  background: rgba(0, 0, 0, 0.4);
-  border: 2px solid rgba(255, 204, 0, 0.5);
-  border-radius: 4px;
-  color: hsl(52, 100%, 50%);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-}
-
-.browse-button:hover {
-  background: hsl(52, 100%, 50%);
-  color: #1a0f0a;
-}
-
 .upload-message {
-  margin-top: 1rem;
+  margin-bottom: 1rem;
   padding: 0.75rem;
   border-radius: 4px;
   font-size: 0.9rem;
