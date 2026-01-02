@@ -136,8 +136,8 @@ export class CombinePage extends BasePage {
    * Assert civilization count
    */
   async assertCivCount(count: number): Promise<void> {
-    const text = `Loaded Civilizations (${count})`;
-    await expect(this.page.getByText(new RegExp(text, 'i'))).toBeVisible();
+    // Need to escape parentheses in regex
+    await expect(this.page.getByText(new RegExp(`Loaded Civilizations \\(${count}\\)`, 'i'))).toBeVisible();
   }
 
   /**
