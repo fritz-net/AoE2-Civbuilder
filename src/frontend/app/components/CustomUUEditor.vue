@@ -488,8 +488,8 @@
         </div>
       </section>
 
-      <!-- Actions -->
-      <div class="form-actions">
+      <!-- Actions (hidden in compact mode) -->
+      <div v-if="!compactMode" class="form-actions">
         <button class="btn-primary" @click="saveUnit" :disabled="!isValid">
           Save Unit
         </button>
@@ -548,7 +548,8 @@ const {
 setMode(props.initialMode);
 
 const validationErrors = ref<any[]>([]);
-const compactMode = ref(false);
+// Set compactMode to true by default for draft mode
+const compactMode = ref(props.initialMode === 'draft');
 
 const unitTypes = [
   {
