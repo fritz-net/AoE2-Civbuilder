@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { CombinePage } from './helpers/CombinePage';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -12,19 +13,14 @@ const VANILLA_CIVS_DIR = path.join(__dirname, '../../public/vanillaFiles/vanilla
 
 test.describe('Vanilla Civs Mode', () => {
   test('should show Custom Mode by default with upload section', async ({ page }) => {
-    await page.goto('/v2/combine');
+    const combinePage = new CombinePage(page);
+    await combinePage.navigate();
     
-    // Check page title
-    await expect(page).toHaveTitle(/AoE2 Civbuilder/);
+    // Check page loaded
+    await combinePage.assertPageLoaded();
     
-    // Check heading
-    await expect(page.getByRole('heading', { name: /Combine Civilizations into Mod/i })).toBeVisible();
-    
-    // Check that upload section is visible (Custom Mode)
-    await expect(page.getByRole('heading', { name: /Add Civilizations/i })).toBeVisible();
-    
-    // Check "Use Vanilla Civs" button is visible
-    await expect(page.getByRole('button', { name: /Use Vanilla Civs/i })).toBeVisible();
+    // Check that we're in Custom Mode
+    await combinePage.assertCustomMode();
     
     // Check "Choose JSON Files" button is visible
     await expect(page.getByText(/Choose JSON Files/i)).toBeVisible();
@@ -40,41 +36,31 @@ test.describe('Vanilla Civs Mode', () => {
   });
 
   test('should load all 50 vanilla civs when "Use Vanilla Civs" button is clicked', async ({ page }) => {
-    await page.goto('/v2/combine');
+    const combinePage = new CombinePage(page);
+    await combinePage.navigate();
     
     // Click "Use Vanilla Civs" button
-    const useVanillaBtn = page.getByRole('button', { name: /Use Vanilla Civs/i });
-    await useVanillaBtn.click();
-    
-    // Wait for civs to load (parallel loading should be fast, but give it 3 seconds)
-    await page.waitForTimeout(3000);
+    await combinePage.clickUseVanillaCivs();
     
     // Check that 50 civilizations are loaded
-    await expect(page.getByText(/Loaded Civilizations \(50\)/i)).toBeVisible();
+    await combinePage.assertCivCount(50);
     
     // Check that warning message about 50 civ limit is shown
-    await expect(page.getByText(/Warning:/i)).toBeVisible();
-    await expect(page.getByText(/50\/50 civilizations loaded/i)).toBeVisible();
+    await combinePage.assertLimitWarning();
     
-    // Check that "Switch to Custom Mode" button is visible
-    await expect(page.getByRole('button', { name: /Switch to Custom Mode/i })).toBeVisible();
-    
-    // Check that upload section is NOT visible (we're in Vanilla Mode)
-    await expect(page.getByRole('heading', { name: /Add Civilizations/i })).not.toBeVisible();
+    // Check that we're now in Vanilla Mode
+    await combinePage.assertVanillaMode();
   });
 
   test('should load vanilla civs in alphabetical order', async ({ page }) => {
-    await page.goto('/v2/combine');
+    const combinePage = new CombinePage(page);
+    await combinePage.navigate();
     
     // Click "Use Vanilla Civs" button
-    await page.getByRole('button', { name: /Use Vanilla Civs/i }).click();
-    
-    // Wait for civs to load
-    await page.waitForTimeout(3000);
+    await combinePage.clickUseVanillaCivs();
     
     // Get all civ cards
-    const civCards = page.locator('.civ-card');
-    const count = await civCards.count();
+    const count = await combinePage.getCivCount();
     expect(count).toBe(50);
     
     // Check first few civs are in alphabetical order
