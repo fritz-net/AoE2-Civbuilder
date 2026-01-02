@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { expandAdvancedSettings } from './helpers/draftHelpers';
+import { DraftCreatePage } from './helpers/DraftCreatePage';
 
 /**
  * E2E tests for Bonuses Per Page feature
@@ -8,13 +8,14 @@ import { expandAdvancedSettings } from './helpers/draftHelpers';
 
 test.describe('Draft Mode - Bonuses Per Page Setting', () => {
   test('should display bonuses per page input in Advanced Settings', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Expand Advanced Settings section
-    await expandAdvancedSettings(page);
+    await draftCreatePage.expandAdvancedSettings();
     
     // Check that bonuses per page input is visible
-    const bonusesPerPageInput = page.locator('#bonusesPerPage');
+    const bonusesPerPageInput = draftCreatePage.getBonusesPerPageInput();
     await expect(bonusesPerPageInput).toBeVisible();
     
     // Check label is present
@@ -23,22 +24,24 @@ test.describe('Draft Mode - Bonuses Per Page Setting', () => {
   });
 
   test('should have default value of 30', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Expand Advanced Settings section
-    await expandAdvancedSettings(page);
+    await draftCreatePage.expandAdvancedSettings();
     
-    const bonusesPerPageInput = page.locator('#bonusesPerPage');
+    const bonusesPerPageInput = draftCreatePage.getBonusesPerPageInput();
     await expect(bonusesPerPageInput).toHaveValue('30');
   });
 
   test('should enforce range validation (10-100)', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Expand Advanced Settings section
-    await expandAdvancedSettings(page);
+    await draftCreatePage.expandAdvancedSettings();
     
-    const bonusesPerPageInput = page.locator('#bonusesPerPage');
+    const bonusesPerPageInput = draftCreatePage.getBonusesPerPageInput();
     
     // Check min and max attributes
     await expect(bonusesPerPageInput).toHaveAttribute('min', '10');
@@ -46,12 +49,13 @@ test.describe('Draft Mode - Bonuses Per Page Setting', () => {
   });
 
   test('should allow changing bonuses per page value', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Expand Advanced Settings section
-    await expandAdvancedSettings(page);
+    await draftCreatePage.expandAdvancedSettings();
     
-    const bonusesPerPageInput = page.locator('#bonusesPerPage');
+    const bonusesPerPageInput = draftCreatePage.getBonusesPerPageInput();
     
     // Set to minimum value (10)
     await bonusesPerPageInput.fill('10');
@@ -67,10 +71,11 @@ test.describe('Draft Mode - Bonuses Per Page Setting', () => {
   });
 
   test('should show help text for bonuses per page', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Expand Advanced Settings section
-    await expandAdvancedSettings(page);
+    await draftCreatePage.expandAdvancedSettings();
     
     // Check for help text describing the feature
     const helpText = page.locator('.form-help').filter({ hasText: /bonus cards displayed/i });
@@ -78,37 +83,37 @@ test.describe('Draft Mode - Bonuses Per Page Setting', () => {
   });
 
   test('should be positioned next to Cards Per Roll', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Expand Advanced Settings section
-    await expandAdvancedSettings(page);
+    await draftCreatePage.expandAdvancedSettings();
     
     // Both inputs should be visible
-    const cardsPerRollInput = page.locator('#cardsPerRoll');
-    const bonusesPerPageInput = page.locator('#bonusesPerPage');
+    const cardsPerRollInput = draftCreatePage.getCardsPerRollInput();
+    const bonusesPerPageInput = draftCreatePage.getBonusesPerPageInput();
     
     await expect(cardsPerRollInput).toBeVisible();
     await expect(bonusesPerPageInput).toBeVisible();
     
     // Check that both are within the Advanced Settings section
-    const advancedSection = page.locator('.advanced-section');
+    const advancedSection = draftCreatePage.getAdvancedSection();
     await expect(advancedSection.locator('#cardsPerRoll')).toBeVisible();
     await expect(advancedSection.locator('#bonusesPerPage')).toBeVisible();
   });
 
   test('should submit bonuses per page value when creating draft', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Expand Advanced Settings section
-    await expandAdvancedSettings(page);
+    await draftCreatePage.expandAdvancedSettings();
     
     // Set custom bonuses per page value
-    const bonusesPerPageInput = page.locator('#bonusesPerPage');
-    await bonusesPerPageInput.fill('50');
+    await draftCreatePage.setBonusesPerPage(50);
     
     // Create draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    await startButton.click();
+    await draftCreatePage.clickStartDraft();
     
     // Wait for modal or error
     await page.waitForTimeout(2000);
@@ -131,40 +136,22 @@ test.describe('Draft Mode - Bonuses Per Page Setting', () => {
 
 test.describe('Draft Mode - Bonuses Per Page Backend Integration', () => {
   test('should create draft with custom bonuses per page and verify it loads', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
-    // Expand Advanced Settings
-    await expandAdvancedSettings(page);
+    // Create draft with custom bonuses per page
+    const result = await draftCreatePage.createDraft({
+      numPlayers: 1,
+      bonusesPerPage: 40
+    }).catch(() => null);
     
-    // Set custom bonuses per page
-    const bonusesPerPageInput = page.locator('#bonusesPerPage');
-    await bonusesPerPageInput.fill('40');
-    
-    // Set minimal player count for faster test
-    const numPlayersInput = page.locator('#numPlayers');
-    await numPlayersInput.fill('1');
-    
-    // Create draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    await startButton.click();
-    
-    // Wait for modal
-    await page.waitForTimeout(2000);
-    
-    const modal = page.locator('.modal-overlay');
-    const isModalVisible = await modal.isVisible().catch(() => false);
-    
-    if (!isModalVisible) {
+    if (!result) {
       console.log('Server not available - skipping integration test');
       return;
     }
     
-    // Get host link
-    const hostLinkInput = page.locator('#hostLink');
-    const hostLink = await hostLinkInput.inputValue();
-    
     // Navigate to host page
-    await page.goto(hostLink);
+    await page.goto(result.hostLink);
     
     // Wait for page to load
     await page.waitForTimeout(3000);
@@ -183,31 +170,21 @@ test.describe('Draft Mode - Bonuses Per Page Backend Integration', () => {
 
 test.describe('Draft Mode - Backward Compatibility', () => {
   test('should create draft without bonuses per page (using default)', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
-    // Create draft without changing bonuses per page (keep default of 30)
-    const numPlayersInput = page.locator('#numPlayers');
-    await numPlayersInput.fill('1');
+    // Create draft with default bonuses per page (30)
+    const result = await draftCreatePage.createDraft({
+      numPlayers: 1
+    }).catch(() => null);
     
-    // Don't expand Advanced Settings - use all defaults
-    
-    // Create draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    await startButton.click();
-    
-    // Wait for response
-    await page.waitForTimeout(2000);
-    
-    const modal = page.locator('.modal-overlay');
-    const isModalVisible = await modal.isVisible().catch(() => false);
-    
-    if (!isModalVisible) {
+    if (!result) {
       console.log('Server not available - skipping backward compatibility test');
       return;
     }
     
     // Draft created successfully with default value
-    await expect(modal).toBeVisible();
+    await expect(page.locator('.modal-overlay')).toBeVisible();
     await expect(page.getByRole('heading', { name: /Draft Created/i })).toBeVisible();
   });
 });

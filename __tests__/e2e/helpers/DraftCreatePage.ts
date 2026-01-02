@@ -11,6 +11,8 @@ export class DraftCreatePage extends BasePage {
     numPlayersInput: '#numPlayers',
     bonusesInput: '#bonusesPerPlayer',
     techTreePointsInput: '#techTreePoints',
+    bonusesPerPageInput: '#bonusesPerPage',
+    cardsPerRollInput: '#cardsPerRoll',
     startDraftButton: 'button:has-text("Start Draft")',
     backButton: 'button:has-text("Back")',
     heading: 'h1, h2',
@@ -23,6 +25,7 @@ export class DraftCreatePage extends BasePage {
     advancedSettings: 'summary:has-text("Advanced Settings")',
     testingSettings: 'summary:has-text("Testing Settings")',
     requiredFirstRollInput: '#requiredFirstRoll',
+    advancedSection: '.advanced-section',
   };
 
   constructor(page: Page) {
@@ -55,6 +58,34 @@ export class DraftCreatePage extends BasePage {
    */
   async setTechTreePoints(points: number): Promise<void> {
     await this.fillInput(this.selectors.techTreePointsInput, points.toString());
+  }
+
+  /**
+   * Set bonuses per page (must be called after expandAdvancedSettings)
+   */
+  async setBonusesPerPage(bonusesPerPage: number): Promise<void> {
+    await this.fillInput(this.selectors.bonusesPerPageInput, bonusesPerPage.toString());
+  }
+
+  /**
+   * Get bonuses per page input element
+   */
+  getBonusesPerPageInput() {
+    return this.page.locator(this.selectors.bonusesPerPageInput);
+  }
+
+  /**
+   * Get cards per roll input element
+   */
+  getCardsPerRollInput() {
+    return this.page.locator(this.selectors.cardsPerRollInput);
+  }
+
+  /**
+   * Get advanced section element
+   */
+  getAdvancedSection() {
+    return this.page.locator(this.selectors.advancedSection);
   }
 
   /**
@@ -129,6 +160,7 @@ export class DraftCreatePage extends BasePage {
     numPlayers?: number;
     bonuses?: number;
     techTreePoints?: number;
+    bonusesPerPage?: number;
     timerEnabled?: boolean;
     timerDuration?: number;
     requiredFirstRoll?: string;
@@ -145,9 +177,14 @@ export class DraftCreatePage extends BasePage {
     }
     
     // Advanced settings
-    if (config.timerEnabled) {
+    if (config.timerEnabled || config.bonusesPerPage !== undefined) {
       await this.expandAdvancedSettings();
-      await this.enableTimer(config.timerDuration);
+      if (config.timerEnabled) {
+        await this.enableTimer(config.timerDuration);
+      }
+      if (config.bonusesPerPage !== undefined) {
+        await this.setBonusesPerPage(config.bonusesPerPage);
+      }
     }
     
     // Testing settings
