@@ -1422,9 +1422,8 @@ function draftIO(io) {
 					draft["gamestate"]["order"].push(maxIndex);
 					priorities[maxIndex] = -1;
 				}
-			}
-			fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
-			io.in(roomID).emit("set gamestate", draft);
+				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
+				io.in(roomID).emit("set gamestate", draft);
 			} else {
 				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 			}

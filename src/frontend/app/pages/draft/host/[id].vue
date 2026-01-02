@@ -1409,13 +1409,14 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 1800px; /* 50% wider than default 1200px */
+  max-width: min(1800px, 95vw); /* Responsive: 1800px for HD screens, 95vw for smaller screens */
   margin: 0 auto;
+  padding: 0 1rem;
 }
 
 .custom-uu-actions {
   width: 100%;
-  max-width: 1200px; /* 50% wider than default 800px */
+  max-width: min(1200px, 90vw); /* Responsive: 1200px for HD screens, 90vw for smaller screens */
   margin-top: 2rem;
   display: flex;
   flex-direction: column;

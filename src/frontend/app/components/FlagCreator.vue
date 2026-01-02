@@ -44,7 +44,9 @@
                 :key="optionIndex - 1" 
                 :value="optionIndex - 1"
               >
-                {{ optionIndex }}
+                {{ index === 5 ? getDivisionName(optionIndex - 1) : 
+                   index === 6 ? getOverlayName(optionIndex - 1) : 
+                   getSymbolName(optionIndex - 1) }}
               </option>
             </select>
           </div>
@@ -238,6 +240,82 @@ function getColorName(colorIndex: number): string {
     'Light Blue',
   ]
   return colorNames[colorIndex] || `Color ${colorIndex + 1}`
+}
+
+// Get a friendly name for a division
+function getDivisionName(divisionIndex: number): string {
+  const divisionNames = [
+    'Plain',
+    'Horizontal Split',
+    'Vertical Split', 
+    'Diagonal Split (Top-Left)',
+    'Diagonal Split (Top-Right)',
+    'Quartered',
+    'Horizontal Thirds',
+    'Vertical Thirds',
+    'Cross',
+    'Saltire (X)',
+    'Border',
+    'Circle'
+  ]
+  return divisionNames[divisionIndex] || `Division ${divisionIndex + 1}`
+}
+
+// Get a friendly name for an overlay
+function getOverlayName(overlayIndex: number): string {
+  const overlayNames = [
+    'None',
+    'Horizontal Stripe',
+    'Vertical Stripe',
+    'Diagonal Stripe',
+    'Cross Pattern',
+    'Border Pattern',
+    'Checkered',
+    'Dots',
+    'Diamond',
+    'Triangle',
+    'Chevron',
+    'Wave'
+  ]
+  return overlayNames[overlayIndex] || `Overlay ${overlayIndex + 1}`
+}
+
+// Get a friendly name for a symbol
+function getSymbolName(symbolIndex: number): string {
+  const symbolNames = [
+    'None',
+    'Cross',
+    'Star',
+    'Circle',
+    'Square',
+    'Diamond',
+    'Triangle',
+    'Crown',
+    'Lion',
+    'Eagle',
+    'Dragon',
+    'Sword',
+    'Shield',
+    'Castle',
+    'Tower',
+    'Ship',
+    'Horse',
+    'Tree',
+    'Sun',
+    'Moon',
+    'Rose',
+    'Fleur-de-lis',
+    'Anchor',
+    'Arrow',
+    'Axe',
+    'Flame',
+    'Heart',
+    'Key',
+    'Scales',
+    'Snake'
+  ]
+  // For symbols beyond the predefined list, use generic name
+  return symbolNames[symbolIndex] || `Symbol ${symbolIndex + 1}`
 }
 
 // Helper to get color from palette with bounds checking (shared logic)
@@ -844,7 +922,7 @@ onMounted(() => {
 }
 
 .flag-dropdown {
-  width: 80px;
+  min-width: 150px;
   padding: 0.25rem 0.5rem;
   background: rgba(0, 0, 0, 0.4);
   border: 2px solid hsl(52, 100%, 50%);
