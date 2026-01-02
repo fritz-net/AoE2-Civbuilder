@@ -12,7 +12,20 @@
           class="architecture-image"
           @error="handleImageError"
         />
-        <span class="architecture-name">{{ currentArchitectureName }}</span>
+        <select 
+          v-model="selectedArchitecture" 
+          @change="handleDropdownChange"
+          class="architecture-dropdown"
+          :disabled="disabled"
+        >
+          <option 
+            v-for="(architecture, index) in architectures" 
+            :key="index" 
+            :value="index + 1"
+          >
+            {{ architecture }}
+          </option>
+        </select>
       </div>
       
       <button class="nav-btn" @click="next">&gt;</button>
@@ -21,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { architectures } from '~/composables/useCivData'
 
 const props = withDefaults(defineProps<{
@@ -38,6 +51,13 @@ const emit = defineEmits<{
 const config = useRuntimeConfig()
 const baseURL = config.app.baseURL || '/v2/'
 
+const selectedArchitecture = ref(props.modelValue)
+
+// Watch for external changes to modelValue
+watch(() => props.modelValue, (newVal) => {
+  selectedArchitecture.value = newVal
+})
+
 // Architecture values are 1-indexed (1-11)
 const currentArchitectureName = computed(() => architectures[props.modelValue - 1] || architectures[0])
 
@@ -46,6 +66,10 @@ const architectureImageSrc = computed(() => `${baseURL}img/architectures/tc_${pr
 function handleImageError(e: Event) {
   const img = e.target as HTMLImageElement
   img.style.display = 'none'
+}
+
+function handleDropdownChange() {
+  emit('update:modelValue', selectedArchitecture.value)
 }
 
 function next() {
@@ -122,9 +146,31 @@ function previous() {
   border-radius: 4px;
 }
 
-.architecture-name {
+.architecture-dropdown {
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
   color: hsl(52, 100%, 50%);
   font-size: 0.9rem;
+  cursor: pointer;
   text-align: center;
+  transition: all 0.2s ease;
+}
+
+.architecture-dropdown:hover:not(:disabled) {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
+.architecture-dropdown:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.architecture-dropdown option {
+  background: rgba(139, 69, 19, 0.95);
+  color: hsl(52, 100%, 50%);
 }
 </style>

@@ -79,9 +79,66 @@
       </div>
     </div>
 
-    <!-- Phase 2: Draft Cards -->
+    <!-- Phase 2: Draft Cards OR Custom UU Design -->
     <div v-else-if="currentPhase === 2 && draft" class="draft-phase">
+      <!-- Custom UU Design Phase -->
+      <div v-if="draft.gamestate.custom_uu_phase" class="custom-uu-phase">
+        <!-- If player has submitted, show waiting screen -->
+        <div v-if="currentPlayer?.ready === 1" class="waiting-screen">
+          <h1 class="waiting-title">Waiting For Other Players</h1>
+          <div class="waiting-phase-box">
+            <div class="loading-spinner"></div>
+            <p>Your custom unique unit has been submitted!</p>
+            <p class="waiting-subtext">Waiting for other players to finish designing their units...</p>
+            
+            <!-- Show status of all players -->
+            <div class="players-status">
+              <h3>Player Status:</h3>
+              <div v-for="(player, idx) in draft.players" :key="idx" class="player-status-item">
+                <span class="player-name">{{ player.alias || `Player ${idx + 1}` }}</span>
+                <span class="status-badge" :class="{ 'status-ready': player.ready === 1 }">
+                  {{ player.ready === 1 ? '✓ Ready' : 'Designing...' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Otherwise, show Custom UU Editor -->
+        <div v-else class="custom-uu-editor-container">
+          <h1 class="phase-title">Design Your Custom Unique Unit</h1>
+          <p class="phase-subtitle">Create your civilization's unique unit with a 100 point budget</p>
+          
+          <CustomUUEditor
+            :initial-mode="'draft'"
+            :show-mode-selector="false"
+            @update="handleCustomUUUpdate"
+          />
+          
+          <div class="custom-uu-actions">
+            <button
+              class="submit-uu-button"
+              :disabled="!isValidCustomUU || isSubmittingUU"
+              @click="handleSubmitCustomUU"
+            >
+              {{ isSubmittingUU ? 'Submitting...' : 'Submit Custom Unit' }}
+            </button>
+            
+            <div v-if="customUUValidationErrors.length > 0" class="validation-errors">
+              <h4>Please fix these errors before submitting:</h4>
+              <ul>
+                <li v-for="(err, idx) in customUUValidationErrors" :key="idx" class="error-item">
+                  {{ err.message }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Normal Draft Board (bonus selection) -->
       <DraftBoard
+        v-else
         :phase-title="roundTypeName"
         :round-number="(currentTurn?.roundType || 0) + 1"
         :players="draft.players"
@@ -196,6 +253,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useDraft } from '~/composables/useDraft'
 import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
 import { PASTURES_BONUS_ID } from '~/composables/useCivConstants'
+import { useCustomUU, type CustomUUData } from '~/composables/useCustomUU'
 import type { CivConfig } from '~/composables/useCivData'
 import DraftLobby from '~/components/draft/DraftLobby.vue'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
@@ -205,6 +263,7 @@ import LanguageSelector from '~/components/LanguageSelector.vue'
 import WonderSelector from '~/components/WonderSelector.vue'
 import TechTree from '~/components/TechTree.vue'
 import PlayerViewModal from '~/components/draft/PlayerViewModal.vue'
+import CustomUUEditor from '~/components/CustomUUEditor.vue'
 
 const config = useRuntimeConfig()
 const route = useRoute()
@@ -284,6 +343,19 @@ const techTreePoints = computed(() => {
   return draft.value?.preset.points || 250
 })
 
+// Custom UU state for draft mode
+const { validateUnit } = useCustomUU('draft')
+const customUU = ref<CustomUUData | null>(null)
+const isSubmittingUU = ref(false)
+const customUUValidationErrors = computed(() => {
+  if (!customUU.value) return []
+  const errors = validateUnit(customUU.value)
+  return errors.filter(e => e.severity === 'error')
+})
+const isValidCustomUU = computed(() => {
+  return customUU.value !== null && customUUValidationErrors.value.length === 0
+})
+
 // Player view modal state
 const showPlayerModal = ref(false)
 const selectedPlayerIndex = ref(-1)
@@ -336,14 +408,44 @@ const sidebarContent = computed(() => {
     html += '</ul>'
   }
   
-  // Unique Unit
+  // Unique Unit - handle both legacy (number) and custom (object) formats
   if (player.bonuses[1] && Array.isArray(player.bonuses[1]) && player.bonuses[1].length > 0) {
-    const unitId = player.bonuses[1][0]
-    const unit = allCards.uniqueUnits[unitId]
-    if (unit && unit.name) {
+    const unitData = player.bonuses[1][0]
+    
+    // Check if it's a custom UU object
+    if (typeof unitData === 'object' && unitData.type === 'custom') {
       if (hasAnyBonus) html += '<hr>'
-      html += `<h3>Unique Unit</h3><p>${unit.name}</p>`
+      html += `<h3>Custom Unique Unit</h3>`
+      html += `<p><strong>${unitData.name}</strong></p>`
+      html += `<p style="color: rgba(240, 230, 210, 0.7); font-style: italic; font-size: 0.9em;">${unitData.unitType.charAt(0).toUpperCase() + unitData.unitType.slice(1)}</p>`
+      html += '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(0, 0, 0, 0.2); border-radius: 4px; border-left: 3px solid hsl(52, 100%, 50%);">'
+      html += `<p><strong>HP:</strong> ${unitData.health} | <strong>Attack:</strong> ${unitData.attack}</p>`
+      html += `<p><strong>Armor:</strong> ${unitData.meleeArmor}/${unitData.pierceArmor} | <strong>Speed:</strong> ${unitData.speed}</p>`
+      if (unitData.range > 0) {
+        html += `<p><strong>Range:</strong> ${unitData.range}</p>`
+      }
+      html += `<p><strong>Cost:</strong> ${unitData.cost.food}F `
+      if (unitData.cost.wood > 0) html += `${unitData.cost.wood}W `
+      if (unitData.cost.gold > 0) html += `${unitData.cost.gold}G `
+      if (unitData.cost.stone > 0) html += `${unitData.cost.stone}S`
+      html += `</p>`
+      if (unitData.attackBonuses && unitData.attackBonuses.length > 0) {
+        html += '<p><strong>Bonuses:</strong></p><ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">'
+        unitData.attackBonuses.forEach((bonus: any) => {
+          html += `<li style="margin: 0.25rem 0; font-size: 0.85em;">+${bonus.amount} vs armor class ${bonus.class}</li>`
+        })
+        html += '</ul>'
+      }
+      html += '</div>'
       hasAnyBonus = true
+    } else if (typeof unitData === 'number') {
+      // Legacy format: numeric unit ID
+      const unit = allCards.uniqueUnits[unitData]
+      if (unit && unit.name) {
+        if (hasAnyBonus) html += '<hr>'
+        html += `<h3>Unique Unit</h3><p>${unit.name}</p>`
+        hasAnyBonus = true
+      }
     }
   }
   
@@ -483,6 +585,8 @@ const handleSaveCivInfo = () => {
       playerNumber.value,
       civConfig.value.alias,
       civConfig.value.flag_palette,
+      civConfig.value.customFlag,
+      civConfig.value.customFlagData,
       civConfig.value.architecture,
       civConfig.value.language,
       civConfig.value.wonder
@@ -509,6 +613,67 @@ const handleTechTreeDone = (tree: number[][], _points: number) => {
     isWaitingPhase3.value = true
     
     updateTree(playerNumber.value, tree)
+  }
+}
+
+// Custom UU handlers
+const handleCustomUUUpdate = (unit: CustomUUData) => {
+  customUU.value = unit
+  
+  // Optionally emit real-time updates to server (for spectators to see)
+  // Uncomment if you want real-time updates
+  // if (draft.value && playerNumber.value >= 0) {
+  //   draft.value.socket?.emit('update custom uu', draftId.value, playerNumber.value, unit)
+  // }
+}
+
+const handleSubmitCustomUU = async () => {
+  if (!customUU.value || !isValidCustomUU.value) {
+    console.error('Cannot submit invalid custom UU')
+    return
+  }
+  
+  if (playerNumber.value < 0) {
+    console.error('Invalid player number')
+    return
+  }
+  
+  isSubmittingUU.value = true
+  
+  try {
+    // Get socket from draft state
+    const socket = initSocket()
+    if (!socket) {
+      throw new Error('Socket not available')
+    }
+    
+    // Emit submit event to server
+    socket.emit('submit custom uu', draftId.value, playerNumber.value, customUU.value)
+    
+    // Wait for confirmation from server
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Submission timeout'))
+      }, 10000)
+      
+      socket.once('custom uu submitted', () => {
+        clearTimeout(timeout)
+        resolve()
+      })
+      
+      socket.once('custom uu error', (errorMsg: string) => {
+        clearTimeout(timeout)
+        reject(new Error(errorMsg))
+      })
+    })
+    
+    console.log('Custom UU submitted successfully')
+  } catch (err) {
+    console.error('Failed to submit custom UU:', err)
+    // Show error in a more user-friendly way
+    error.value = 'Failed to submit custom UU: ' + (err instanceof Error ? err.message : 'Unknown error')
+  } finally {
+    isSubmittingUU.value = false
   }
 }
 
@@ -1171,5 +1336,137 @@ onUnmounted(() => {
   .techtree-container {
     flex-direction: column;
   }
+}
+
+/* Custom UU Phase Styles */
+.custom-uu-phase {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.custom-uu-editor-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.phase-subtitle {
+  color: #f0e6d2;
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.custom-uu-actions {
+  width: 100%;
+  max-width: 800px;
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.submit-uu-button {
+  padding: 1rem 3rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  color: hsl(52, 100%, 50%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-uu-button:hover:not(:disabled) {
+  background: hsl(52, 100%, 50%);
+  color: #1a0f0a;
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+.submit-uu-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.validation-errors {
+  background: rgba(200, 0, 0, 0.2);
+  border: 2px solid rgba(255, 0, 0, 0.5);
+  border-radius: 4px;
+  padding: 1rem;
+  max-width: 600px;
+}
+
+.validation-errors h4 {
+  color: #ffcccc;
+  margin: 0 0 0.5rem 0;
+}
+
+.validation-errors ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.error-item {
+  color: #ffb6c1;
+  padding: 0.25rem 0;
+}
+
+.players-status {
+  margin-top: 2rem;
+  text-align: left;
+  width: 100%;
+  max-width: 400px;
+}
+
+.players-status h3 {
+  color: hsl(52, 100%, 50%);
+  font-size: 1.2rem;
+  margin: 0 0 1rem 0;
+}
+
+.player-status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.player-name {
+  color: #f0e6d2;
+  font-weight: 500;
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  background: rgba(100, 100, 100, 0.5);
+  color: #ccc;
+}
+
+.status-badge.status-ready {
+  background: rgba(0, 150, 0, 0.3);
+  color: #90ee90;
+  border: 1px solid rgba(0, 255, 0, 0.4);
+}
+
+.waiting-subtext {
+  color: rgba(240, 230, 210, 0.7);
+  font-size: 1rem;
+  margin-top: 1rem;
 }
 </style>

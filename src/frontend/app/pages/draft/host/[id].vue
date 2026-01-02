@@ -79,9 +79,40 @@
       </div>
     </div>
 
-    <!-- Phase 2: Draft Cards -->
+    <!-- Phase 2: Draft Cards OR Custom UU Design -->
     <div v-if="currentPhase === 2 && draft">
+      <!-- Custom UU Design Phase -->
+      <div v-if="draft.gamestate.custom_uu_phase" class="custom-uu-phase">
+        <h1 class="phase-title">Players Designing Custom Unique Units</h1>
+        <p class="phase-subtitle">Each player is creating their own unique unit (100 point budget)</p>
+        
+        <div class="players-status-container">
+          <h3>Player Progress:</h3>
+          <div class="players-status-grid">
+            <div v-for="(player, idx) in draft.players" :key="idx" class="player-status-card">
+              <div class="player-info">
+                <span class="player-name">{{ player.alias || `Player ${idx + 1}` }}</span>
+                <span class="status-badge" :class="{ 'status-ready': player.ready === 1 }">
+                  {{ player.ready === 1 ? '✓ Ready' : 'Designing...' }}
+                </span>
+              </div>
+              <div v-if="player.custom_uu && player.custom_uu.name" class="uu-preview">
+                <strong>{{ player.custom_uu.name }}</strong>
+                <span class="uu-type">({{ player.custom_uu.unitType }})</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="waiting-phase-box">
+          <div class="loading-spinner"></div>
+          <p class="waiting-text">Waiting for all players to submit their custom units...</p>
+        </div>
+      </div>
+      
+      <!-- Normal Draft Board (bonus selection) -->
       <DraftBoard
+      v-else
       :phase-title="roundTypeName"
       :round-number="(currentTurn?.roundType || 0) + 1"
       :players="draft.players"
@@ -349,14 +380,44 @@ const sidebarContent = computed(() => {
     html += '</ul>'
   }
   
-  // Unique Unit
+  // Unique Unit - handle both legacy (number) and custom (object) formats
   if (player.bonuses[1] && Array.isArray(player.bonuses[1]) && player.bonuses[1].length > 0) {
-    const unitId = player.bonuses[1][0]
-    const unit = allCards.uniqueUnits[unitId]
-    if (unit && unit.name) {
+    const unitData = player.bonuses[1][0]
+    
+    // Check if it's a custom UU object
+    if (typeof unitData === 'object' && unitData.type === 'custom') {
       if (hasAnyBonus) html += '<hr>'
-      html += `<h3>Unique Unit</h3><p>${unit.name}</p>`
+      html += `<h3>Custom Unique Unit</h3>`
+      html += `<p><strong>${unitData.name}</strong></p>`
+      html += `<p style="color: rgba(240, 230, 210, 0.7); font-style: italic; font-size: 0.9em;">${unitData.unitType.charAt(0).toUpperCase() + unitData.unitType.slice(1)}</p>`
+      html += '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(0, 0, 0, 0.2); border-radius: 4px; border-left: 3px solid hsl(52, 100%, 50%);">'
+      html += `<p><strong>HP:</strong> ${unitData.health} | <strong>Attack:</strong> ${unitData.attack}</p>`
+      html += `<p><strong>Armor:</strong> ${unitData.meleeArmor}/${unitData.pierceArmor} | <strong>Speed:</strong> ${unitData.speed}</p>`
+      if (unitData.range > 0) {
+        html += `<p><strong>Range:</strong> ${unitData.range}</p>`
+      }
+      html += `<p><strong>Cost:</strong> ${unitData.cost.food}F `
+      if (unitData.cost.wood > 0) html += `${unitData.cost.wood}W `
+      if (unitData.cost.gold > 0) html += `${unitData.cost.gold}G `
+      if (unitData.cost.stone > 0) html += `${unitData.cost.stone}S`
+      html += `</p>`
+      if (unitData.attackBonuses && unitData.attackBonuses.length > 0) {
+        html += '<p><strong>Bonuses:</strong></p><ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">'
+        unitData.attackBonuses.forEach((bonus: any) => {
+          html += `<li style="margin: 0.25rem 0; font-size: 0.85em;">+${bonus.amount} vs armor class ${bonus.class}</li>`
+        })
+        html += '</ul>'
+      }
+      html += '</div>'
       hasAnyBonus = true
+    } else if (typeof unitData === 'number') {
+      // Legacy format: numeric unit ID
+      const unit = allCards.uniqueUnits[unitData]
+      if (unit && unit.name) {
+        if (hasAnyBonus) html += '<hr>'
+        html += `<h3>Unique Unit</h3><p>${unit.name}</p>`
+        hasAnyBonus = true
+      }
     }
   }
   
@@ -493,6 +554,8 @@ const handleSaveCivInfo = () => {
       playerNumber.value,
       civConfig.value.alias,
       civConfig.value.flag_palette,
+      civConfig.value.customFlag,
+      civConfig.value.customFlagData,
       civConfig.value.architecture,
       civConfig.value.language,
       civConfig.value.wonder
@@ -1140,5 +1203,96 @@ onUnmounted(() => {
   margin-top: 2rem;
   text-align: center;
   max-width: 500px;
+}
+
+/* Custom UU Phase Styles */
+.custom-uu-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.phase-subtitle {
+  color: #f0e6d2;
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.players-status-container {
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 2rem;
+}
+
+.players-status-container h3 {
+  color: hsl(52, 100%, 50%);
+  font-size: 1.3rem;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+}
+
+.players-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.player-status-card {
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border: 2px solid rgba(255, 204, 0, 0.5);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.player-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.player-name {
+  color: #f0e6d2;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.status-badge {
+  padding: 0.35rem 0.85rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  background: rgba(100, 100, 100, 0.5);
+  color: #ccc;
+  font-weight: 500;
+}
+
+.status-badge.status-ready {
+  background: rgba(0, 150, 0, 0.3);
+  color: #90ee90;
+  border: 1px solid rgba(0, 255, 0, 0.4);
+}
+
+.uu-preview {
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 204, 0, 0.2);
+  color: rgba(240, 230, 210, 0.8);
+  font-size: 0.95rem;
+}
+
+.uu-preview strong {
+  color: hsl(52, 100%, 50%);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.uu-type {
+  font-size: 0.85rem;
+  color: rgba(240, 230, 210, 0.6);
+  text-transform: capitalize;
 }
 </style>

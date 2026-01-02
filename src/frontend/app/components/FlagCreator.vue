@@ -10,8 +10,52 @@
           class="flag-control-row"
         >
           <button class="nav-btn" @click="decrementPalette(index)">&lt;</button>
-          <span class="category-label">{{ category }}</span>
+          <!-- For colors (0-4), show dropdown with color names -->
+          <select
+            v-if="index < 5"
+            :value="localPalette[index]"
+            @change="handleDropdownChange(index, $event)"
+            class="color-dropdown"
+            :disabled="disabled || useCustomFlag"
+            title="Select a preset color"
+          >
+            <option 
+              v-for="(color, colorIndex) in colours" 
+              :key="colorIndex" 
+              :value="colorIndex"
+              :style="{ backgroundColor: rgbToHex(color) }"
+            >
+              {{ getColorName(colorIndex) }}
+            </option>
+          </select>
+          <!-- For Division, Overlay, Symbol (5-7), show dropdown with category as placeholder -->
+          <select
+            v-else
+            :value="localPalette[index]"
+            @change="handleDropdownChange(index, $event)"
+            class="flag-dropdown"
+            :disabled="disabled || useCustomFlag"
+            :title="`Select ${category}`"
+          >
+            <option 
+              v-for="optionIndex in paletteSizes[index]" 
+              :key="optionIndex - 1" 
+              :value="optionIndex - 1"
+            >
+              {{ category }} {{ optionIndex }}
+            </option>
+          </select>
           <button class="nav-btn" @click="incrementPalette(index)">&gt;</button>
+          <!-- Add color picker for color categories (0-4) -->
+          <input
+            v-if="index < 5"
+            type="color"
+            :value="rgbToHex(getColor(index))"
+            @input="handleColorPick(index, $event)"
+            class="color-picker"
+            :disabled="disabled || useCustomFlag"
+            title="Pick a custom color"
+          />
         </div>
       </div>
       
@@ -73,6 +117,7 @@ const useCustomFlag = ref(props.customFlag)
 const customImage = ref<HTMLImageElement | null>(null)
 
 const localPalette = ref([...props.modelValue])
+const customColors = ref<Map<number, number[]>>(new Map())
 
 function incrementPalette(index: number) {
   if (props.disabled) return
@@ -80,6 +125,12 @@ function incrementPalette(index: number) {
   newPalette[index] = (newPalette[index] + 1) % paletteSizes[index]
   localPalette.value = newPalette
   emit('update:modelValue', newPalette)
+  
+  // Clear custom color when cycling through presets
+  if (index < 5) {
+    customColors.value.delete(index)
+  }
+  
   if (!useCustomFlag.value) {
     renderFlag()
   }
@@ -91,9 +142,125 @@ function decrementPalette(index: number) {
   newPalette[index] = (newPalette[index] - 1 + paletteSizes[index]) % paletteSizes[index]
   localPalette.value = newPalette
   emit('update:modelValue', newPalette)
+  
+  // Clear custom color when cycling through presets
+  if (index < 5) {
+    customColors.value.delete(index)
+  }
+  
   if (!useCustomFlag.value) {
     renderFlag()
   }
+}
+
+// Helper function to convert RGB array to hex color
+function rgbToHex(rgb: number[]): string {
+  if (!rgb || rgb.length < 3) {
+    return '#000000' // Default to black if invalid
+  }
+  const r = Math.max(0, Math.min(255, rgb[0])).toString(16).padStart(2, '0')
+  const g = Math.max(0, Math.min(255, rgb[1])).toString(16).padStart(2, '0')
+  const b = Math.max(0, Math.min(255, rgb[2])).toString(16).padStart(2, '0')
+  return `#${r}${g}${b}`
+}
+
+// Helper function to convert hex color to RGB array
+function hexToRgb(hex: string): number[] {
+  if (!hex || typeof hex !== 'string' || hex.length < 7) {
+    return [0, 0, 0] // Default to black if invalid
+  }
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  
+  // Return black if parsing failed
+  if (isNaN(r) || isNaN(g) || isNaN(b)) {
+    return [0, 0, 0]
+  }
+  
+  return [r, g, b]
+}
+
+// Handle color picker input
+function handleColorPick(index: number, event: Event) {
+  if (props.disabled || useCustomFlag.value) return
+  
+  const input = event.target as HTMLInputElement
+  const rgb = hexToRgb(input.value)
+  
+  // Store custom color for this index
+  customColors.value.set(index, rgb)
+  
+  // Render flag with custom color
+  if (!useCustomFlag.value) {
+    renderFlag()
+  }
+}
+
+// Handle dropdown change for preset color selection
+function handleDropdownChange(index: number, event: Event) {
+  if (props.disabled || useCustomFlag.value) return
+  
+  const select = event.target as HTMLSelectElement
+  const newPalette = [...localPalette.value]
+  newPalette[index] = parseInt(select.value)
+  localPalette.value = newPalette
+  emit('update:modelValue', newPalette)
+  
+  // Clear custom color when selecting a preset
+  customColors.value.delete(index)
+  
+  if (!useCustomFlag.value) {
+    renderFlag()
+  }
+}
+
+// Get a friendly name for a color
+function getColorName(colorIndex: number): string {
+  const colorNames = [
+    'Black',
+    'White', 
+    'Red',
+    'Green',
+    'Yellow',
+    'Blue',
+    'Orange',
+    'Cyan',
+    'Purple',
+    'Magenta',
+    'Mint',
+    'Brown',
+    'Gray',
+    'Pink',
+    'Light Blue',
+  ]
+  return colorNames[colorIndex] || `Color ${colorIndex + 1}`
+}
+
+// Helper to get color from palette with bounds checking (shared logic)
+function getPaletteColor(index: number): number[] {
+  // Validate index is within bounds for localPalette
+  if (index < 0 || index >= localPalette.value.length) {
+    return [0, 0, 0]
+  }
+  
+  const paletteIndex = localPalette.value[index]
+  if (paletteIndex >= 0 && paletteIndex < colours.length) {
+    return colours[paletteIndex]
+  }
+  return [0, 0, 0] // Fallback to black if index is out of bounds
+}
+
+// Get the actual color to use (custom or from palette)
+function getColor(index: number): number[] {
+  // Validate index is within bounds
+  if (index < 0 || index >= localPalette.value.length) {
+    return [0, 0, 0]
+  }
+  
+  // Check if there's a custom color for this palette index
+  // Use optional chaining with fallback for safety
+  return customColors.value.get(index) ?? getPaletteColor(index)
 }
 
 function handleCustomFlagToggle() {
@@ -172,11 +339,11 @@ function renderFlag() {
   
   // Draw base colors based on division pattern
   const division = palette[5]
-  const color1 = colours[palette[0]]
-  const color2 = colours[palette[1]]
-  const color3 = colours[palette[2]]
-  const color4 = colours[palette[3]]
-  const color5 = colours[palette[4]]
+  const color1 = getColor(0)
+  const color2 = getColor(1)
+  const color3 = getColor(2)
+  const color4 = getColor(3)
+  const color5 = getColor(4)
   
   // Simple division patterns
   ctx.fillStyle = `rgb(${color1[0]}, ${color1[1]}, ${color1[2]})`
@@ -636,6 +803,82 @@ onMounted(() => {
   text-align: center;
   color: hsl(52, 100%, 50%);
   font-size: 0.9rem;
+}
+
+.color-dropdown {
+  width: 120px;
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  color: hsl(52, 100%, 50%);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.color-dropdown:hover:not(:disabled) {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
+.color-dropdown:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.color-dropdown option {
+  background: rgba(139, 69, 19, 0.95);
+  color: hsl(52, 100%, 50%);
+  padding: 0.25rem;
+}
+
+.flag-dropdown {
+  width: 120px;
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  color: hsl(52, 100%, 50%);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.flag-dropdown:hover:not(:disabled) {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
+.flag-dropdown:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.flag-dropdown option {
+  background: rgba(139, 69, 19, 0.95);
+  color: hsl(52, 100%, 50%);
+  padding: 0.25rem;
+}
+
+.color-picker {
+  width: 40px;
+  height: 30px;
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.color-picker:hover:not(:disabled) {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
+.color-picker:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .flag-preview {
