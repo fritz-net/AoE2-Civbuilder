@@ -45,11 +45,12 @@
               v-model="civConfig.flag_palette"
               v-model:custom-flag="civConfig.customFlag"
               v-model:custom-flag-data="civConfig.customFlagData"
+              class="selector-spacing"
             />
             
-            <ArchitectureSelector v-model="civConfig.architecture" />
-            <LanguageSelector v-model="civConfig.language" />
-            <WonderSelector v-model="civConfig.wonder" />
+            <ArchitectureSelector v-model="civConfig.architecture" class="selector-spacing" />
+            <LanguageSelector v-model="civConfig.language" class="selector-spacing" />
+            <WonderSelector v-model="civConfig.wonder" class="selector-spacing" />
             
             <div class="civ-name-input">
               <label for="civName">Civilization Name</label>
@@ -911,6 +912,10 @@ onUnmounted(() => {
 .tech-tree-section {
   overflow: auto;
   max-height: 70vh;
+}
+
+.selector-spacing {
+  margin-bottom: 1.5rem;
 }
 
 .civ-name-input {
