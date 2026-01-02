@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.10.3...v1.11.0) (2026-01-02)
+
+
+### Features
+
+* add color picker and dropdowns to flag creator, fix custom flag uploads in draft mode ([#213](https://github.com/fritz-net/AoE2-Civbuilder/issues/213)) ([1d5ec1e](https://github.com/fritz-net/AoE2-Civbuilder/commit/1d5ec1ee0e2d89460b63836e14836f8eec0d3e19))
+* add configurable bonuses per page and drag-drop draft config upload ([#211](https://github.com/fritz-net/AoE2-Civbuilder/issues/211)) ([bbf6c5a](https://github.com/fritz-net/AoE2-Civbuilder/commit/bbf6c5a3e2941349c362daf4aade79605692c70d))
+* add vanilla civs mode to combine page ([#209](https://github.com/fritz-net/AoE2-Civbuilder/issues/209)) ([b774530](https://github.com/fritz-net/AoE2-Civbuilder/commit/b774530b02bfab0fe8153ab753e9d46c1430dba0))
+* always show wonder and language selectors in build and draft modes ([#215](https://github.com/fritz-net/AoE2-Civbuilder/issues/215)) ([bfdf4b6](https://github.com/fritz-net/AoE2-Civbuilder/commit/bfdf4b64c2611529416f1af54d95cf2698c12d26))
+* complete custom UU designer integration - backend, frontend, and results display ([#219](https://github.com/fritz-net/AoE2-Civbuilder/issues/219)) ([024b511](https://github.com/fritz-net/AoE2-Civbuilder/commit/024b5115c7030786d4b8666e53f32e74ab48a991))
+* convert README.md HTML to proper markdown and restructure /v2/about page ([#210](https://github.com/fritz-net/AoE2-Civbuilder/issues/210)) ([c1467fd](https://github.com/fritz-net/AoE2-Civbuilder/commit/c1467fddfbcef1d267f1a99eaf2302f006482907))
+* integrate custom UU designer in /build and /draft UI with validation dashboard ([#189](https://github.com/fritz-net/AoE2-Civbuilder/issues/189)) ([3983ca8](https://github.com/fritz-net/AoE2-Civbuilder/commit/3983ca8849354aa18ed70c4c4ac835a083136746))
+
+
+### Bug Fixes
+
+* one-click tech enabling with prerequisites and limited-points handling ([#186](https://github.com/fritz-net/AoE2-Civbuilder/issues/186)) ([b66a683](https://github.com/fritz-net/AoE2-Civbuilder/commit/b66a683fc2564a7a5eb74246db8562608f7e8f04))
+
 ## [1.10.3](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.10.2...v1.10.3) (2025-12-31)
 
 
