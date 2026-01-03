@@ -1163,6 +1163,7 @@ function getCurrentPlayer(draft) {
 }
 
 // Helper function to distribute bonus cards and set draft order
+// This handles both card distribution and player order randomization for the draft
 function distributeBonusCards(draft) {
 	const numPlayers = draft["preset"]["slots"];
 	
@@ -1416,7 +1417,8 @@ function draftIO(io) {
 			if (nextPhase == 1) {
 				// Check if custom UU mode is enabled
 				if (draft["preset"]["custom_uu_mode"]) {
-					// Move to custom UU design phase BEFORE bonus selection
+					// Move to custom UU design phase (Phase 2 with custom_uu_phase=true)
+					// This occurs between civ selection (Phase 1) and bonus selection (Phase 2)
 					draft["gamestate"]["phase"] = 2;
 					draft["gamestate"]["custom_uu_phase"] = true;
 					for (var i = 0; i < numPlayers; i++) {
@@ -1981,7 +1983,7 @@ function draftIO(io) {
 			draft["players"][playerNumber]["custom_uu"] = customUU;
 			draft["players"][playerNumber]["ready"] = 1;
 			
-			// Also add to bonuses[1] array for display in tech tree sidebar
+			// Also add to bonuses[1] array for display in tech tree sidebar later (Phase 3)
 			draft["players"][playerNumber]["bonuses"][1] = [customUU];
 			
 			console.log(`Player ${playerNumber} submitted custom UU: ${customUU.name}`);
