@@ -67,10 +67,12 @@ export function isMultiCivDataJson(json: any): boolean {
 /**
  * Convert a data.json civilization entry to CivConfig format
  * @param civName - The name of the civilization
- * @param civData - The civilization data from data.json (not used currently)
  * @returns A CivConfig object
+ * @note The civData parameter from data.json is not used because data.json has a different
+ *       structure (buildings/techs/units arrays) that is incompatible with CivConfig format.
+ *       We create a placeholder config that can be used for display in the combine view.
  */
-function convertDataJsonCivToConfig(civName: string, civData: any): CivConfig {
+function convertDataJsonCivToConfig(civName: string): CivConfig {
   // Start with default civ config for consistency
   const config = createDefaultCiv()
   
@@ -96,8 +98,7 @@ export function parseCivJson(json: any): CivConfig[] {
     const civNames = Object.keys(json.techtrees)
     
     for (const civName of civNames) {
-      const civData = json.techtrees[civName]
-      const civConfig = convertDataJsonCivToConfig(civName, civData)
+      const civConfig = convertDataJsonCivToConfig(civName)
       civConfig.description = normalizeDescription(civConfig.description)
       civs.push(civConfig)
     }

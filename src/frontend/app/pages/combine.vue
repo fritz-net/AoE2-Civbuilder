@@ -278,7 +278,7 @@ function handleDrop(event: DragEvent) {
 }
 
 function processFiles(files: File[]) {
-  const readers = files.map(file => {
+  const fileReaders = files.map(file => {
     return new Promise<CivConfig[]>((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = (e) => {
@@ -300,10 +300,10 @@ function processFiles(files: File[]) {
     })
   })
 
-  Promise.all(readers)
-    .then(loadedCivArrays => {
+  Promise.all(fileReaders)
+    .then(civConfigArrays => {
       // Flatten array of arrays into single array of civs
-      const allCivs = loadedCivArrays.flat()
+      const allCivs = civConfigArrays.flat()
       
       // Check if adding these civs would exceed the 50 civ limit
       const totalAfterAdd = civs.value.length + allCivs.length
