@@ -144,60 +144,60 @@ const mode = ref<'custom' | 'vanilla'>('custom')
 
 // List of vanilla civ names in game order
 const vanillaCivNames = [
-  'Britons',
-  'Franks',
-  'Goths',
-  'Teutons',
-  'Japanese',
-  'Chinese',
-  'Byzantines',
-  'Persians',
-  'Saracens',
-  'Turks',
-  'Vikings',
-  'Mongols',
-  'Celts',
-  'Spanish',
-  'Aztecs',
-  'Mayans',
-  'Huns',
-  'Koreans',
-  'Italians',
-  'Hindustanis',
-  'Incas',
-  'Magyars',
-  'Slavs',
-  'Portuguese',
-  'Ethiopians',
-  'Malians',
-  'Berbers',
-  'Khmer',
-  'Malay',
-  'Burmese',
-  'Vietnamese',
-  'Tatars',
-  'Cumans',
-  'Lithuanians',
-  'Bulgarians',
-  'Burgundians',
-  'Sicilians',
-  'Poles',
-  'Bohemians',
-  'Dravidians',
-  'Bengalis',
-  'Gurjaras',
-  'Armenians',
-  'Georgians',
-  'Romans',
+  'Britons', // 1
+  'Franks', // 2
+  'Goths', // 3
+  'Teutons', // 4
+  'Japanese', // 5
+  'Chinese', // 6
+  'Byzantines', // 7
+  'Persians', // 8
+  'Saracens', // 9
+  'Turks', // 10
+  'Vikings', // 11
+  'Mongols', // 12
+  'Celts', // 13
+  'Spanish', // 14
+  'Aztecs', // 15
+  'Mayans', // 16
+  'Huns', // 17
+  'Koreans', // 18
+  'Italians', // 19
+  'Hindustanis', // 20
+  'Incas', // 21
+  'Magyars', // 22
+  'Slavs', // 23
+  'Portuguese', // 24
+  'Ethiopians', // 25
+  'Malians', // 26
+  'Berbers', // 27
+  'Khmer', // 28
+  'Malay', // 29
+  'Burmese', // 30
+  'Vietnamese', // 31
+  'Tatars', // 32
+  'Cumans', // 33
+  'Lithuanians', // 34
+  'Bulgarians', // 35
+  'Burgundians', // 36
+  'Sicilians', // 37
+  'Poles', // 38
+  'Bohemians', // 39
+  'Dravidians', // 40
+  'Bengalis', // 41
+  'Gurjaras', // 42
+  'Romans', // 43
+  'Armenians', // 44
+  'Georgians', // 45
   // Chronicle civs (not included):
-  // 'Archaemenids',
-  // 'Athenians',
-  // 'Spartans',
-  'Shu',
-  'Wei',
-  'Wu',
-  'Jurchens',
-  'Khitans',
+  // 'Archaemenids', // 46
+  // 'Athenians', // 47
+  // 'Spartans', // 48
+  'Shu', // 49
+  'Wei', // 50
+  'Wu', // 51
+  'Jurchens', // 52
+  'Khitans', // 53
 ]
 
 async function loadVanillaCivs() {
