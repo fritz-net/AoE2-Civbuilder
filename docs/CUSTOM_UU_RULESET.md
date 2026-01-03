@@ -119,12 +119,24 @@ Custom unique units must belong to one of four primary categories. Each category
 ### Special Constraints
 
 **Range Limitations:**
-- Infantry: Range 0 only (exception: Kamayuk can have range 1)
-- Cavalry: Range 0 only (exceptions: Steppe Lancer with range 1, Mameluke with range 3)
-  - Hybrid cavalry (Steppe Lancer, Mameluke) can have limited range but are rare
+- Infantry: Range 0 (melee), 1 (Kamayuk), up to 3 (Throwing Axeman), or up to 5 (Gbeto)
+  - Most infantry are melee only
+  - Gaining range as infantry is VERY expensive (14 points per range)
+  - Throwing Axeman and Gbeto types allowed but costly
+- Cavalry: Range 0 (melee), 1 (Steppe Lancer), or 3-5 (Mameluke)
+  - Range 2 is not allowed for cavalry (gap between Steppe Lancer and Mameluke)
+  - Most cavalry are melee only
+  - Gaining range as cavalry is VERY expensive (14 points per range)
+  - Mameluke-type units can have 3-5 range but at very high cost
 - Foot Archers: Range 3-9
 - Cavalry Archers: Range 3-7
 - Siege: Range 2-12
+
+**Range Point Costs:**
+- Base range cost: 6 points per range unit
+- Infantry/Cavalry gaining range: Additional 8 points per range (total 14 points per range)
+  - This makes it prohibitively expensive for melee units to become ranged
+  - Example: Infantry with +3 range = 3 * 14 = 42 points (nearly full budget)
 
 **Minimum Range:**
 - Ranged units start with minimum range = 1 (cannot fire at melee range)
@@ -180,7 +192,8 @@ Each unit has a "power budget" based on its statistics. Higher stats require hig
 | +1 Pierce Armor | 4 points |
 | +0.1 Movement Speed | 5 points |
 | -0.2 Attack Speed | 3 points |
-| +1 Range (archers) | 6 points |
+| +1 Range (archers/siege) | 6 points |
+| +1 Range (infantry/cavalry) | 14 points (6 base + 8 penalty) |
 | Attack Bonus (+5 vs class) | 8 points |
 
 **Example Calculation:**
@@ -296,11 +309,15 @@ Units must have weaknesses:
 ### Type-Specific Restrictions
 
 **Infantry:**
-- Cannot have ranged attack (exception: Kamayuk with range 1)
+- Can have range 0 (melee), 1 (Kamayuk), up to 3 (Throwing Axeman), or up to 5 (Gbeto)
+- Gaining range is VERY expensive (14 points per range)
 - If HP > 100, speed must be ≤ 1.0
 - If speed > 1.15, armor must be ≤ 2/2
 
 **Cavalry:**
+- Can have range 0 (melee), 1 (Steppe Lancer), or 3-5 (Mameluke)
+- Range 2 is not allowed (gap between Steppe Lancer and Mameluke types)
+- Gaining range is VERY expensive (14 points per range)
 - If HP > 150, speed must be ≤ 1.35
 - Cannot have pierce armor > melee armor by more than 1
 - If speed > 1.5, HP must be ≤ 100

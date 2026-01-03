@@ -314,28 +314,35 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     }
 
     // Type-specific range validation (see CUSTOM_UU_RULESET.md)
-    // Infantry: range 0 (melee) or 1 (Kamayuk-like)
-    if (unit.unitType === 'infantry' && unit.range > 1) {
+    // Infantry: generally melee (range 0) or 1 for Kamayuk
+    // Throwing Axeman and Gbeto can have higher range but at very high point cost
+    // Allow up to range 5 for Gbeto, range 3 for Throwing Axeman
+    if (unit.unitType === 'infantry' && unit.range > 5) {
       errors.push({
         field: 'range',
-        message: 'Infantry can only have range 0 (or 1 for Kamayuk-like)',
+        message: 'Infantry can have range 0 (melee), 1 (Kamayuk), up to 3 (Throwing Axeman), or up to 5 (Gbeto)',
         severity: 'error'
       });
     }
     
-    // Cavalry: range 0 (melee) or 1 for Steppe Lancer-like units only
-    // Other cavalry must be melee (range = 0)
-    if (unit.unitType === 'cavalry' && unit.range > 1) {
+    // Cavalry: range 0 (melee), 1 for Steppe Lancer, or 3-5 for Mameluke
+    // Mameluke can have range 3-5 but at very high point cost
+    if (unit.unitType === 'cavalry' && unit.range > 5) {
       errors.push({
         field: 'range',
-        message: 'Cavalry can only have range 0 (melee) or 1 (Steppe Lancer-like)',
+        message: 'Cavalry can have range 0 (melee), 1 (Steppe Lancer), or 3-5 (Mameluke)',
         severity: 'error'
       });
     }
     
-    // Cavalry with range must have range = 1 exactly (Steppe Lancer rule)
-    // Allow range 1 for hybrid cavalry (like Steppe Lancer, Mameluke)
-    // See CUSTOM_UU_RULESET.md for cavalry range rules
+    // Cavalry with range 2 is not allowed (gap between Steppe Lancer and Mameluke)
+    if (unit.unitType === 'cavalry' && unit.range === 2) {
+      errors.push({
+        field: 'range',
+        message: 'Cavalry cannot have range 2. Use 0-1 (melee/Steppe Lancer) or 3-5 (Mameluke)',
+        severity: 'error'
+      });
+    }
 
     // Cost validation
     const totalCost = unit.cost.food + unit.cost.wood + unit.cost.stone + unit.cost.gold;
@@ -423,8 +430,16 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     points += attackSpeedBonus * 6; // Increased from 3 to 6 to make it more expensive
 
     // Range contribution - now included in calculations
+    // IMPORTANT: Make range very expensive for melee units (infantry, cavalry)
+    // This prevents cheap melee units from becoming ranged easily
     const rangeDiff = unit.range - defaults.range;
-    points += rangeDiff * 6;
+    let rangePoints = rangeDiff * 6;
+    
+    // Extra cost for melee unit types gaining range (Throwing Axeman, Gbeto cost more)
+    if ((unit.unitType === 'infantry' || unit.unitType === 'cavalry') && rangeDiff > 0) {
+      rangePoints += rangeDiff * 8; // Additional 8 points per range for melee types
+    }
+    points += rangePoints;
     
     // Min range contribution - lowering min range costs points (allows closer attacks)
     // Start: ranged units have min range 1, melee have 0

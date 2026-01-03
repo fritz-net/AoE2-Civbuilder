@@ -113,10 +113,13 @@ test.describe('Custom UU Editor - Combat Stats', () => {
     
     // Select Infantry type
     await page.getByTestId('type-button-infantry').click();
-    await page.waitForTimeout(500);
     
-    // Check armor sections exist
-    await expect(page.getByText(/Armor/i).first()).toBeVisible();
+    // Wait for editor form to appear (check for input element, not label text)
+    await expect(page.locator('#melee-armor')).toBeVisible({ timeout: 10000 });
+    
+    // Check armor input elements exist
+    await expect(page.locator('#melee-armor')).toBeVisible();
+    await expect(page.locator('#pierce-armor')).toBeVisible();
   });
 
   test('should display elite stats', async ({ page }) => {
@@ -194,14 +197,17 @@ test.describe('Custom UU Editor - Budget Slider Enforcement', () => {
     
     // Select Infantry type
     await page.getByTestId('type-button-infantry').click();
-    await page.waitForTimeout(500);
+    
+    // Wait for editor form to appear
+    await expect(page.locator('#health')).toBeVisible({ timeout: 10000 });
     
     // Switch to Build Mode
     await page.getByRole('button', { name: /Build Mode \(150 pts\)/i }).click();
     await page.waitForTimeout(300);
     
-    // Check that editor is interactive
-    await expect(page.getByText(/Health/i).first()).toBeVisible();
+    // Check that editor health input is interactive and visible
+    await expect(page.locator('#health')).toBeVisible();
+    await expect(page.locator('#health')).toBeEnabled();
   });
 
   test('should prevent exceeding budget in Build mode', async ({ page }) => {
