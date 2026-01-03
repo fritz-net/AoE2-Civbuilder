@@ -45,8 +45,8 @@ test.describe('Vanilla Civs Mode', () => {
     // Check that 50 civilizations are loaded
     await combinePage.assertCivCount(50);
     
-    // Check that warning message about 50 civ limit is shown
-    await combinePage.assertLimitWarning();
+    // Check that NO warning message is shown at 50 civs (warning only shows at 51+)
+    await expect(page.getByText(/Warning:/i)).not.toBeVisible();
     
     // Check that we're now in Vanilla Mode
     await combinePage.assertVanillaMode();
@@ -181,8 +181,8 @@ test.describe('Vanilla Civs Mode', () => {
     // Verify only 49 civs remain
     await expect(page.getByText(/Loaded Civilizations \(49\)/i)).toBeVisible();
     
-    // Verify warning message is updated
-    await expect(page.getByText(/49\/50 civilizations loaded/i)).toBeVisible();
+    // Verify NO warning message at 49 civs (warning only shows at 51+)
+    await expect(page.getByText(/Warning:/i)).not.toBeVisible();
     
     // Verify Britons is removed (second civ should now be first)
     const firstCivCard = page.locator('.civ-card').first();

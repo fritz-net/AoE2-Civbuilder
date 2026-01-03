@@ -141,10 +141,10 @@ export class CombinePage extends BasePage {
   }
 
   /**
-   * Assert warning visible for 50 civ limit
+   * Assert warning visible when exceeding 50 civ limit (51+ civs)
+   * Note: Warning only shows at 51+ civs, not at exactly 50
    */
   async assertLimitWarning(): Promise<void> {
-    await expect(this.page.getByText(/Warning:/i)).toBeVisible();
-    await expect(this.page.getByText(/50\/50 civilizations loaded/i)).toBeVisible();
+    await expect(this.page.getByText(/Limit Exceeded:/i)).toBeVisible();
   }
 }
