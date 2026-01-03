@@ -1162,6 +1162,59 @@ function getCurrentPlayer(draft) {
 	return { player, roundType, numPlayers };
 }
 
+// Helper function to distribute bonus cards and set draft order
+function distributeBonusCards(draft) {
+	const numPlayers = draft["preset"]["slots"];
+	
+	// Distribute the first set of civ bonus cards
+	// First, add any required cards for testing
+	if (draft["preset"]["required_first_roll"] && draft["preset"]["required_first_roll"].length > 0) {
+		for (var reqCard of draft["preset"]["required_first_roll"]) {
+			// Check if card is available
+			var cardIndex = draft["gamestate"]["available_cards"][0].indexOf(reqCard);
+			if (cardIndex !== -1) {
+				draft["gamestate"]["cards"].push(reqCard);
+				draft["gamestate"]["available_cards"][0].splice(cardIndex, 1);
+			}
+		}
+	}
+	
+	// Then fill the rest randomly
+	// Use configurable bonuses_per_page, default to 30 for backward compatibility
+	var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
+	var cardsNeeded = (draft["preset"]["rounds"] - 1) * numPlayers + bonusesPerPage - draft["gamestate"]["cards"].length;
+	for (var i = 0; i < cardsNeeded; i++) {
+		if (draft["gamestate"]["available_cards"][0].length > 0) {
+			var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
+			draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][0][rand]);
+			draft["gamestate"]["available_cards"][0].splice(rand, 1);
+		}
+	}
+	
+	// Give each player a ranking for draft order
+	var priorities = [];
+	for (var i = 0; i < numPlayers; i++) {
+		priorities.push(Math.random());
+	}
+	for (var i = 0; i < numPlayers; i++) {
+		var maxIndex = 0;
+		for (var j = 0; j < numPlayers; j++) {
+			if (priorities[j] > priorities[maxIndex]) {
+				maxIndex = j;
+			} else if (priorities[j] == priorities[maxIndex]) {
+				//50/50 switching in ties is good enough *cries in perfectionist*
+				//In the long run it advantages players that join the later
+				var rand = Math.floor(Math.random() * 2);
+				if (rand == 0) {
+					maxIndex = j;
+				}
+			}
+		}
+		draft["gamestate"]["order"].push(maxIndex);
+		priorities[maxIndex] = -1;
+	}
+}
+
 // Helper function to process a card pick (used by both end turn and timer expired)
 function processCardPick(draft, pick) {
 	var { player, roundType, numPlayers } = getCurrentPlayer(draft);
@@ -1379,54 +1432,8 @@ function draftIO(io) {
 						draft["players"][i]["ready"] = 0;
 					}
 
-					//Distribute the first set of civ bonus cards
-					// First, add any required cards for testing
-					if (draft["preset"]["required_first_roll"] && draft["preset"]["required_first_roll"].length > 0) {
-						for (var reqCard of draft["preset"]["required_first_roll"]) {
-							// Check if card is available
-							var cardIndex = draft["gamestate"]["available_cards"][0].indexOf(reqCard);
-							if (cardIndex !== -1) {
-								draft["gamestate"]["cards"].push(reqCard);
-								draft["gamestate"]["available_cards"][0].splice(cardIndex, 1);
-							}
-						}
-					}
-					
-					// Then fill the rest randomly
-					// Use configurable bonuses_per_page, default to 30 for backward compatibility
-					var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
-					var cardsNeeded = (draft["preset"]["rounds"] - 1) * numPlayers + bonusesPerPage - draft["gamestate"]["cards"].length;
-					for (var i = 0; i < cardsNeeded; i++) {
-						if (draft["gamestate"]["available_cards"][0].length > 0) {
-							var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
-							draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][0][rand]);
-							draft["gamestate"]["available_cards"][0].splice(rand, 1);
-						}
-					}
-
-					//Give each player a ranking based off how many techtree points they spent
-					//Edit: we do this randomly now because techtrees are made afterwards
-					var priorities = [];
-					for (var i = 0; i < numPlayers; i++) {
-						priorities.push(Math.random());
-					}
-					for (var i = 0; i < numPlayers; i++) {
-						var maxIndex = 0;
-						for (var j = 0; j < numPlayers; j++) {
-							if (priorities[j] > priorities[maxIndex]) {
-								maxIndex = j;
-							} else if (priorities[j] == priorities[maxIndex]) {
-								//50/50 switching in ties is good enough *cries in perfectionist*
-								//In the long run it advantages players that join the later
-								var rand = Math.floor(Math.random() * 2);
-								if (rand == 0) {
-									maxIndex = j;
-								}
-							}
-						}
-						draft["gamestate"]["order"].push(maxIndex);
-						priorities[maxIndex] = -1;
-					}
+					// Distribute bonus cards and set draft order
+					distributeBonusCards(draft);
 				}
 				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 				io.in(roomID).emit("set gamestate", draft);
@@ -2008,52 +2015,8 @@ function draftIO(io) {
 					draft["players"][i]["ready"] = 0;
 				}
 				
-				// Distribute the first set of civ bonus cards
-				// First, add any required cards for testing
-				if (draft["preset"]["required_first_roll"] && draft["preset"]["required_first_roll"].length > 0) {
-					for (var reqCard of draft["preset"]["required_first_roll"]) {
-						// Check if card is available
-						var cardIndex = draft["gamestate"]["available_cards"][0].indexOf(reqCard);
-						if (cardIndex !== -1) {
-							draft["gamestate"]["cards"].push(reqCard);
-							draft["gamestate"]["available_cards"][0].splice(cardIndex, 1);
-						}
-					}
-				}
-				
-				// Then fill the rest randomly
-				// Use configurable bonuses_per_page, default to 30 for backward compatibility
-				var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
-				var numPlayers = draft["preset"]["slots"];
-				var cardsNeeded = (draft["preset"]["rounds"] - 1) * numPlayers + bonusesPerPage - draft["gamestate"]["cards"].length;
-				for (var i = 0; i < cardsNeeded; i++) {
-					if (draft["gamestate"]["available_cards"][0].length > 0) {
-						var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
-						draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][0][rand]);
-						draft["gamestate"]["available_cards"][0].splice(rand, 1);
-					}
-				}
-				
-				// Give each player a ranking for draft order
-				var priorities = [];
-				for (var i = 0; i < numPlayers; i++) {
-					priorities.push(Math.random());
-				}
-				for (var i = 0; i < numPlayers; i++) {
-					var maxIndex = 0;
-					for (var j = 0; j < numPlayers; j++) {
-						if (priorities[j] > priorities[maxIndex]) {
-							maxIndex = j;
-						} else if (priorities[j] == priorities[maxIndex]) {
-							var rand = Math.floor(Math.random() * 2);
-							if (rand == 0) {
-								maxIndex = j;
-							}
-						}
-					}
-					draft["gamestate"]["order"].push(maxIndex);
-					priorities[maxIndex] = -1;
-				}
+				// Distribute bonus cards and set draft order
+				distributeBonusCards(draft);
 				
 				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 				io.in(roomID).emit("set gamestate", draft);
