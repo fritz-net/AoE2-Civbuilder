@@ -56,7 +56,7 @@ async function handleNext(config: CivConfig) {
   console.log('Creating mod for civ config:', config)
   
   try {
-    const seed = await createMod([config])
+    const filename = await createMod([config])
     
     // Set flag to allow navigation without warning
     allowNavigation.value = true
@@ -66,7 +66,7 @@ async function handleNext(config: CivConfig) {
       path: '/download-success',
       query: {
         civs: config.alias,
-        filename: `${seed}.zip`
+        filename: filename
       }
     })
   } catch (err) {

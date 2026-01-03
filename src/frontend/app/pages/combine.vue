@@ -378,7 +378,7 @@ async function handleCreateMod() {
   }
 
   try {
-    const seed = await createMod(civs.value)
+    const filename = await createMod(civs.value)
     
     // Navigate to download success page with civ names
     const civNames = civs.value.map(c => c.alias).join(',')
@@ -387,7 +387,7 @@ async function handleCreateMod() {
       path: '/download-success',
       query: {
         civs: civNames,
-        filename: `${seed}.zip`
+        filename: filename
       }
     })
   } catch (err) {
