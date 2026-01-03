@@ -316,11 +316,11 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     // Type-specific range validation (see CUSTOM_UU_RULESET.md)
     // Infantry: generally melee (range 0) or 1 for Kamayuk
     // Throwing Axeman and Gbeto can have higher range but at very high point cost
-    // Allow up to range 5 for Gbeto, range 3 for Throwing Axeman
+    // Allow range 0-5 for infantry (typical units use 0, 1, 3, or 5)
     if (unit.unitType === 'infantry' && unit.range > 5) {
       errors.push({
         field: 'range',
-        message: 'Infantry can have range 0 (melee), 1 (Kamayuk), up to 3 (Throwing Axeman), or up to 5 (Gbeto)',
+        message: 'Infantry can have range 0-5 (typical: 0=melee, 1=Kamayuk, 3=Throwing Axeman, 5=Gbeto)',
         severity: 'error'
       });
     }
@@ -330,7 +330,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     if (unit.unitType === 'cavalry' && unit.range > 5) {
       errors.push({
         field: 'range',
-        message: 'Cavalry can have range 0 (melee), 1 (Steppe Lancer), or 3-5 (Mameluke)',
+        message: 'Cavalry can have range 0-1 or 3-5 (typical: 0=melee, 1=Steppe Lancer, 3=Mameluke). Range 2 not allowed.',
         severity: 'error'
       });
     }
@@ -339,7 +339,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     if (unit.unitType === 'cavalry' && unit.range === 2) {
       errors.push({
         field: 'range',
-        message: 'Cavalry cannot have range 2. Use 0-1 (melee/Steppe Lancer) or 3-5 (Mameluke)',
+        message: 'Cavalry cannot have range 2 (gap between unit types). Use 0-1 or 3-5.',
         severity: 'error'
       });
     }
