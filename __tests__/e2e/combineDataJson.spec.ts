@@ -33,10 +33,10 @@ test.describe('Combine Page - data.json Multi-Civ Support', () => {
     // Check that all 3 civilizations are loaded as separate entries
     await expect(page.getByText(/Loaded Civilizations \(3\)/i)).toBeVisible();
     
-    // Verify all 3 civ names are shown
-    await expect(page.getByText('Britons')).toBeVisible();
-    await expect(page.getByText('Franks')).toBeVisible();
-    await expect(page.getByText('Aztecs')).toBeVisible();
+    // Verify all 3 civ names are shown - use heading role for specificity
+    await expect(page.getByRole('heading', { name: 'Britons' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Franks' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Aztecs' })).toBeVisible();
     
     // Check create button is enabled
     const createButton = page.getByRole('button', { name: /Create Combined Mod \(3 Civs\)/i });
@@ -63,11 +63,11 @@ test.describe('Combine Page - data.json Multi-Civ Support', () => {
     // Check that 4 civilizations are loaded (3 from data.json + 1 single civ)
     await expect(page.getByText(/Loaded Civilizations \(4\)/i)).toBeVisible();
     
-    // Verify all civ names are shown
-    await expect(page.getByText('Britons')).toBeVisible();
-    await expect(page.getByText('Franks')).toBeVisible();
-    await expect(page.getByText('Aztecs')).toBeVisible();
-    await expect(page.getByText('Japanese')).toBeVisible();
+    // Verify all civ names are shown - use heading role for specificity
+    await expect(page.getByRole('heading', { name: 'Britons' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Franks' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Aztecs' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Japanese' })).toBeVisible();
   });
 
   test('should remove individual civs from data.json upload', async ({ page }) => {
@@ -113,9 +113,9 @@ test.describe('Combine Page - data.json Multi-Civ Support', () => {
     
     // Check that 3 civilizations are loaded
     await expect(page.getByText(/Loaded Civilizations \(3\)/i)).toBeVisible();
-    await expect(page.getByText('Britons')).toBeVisible();
-    await expect(page.getByText('Franks')).toBeVisible();
-    await expect(page.getByText('Aztecs')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Britons' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Franks' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Aztecs' })).toBeVisible();
   });
 
   test('should enforce 50 civ limit with data.json upload', async ({ page }) => {
