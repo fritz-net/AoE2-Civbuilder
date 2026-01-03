@@ -318,3 +318,250 @@ describe('useCustomUU - API Compatibility', () => {
     expect(exported.name).toBe('Test Warrior');
   });
 });
+
+describe('useCustomUU - Hybrid Unit Range Rules', () => {
+  describe('Infantry Range Validation (0-5)', () => {
+    it('should allow infantry range 0 (melee)', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('infantry');
+      unit.range = 0;
+      
+      const errors = validateUnit(unit);
+      expect(errors.every(e => e.field !== 'range' || e.severity !== 'error')).toBe(true);
+    });
+
+    it('should allow infantry range 1 (Kamayuk)', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('infantry');
+      unit.range = 1;
+      
+      const errors = validateUnit(unit);
+      expect(errors.every(e => e.field !== 'range' || e.severity !== 'error')).toBe(true);
+    });
+
+    it('should allow infantry range 3 (Throwing Axeman)', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('infantry');
+      unit.range = 3;
+      
+      const errors = validateUnit(unit);
+      expect(errors.every(e => e.field !== 'range' || e.severity !== 'error')).toBe(true);
+    });
+
+    it('should allow infantry range 5 (Gbeto)', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('infantry');
+      unit.range = 5;
+      
+      const errors = validateUnit(unit);
+      expect(errors.every(e => e.field !== 'range' || e.severity !== 'error')).toBe(true);
+    });
+
+    it('should reject infantry range > 5', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('infantry');
+      unit.range = 6;
+      
+      const errors = validateUnit(unit);
+      expect(errors.some(e => e.field === 'range' && e.severity === 'error')).toBe(true);
+    });
+  });
+
+  describe('Cavalry Range Validation (0-1 or 3-5)', () => {
+    it('should allow cavalry range 0 (melee)', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('cavalry');
+      unit.range = 0;
+      
+      const errors = validateUnit(unit);
+      expect(errors.every(e => e.field !== 'range' || e.severity !== 'error')).toBe(true);
+    });
+
+    it('should allow cavalry range 1 (Steppe Lancer)', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('cavalry');
+      unit.range = 1;
+      
+      const errors = validateUnit(unit);
+      expect(errors.every(e => e.field !== 'range' || e.severity !== 'error')).toBe(true);
+    });
+
+    it('should REJECT cavalry range 2 (gap between Steppe Lancer and Mameluke)', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('cavalry');
+      unit.range = 2;
+      
+      const errors = validateUnit(unit);
+      expect(errors.some(e => e.field === 'range' && e.severity === 'error')).toBe(true);
+    });
+
+    it('should allow cavalry range 3 (Mameluke min)', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('cavalry');
+      unit.range = 3;
+      
+      const errors = validateUnit(unit);
+      expect(errors.every(e => e.field !== 'range' || e.severity !== 'error')).toBe(true);
+    });
+
+    it('should allow cavalry range 4 (Mameluke mid)', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('cavalry');
+      unit.range = 4;
+      
+      const errors = validateUnit(unit);
+      expect(errors.every(e => e.field !== 'range' || e.severity !== 'error')).toBe(true);
+    });
+
+    it('should allow cavalry range 5 (Mameluke max)', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('cavalry');
+      unit.range = 5;
+      
+      const errors = validateUnit(unit);
+      expect(errors.every(e => e.field !== 'range' || e.severity !== 'error')).toBe(true);
+    });
+
+    it('should reject cavalry range > 5', () => {
+      const { createCustomUnit, validateUnit } = useCustomUU();
+      const unit = createCustomUnit('cavalry');
+      unit.range = 6;
+      
+      const errors = validateUnit(unit);
+      expect(errors.some(e => e.field === 'range' && e.severity === 'error')).toBe(true);
+    });
+  });
+
+  describe('Range Point Costs - Melee Units Pay Extra', () => {
+    it('should cost 14 points per range for infantry (6 base + 8 penalty)', () => {
+      const { createCustomUnit, calculatePowerBudget } = useCustomUU();
+      const unit = createCustomUnit('infantry');
+      
+      // Start with melee (range 0)
+      unit.range = 0;
+      const meleePoints = calculatePowerBudget(unit);
+      
+      // Add 1 range (Kamayuk-like)
+      unit.range = 1;
+      const oneRangePoints = calculatePowerBudget(unit);
+      expect(oneRangePoints - meleePoints).toBe(14); // Should cost 14 points
+      
+      // Add 3 range (Throwing Axeman-like)
+      unit.range = 3;
+      const threeRangePoints = calculatePowerBudget(unit);
+      expect(threeRangePoints - meleePoints).toBe(42); // 3 × 14 = 42 points
+      
+      // Add 5 range (Gbeto-like)
+      unit.range = 5;
+      const fiveRangePoints = calculatePowerBudget(unit);
+      expect(fiveRangePoints - meleePoints).toBe(70); // 5 × 14 = 70 points
+    });
+
+    it('should cost 14 points per range for cavalry (6 base + 8 penalty)', () => {
+      const { createCustomUnit, calculatePowerBudget } = useCustomUU();
+      const unit = createCustomUnit('cavalry');
+      
+      // Start with melee (range 0)
+      unit.range = 0;
+      const meleePoints = calculatePowerBudget(unit);
+      
+      // Add 1 range (Steppe Lancer-like)
+      unit.range = 1;
+      const oneRangePoints = calculatePowerBudget(unit);
+      expect(oneRangePoints - meleePoints).toBe(14); // Should cost 14 points
+      
+      // Add 3 range (Mameluke-like)
+      unit.range = 3;
+      const threeRangePoints = calculatePowerBudget(unit);
+      expect(threeRangePoints - meleePoints).toBe(42); // 3 × 14 = 42 points
+    });
+
+    it('should cost only 6 points per range for archers (no penalty)', () => {
+      const { createCustomUnit, calculatePowerBudget } = useCustomUU();
+      const unit = createCustomUnit('archer');
+      
+      const baseRange = unit.range;
+      const basePoints = calculatePowerBudget(unit);
+      
+      // Add 3 range
+      unit.range = baseRange + 3;
+      const threeRangePoints = calculatePowerBudget(unit);
+      expect(threeRangePoints - basePoints).toBe(18); // 3 × 6 = 18 points (NOT 42)
+    });
+
+    it('should cost only 6 points per range for siege (no penalty)', () => {
+      const { createCustomUnit, calculatePowerBudget } = useCustomUU();
+      const unit = createCustomUnit('siege');
+      
+      const baseRange = unit.range;
+      const basePoints = calculatePowerBudget(unit);
+      
+      // Add 3 range
+      unit.range = baseRange + 3;
+      const threeRangePoints = calculatePowerBudget(unit);
+      expect(threeRangePoints - basePoints).toBe(18); // 3 × 6 = 18 points (NOT 42)
+    });
+  });
+
+  describe('Base Unit Configurations', () => {
+    it('should configure Throwing Axeman with range 3, minRange 0', () => {
+      const { getBaseUnitOptions } = useCustomUU();
+      const infantryOptions = getBaseUnitOptions('infantry');
+      
+      const throwingAxeman = infantryOptions.find(opt => opt.name === 'Throwing Axeman');
+      expect(throwingAxeman).toBeDefined();
+      expect(throwingAxeman?.range).toBe(3);
+      expect(throwingAxeman?.minRange).toBe(0);
+      expect(throwingAxeman?.isRanged).toBe(true);
+      expect(throwingAxeman?.isMelee).toBe(true);
+    });
+
+    it('should configure Gbeto with range 5, minRange 0', () => {
+      const { getBaseUnitOptions } = useCustomUU();
+      const infantryOptions = getBaseUnitOptions('infantry');
+      
+      const gbeto = infantryOptions.find(opt => opt.name === 'Gbeto');
+      expect(gbeto).toBeDefined();
+      expect(gbeto?.range).toBe(5);
+      expect(gbeto?.minRange).toBe(0);
+      expect(gbeto?.isRanged).toBe(true);
+      expect(gbeto?.isMelee).toBe(true);
+    });
+
+    it('should configure Kamayuk with range 1, minRange 0', () => {
+      const { getBaseUnitOptions } = useCustomUU();
+      const infantryOptions = getBaseUnitOptions('infantry');
+      
+      const kamayuk = infantryOptions.find(opt => opt.name === 'Kamayuk');
+      expect(kamayuk).toBeDefined();
+      expect(kamayuk?.range).toBe(1);
+      expect(kamayuk?.minRange).toBe(0);
+      expect(kamayuk?.isRanged).toBe(true);
+      expect(kamayuk?.isMelee).toBe(true);
+    });
+
+    it('should configure Steppe Lancer with range 1, minRange 0', () => {
+      const { getBaseUnitOptions } = useCustomUU();
+      const cavalryOptions = getBaseUnitOptions('cavalry');
+      
+      const steppeLancer = cavalryOptions.find(opt => opt.name === 'Steppe Lancer');
+      expect(steppeLancer).toBeDefined();
+      expect(steppeLancer?.range).toBe(1);
+      expect(steppeLancer?.minRange).toBe(0);
+      expect(steppeLancer?.isRanged).toBe(true);
+      expect(steppeLancer?.isMelee).toBe(true);
+    });
+
+    it('should configure Mameluke with range 3, minRange 0', () => {
+      const { getBaseUnitOptions } = useCustomUU();
+      const cavalryOptions = getBaseUnitOptions('cavalry');
+      
+      const mameluke = cavalryOptions.find(opt => opt.name === 'Mameluke');
+      expect(mameluke).toBeDefined();
+      expect(mameluke?.range).toBe(3);
+      expect(mameluke?.minRange).toBe(0);
+      expect(mameluke?.isRanged).toBe(true);
+      expect(mameluke?.isMelee).toBe(true);
+    });
+  });
+});
