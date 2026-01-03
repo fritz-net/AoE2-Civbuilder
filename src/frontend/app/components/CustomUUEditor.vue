@@ -400,7 +400,7 @@
           </button>
         </div>
 
-        <div class="form-group">
+        <div class="form-group train-time-group">
           <label for="train-time">
             <span class="stat-icon">⏱️</span> Train Time (seconds)
           </label>
@@ -1410,6 +1410,30 @@ watch(() => customUnit.value, (newVal) => {
 }
 
 .compact-mode .cost-grid .form-group input {
+  padding-left: 2.5rem;
+}
+
+/* Train time field in compact mode should have icon inside */
+.compact-mode .train-time-group {
+  position: relative;
+}
+
+.compact-mode .train-time-group > label {
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  pointer-events: none;
+  z-index: 1;
+  font-size: 0;
+}
+
+.compact-mode .train-time-group > label .stat-icon {
+  font-size: 1.3rem;
+}
+
+.compact-mode .train-time-group .stat-with-slider {
   padding-left: 2.5rem;
 }
 

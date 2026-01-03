@@ -19,7 +19,7 @@ describe('useCustomUU - Unit Type Creation', () => {
     
     expect(unit.unitType).toBe('infantry');
     expect(unit.health).toBeGreaterThanOrEqual(15);
-    expect(unit.health).toBeLessThanOrEqual(250);
+    expect(unit.health).toBeLessThanOrEqual(400); // Updated from 250
     expect(unit.range).toBeLessThanOrEqual(1); // Infantry max range is 1
   });
 
@@ -49,7 +49,7 @@ describe('useCustomUU - Unit Type Creation', () => {
 });
 
 describe('useCustomUU - Validation Rules', () => {
-  it('should validate health is within bounds (15-250)', () => {
+  it('should validate health is within bounds (15-400)', () => {
     const { createCustomUnit, validateUnit } = useCustomUU();
     const unit = createCustomUnit('infantry');
     
@@ -57,7 +57,7 @@ describe('useCustomUU - Validation Rules', () => {
     let errors = validateUnit(unit);
     expect(errors.some(e => e.field === 'health' && e.severity === 'error')).toBe(true);
     
-    unit.health = 300; // Too high
+    unit.health = 450; // Too high (updated from 300)
     errors = validateUnit(unit);
     expect(errors.some(e => e.field === 'health' && e.severity === 'error')).toBe(true);
     
@@ -66,11 +66,11 @@ describe('useCustomUU - Validation Rules', () => {
     expect(errors.every(e => e.field !== 'health' || e.severity !== 'error')).toBe(true);
   });
 
-  it('should validate attack is within bounds (2-35)', () => {
+  it('should validate attack is within bounds (1-35)', () => {
     const { createCustomUnit, validateUnit } = useCustomUU();
     const unit = createCustomUnit('infantry');
     
-    unit.attack = 1; // Too low
+    unit.attack = 0; // Too low (updated from 1)
     let errors = validateUnit(unit);
     expect(errors.some(e => e.field === 'attack' && e.severity === 'error')).toBe(true);
     
@@ -299,9 +299,8 @@ describe('useCustomUU - Hero Mode', () => {
     unit.heroMode = true;
     const heroBudget = calculatePowerBudget(unit);
     
-    // Hero mode should reduce point cost (or grant bonus points)
-    // Implementation may vary - this is a placeholder test
-    expect(heroBudget).toBeDefined();
+    // Hero mode should grant +30 bonus points
+    expect(heroBudget).toBe(normalBudget + 30);
   });
 });
 
