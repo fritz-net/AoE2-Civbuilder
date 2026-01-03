@@ -63,6 +63,8 @@ export interface BaseUnitOption {
   isMelee: boolean; // Some units like Throwing Axeman, Mameluk are both ranged AND melee
   uuGraphicId: number | null; // UU graphic ID for icon (0-87), null means use techtree
   techtreeIconId?: number; // Unit ID for techtree icon
+  range?: number; // Override default range for this base unit
+  minRange?: number; // Override default min range for this base unit
 }
 
 interface UnitTypeDefaults {
@@ -162,7 +164,7 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 1755, name: 'War Elephant', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 5 },
     { id: 1132, name: 'Battle Elephant', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 19 },
     { id: 1663, name: 'Mameluke', type: 'cavalry', isRanged: true, isMelee: true, uuGraphicId: 8 }, // Hybrid ranged+melee
-    { id: 1794, name: 'Steppe Lancer', type: 'cavalry', isRanged: true, isMelee: true, uuGraphicId: 77 }, // Hybrid ranged+melee (1 range)
+    { id: 1794, name: 'Steppe Lancer', type: 'cavalry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 77 }, // Hybrid ranged+melee (1 range, 0 min range)
     { id: 1721, name: 'Knight Line', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 37 }, // Knight
     { id: 207, name: 'Camel Line', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 207 },
     { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 546 },
@@ -436,7 +438,12 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     
     // Hero units should be significantly more expensive
     if (unit.heroMode) {
-      totalCost = Math.round(totalCost * 1.8);
+      // Cavalry heroes get an extra multiplier to reach ~500 cost at max points
+      if (unit.unitType === 'cavalry') {
+        totalCost = Math.round(totalCost * 2.2); // Higher multiplier for cavalry heroes
+      } else {
+        totalCost = Math.round(totalCost * 1.8);
+      }
     }
 
     // Asymmetric cost distribution based on unit type

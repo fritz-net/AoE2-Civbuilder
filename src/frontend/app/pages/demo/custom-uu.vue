@@ -10,9 +10,18 @@
     </div>
 
     <div class="demo-content">
+      <!-- Validation Dashboard Sidebar (wide screens only) -->
+      <aside class="validation-sidebar" v-if="editorRef">
+        <ValidationDashboard v-if="editorRef" />
+      </aside>
+      
       <!-- Main Editor -->
       <div class="editor-container">
-        <CustomUUEditor :show-mode-selector="true" :show-validation-dashboard="true" ref="editorRef" />
+        <CustomUUEditor 
+          :show-mode-selector="true" 
+          :show-validation-dashboard="false" 
+          ref="editorRef" 
+        />
       </div>
 
       <!-- Documentation Sidebar -->
@@ -149,6 +158,10 @@
 
 <script setup lang="ts">
 import CustomUUEditor from '~/components/CustomUUEditor.vue';
+import ValidationDashboard from '~/components/ValidationDashboard.vue';
+import { ref } from 'vue';
+
+const editorRef = ref(null);
 
 const loadExample = (type: string) => {
   // Feature to be implemented - would load example unit into editor
@@ -196,16 +209,30 @@ const loadExample = (type: string) => {
 
 .demo-content {
   display: grid;
-  grid-template-columns: 1fr 350px;
+  grid-template-columns: 350px 1fr 350px;
   gap: 2rem;
-  max-width: 1600px;
+  max-width: 1800px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+@media (max-width: 1400px) {
+  .demo-content {
+    grid-template-columns: 1fr 350px;
+  }
+  
+  .validation-sidebar {
+    display: none;
+  }
 }
 
 @media (max-width: 1200px) {
   .demo-content {
     grid-template-columns: 1fr;
+  }
+  
+  .validation-sidebar {
+    display: none;
   }
   
   .documentation {
@@ -221,6 +248,17 @@ const loadExample = (type: string) => {
 }
 
 .documentation {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  position: sticky;
+  top: 2rem;
+}
+
+.validation-sidebar {
   background: white;
   border-radius: 8px;
   padding: 1.5rem;

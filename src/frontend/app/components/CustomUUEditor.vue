@@ -733,6 +733,21 @@ const baseUnitOptions = computed(() => {
 const selectBaseUnit = (id: number) => {
   if (customUnit.value) {
     customUnit.value.baseUnit = id;
+    
+    // Find the selected base unit option to check for custom range/minRange
+    const baseOptions = getBaseUnitOptions(customUnit.value.unitType);
+    const selectedOption = baseOptions.find(opt => opt.id === id);
+    
+    // If the base unit has custom range/minRange, apply them
+    if (selectedOption) {
+      if (selectedOption.range !== undefined) {
+        customUnit.value.range = selectedOption.range;
+      }
+      if (selectedOption.minRange !== undefined) {
+        customUnit.value.minRange = selectedOption.minRange;
+      }
+    }
+    
     onUnitChange();
   }
 };
@@ -1225,6 +1240,7 @@ watch(() => customUnit.value, (newVal) => {
 
 .total-cost {
   font-size: 1.1rem;
+  color: #333;
 }
 
 /* Checkbox */
