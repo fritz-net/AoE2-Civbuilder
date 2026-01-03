@@ -197,24 +197,38 @@ const typeSpecificRules = computed(() => {
   const rules = [];
   const unit = props.unit;
   
-  // Infantry range constraint
+  // Infantry range constraint (see CUSTOM_UU_RULESET.md)
+  // Infantry can have range 0-5: 0=melee, 1=Kamayuk, 3=Throwing Axeman, 5=Gbeto
   if (unit.unitType === 'infantry') {
     rules.push({
       id: 'infantry-range',
-      text: 'Infantry range must be 0-1 (Kamayuk-like)',
-      status: unit.range <= 1 ? 'pass' : 'fail',
-      error: `Current: ${unit.range}`
+      text: 'Infantry range must be 0-5 (0=melee, 1=Kamayuk, 3=Throwing Axeman, 5=Gbeto)',
+      status: unit.range >= 0 && unit.range <= 5 ? 'pass' : 'fail',
+      error: `Current: ${unit.range}. Maximum is 5.`
     });
   }
   
-  // Cavalry range constraint
+  // Cavalry range constraints (see CUSTOM_UU_RULESET.md)
+  // Cavalry can have range 0-1 or 3-5, but NOT range 2 (gap rule)
   if (unit.unitType === 'cavalry') {
+    // First rule: overall range must be 0-1 or 3-5
+    const validCavRange = (unit.range >= 0 && unit.range <= 1) || (unit.range >= 3 && unit.range <= 5);
     rules.push({
-      id: 'cavalry-range',
-      text: 'Cavalry must be melee (range = 0)',
-      status: unit.range === 0 ? 'pass' : 'fail',
-      error: `Current: ${unit.range}`
+      id: 'cavalry-range-overall',
+      text: 'Cavalry range must be 0-1 or 3-5 (0=melee, 1=Steppe Lancer, 3-5=Mameluke)',
+      status: validCavRange ? 'pass' : 'fail',
+      error: `Current: ${unit.range}. Use 0-1 or 3-5.`
     });
+    
+    // Second rule: specifically block range 2 (gap between Steppe Lancer and Mameluke)
+    if (unit.range === 2) {
+      rules.push({
+        id: 'cavalry-range-2-blocked',
+        text: 'Cavalry cannot have range 2 (gap between Steppe Lancer and Mameluke)',
+        status: 'fail',
+        error: 'Use range 1 (Steppe Lancer) or 3+ (Mameluke)'
+      });
+    }
   }
   
   // Archer range requirement
