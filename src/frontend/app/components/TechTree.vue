@@ -882,13 +882,14 @@ function getSpecialPrerequisites(caretId: string): string[] {
 }
 
 function getLinkedCaretId(caretId: string): string | null {
-  // Get the linked caret ID for bidirectional pairs
+  // Get the linked caret ID for tech/building pairs that need affordability checking
+  // Note: Stone wall and gate are NOT included here because they are both buildings
+  // and don't need separate affordability checking (they're enabled together)
   const linkedPairs: [string, string][] = [
     ['building_234', 'tech_140'],  // Guard Tower
     ['tech_64', 'building_236'],   // Bombard Tower
     ['tech_63', 'building_235'],   // Keep
     [FORTIFIED_WALL_TECH_ID, FORTIFIED_WALL_BUILDING_ID],  // Fortified wall
-    [STONE_WALL_ID, GATE_ID],  // Stone wall and gate
   ]
   
   for (const [a, b] of linkedPairs) {
