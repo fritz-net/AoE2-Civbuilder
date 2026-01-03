@@ -1,6 +1,9 @@
 /**
  * Composable for managing Custom Unique Unit data and validation
  * Based on the ruleset defined in docs/CUSTOM_UU_RULESET.md
+ * 
+ * IMPORTANT: Keep this file in sync with docs/CUSTOM_UU_RULESET.md
+ * Any rule changes should be documented in both locations.
  */
 
 import { ref, computed, type Ref } from 'vue';
@@ -150,9 +153,9 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 2 },
     { id: 1306, name: 'Samurai', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 4 },
     { id: 1317, name: 'Berserk', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 13 },
-    { id: 1645, name: 'Throwing Axeman', type: 'infantry', isRanged: true, isMelee: true, uuGraphicId: 16 }, // Hybrid ranged+melee
-    { id: 1009, name: 'Gbeto', type: 'infantry', isRanged: true, isMelee: true, uuGraphicId: 53 }, // Hybrid ranged+melee
-    { id: 1800, name: 'Kamayuk', type: 'infantry', isRanged: true, isMelee: true, uuGraphicId: 55 }, // Hybrid ranged+melee (1 range)
+    { id: 1645, name: 'Throwing Axeman', type: 'infantry', isRanged: true, isMelee: true, range: 3, minRange: 0, uuGraphicId: 16 }, // Hybrid ranged+melee
+    { id: 1009, name: 'Gbeto', type: 'infantry', isRanged: true, isMelee: true, range: 5, minRange: 0, uuGraphicId: 53 }, // Hybrid ranged+melee
+    { id: 1800, name: 'Kamayuk', type: 'infantry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 55 }, // Hybrid ranged+melee (1 range)
     { id: 75, name: 'Militia Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 75 },
     { id: 93, name: 'Spearman Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 93 },
     { id: 473, name: 'Champion', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 473 },
@@ -163,7 +166,7 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 1269, name: 'Boyar', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 22 },
     { id: 1755, name: 'War Elephant', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 5 },
     { id: 1132, name: 'Battle Elephant', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 19 },
-    { id: 1663, name: 'Mameluke', type: 'cavalry', isRanged: true, isMelee: true, uuGraphicId: 8 }, // Hybrid ranged+melee
+    { id: 1663, name: 'Mameluke', type: 'cavalry', isRanged: true, isMelee: true, range: 3, minRange: 0, uuGraphicId: 8 }, // Hybrid ranged+melee
     { id: 1794, name: 'Steppe Lancer', type: 'cavalry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 77 }, // Hybrid ranged+melee (1 range, 0 min range)
     { id: 1721, name: 'Knight Line', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 37 }, // Knight
     { id: 207, name: 'Camel Line', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 207 },
@@ -181,11 +184,11 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 943 },
   ],
   siege: [
-    { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, isMelee: false, uuGraphicId: 10 },
-    { id: 280, name: 'Mangonel Line', type: 'siege', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 280 },
-    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 279 },
-    { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 36 },
-    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 706 },
+    { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, isMelee: false, range: 6, minRange: 1, uuGraphicId: 10 },
+    { id: 280, name: 'Mangonel Line', type: 'siege', isRanged: true, isMelee: false, range: 7, minRange: 3, uuGraphicId: null, techtreeIconId: 280 },
+    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, isMelee: false, range: 5, minRange: 1, uuGraphicId: null, techtreeIconId: 279 },
+    { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, isMelee: false, range: 12, minRange: 5, uuGraphicId: null, techtreeIconId: 36 },
+    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false, isMelee: true, range: 0, minRange: 0, uuGraphicId: null, techtreeIconId: 706 },
   ]
 };
 
@@ -199,6 +202,12 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
   const createCustomUnit = (unitType: 'infantry' | 'cavalry' | 'archer' | 'siege'): CustomUUData => {
     const defaults = UNIT_TYPE_DEFAULTS[unitType];
     const isRangedType = defaults.range > 0;
+    
+    // Siege units get +10 attack vs buildings for free (see CUSTOM_UU_RULESET.md)
+    const bonuses: AttackBonus[] = [];
+    if (unitType === 'siege') {
+      bonuses.push({ class: 11, amount: 10 }); // +10 vs Buildings
+    }
     
     return {
       type: 'custom',
@@ -217,7 +226,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
       trainTime: defaults.trainTime,
       lineOfSight: 5,
       heroMode: false,
-      attackBonuses: []
+      attackBonuses: bonuses
     };
   };
 
@@ -304,7 +313,8 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
       });
     }
 
-    // Type-specific range validation
+    // Type-specific range validation (see CUSTOM_UU_RULESET.md)
+    // Infantry: range 0 (melee) or 1 (Kamayuk-like)
     if (unit.unitType === 'infantry' && unit.range > 1) {
       errors.push({
         field: 'range',
@@ -312,6 +322,20 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
         severity: 'error'
       });
     }
+    
+    // Cavalry: range 0 (melee) or 1 for Steppe Lancer-like units only
+    // Other cavalry must be melee (range = 0)
+    if (unit.unitType === 'cavalry' && unit.range > 1) {
+      errors.push({
+        field: 'range',
+        message: 'Cavalry can only have range 0 (melee) or 1 (Steppe Lancer-like)',
+        severity: 'error'
+      });
+    }
+    
+    // Cavalry with range must have range = 1 exactly (Steppe Lancer rule)
+    // Allow range 1 for hybrid cavalry (like Steppe Lancer, Mameluke)
+    // See CUSTOM_UU_RULESET.md for cavalry range rules
 
     // Cost validation
     const totalCost = unit.cost.food + unit.cost.wood + unit.cost.stone + unit.cost.gold;
@@ -436,13 +460,14 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     // Calculate base total from points
     let totalCost = Math.round(points * 1.2);
     
-    // Hero units should be significantly more expensive
+    // Hero units should be significantly more expensive (see CUSTOM_UU_RULESET.md)
+    // Multipliers ensure that max-point heroes reach appropriate cost levels (400-600 range)
     if (unit.heroMode) {
-      // Cavalry heroes get an extra multiplier to reach ~500 cost at max points
+      // Cavalry heroes get an extra multiplier to reach ~500-600 cost at max points
       if (unit.unitType === 'cavalry') {
-        totalCost = Math.round(totalCost * 2.2); // Higher multiplier for cavalry heroes
+        totalCost = Math.round(totalCost * 3.0); // Increased from 2.2x to 3.0x for proper scaling
       } else {
-        totalCost = Math.round(totalCost * 1.8);
+        totalCost = Math.round(totalCost * 2.5); // Increased from 1.8x to 2.5x
       }
     }
 

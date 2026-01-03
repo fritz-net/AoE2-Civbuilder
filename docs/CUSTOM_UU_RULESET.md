@@ -120,9 +120,32 @@ Custom unique units must belong to one of four primary categories. Each category
 
 **Range Limitations:**
 - Infantry: Range 0 only (exception: Kamayuk can have range 1)
+- Cavalry: Range 0 only (exceptions: Steppe Lancer with range 1, Mameluke with range 3)
+  - Hybrid cavalry (Steppe Lancer, Mameluke) can have limited range but are rare
 - Foot Archers: Range 3-9
 - Cavalry Archers: Range 3-7
 - Siege: Range 2-12
+
+**Minimum Range:**
+- Ranged units start with minimum range = 1 (cannot fire at melee range)
+- Melee units (range = 0) have minimum range = 0 (locked)
+- Hybrid units (Steppe Lancer, Mameluke, Kamayuk) have minimum range = 0 (can attack at any range)
+- Lowering minimum range from default costs 4 points per unit
+
+**Hybrid Ranged+Melee Units:**
+- Some units can attack at both range and melee (Throwing Axeman, Gbeto, Kamayuk, Mameluke, Steppe Lancer)
+- These units have both `isRanged: true` and `isMelee: true` flags
+- Specific base units with custom ranges:
+  - Kamayuk: range 1, minRange 0
+  - Throwing Axeman: range 3, minRange 0
+  - Gbeto: range 5, minRange 0
+  - Mameluke: range 3, minRange 0
+  - Steppe Lancer: range 1, minRange 0
+
+**Siege Unit Bonuses:**
+- All siege units automatically receive +10 attack vs Buildings (class 11)
+- This bonus is free and does not cost points
+- Additional building bonuses can be added at normal point cost
 
 **Attack Type Consistency:**
 - Infantry: Must use melee attack (attack type is implied by base unit)
@@ -189,16 +212,23 @@ Distribution: 55 food + 31 gold
 
 ### Hero Mode Adjustments
 
-When **Hero Mode** is enabled:
+When **Hero Mode** is enabled (see implementation in `src/frontend/app/composables/useCustomUU.ts`):
 - Unit can only be trained once per game
-- Costs multiplied by 1.5-2.5x
-- Player gains +20-40 bonus points for other customizations
+- Player gains +30 bonus points for customizations
+- Costs multiplied significantly:
+  - Cavalry: 3.0x multiplier
+  - Other types: 2.5x multiplier
+- Minimum cost enforced: 300 resources per resource type (e.g., 300 Food + 300 Gold)
 - Recommended for very powerful or specialized units
+- Total hero unit cost at max points should reach 400-600 resources
 
 **Hero Mode Example:**
 ```
-Normal Unit: 60 food + 45 gold
-Hero Mode: 120 food + 90 gold + 30 bonus points
+Normal Cavalry Unit (65 points): 60 food + 85 gold = 145 total
+Hero Cavalry Unit (65 - 30 = 35 base, but can spend up to 95):
+  - At max points (95 spent): ~180 power
+  - Cost: 180 * 1.2 * 3.0 = 648 total
+  - Distribution: ~259F + 389G (or enforced minimum 300F + 300G)
 ```
 
 ## Optic/Sprite Selection

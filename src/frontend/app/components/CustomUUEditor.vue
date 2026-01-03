@@ -746,6 +746,12 @@ const selectBaseUnit = (id: number) => {
       if (selectedOption.minRange !== undefined) {
         customUnit.value.minRange = selectedOption.minRange;
       }
+      
+      // Reset range to 0 if switching to a melee-only base unit (see CUSTOM_UU_RULESET.md)
+      if (!selectedOption.isRanged && selectedOption.isMelee) {
+        customUnit.value.range = 0;
+        customUnit.value.minRange = 0;
+      }
     }
     
     onUnitChange();
