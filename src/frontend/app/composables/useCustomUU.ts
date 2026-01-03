@@ -449,8 +449,14 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     };
 
     const dist = distributions[unit.unitType];
-    const primaryCost = Math.round(totalCost * dist.primary);
-    const secondaryCost = Math.round(totalCost * dist.secondary);
+    let primaryCost = Math.round(totalCost * dist.primary);
+    let secondaryCost = Math.round(totalCost * dist.secondary);
+
+    // Hero mode cost penalty: minimum 300 for each of the 2 selected resources
+    if (unit.heroMode) {
+      primaryCost = Math.max(primaryCost, 300);
+      secondaryCost = Math.max(secondaryCost, 300);
+    }
 
     if (dist.resource === 'wood') {
       return { food: 0, wood: primaryCost, stone: 0, gold: secondaryCost };
