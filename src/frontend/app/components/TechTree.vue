@@ -305,6 +305,12 @@ const FORTIFIED_WALL_BUILDING_ID = 'building_155'
 const STONE_WALL_ID = 'building_117'
 const GATE_ID = 'building_487'
 
+// Constants for Tower group dependencies
+const KEEP_TECH_ID = 'tech_63'
+const KEEP_BUILDING_ID = 'building_235'
+const GUARD_TOWER_TECH_ID = 'tech_140'
+const GUARD_TOWER_BUILDING_ID = 'building_234'
+
 // Constants for other tech/building dependencies
 const BOMBARD_TOWER_BUILDING_ID = 'building_236'
 const CHEMISTRY_ID = 'tech_47'
@@ -844,6 +850,55 @@ function getAllPrerequisites(caretId: string): string[] {
   return prerequisites
 }
 
+function getSpecialPrerequisites(caretId: string): string[] {
+  // Special prerequisites are non-parent prerequisites that must be enabled
+  // These are requirements that aren't captured in the normal parent relationship
+  const specialPrereqs: string[] = []
+  // Fortified walls require both stone wall AND gate
+  const isFortifiedWall = caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID
+  if (isFortifiedWall) {
+    if (!isEnabled(STONE_WALL_ID)) {
+      specialPrereqs.push(STONE_WALL_ID)
+    }
+    if (!isEnabled(GATE_ID)) {
+      specialPrereqs.push(GATE_ID)
+    }
+  }
+  // Keep requires guard tower
+  const isKeep = caretId === KEEP_TECH_ID || caretId === KEEP_BUILDING_ID
+  if (isKeep) {
+    if (!isEnabled(GUARD_TOWER_TECH_ID)) {
+      specialPrereqs.push(GUARD_TOWER_TECH_ID)
+    }
+    if (!isEnabled(GUARD_TOWER_BUILDING_ID)) {
+      specialPrereqs.push(GUARD_TOWER_BUILDING_ID)
+    }
+  }
+  // Bombard tower requires chemistry
+  if (caretId === BOMBARD_TOWER_BUILDING_ID && !isEnabled(CHEMISTRY_ID)) {
+    specialPrereqs.push(CHEMISTRY_ID)
+  }
+  return specialPrereqs
+}
+
+function getLinkedCaretId(caretId: string): string | null {
+  // Get the linked caret ID for tech/building pairs that need affordability checking
+  // Note: Stone wall and gate are NOT included here because they are both buildings
+  // and don't need separate affordability checking (they're enabled together)
+  const linkedPairs: [string, string][] = [
+    ['building_234', 'tech_140'],  // Guard Tower
+    ['tech_64', 'building_236'],   // Bombard Tower
+    ['tech_63', 'building_235'],   // Keep
+    [FORTIFIED_WALL_TECH_ID, FORTIFIED_WALL_BUILDING_ID],  // Fortified wall
+  ]
+  
+  for (const [a, b] of linkedPairs) {
+    if (caretId === a) return b
+    if (caretId === b) return a
+  }
+  return null
+}
+
 function enableCaret(caretId: string, fromUserClick: boolean = false) {
   const type = idType(caretId)
   const id = idID(caretId)
@@ -851,21 +906,14 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
   if (!localtree.value[type].includes(id)) {
     const techCost = getCaretCost(caretId)
     
-    // Special handling for techs/buildings with non-parent prerequisites
-    // These need to be enabled BEFORE the main prerequisite logic runs
-    const isFortifiedWall = caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID
-    if (isFortifiedWall && !isEnabled(STONE_WALL_ID)) {
-      enableCaret(STONE_WALL_ID, false)
-    }
-    if (isFortifiedWall && !isEnabled(GATE_ID)) {
-      enableCaret(GATE_ID, false)
-    }
-    if (caretId === BOMBARD_TOWER_BUILDING_ID && !isEnabled(CHEMISTRY_ID)) {
-      enableCaret(CHEMISTRY_ID, false)
-    }
-    
     if (props.mode === 'build') {
       // Build mode: add points (no limit)
+      // Enable special prerequisites first
+      const specialPrereqs = getSpecialPrerequisites(caretId)
+      for (const prereqId of specialPrereqs) {
+        enableCaret(prereqId, false)
+      }
+      
       localtree.value[type].push(id)
       techtreePoints.value += techCost
     } else {
@@ -873,6 +921,15 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
       
       // If this is from a user click, enable ALL affordable prerequisites first
       if (fromUserClick) {
+        // Enable special prerequisites first (with point checks)
+        const specialPrereqs = getSpecialPrerequisites(caretId)
+        for (const specialPrereqId of specialPrereqs) {
+          const cost = getCaretCost(specialPrereqId)
+          if (techtreePoints.value >= cost && !isEnabled(specialPrereqId)) {
+            enableCaret(specialPrereqId, false)
+          }
+        }
+        
         const prerequisites = getAllPrerequisites(caretId)
         
         // Check if any prerequisites are not enabled
@@ -902,6 +959,19 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
             return
           }
         }
+        
+        // Check if this caret has a linked caret (tech<->building pair)
+        // If so, we need to ensure BOTH can be afforded together
+        const linkedCaretId = getLinkedCaretId(caretId)
+        if (linkedCaretId && !isEnabled(linkedCaretId)) {
+          const linkedCost = getCaretCost(linkedCaretId)
+          const totalCost = techCost + linkedCost
+          
+          // If we can't afford both the clicked caret and its linked pair, don't enable either
+          if (techtreePoints.value < totalCost) {
+            return
+          }
+        }
       }
       
       // If not enough points for this tech
@@ -918,15 +988,15 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
         techtreePoints.value = 0
       }
     }
-  }
-  
-  // Enable linked carets
-  handleLinkedCarets(caretId, true)
-  
-  // Enable parent
-  const parentId = parentConnections.value.get(caretId)
-  if (parentId) {
-    enableCaret(parentId, false)
+    
+    // Enable linked carets (only executed if tech wasn't already in tree)
+    handleLinkedCarets(caretId, true)
+    
+    // Enable parent (only executed if tech wasn't already in tree)
+    const parentId = parentConnections.value.get(caretId)
+    if (parentId) {
+      enableCaret(parentId, false)
+    }
   }
 }
 
