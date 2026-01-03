@@ -940,10 +940,10 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
       }
     }
     
-    // Enable linked carets (only if tech was actually added)
+    // Enable linked carets (only executed if tech wasn't already in tree)
     handleLinkedCarets(caretId, true)
     
-    // Enable parent (only if tech was actually added)
+    // Enable parent (only executed if tech wasn't already in tree)
     const parentId = parentConnections.value.get(caretId)
     if (parentId) {
       enableCaret(parentId, false)

@@ -6,6 +6,9 @@ import { TechTreeDemoPage } from './helpers/TechTreeDemoPage';
  * Tests that with insufficient points, only affordable prerequisites are enabled
  */
 
+// The base tech tree after reset has 39 techs enabled (11 units + 23 buildings + 5 techs)
+const BASE_TECH_COUNT = 39;
+
 test.describe('TechTree Limited Points - 3 Point Wall Issue', () => {
   let demoPage: TechTreeDemoPage;
 
@@ -154,7 +157,7 @@ test.describe('TechTree Limited Points - Consistency Check', () => {
     // Points should never go negative
     expect(finalPoints).toBeGreaterThanOrEqual(0);
     // Should have enabled at least some techs
-    expect(finalTechCount).toBeGreaterThan(39); // More than base techs
+    expect(finalTechCount).toBeGreaterThan(BASE_TECH_COUNT);
   });
 
   test('with 8 points, fill should enable cheaper techs first', async () => {
@@ -171,7 +174,7 @@ test.describe('TechTree Limited Points - Consistency Check', () => {
     
     // Should have enabled some techs without going negative
     expect(finalPoints).toBeGreaterThanOrEqual(0);
-    expect(finalTechCount).toBeGreaterThan(39); // More than initial base techs
+    expect(finalTechCount).toBeGreaterThan(BASE_TECH_COUNT);
   });
 });
 
