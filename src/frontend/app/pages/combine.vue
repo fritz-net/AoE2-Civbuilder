@@ -134,7 +134,7 @@
 <script setup lang="ts">
 import type { CivConfig } from '~/composables/useCivData'
 import { useModApi } from '~/composables/useModApi'
-import { normalizeDescription } from '~/utils/civDataUtils'
+import { normalizeDescription, parseCivJson } from '~/utils/civDataUtils'
 
 const { isCreating, error, createMod } = useModApi()
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -278,26 +278,18 @@ function handleDrop(event: DragEvent) {
 }
 
 function processFiles(files: File[]) {
-  // Check if adding these files would exceed the 50 civ limit
-  const totalAfterAdd = civs.value.length + files.length
-  if (totalAfterAdd > 50) {
-    const available = 50 - civs.value.length
-    alert(`Cannot add ${files.length} civilization${files.length > 1 ? 's' : ''}. You currently have ${civs.value.length} civilizations loaded. You can only add ${available} more to reach the maximum of 50 civilizations.`)
-    return
-  }
-
-  const readers = files.map(file => {
-    return new Promise<CivConfig>((resolve, reject) => {
+  const fileReaders = files.map(file => {
+    return new Promise<CivConfig[]>((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = (e) => {
         try {
           const content = e.target?.result as string
-          const config = JSON.parse(content) as CivConfig
+          const json = JSON.parse(content)
           
-          // Normalize description field using shared utility
-          config.description = normalizeDescription(config.description)
+          // Parse JSON - handles both single civ and multi-civ data.json
+          const configs = parseCivJson(json)
           
-          resolve(config)
+          resolve(configs)
         } catch (err) {
           console.error('Failed to parse file:', file.name, err)
           reject(new Error(`Failed to parse ${file.name}`))
@@ -308,9 +300,20 @@ function processFiles(files: File[]) {
     })
   })
 
-  Promise.all(readers)
-    .then(loadedCivs => {
-      civs.value.push(...loadedCivs)
+  Promise.all(fileReaders)
+    .then(civConfigArrays => {
+      // Flatten array of arrays into single array of civs
+      const allCivs = civConfigArrays.flat()
+      
+      // Check if adding these civs would exceed the 50 civ limit
+      const totalAfterAdd = civs.value.length + allCivs.length
+      if (totalAfterAdd > 50) {
+        const available = 50 - civs.value.length
+        alert(`Cannot add ${allCivs.length} civilization${allCivs.length > 1 ? 's' : ''}. You currently have ${civs.value.length} civilizations loaded. You can only add ${available} more to reach the maximum of 50 civilizations.`)
+        return
+      }
+      
+      civs.value.push(...allCivs)
       // Reset file input
       if (fileInput.value) {
         fileInput.value.value = ''
