@@ -540,7 +540,7 @@
   margin: 0 auto 1.5rem;
   font-size: 1.1rem;
   line-height: 1.6;
-  color: #f0f0f0; /* Better contrast on dark background */
+  color: #f0f0f0; /* Light text color for dark gradient background */
 }
 
 .back-link {
@@ -583,7 +583,7 @@
 }
 
 .category-description {
-  color: #333; /* Improved contrast from #666 */
+  color: #333; /* Darker text for better contrast on white background */
   margin-bottom: 1.5rem;
   font-size: 1.05rem;
 }
@@ -627,7 +627,7 @@
 }
 
 .description {
-  color: #555; /* Better contrast from #666 */
+  color: #555; /* Darker text for better contrast on light background */
   font-style: italic;
   font-size: 0.95rem;
 }
