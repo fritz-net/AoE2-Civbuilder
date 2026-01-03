@@ -41,27 +41,40 @@ export function normalizeDescription(description: any): string {
 
 /**
  * Check if a JSON object is a multi-civ data.json file
- * data.json has a "techtrees" key containing multiple civilization objects
+ * data.json has a "techtrees" key containing multiple civilization objects or arrays
  * @param json - The parsed JSON object
  * @returns True if the JSON is a multi-civ data.json format
  */
 export function isMultiCivDataJson(json: any): boolean {
-  // Check if json has a "techtrees" property that is an object
-  if (!json || typeof json !== 'object' || !json.techtrees || typeof json.techtrees !== 'object') {
+  // Check if json has a "techtrees" property
+  if (!json || typeof json !== 'object' || !json.techtrees) {
     return false
   }
   
-  // Check if techtrees contains at least one civilization object
-  // Each civ in data.json has properties like "buildings", "techs", "units"
-  const civKeys = Object.keys(json.techtrees)
-  if (civKeys.length === 0) {
-    return false
+  // Handle techtrees as an array
+  if (Array.isArray(json.techtrees)) {
+    if (json.techtrees.length === 0) {
+      return false
+    }
+    // Check if first element looks like a civ
+    const firstCiv = json.techtrees[0]
+    return firstCiv && typeof firstCiv === 'object' && 
+           ('buildings' in firstCiv || 'techs' in firstCiv || 'units' in firstCiv)
   }
   
-  // Verify at least one entry looks like a civilization
-  const firstCiv = json.techtrees[civKeys[0]]
-  return firstCiv && typeof firstCiv === 'object' && 
-         ('buildings' in firstCiv || 'techs' in firstCiv || 'units' in firstCiv)
+  // Handle techtrees as an object with named keys
+  if (typeof json.techtrees === 'object') {
+    const civKeys = Object.keys(json.techtrees)
+    if (civKeys.length === 0) {
+      return false
+    }
+    // Verify at least one entry looks like a civilization
+    const firstCiv = json.techtrees[civKeys[0]]
+    return firstCiv && typeof firstCiv === 'object' && 
+           ('buildings' in firstCiv || 'techs' in firstCiv || 'units' in firstCiv)
+  }
+  
+  return false
 }
 
 /**
@@ -95,8 +108,23 @@ export function parseCivJson(json: any): CivConfig[] {
   // Check if it's a multi-civ data.json (with techtrees key)
   if (isMultiCivDataJson(json)) {
     const civs: CivConfig[] = []
-    const civNames = Object.keys(json.techtrees)
     
+    // Handle techtrees as an array
+    if (Array.isArray(json.techtrees)) {
+      for (let i = 0; i < json.techtrees.length; i++) {
+        const civData = json.techtrees[i]
+        // Try to get civ name from various possible properties
+        const civName = civData.name || civData.civ || civData.alias || 
+                       json.civ_names?.[i] || `Civilization ${i + 1}`
+        const civConfig = convertDataJsonCivToConfig(civName)
+        civConfig.description = normalizeDescription(civConfig.description)
+        civs.push(civConfig)
+      }
+      return civs
+    }
+    
+    // Handle techtrees as an object with named keys
+    const civNames = Object.keys(json.techtrees)
     for (const civName of civNames) {
       const civConfig = convertDataJsonCivToConfig(civName)
       civConfig.description = normalizeDescription(civConfig.description)

@@ -8,6 +8,7 @@ import * as fs from 'fs';
  */
 
 const TEST_DATA_JSON = path.join(__dirname, 'fixtures/test-data.json');
+const TEST_DATA_ARRAY_JSON = path.join(__dirname, 'fixtures/test-data-array.json');
 
 test.describe('Combine Page - data.json Multi-Civ Support', () => {
   test('should upload and parse data.json with multiple civs', async ({ page }) => {
@@ -166,5 +167,37 @@ test.describe('Combine Page - data.json Multi-Civ Support', () => {
     await expect(page.getByText(/Civilization: Britons/i)).toBeVisible();
     await expect(page.getByText(/Civilization: Franks/i)).toBeVisible();
     await expect(page.getByText(/Civilization: Aztecs/i)).toBeVisible();
+  });
+
+  test('should upload and parse data.json with techtrees as array', async ({ page }) => {
+    await page.goto('/v2/combine');
+    
+    // Verify test data file exists
+    expect(fs.existsSync(TEST_DATA_ARRAY_JSON)).toBeTruthy();
+    
+    // Verify file has techtrees as an array
+    const testData = JSON.parse(fs.readFileSync(TEST_DATA_ARRAY_JSON, 'utf-8'));
+    expect(Array.isArray(testData.techtrees)).toBeTruthy();
+    expect(testData.techtrees).toHaveLength(3);
+    
+    // Upload the data.json file with array format
+    const fileInput = page.locator('input[type="file"]');
+    await fileInput.setInputFiles([TEST_DATA_ARRAY_JSON]);
+    
+    // Wait for files to be processed
+    await page.waitForTimeout(1000);
+    
+    // Check that all 3 civilizations are loaded as separate entries
+    await expect(page.getByText(/Loaded Civilizations \(3\)/i)).toBeVisible();
+    
+    // When techtrees is an array without names, civs are numbered
+    // Should see "Civilization 1", "Civilization 2", "Civilization 3"
+    await expect(page.getByRole('heading', { name: /Civilization 1/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Civilization 2/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Civilization 3/i })).toBeVisible();
+    
+    // Check create button is enabled
+    const createButton = page.getByRole('button', { name: /Create Combined Mod \(3 Civs\)/i });
+    await expect(createButton).toBeEnabled();
   });
 });
