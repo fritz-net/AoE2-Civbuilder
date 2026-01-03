@@ -94,14 +94,19 @@ export async function createMod(
     
     // Extract filename from Content-Disposition header
     // Server sends: attachment; filename="2025-12-02T23-15-30Z_a3f2_v1.6.2.zip"
+    // Note: Express res.download() always quotes filenames
     const contentDisposition = response.headers.get('Content-Disposition')
     let filename = `${seed}.zip` // Fallback to old format
     
     if (contentDisposition) {
-      // RFC 6266: Match quoted filename (standard format)
-      const filenameMatch = contentDisposition.match(/filename="([^"]+)"/)
-      if (filenameMatch && filenameMatch[1]) {
-        filename = filenameMatch[1]
+      // RFC 6266: Match both quoted and unquoted filenames for robustness
+      const filenameMatch = contentDisposition.match(/filename=(?:"([^"]+)"|([^;,]+))/)
+      if (filenameMatch) {
+        filename = (filenameMatch[1] || filenameMatch[2] || '').trim()
+        // If we couldn't extract a valid filename, keep the fallback
+        if (!filename) {
+          filename = `${seed}.zip`
+        }
       }
     }
     
