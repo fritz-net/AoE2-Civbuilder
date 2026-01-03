@@ -851,21 +851,20 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
   if (!localtree.value[type].includes(id)) {
     const techCost = getCaretCost(caretId)
     
-    // Special handling for techs/buildings with non-parent prerequisites
-    // These need to be enabled BEFORE the main prerequisite logic runs
-    const isFortifiedWall = caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID
-    if (isFortifiedWall && !isEnabled(STONE_WALL_ID)) {
-      enableCaret(STONE_WALL_ID, false)
-    }
-    if (isFortifiedWall && !isEnabled(GATE_ID)) {
-      enableCaret(GATE_ID, false)
-    }
-    if (caretId === BOMBARD_TOWER_BUILDING_ID && !isEnabled(CHEMISTRY_ID)) {
-      enableCaret(CHEMISTRY_ID, false)
-    }
-    
     if (props.mode === 'build') {
       // Build mode: add points (no limit)
+      // Special handling for techs/buildings with non-parent prerequisites
+      const isFortifiedWall = caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID
+      if (isFortifiedWall && !isEnabled(STONE_WALL_ID)) {
+        enableCaret(STONE_WALL_ID, false)
+      }
+      if (isFortifiedWall && !isEnabled(GATE_ID)) {
+        enableCaret(GATE_ID, false)
+      }
+      if (caretId === BOMBARD_TOWER_BUILDING_ID && !isEnabled(CHEMISTRY_ID)) {
+        enableCaret(CHEMISTRY_ID, false)
+      }
+      
       localtree.value[type].push(id)
       techtreePoints.value += techCost
     } else {
@@ -873,6 +872,30 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
       
       // If this is from a user click, enable ALL affordable prerequisites first
       if (fromUserClick) {
+        // Special handling for techs/buildings with non-parent prerequisites
+        // Add these as special prerequisites that need to be enabled first
+        const specialPrereqs: string[] = []
+        const isFortifiedWall = caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID
+        if (isFortifiedWall) {
+          if (!isEnabled(STONE_WALL_ID)) {
+            specialPrereqs.push(STONE_WALL_ID)
+          }
+          if (!isEnabled(GATE_ID)) {
+            specialPrereqs.push(GATE_ID)
+          }
+        }
+        if (caretId === BOMBARD_TOWER_BUILDING_ID && !isEnabled(CHEMISTRY_ID)) {
+          specialPrereqs.push(CHEMISTRY_ID)
+        }
+        
+        // Enable special prerequisites first (these are non-parent prerequisites)
+        for (const specialPrereqId of specialPrereqs) {
+          const cost = getCaretCost(specialPrereqId)
+          if (techtreePoints.value >= cost && !isEnabled(specialPrereqId)) {
+            enableCaret(specialPrereqId, false)
+          }
+        }
+        
         const prerequisites = getAllPrerequisites(caretId)
         
         // Check if any prerequisites are not enabled
