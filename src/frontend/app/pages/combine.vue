@@ -361,7 +361,7 @@ function handleCivsSectionDrop(event: DragEvent) {
 function handleCivCardDragOver(event: DragEvent) {
   event.preventDefault()
   event.stopPropagation()
-  event.dataTransfer!.dropEffect = 'move'
+  event.dataTransfer!.dropEffect = 'copy'
 }
 
 function handleCivCardDragEnter(event: DragEvent, index: number) {
@@ -748,7 +748,6 @@ function handleDownloadVanilla() {
   border: 1px solid hsla(52, 100%, 50%, 0.3);
   border-radius: 4px;
   transition: all 0.2s ease;
-  cursor: pointer;
 }
 
 .civ-card:hover {
