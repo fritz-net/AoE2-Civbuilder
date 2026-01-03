@@ -293,7 +293,7 @@
             </div>
           </div>
 
-          <div class="form-group">
+          <div v-if="customUnit.range > 0" class="form-group">
             <label for="range">
               <span class="stat-icon">🎯</span> Range
             </label>
@@ -309,6 +309,10 @@
               <span class="help-text">0 = melee</span>
               <span v-if="eliteStats && eliteStats.range !== customUnit.range" class="elite-value">Elite: {{ eliteStats.range }} RNG</span>
             </div>
+          </div>
+
+          <div v-else class="form-group">
+            <span class="melee-indicator">⚔️ Melee Unit (No Range)</span>
           </div>
 
           <div v-if="customUnit.range > 0" class="form-group">
@@ -499,7 +503,7 @@
               type="checkbox"
               @change="onUnitChange"
             />
-            <span>Hero Mode (only trainable once, costs 30 points, higher unit cost)</span>
+            <span>Hero Mode (only trainable once, grants 30 bonus points, higher unit cost)</span>
           </label>
         </div>
       </section>
@@ -1443,7 +1447,7 @@ watch(() => customUnit.value, (newVal) => {
 .compact-mode .stat-with-elite .current-value,
 .compact-mode .stat-with-slider .current-value {
   position: absolute;
-  top: -1.2rem;
+  bottom: -1.5rem;
   left: 0;
   font-size: 0.75rem;
   font-weight: bold;
@@ -1454,8 +1458,9 @@ watch(() => customUnit.value, (newVal) => {
 .compact-mode .elite-value {
   font-size: 0.7rem;
   color: #666;
-  text-align: center;
-  margin-top: 0.25rem;
+  text-align: left;
+  margin-top: 1.5rem;
+  margin-left: 3rem;
   padding: 0.25rem;
 }
 
@@ -1471,6 +1476,18 @@ watch(() => customUnit.value, (newVal) => {
 
 .compact-mode .current-value {
   display: block;
+}
+
+/* Melee indicator styling */
+.melee-indicator {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #e3f2fd;
+  border: 2px solid #2196f3;
+  border-radius: 6px;
+  color: #1565c0;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 /* Also apply to stat-with-slider */

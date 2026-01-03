@@ -379,16 +379,19 @@ function getStatusIcon(status: string): string {
 .rule-item.pass {
   background: #d4edda;
   border-left: 3px solid #28a745;
+  color: #155724; /* Dark green text for readability */
 }
 
 .rule-item.fail {
   background: #f8d7da;
   border-left: 3px solid #dc3545;
+  color: #721c24; /* Dark red text for readability */
 }
 
 .rule-item.warning {
   background: #fff3cd;
   border-left: 3px solid #ffc107;
+  color: #856404; /* Dark amber text for readability */
 }
 
 .rule-indicator {

@@ -702,6 +702,7 @@
   padding: 0.5rem;
   border-radius: 4px;
   border: 1px solid #e0e0e0;
+  color: #333; /* Dark text for readability */
 }
 
 .budget-list,
@@ -744,6 +745,7 @@
   margin-bottom: 0.5rem;
   border-radius: 4px;
   border-left: 3px solid #4caf50;
+  color: #333; /* Dark text for readability */
 }
 
 @media (max-width: 768px) {

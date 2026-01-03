@@ -370,9 +370,9 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
 
     let points = basePoints[unit.unitType] || 50;
     
-    // Hero mode costs points (makes unit more expensive in terms of budget)
+    // Hero mode gives bonus points (allows more powerful unit)
     if (unit.heroMode) {
-      points += 30; // Hero mode costs 30 points from budget
+      points -= 30; // Hero mode gives 30 points to use
     }
 
     // Health contribution
