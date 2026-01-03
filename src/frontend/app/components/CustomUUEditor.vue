@@ -295,6 +295,30 @@
               <span v-if="eliteStats && eliteStats.range !== customUnit.range" class="elite-value">Elite: {{ eliteStats.range }} RNG</span>
             </div>
           </div>
+
+          <div v-if="customUnit.range > 0" class="form-group">
+            <label for="min-range">
+              <span class="stat-icon">📏</span> Min Range
+            </label>
+            <div class="stat-with-slider">
+              <input 
+                id="min-range"
+                v-model.number="customUnit.minRange" 
+                type="number" 
+                min="0"
+                :max="customUnit.range"
+                @input="onUnitChange"
+              />
+              <BudgetSlider
+                v-model="customUnit.minRange"
+                :min="0"
+                :max="customUnit.range"
+                :budget-limit="null"
+                @change="onUnitChange"
+              />
+              <span class="help-text">Lowering costs points (allows closer attacks)</span>
+            </div>
+          </div>
         </div>
       </section>
 

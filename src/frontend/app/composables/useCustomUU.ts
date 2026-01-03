@@ -38,6 +38,7 @@ export interface CustomUUData {
   attackSpeed: number;
   speed: number;
   range: number;
+  minRange: number; // Minimum range (1 for ranged units, 0 for melee)
   cost: ResourceCost;
   trainTime: number;
   lineOfSight: number;
@@ -59,6 +60,7 @@ export interface BaseUnitOption {
   name: string;
   type: 'infantry' | 'cavalry' | 'archer' | 'siege';
   isRanged: boolean;
+  isMelee: boolean; // Some units like Throwing Axeman, Mameluk are both ranged AND melee
   uuGraphicId: number | null; // UU graphic ID for icon (0-87), null means use techtree
   techtreeIconId?: number; // Unit ID for techtree icon
 }
@@ -140,43 +142,48 @@ const ARMOR_CLASS_NAMES: Record<number, string> = {
 // 6=Cataphract, 7=Chu Ko Nu, 8=Mameluke, 9=Janissary, 10=War Wagon, 11=Mangudai, etc.
 const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
   infantry: [
-    { id: 1067, name: 'Jaguar Warrior', type: 'infantry', isRanged: false, uuGraphicId: 14 },
-    { id: 1723, name: 'Teutonic Knight', type: 'infantry', isRanged: false, uuGraphicId: 3 },
-    { id: 1570, name: 'Woad Raider', type: 'infantry', isRanged: false, uuGraphicId: 12 },
-    { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false, uuGraphicId: 2 },
-    { id: 1306, name: 'Samurai', type: 'infantry', isRanged: false, uuGraphicId: 4 },
-    { id: 1317, name: 'Berserk', type: 'infantry', isRanged: false, uuGraphicId: 13 },
-    { id: 75, name: 'Militia Line', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 75 },
-    { id: 93, name: 'Spearman Line', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 93 },
-    { id: 473, name: 'Champion', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 473 },
-    { id: 555, name: 'Halberdier', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 555 },
+    { id: 1067, name: 'Jaguar Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 14 },
+    { id: 1723, name: 'Teutonic Knight', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 3 },
+    { id: 1570, name: 'Woad Raider', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 12 },
+    { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 2 },
+    { id: 1306, name: 'Samurai', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 4 },
+    { id: 1317, name: 'Berserk', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 13 },
+    { id: 1645, name: 'Throwing Axeman', type: 'infantry', isRanged: true, isMelee: true, uuGraphicId: 16 }, // Hybrid ranged+melee
+    { id: 1009, name: 'Gbeto', type: 'infantry', isRanged: true, isMelee: true, uuGraphicId: 53 }, // Hybrid ranged+melee
+    { id: 1800, name: 'Kamayuk', type: 'infantry', isRanged: true, isMelee: true, uuGraphicId: 55 }, // Hybrid ranged+melee (1 range)
+    { id: 75, name: 'Militia Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 75 },
+    { id: 93, name: 'Spearman Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 93 },
+    { id: 473, name: 'Champion', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 473 },
+    { id: 555, name: 'Halberdier', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 555 },
   ],
   cavalry: [
-    { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false, uuGraphicId: 6 },
-    { id: 1269, name: 'Boyar', type: 'cavalry', isRanged: false, uuGraphicId: 22 },
-    { id: 1755, name: 'War Elephant', type: 'cavalry', isRanged: false, uuGraphicId: 5 },
-    { id: 1132, name: 'Battle Elephant', type: 'cavalry', isRanged: false, uuGraphicId: 19 },
-    { id: 1721, name: 'Knight Line', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 37 }, // Knight
-    { id: 207, name: 'Camel Line', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 207 },
-    { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 546 },
-    { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 441 },
+    { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 6 },
+    { id: 1269, name: 'Boyar', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 22 },
+    { id: 1755, name: 'War Elephant', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 5 },
+    { id: 1132, name: 'Battle Elephant', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 19 },
+    { id: 1663, name: 'Mameluke', type: 'cavalry', isRanged: true, isMelee: true, uuGraphicId: 8 }, // Hybrid ranged+melee
+    { id: 1794, name: 'Steppe Lancer', type: 'cavalry', isRanged: true, isMelee: true, uuGraphicId: 77 }, // Hybrid ranged+melee (1 range)
+    { id: 1721, name: 'Knight Line', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 37 }, // Knight
+    { id: 207, name: 'Camel Line', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 207 },
+    { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 546 },
+    { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 441 },
   ],
   archer: [
-    { id: 873, name: 'Longbowman', type: 'archer', isRanged: true, uuGraphicId: 0 },
-    { id: 850, name: 'Plumed Archer', type: 'archer', isRanged: true, uuGraphicId: 15 },
-    { id: 1225, name: 'Chu Ko Nu', type: 'archer', isRanged: true, uuGraphicId: 7 },
-    { id: 1231, name: 'Mangudai', type: 'archer', isRanged: true, uuGraphicId: 11 },
-    { id: 1036, name: 'Genitour', type: 'archer', isRanged: true, uuGraphicId: 25 },
-    { id: 5, name: 'Archer Line', type: 'archer', isRanged: true, uuGraphicId: null, techtreeIconId: 5 },
-    { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true, uuGraphicId: null, techtreeIconId: 24 },
-    { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, uuGraphicId: null, techtreeIconId: 943 },
+    { id: 873, name: 'Longbowman', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 0 },
+    { id: 850, name: 'Plumed Archer', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 15 },
+    { id: 1225, name: 'Chu Ko Nu', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 7 },
+    { id: 1231, name: 'Mangudai', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 11 },
+    { id: 1036, name: 'Genitour', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 25 },
+    { id: 5, name: 'Archer Line', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 5 },
+    { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 24 },
+    { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 943 },
   ],
   siege: [
-    { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, uuGraphicId: 10 },
-    { id: 280, name: 'Mangonel Line', type: 'siege', isRanged: true, uuGraphicId: null, techtreeIconId: 280 },
-    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, uuGraphicId: null, techtreeIconId: 279 },
-    { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, uuGraphicId: null, techtreeIconId: 36 },
-    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false, uuGraphicId: null, techtreeIconId: 706 },
+    { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, isMelee: false, uuGraphicId: 10 },
+    { id: 280, name: 'Mangonel Line', type: 'siege', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 280 },
+    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 279 },
+    { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 36 },
+    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 706 },
   ]
 };
 
@@ -189,6 +196,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
 
   const createCustomUnit = (unitType: 'infantry' | 'cavalry' | 'archer' | 'siege'): CustomUUData => {
     const defaults = UNIT_TYPE_DEFAULTS[unitType];
+    const isRangedType = defaults.range > 0;
     
     return {
       type: 'custom',
@@ -202,6 +210,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
       attackSpeed: 2.0,
       speed: defaults.speed,
       range: defaults.range,
+      minRange: isRangedType ? 1 : 0, // Start with 1 min range for ranged units, 0 for melee
       cost: { ...defaults.cost },
       trainTime: defaults.trainTime,
       lineOfSight: 5,
@@ -271,6 +280,24 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
       errors.push({
         field: 'range',
         message: 'Range must be between 0 and 12',
+        severity: 'error'
+      });
+    }
+
+    // Min range validation
+    if (unit.minRange < 0 || unit.minRange > unit.range) {
+      errors.push({
+        field: 'minRange',
+        message: `Minimum range must be between 0 and ${unit.range}`,
+        severity: 'error'
+      });
+    }
+
+    // Min range should be 0 for melee-only units
+    if (unit.range === 0 && unit.minRange !== 0) {
+      errors.push({
+        field: 'minRange',
+        message: 'Minimum range must be 0 for melee units (range = 0)',
         severity: 'error'
       });
     }
@@ -372,6 +399,13 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     // Range contribution - now included in calculations
     const rangeDiff = unit.range - defaults.range;
     points += rangeDiff * 6;
+    
+    // Min range contribution - lowering min range costs points (allows closer attacks)
+    // Start: ranged units have min range 1, melee have 0
+    // Lowering min range from default makes unit stronger
+    const defaultMinRange = defaults.range > 0 ? 1 : 0;
+    const minRangeDiff = defaultMinRange - unit.minRange; // Positive = lower min range = costs points
+    points += minRangeDiff * 4; // 4 points per 1 min range reduction
     
     // Train time contribution - now included in calculations
     // Lower train time = better = costs points

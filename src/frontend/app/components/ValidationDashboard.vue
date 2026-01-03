@@ -177,6 +177,15 @@ const propertyRules = computed(() => {
       status: props.unit.range >= 0 && props.unit.range <= 12 ? 'pass' : 'fail',
       error: 'Out of range'
     },
+    {
+      field: 'minRange',
+      label: 'Min Range',
+      current: props.unit.minRange,
+      min: 0,
+      max: props.unit.range,
+      status: props.unit.minRange >= 0 && props.unit.minRange <= props.unit.range ? 'pass' : 'fail',
+      error: 'Must be 0 to range value'
+    },
   ];
 
   return rules;

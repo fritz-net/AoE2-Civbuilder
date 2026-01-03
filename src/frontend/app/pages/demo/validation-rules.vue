@@ -575,10 +575,10 @@
 }
 
 .rule-category h2 {
-  color: #d4af37;
+  color: #4d3617; /* Dark brown for better contrast on white background */
   font-size: 2rem;
   margin-bottom: 0.5rem;
-  border-bottom: 3px solid #d4af37;
+  border-bottom: 3px solid #4d3617;
   padding-bottom: 0.5rem;
 }
 
@@ -620,10 +620,11 @@
 
 .type-specific {
   font-size: 1.05rem;
-  color: #d4af37;
-  background: rgba(212, 175, 55, 0.1);
+  color: #8B6914; /* Darker gold for better contrast */
+  background: rgba(212, 175, 55, 0.15);
   padding: 0.5rem;
   border-radius: 4px;
+  font-weight: 600;
 }
 
 .description {
@@ -715,7 +716,8 @@
   background: white;
   padding: 0.75rem;
   border-radius: 4px;
-  border-left: 4px solid #d4af37;
+  border-left: 4px solid #4d3617; /* Darker color for visibility */
+  color: #333; /* Ensure text is dark */
 }
 
 .elite-grid {
