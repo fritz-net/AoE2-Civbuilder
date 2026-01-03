@@ -305,6 +305,12 @@ const FORTIFIED_WALL_BUILDING_ID = 'building_155'
 const STONE_WALL_ID = 'building_117'
 const GATE_ID = 'building_487'
 
+// Constants for Tower group dependencies
+const KEEP_TECH_ID = 'tech_63'
+const KEEP_BUILDING_ID = 'building_235'
+const GUARD_TOWER_TECH_ID = 'tech_140'
+const GUARD_TOWER_BUILDING_ID = 'building_234'
+
 // Constants for other tech/building dependencies
 const BOMBARD_TOWER_BUILDING_ID = 'building_236'
 const CHEMISTRY_ID = 'tech_47'
@@ -848,6 +854,8 @@ function getSpecialPrerequisites(caretId: string): string[] {
   // Special prerequisites are non-parent prerequisites that must be enabled
   // These are requirements that aren't captured in the normal parent relationship
   const specialPrereqs: string[] = []
+  
+  // Fortified walls require both stone wall AND gate
   const isFortifiedWall = caretId === FORTIFIED_WALL_TECH_ID || caretId === FORTIFIED_WALL_BUILDING_ID
   if (isFortifiedWall) {
     if (!isEnabled(STONE_WALL_ID)) {
@@ -857,9 +865,23 @@ function getSpecialPrerequisites(caretId: string): string[] {
       specialPrereqs.push(GATE_ID)
     }
   }
+  
+  // Keep requires guard tower
+  const isKeep = caretId === KEEP_TECH_ID || caretId === KEEP_BUILDING_ID
+  if (isKeep) {
+    if (!isEnabled(GUARD_TOWER_TECH_ID)) {
+      specialPrereqs.push(GUARD_TOWER_TECH_ID)
+    }
+    if (!isEnabled(GUARD_TOWER_BUILDING_ID)) {
+      specialPrereqs.push(GUARD_TOWER_BUILDING_ID)
+    }
+  }
+  
+  // Bombard tower requires chemistry
   if (caretId === BOMBARD_TOWER_BUILDING_ID && !isEnabled(CHEMISTRY_ID)) {
     specialPrereqs.push(CHEMISTRY_ID)
   }
+  
   return specialPrereqs
 }
 
