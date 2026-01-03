@@ -1,5 +1,15 @@
 <template>
   <div class="custom-uu-editor">
+    <!-- Validation Dashboard (shown if enabled) -->
+    <div v-if="showValidationDashboard" class="dashboard-wrapper">
+      <ValidationDashboard 
+        :unit="customUnit"
+        :validation-errors="validationErrors"
+        :current-points="powerBudget"
+        :max-points="maxPoints"
+      />
+    </div>
+
     <div class="editor-header">
       <h2>Custom Unique Unit Editor</h2>
       <p class="subtitle">Design your own unique unit with customizable stats and abilities</p>
@@ -520,14 +530,17 @@
 import { ref, computed, watch } from 'vue';
 import { useCustomUU, type CustomUUData } from '~/composables/useCustomUU';
 import BudgetSlider from './BudgetSlider.vue';
+import ValidationDashboard from './ValidationDashboard.vue';
 
 interface Props {
   showModeSelector?: boolean;
+  showValidationDashboard?: boolean;
   initialMode?: 'demo' | 'build' | 'draft';
 }
 
 const props = withDefaults(defineProps<Props>(), {
   showModeSelector: false,
+  showValidationDashboard: false,
   initialMode: 'demo'
 });
 
@@ -1296,6 +1309,15 @@ watch(() => customUnit.value, (newVal) => {
 .compact-mode .form-section h3 {
   font-size: 0.95rem;
   margin-bottom: 0.75rem;
+}
+
+/* Dashboard Wrapper */
+.dashboard-wrapper {
+  margin-bottom: 2rem;
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 2px solid #e0e0e0;
 }
 
 .compact-mode .stats-grid {
