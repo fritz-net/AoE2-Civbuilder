@@ -175,10 +175,10 @@ const vanillaCivNames = [
   'Malay', // 29
   'Burmese', // 30
   'Vietnamese', // 31
-  'Tatars', // 32
-  'Cumans', // 33
-  'Lithuanians', // 34
-  'Bulgarians', // 35
+  'Bulgarians', // 32
+  'Tatars', // 33
+  'Cumans', // 34
+  'Lithuanians', // 35
   'Burgundians', // 36
   'Sicilians', // 37
   'Poles', // 38
@@ -194,8 +194,8 @@ const vanillaCivNames = [
   // 'Athenians', // 47
   // 'Spartans', // 48
   'Shu', // 49
-  'Wei', // 50
-  'Wu', // 51
+  'Wu', // 50
+  'Wei', // 51
   'Jurchens', // 52
   'Khitans', // 53
 ]
