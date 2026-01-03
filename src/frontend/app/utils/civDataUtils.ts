@@ -4,6 +4,7 @@
  */
 
 import type { CivConfig } from '~/composables/useCivData'
+import { createDefaultCiv } from '~/composables/useCivData'
 
 /**
  * Normalize description field to ensure it's always a string
@@ -66,25 +67,20 @@ export function isMultiCivDataJson(json: any): boolean {
 /**
  * Convert a data.json civilization entry to CivConfig format
  * @param civName - The name of the civilization
- * @param civData - The civilization data from data.json
+ * @param civData - The civilization data from data.json (not used currently)
  * @returns A CivConfig object
  */
 function convertDataJsonCivToConfig(civName: string, civData: any): CivConfig {
-  // data.json format doesn't have the same structure as single civ JSON
-  // We need to create a basic CivConfig with what's available
-  return {
-    alias: civName,
-    description: `Civilization: ${civName}`,
-    flag_palette: [-1, 0, 5, 6, 7, 3, 3, 3], // Default flag palette
-    tree: [[], [], []], // Empty tech tree - data.json has different structure
-    bonuses: [[], [], [], [], []], // Empty bonuses
-    architecture: 1,
-    language: 0,
-    wonder: 0,
-    castle: 0,
-    customFlag: false,
-    customFlagData: ''
-  }
+  // Start with default civ config for consistency
+  const config = createDefaultCiv()
+  
+  // Override with data.json specific values
+  // data.json format doesn't have compatible tree/bonus structure, so we leave those empty
+  config.alias = civName
+  config.description = `Civilization: ${civName}`
+  config.tree = [[], [], []] // Empty tech tree - data.json has different structure
+  
+  return config
 }
 
 /**
@@ -110,22 +106,28 @@ export function parseCivJson(json: any): CivConfig[] {
   }
   
   // Otherwise, treat as single civ JSON
+  // Start with defaults for consistency
+  const defaults = createDefaultCiv()
+  
   // Normalize the description field
   json.description = normalizeDescription(json.description)
   
-  // Ensure all required fields exist with defaults
+  // Merge with defaults, allowing json to override
   const civConfig: CivConfig = {
-    alias: json.alias || 'Unnamed Civ',
-    description: json.description || '',
-    flag_palette: json.flag_palette || [3, 4, 5, 6, 7, 3, 3, 3],
-    tree: json.tree || [[], [], []],
-    bonuses: json.bonuses || [[], [], [], [], []],
-    architecture: json.architecture !== undefined ? json.architecture : 1,
-    language: json.language !== undefined ? json.language : 0,
-    wonder: json.wonder !== undefined ? json.wonder : 0,
-    castle: json.castle !== undefined ? json.castle : 0,
-    customFlag: json.customFlag || false,
-    customFlagData: json.customFlagData || ''
+    ...defaults,
+    ...json,
+    // Ensure these fields exist even if not in json
+    alias: json.alias || defaults.alias,
+    flag_palette: json.flag_palette || defaults.flag_palette,
+    tree: json.tree || defaults.tree,
+    bonuses: json.bonuses || defaults.bonuses,
+    architecture: json.architecture !== undefined ? json.architecture : defaults.architecture,
+    language: json.language !== undefined ? json.language : defaults.language,
+    wonder: json.wonder !== undefined ? json.wonder : defaults.wonder,
+    castle: json.castle !== undefined ? json.castle : defaults.castle,
+    customFlag: json.customFlag || defaults.customFlag,
+    customFlagData: json.customFlagData || defaults.customFlagData,
+    description: json.description || defaults.description,
   }
   
   return [civConfig]
