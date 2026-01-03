@@ -46,7 +46,15 @@
       </div>
 
       <!-- Civs List -->
-      <div v-if="civs.length > 0" class="civs-section">
+      <div 
+        v-if="civs.length > 0" 
+        class="civs-section"
+        @drop.prevent="handleCivsSectionDrop"
+        @dragover.prevent="handleCivsSectionDragOver"
+        @dragenter.prevent="handleCivsSectionDragEnter"
+        @dragleave.prevent="handleCivsSectionDragLeave"
+        :class="{ 'drag-over': isCivsSectionDragging && civs.length < 50 }"
+      >
         <div class="civs-header">
           <h2>Loaded Civilizations ({{ civs.length }})</h2>
           <button 
@@ -63,6 +71,11 @@
             v-for="(civ, index) in civs" 
             :key="index"
             class="civ-card"
+            @drop.prevent="handleCivCardDrop($event, index)"
+            @dragover.prevent="handleCivCardDragOver"
+            @dragenter.prevent="handleCivCardDragEnter($event, index)"
+            @dragleave.prevent="handleCivCardDragLeave($event, index)"
+            :class="{ 'drag-over-card': dragOverCardIndex === index }"
           >
             <div class="civ-info">
               <h3>{{ civ.alias || 'Unnamed Civ' }}</h3>
@@ -87,6 +100,7 @@
             </div>
           </div>
         </div>
+        <p v-if="civs.length < 50" class="drop-hint">💡 Drag and drop JSON files here to add more civilizations</p>
       </div>
 
       <!-- Empty State -->
@@ -140,6 +154,8 @@ const { isCreating, error, createMod } = useModApi()
 const fileInput = ref<HTMLInputElement | null>(null)
 const civs = ref<CivConfig[]>([])
 const isDragging = ref(false)
+const isCivsSectionDragging = ref(false)
+const dragOverCardIndex = ref<number | null>(null)
 const mode = ref<'custom' | 'vanilla'>('custom')
 
 // List of vanilla civ names in game order
@@ -285,6 +301,120 @@ function handleDrop(event: DragEvent) {
   }
   
   processFiles(jsonFiles)
+}
+
+// Handler for dragging over the civs section (to add new civs)
+function handleCivsSectionDragOver(event: DragEvent) {
+  event.preventDefault()
+  // Only allow drop if we have space for more civs
+  if (civs.value.length < 50) {
+    event.dataTransfer!.dropEffect = 'copy'
+  } else {
+    event.dataTransfer!.dropEffect = 'none'
+  }
+}
+
+function handleCivsSectionDragEnter(event: DragEvent) {
+  event.preventDefault()
+  // Only show drag effect if we have space
+  if (civs.value.length < 50) {
+    isCivsSectionDragging.value = true
+  }
+}
+
+function handleCivsSectionDragLeave(event: DragEvent) {
+  event.preventDefault()
+  // Only reset if leaving the section entirely
+  if (event.target === event.currentTarget) {
+    isCivsSectionDragging.value = false
+  }
+}
+
+function handleCivsSectionDrop(event: DragEvent) {
+  event.preventDefault()
+  event.stopPropagation()
+  isCivsSectionDragging.value = false
+  
+  // Only process if we have space
+  if (civs.value.length >= 50) {
+    alert('Cannot add more civilizations. Maximum of 50 civilizations reached.')
+    return
+  }
+  
+  const files = event.dataTransfer?.files
+  if (!files || files.length === 0) return
+  
+  // Filter for JSON files only
+  const jsonFiles = Array.from(files).filter(file => 
+    file.name.toLowerCase().endsWith('.json')
+  )
+  
+  if (jsonFiles.length === 0) {
+    alert('Please drop only JSON files')
+    return
+  }
+  
+  processFiles(jsonFiles)
+}
+
+// Handler for dragging over a specific civ card (to replace it)
+function handleCivCardDragOver(event: DragEvent) {
+  event.preventDefault()
+  event.stopPropagation()
+  event.dataTransfer!.dropEffect = 'move'
+}
+
+function handleCivCardDragEnter(event: DragEvent, index: number) {
+  event.preventDefault()
+  event.stopPropagation()
+  dragOverCardIndex.value = index
+  // Don't show the civs section drag effect when over a card
+  isCivsSectionDragging.value = false
+}
+
+function handleCivCardDragLeave(event: DragEvent, index: number) {
+  event.preventDefault()
+  event.stopPropagation()
+  // Only reset if leaving the card entirely
+  if (event.target === event.currentTarget) {
+    dragOverCardIndex.value = null
+  }
+}
+
+function handleCivCardDrop(event: DragEvent, index: number) {
+  event.preventDefault()
+  event.stopPropagation()
+  dragOverCardIndex.value = null
+  
+  const files = event.dataTransfer?.files
+  if (!files || files.length === 0) return
+  
+  // Only accept one file for replacement
+  const file = files[0]
+  if (!file.name.toLowerCase().endsWith('.json')) {
+    alert('Please drop a JSON file')
+    return
+  }
+  
+  // Read and replace the civ at this index
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const content = e.target?.result as string
+      const config = JSON.parse(content) as CivConfig
+      config.description = normalizeDescription(config.description)
+      
+      // Replace the civ at the specified index
+      civs.value[index] = config
+    } catch (err) {
+      console.error('Failed to parse file:', file.name, err)
+      alert(`Failed to parse ${file.name}`)
+    }
+  }
+  reader.onerror = () => {
+    alert(`Failed to read ${file.name}`)
+  }
+  reader.readAsText(file)
 }
 
 function processFiles(files: File[]) {
@@ -561,6 +691,14 @@ function handleDownloadVanilla() {
   border: 2px solid hsl(52, 100%, 50%);
   padding: 2rem;
   border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.civs-section.drag-over {
+  background: rgba(160, 82, 45, 0.85);
+  border-color: hsl(52, 100%, 60%);
+  border-style: dashed;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
 }
 
 .civs-header {
@@ -610,11 +748,19 @@ function handleDownloadVanilla() {
   border: 1px solid hsla(52, 100%, 50%, 0.3);
   border-radius: 4px;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .civ-card:hover {
   background: rgba(0, 0, 0, 0.4);
   border-color: hsla(52, 100%, 50%, 0.5);
+}
+
+.civ-card.drag-over-card {
+  background: rgba(50, 150, 200, 0.4);
+  border: 2px dashed hsl(200, 80%, 60%);
+  box-shadow: 0 0 15px rgba(100, 180, 230, 0.6);
+  transform: scale(1.02);
 }
 
 .civ-info {
@@ -688,6 +834,18 @@ function handleDownloadVanilla() {
 .empty-hint {
   font-size: 0.9rem !important;
   opacity: 0.8;
+}
+
+.drop-hint {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  text-align: center;
+  color: hsla(52, 100%, 50%, 0.8);
+  font-size: 0.95rem;
+  font-style: italic;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border: 1px dashed hsla(52, 100%, 50%, 0.3);
 }
 
 .actions-section {
