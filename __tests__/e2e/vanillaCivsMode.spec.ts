@@ -72,8 +72,8 @@ test.describe('Vanilla Civs Mode', () => {
     await expect(civCards.nth(3).getByRole('heading', { name: 'Teutons' })).toBeVisible();
     await expect(civCards.nth(4).getByRole('heading', { name: 'Japanese' })).toBeVisible();
     
-    // Check last civ (Khmer should be last in the list)
-    await expect(civCards.nth(49).getByRole('heading', { name: 'Khmer' })).toBeVisible();
+    // Check last civ (Khitans should be last in the list)
+    await expect(civCards.nth(49).getByRole('heading', { name: 'Khitans' })).toBeVisible();
   });
 
   test('should show Replace button for each civ in Vanilla Mode', async ({ page }) => {

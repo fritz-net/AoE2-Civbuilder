@@ -171,6 +171,7 @@ const vanillaCivNames = [
   'Ethiopians',
   'Malians',
   'Berbers',
+  'Khmer',
   'Malay',
   'Burmese',
   'Vietnamese',
@@ -178,16 +179,16 @@ const vanillaCivNames = [
   'Cumans',
   'Lithuanians',
   'Bulgarians',
+  'Burgundians',
+  'Sicilians',
   'Poles',
   'Bohemians',
   'Dravidians',
+  'Bengalis',
   'Gurjaras',
   'Armenians',
   'Georgians',
   'Romans',
-  'Bengalis',
-  'Sicilians',
-  'Burgundians',
   // Chronicle civs (not included):
   // 'Archaemenids',
   // 'Athenians',
@@ -197,7 +198,6 @@ const vanillaCivNames = [
   'Wu',
   'Jurchens',
   'Khitans',
-  'Khmer',
 ]
 
 async function loadVanillaCivs() {
