@@ -430,7 +430,7 @@
               type="checkbox"
               @change="onUnitChange"
             />
-            <span>Hero Mode (only trainable once, higher cost, bonus points)</span>
+            <span>Hero Mode (only trainable once, costs 30 points, higher unit cost)</span>
           </label>
         </div>
       </section>
@@ -1298,7 +1298,12 @@ watch(() => customUnit.value, (newVal) => {
   margin-bottom: 0.75rem;
 }
 
-.compact-mode .stats-grid,
+.compact-mode .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
 .compact-mode .cost-grid {
   gap: 0.75rem;
 }
@@ -1318,7 +1323,31 @@ watch(() => customUnit.value, (newVal) => {
 }
 
 /* In compact mode, arrange stat-with-elite in a single line with icon, slider, and elite text */
+.compact-mode .stats-grid .form-group {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 0;
+  align-items: center;
+}
+
+.compact-mode .stats-grid .form-group label {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  margin: 0;
+  padding-right: 0.5rem;
+  font-size: 0;
+  line-height: 1;
+}
+
+.compact-mode .stats-grid .form-group label .stat-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
 .compact-mode .stat-with-elite {
+  grid-column: 2;
+  grid-row: 1 / 3;
   display: flex;
   align-items: center;
   gap: 0.5rem;

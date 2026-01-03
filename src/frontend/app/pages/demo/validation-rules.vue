@@ -441,12 +441,12 @@
                   <strong>Draft Mode:</strong> 100 points maximum
                 </div>
                 <div class="mode-item">
-                  <strong>Hero Mode Bonus:</strong> +30 points when hero mode is enabled
+                  <strong>Hero Mode Cost:</strong> Costs 30 points when hero mode is enabled
                 </div>
               </div>
               <div class="description">
                 In Build and Draft modes, sliders automatically limit to available points.
-                Hero mode grants bonus points but makes the unit trainable only once and more expensive.
+                Hero mode costs 30 points from your budget but makes the unit trainable only once and more expensive.
               </div>
             </div>
           </div>

@@ -3,8 +3,21 @@
     <h3>Validation Dashboard</h3>
     <p class="dashboard-description">Real-time display of all validation rules and their status</p>
     
+    <!-- Show instructions if no unit is selected -->
+    <div v-if="!unit" class="no-unit-message">
+      <p><strong>👇 Select a unit type below to begin validation</strong></p>
+      <p>Once you select a unit type (Infantry, Cavalry, Archer, or Siege), this dashboard will show:</p>
+      <ul>
+        <li>✓ Property constraints (Health, Attack, Armor, Speed, Range)</li>
+        <li>✓ Type-specific rules for your chosen unit type</li>
+        <li>✓ Attack bonus limits</li>
+        <li>✓ Point budget status (if in Build/Draft mode)</li>
+        <li>✓ Balance warnings for overpowered combinations</li>
+      </ul>
+    </div>
+    
     <!-- Budget Status (if applicable) -->
-    <section v-if="maxPoints" class="validation-section">
+    <section v-if="unit && maxPoints" class="validation-section">
       <h4>Point Budget</h4>
       <div class="rule-list">
         <div :class="['rule-item', budgetStatus]">
@@ -18,7 +31,7 @@
     </section>
 
     <!-- Property Constraints -->
-    <section class="validation-section">
+    <section v-if="unit" class="validation-section">
       <h4>Property Constraints</h4>
       <div class="rule-list">
         <div v-for="rule in propertyRules" :key="rule.field" :class="['rule-item', rule.status]">
@@ -33,7 +46,7 @@
     </section>
 
     <!-- Type-Specific Rules -->
-    <section v-if="typeSpecificRules.length > 0" class="validation-section">
+    <section v-if="unit && typeSpecificRules.length > 0" class="validation-section">
       <h4>Type-Specific Rules ({{ unitType }})</h4>
       <div class="rule-list">
         <div v-for="rule in typeSpecificRules" :key="rule.id" :class="['rule-item', rule.status]">
@@ -47,7 +60,7 @@
     </section>
 
     <!-- Attack Bonuses -->
-    <section v-if="attackBonusRules.length > 0" class="validation-section">
+    <section v-if="unit && attackBonusRules.length > 0" class="validation-section">
       <h4>Attack Bonuses</h4>
       <div class="rule-list">
         <div v-for="rule in attackBonusRules" :key="rule.id" :class="['rule-item', rule.status]">
@@ -61,7 +74,7 @@
     </section>
 
     <!-- General Warnings -->
-    <section v-if="warnings.length > 0" class="validation-section">
+    <section v-if="unit && warnings.length > 0" class="validation-section">
       <h4>Warnings</h4>
       <div class="rule-list">
         <div v-for="warning in warnings" :key="warning" class="rule-item warning">
@@ -285,6 +298,40 @@ function getStatusIcon(status: string): string {
   margin: 0 0 1.5rem 0;
   color: #666;
   font-size: 0.9rem;
+}
+
+.no-unit-message {
+  background: #e3f2fd;
+  border: 2px solid #2196f3;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  color: #1565c0;
+}
+
+.no-unit-message p {
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+}
+
+.no-unit-message p:last-child {
+  margin-bottom: 0;
+}
+
+.no-unit-message strong {
+  font-size: 1.1rem;
+  color: #0d47a1;
+}
+
+.no-unit-message ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.5rem 0 0 0;
+}
+
+.no-unit-message li {
+  padding: 0.4rem 0;
+  color: #1565c0;
 }
 
 .validation-section {

@@ -14,18 +14,13 @@
       <div class="editor-container">
         <!-- Validation Dashboard - Always visible, positioned above editor -->
         <div class="dashboard-wrapper">
+          <!-- Always show ValidationDashboard, even without a unit -->
           <ValidationDashboard 
-            v-if="editorUnit"
             :unit="editorUnit"
             :validation-errors="editorValidationErrors"
             :current-points="editorPowerBudget"
             :max-points="editorMaxPoints"
           />
-          <div v-else class="dashboard-placeholder">
-            <h3>Validation Dashboard</h3>
-            <p>This dashboard will show real-time validation rules and budget status once you select a unit type below.</p>
-            <p class="help-hint">👇 Click on a unit type (Infantry, Cavalry, Archer, or Siege) to get started</p>
-          </div>
         </div>
         
         <CustomUUEditor :show-mode-selector="true" ref="editorRef" />
@@ -104,7 +99,7 @@
           </p>
           <p>
             <strong>Hero Mode:</strong> Enable this to create a powerful unit that can only be trained once.
-            Hero units are more expensive but grant bonus points for other customizations.
+            Hero units cost 30 points from your budget, are more expensive, but can have enhanced stats.
           </p>
         </section>
 
