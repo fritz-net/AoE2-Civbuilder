@@ -881,6 +881,23 @@ function getSpecialPrerequisites(caretId: string): string[] {
   return specialPrereqs
 }
 
+function getLinkedCaretId(caretId: string): string | null {
+  // Get the linked caret ID for bidirectional pairs
+  const linkedPairs: [string, string][] = [
+    ['building_234', 'tech_140'],  // Guard Tower
+    ['tech_64', 'building_236'],   // Bombard Tower
+    ['tech_63', 'building_235'],   // Keep
+    [FORTIFIED_WALL_TECH_ID, FORTIFIED_WALL_BUILDING_ID],  // Fortified wall
+    [STONE_WALL_ID, GATE_ID],  // Stone wall and gate
+  ]
+  
+  for (const [a, b] of linkedPairs) {
+    if (caretId === a) return b
+    if (caretId === b) return a
+  }
+  return null
+}
+
 function enableCaret(caretId: string, fromUserClick: boolean = false) {
   const type = idType(caretId)
   const id = idID(caretId)
@@ -938,6 +955,19 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
           // After enabling prerequisites, check if we can still afford the clicked tech
           // If not, don't enable it (return early)
           if (techtreePoints.value < techCost) {
+            return
+          }
+        }
+        
+        // Check if this caret has a linked caret (tech<->building pair)
+        // If so, we need to ensure BOTH can be afforded together
+        const linkedCaretId = getLinkedCaretId(caretId)
+        if (linkedCaretId && !isEnabled(linkedCaretId)) {
+          const linkedCost = getCaretCost(linkedCaretId)
+          const totalCost = techCost + linkedCost
+          
+          // If we can't afford both the clicked caret and its linked pair, don't enable either
+          if (techtreePoints.value < totalCost) {
             return
           }
         }

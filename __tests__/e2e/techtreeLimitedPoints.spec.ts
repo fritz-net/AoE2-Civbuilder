@@ -206,3 +206,109 @@ test.describe('TechTree Limited Points - Stone Wall and Gate Linking', () => {
     expect(refilledTechCount).toBe(filledTechCount);
   });
 });
+
+test.describe('TechTree Limited Points - Linked Tech/Building Pairs', () => {
+  let demoPage: TechTreeDemoPage;
+
+  test.beforeEach(async ({ page }) => {
+    demoPage = new TechTreeDemoPage(page);
+  });
+
+  test('with limited points, clicking fortified wall tech should not enable it if linked building is unaffordable', async () => {
+    // Fortified wall tech costs 1 point, building costs 1 point
+    // With stone wall (1) + gate (1) = 2 points used, need 2 more for both fortified wall tech+building
+    await demoPage.setupDraftMode(3);
+    
+    const initialTechCount = await demoPage.getTechCount();
+    const initialPoints = await demoPage.getPoints();
+    
+    // Click on fortified wall tech (tech_194)
+    await demoPage.clickCaret('tech_194');
+    
+    const finalTechCount = await demoPage.getTechCount();
+    const finalPoints = await demoPage.getPoints();
+    
+    // Should enable stone wall and gate (2 points), but not fortified wall tech or building
+    // because we can't afford BOTH fortified wall tech AND building together (need 2 points, only have 1)
+    expect(finalPoints).toBe(initialPoints - 2); // Only stone wall + gate
+    expect(finalTechCount).toBe(initialTechCount + 2); // Only stone wall + gate added
+  });
+
+  test('with limited points, clicking keep tech should not enable it if linked building is unaffordable', async () => {
+    // Keep tech costs 1 point, keep building costs 1 point
+    // Guard tower tech costs 1, guard tower building costs 1
+    // Total: 4 points needed (guard tower tech + guard tower building + keep tech + keep building)
+    await demoPage.setupDraftMode(3);
+    
+    const initialTechCount = await demoPage.getTechCount();
+    const initialPoints = await demoPage.getPoints();
+    
+    // Click on keep tech (tech_63)
+    await demoPage.clickCaret('tech_63');
+    
+    const finalTechCount = await demoPage.getTechCount();
+    const finalPoints = await demoPage.getPoints();
+    
+    // Should enable guard tower tech and building (2 points), but not keep tech or building
+    // because we can't afford BOTH keep tech AND building together (need 2 points, only have 1)
+    expect(finalPoints).toBe(initialPoints - 2); // Only guard tower tech + building
+    expect(finalTechCount).toBe(initialTechCount + 2); // Only guard tower pair added
+  });
+
+  test('with limited points, clicking bombard tower tech should not enable it if linked building is unaffordable', async () => {
+    // Bombard tower tech costs 2 points, bombard tower building costs 2 points
+    // Chemistry costs 6 points
+    // Total: 10 points needed
+    await demoPage.setupDraftMode(3);
+    
+    const initialTechCount = await demoPage.getTechCount();
+    const initialPoints = await demoPage.getPoints();
+    
+    // Click on bombard tower tech (tech_64)
+    await demoPage.clickCaret('tech_64');
+    
+    const finalTechCount = await demoPage.getTechCount();
+    const finalPoints = await demoPage.getPoints();
+    
+    // Should not enable anything - not enough points for chemistry (6 points)
+    expect(finalPoints).toBe(initialPoints);
+    expect(finalTechCount).toBe(initialTechCount);
+  });
+
+  test('with limited points, clicking guard tower tech should not enable it if linked building is unaffordable', async () => {
+    // Guard tower tech costs 1 point, guard tower building costs 1 point
+    // Total: 2 points needed
+    await demoPage.setupDraftMode(1);
+    
+    const initialTechCount = await demoPage.getTechCount();
+    const initialPoints = await demoPage.getPoints();
+    
+    // Click on guard tower tech (tech_140)
+    await demoPage.clickCaret('tech_140');
+    
+    const finalTechCount = await demoPage.getTechCount();
+    const finalPoints = await demoPage.getPoints();
+    
+    // Should not enable anything - can afford tech (1 point) but not both tech AND building (2 points total)
+    expect(finalPoints).toBe(initialPoints);
+    expect(finalTechCount).toBe(initialTechCount);
+  });
+
+  test('with exactly enough points, both tech and building should be enabled together', async () => {
+    // Guard tower tech costs 1 point, guard tower building costs 1 point
+    await demoPage.setupDraftMode(2);
+    
+    const initialTechCount = await demoPage.getTechCount();
+    const initialPoints = await demoPage.getPoints();
+    
+    // Click on guard tower tech (tech_140)
+    await demoPage.clickCaret('tech_140');
+    
+    const finalTechCount = await demoPage.getTechCount();
+    const finalPoints = await demoPage.getPoints();
+    
+    // Should enable both guard tower tech AND building
+    expect(finalPoints).toBe(0); // All points spent
+    expect(finalTechCount).toBe(initialTechCount + 2); // Both tech and building added
+  });
+});
