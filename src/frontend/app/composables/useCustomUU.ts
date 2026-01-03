@@ -314,34 +314,60 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     }
 
     // Type-specific range validation (see CUSTOM_UU_RULESET.md)
+    // Honor base unit ranges: if unit started from hybrid base unit (Throwing Axeman, Gbeto, Mameluke),
+    // allow up to +2 range from base unit starting range
+    const baseUnit = getBaseUnitOption(unit.baseUnit);
+    const baseUnitRange = baseUnit?.range ?? 0;
+    
+    // Hybrid units (Throwing Axeman, Gbeto, Mameluke) can have +2 range beyond their base at 30 pts/range
+    const isHybridUnit = baseUnit && baseUnit.isRanged && baseUnit.isMelee;
+    const maxAllowedRange = isHybridUnit ? baseUnitRange + 2 : (unit.unitType === 'infantry' ? 5 : 5);
+    
     // Infantry: generally melee (range 0) or 1 for Kamayuk
-    // Throwing Axeman and Gbeto can have higher range but at very high point cost
-    // Allow range 0-5 for infantry (typical units use 0, 1, 3, or 5)
-    if (unit.unitType === 'infantry' && unit.range > 5) {
-      errors.push({
-        field: 'range',
-        message: 'Infantry can have range 0-5 (typical: 0=melee, 1=Kamayuk, 3=Throwing Axeman, 5=Gbeto)',
-        severity: 'error'
-      });
+    // Throwing Axeman (base 3) and Gbeto (base 5) can have up to +2 range
+    if (unit.unitType === 'infantry' && unit.range > maxAllowedRange) {
+      if (isHybridUnit) {
+        errors.push({
+          field: 'range',
+          message: `${baseUnit.name} can have up to range ${maxAllowedRange} (base ${baseUnitRange} + 2)`,
+          severity: 'error'
+        });
+      } else {
+        errors.push({
+          field: 'range',
+          message: 'Infantry can have range 0-5 (typical: 0=melee, 1=Kamayuk, 3=Throwing Axeman, 5=Gbeto)',
+          severity: 'error'
+        });
+      }
     }
     
     // Cavalry: range 0 (melee), 1 for Steppe Lancer, or 3-5 for Mameluke
-    // Mameluke can have range 3-5 but at very high point cost
-    if (unit.unitType === 'cavalry' && unit.range > 5) {
-      errors.push({
-        field: 'range',
-        message: 'Cavalry can have range 0-1 or 3-5 (typical: 0=melee, 1=Steppe Lancer, 3=Mameluke). Range 2 not allowed.',
-        severity: 'error'
-      });
-    }
-    
-    // Cavalry with range 2 is not allowed (gap between Steppe Lancer and Mameluke)
-    if (unit.unitType === 'cavalry' && unit.range === 2) {
-      errors.push({
-        field: 'range',
-        message: 'Cavalry cannot have range 2 (gap between unit types). Use 0-1 or 3-5.',
-        severity: 'error'
-      });
+    // Mameluke (base 3) can have up to range 5 (base 3 + 2)
+    if (unit.unitType === 'cavalry') {
+      if (unit.range > maxAllowedRange) {
+        if (isHybridUnit) {
+          errors.push({
+            field: 'range',
+            message: `${baseUnit.name} can have up to range ${maxAllowedRange} (base ${baseUnitRange} + 2)`,
+            severity: 'error'
+          });
+        } else {
+          errors.push({
+            field: 'range',
+            message: 'Cavalry can have range 0-1 or 3-5 (typical: 0=melee, 1=Steppe Lancer, 3=Mameluke). Range 2 not allowed.',
+            severity: 'error'
+          });
+        }
+      }
+      
+      // Cavalry with range 2 is not allowed UNLESS it's a hybrid unit with base range >= 1
+      if (unit.range === 2 && !(isHybridUnit && baseUnitRange >= 1)) {
+        errors.push({
+          field: 'range',
+          message: 'Cavalry cannot have range 2 (gap between unit types). Use 0-1 or 3-5.',
+          severity: 'error'
+        });
+      }
     }
 
     // Cost validation
@@ -432,12 +458,30 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     // Range contribution - now included in calculations
     // IMPORTANT: Make range very expensive for melee units (infantry, cavalry)
     // This prevents cheap melee units from becoming ranged easily
-    const rangeDiff = unit.range - defaults.range;
-    let rangePoints = rangeDiff * 6;
+    // SPECIAL CASE: Hybrid units (Throwing Axeman, Gbeto, Mameluke) can increase range
+    // beyond their base at 30 points per range (instead of standard 14 points)
+    const baseUnit = getBaseUnitOption(unit.baseUnit);
+    const baseUnitRange = baseUnit?.range ?? defaults.range;
+    const isHybridUnit = baseUnit && baseUnit.isRanged && baseUnit.isMelee;
     
-    // Extra cost for melee unit types gaining range (Throwing Axeman, Gbeto cost more)
-    if ((unit.unitType === 'infantry' || unit.unitType === 'cavalry') && rangeDiff > 0) {
-      rangePoints += rangeDiff * 8; // Additional 8 points per range for melee types
+    const rangeDiff = unit.range - defaults.range;
+    const rangeDiffFromBase = unit.range - baseUnitRange;
+    let rangePoints = 0;
+    
+    if (rangeDiff > 0) {
+      if (isHybridUnit && rangeDiffFromBase > 0) {
+        // Hybrid units: charge 30 points per range beyond their base unit range
+        // e.g., Throwing Axeman base 3 -> 4 = 30 pts, 5 = 60 pts
+        rangePoints = rangeDiffFromBase * 30;
+      } else {
+        // Standard calculation: 6 base + 8 penalty for melee types
+        rangePoints = rangeDiff * 6;
+        
+        // Extra cost for melee unit types gaining range (standard units like Militia -> ranged)
+        if (unit.unitType === 'infantry' || unit.unitType === 'cavalry') {
+          rangePoints += rangeDiff * 8; // Additional 8 points per range for melee types (total 14)
+        }
+      }
     }
     points += rangePoints;
     
@@ -525,6 +569,15 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
 
   const getBaseUnitOptions = (unitType: string): BaseUnitOption[] => {
     return BASE_UNIT_OPTIONS[unitType] || [];
+  };
+
+  const getBaseUnitOption = (baseUnitId: number): BaseUnitOption | undefined => {
+    // Search through all unit types to find the base unit option
+    for (const unitType in BASE_UNIT_OPTIONS) {
+      const found = BASE_UNIT_OPTIONS[unitType].find(opt => opt.id === baseUnitId);
+      if (found) return found;
+    }
+    return undefined;
   };
 
   const getUnitIconUrl = (option: BaseUnitOption): string => {
@@ -678,6 +731,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     exportToTechtree,
     getArmorClassName,
     getBaseUnitOptions,
+    getBaseUnitOption,
     getUnitIconUrl,
     setMode,
     getMaxStatValue,

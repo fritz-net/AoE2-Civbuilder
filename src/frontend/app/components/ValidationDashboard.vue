@@ -89,6 +89,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { CustomUUData, ValidationError } from '~/composables/useCustomUU';
+import { useCustomUU } from '~/composables/useCustomUU';
 
 interface Props {
   unit: CustomUUData | null;
@@ -98,6 +99,9 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+// Get access to helper functions
+const { getBaseUnitOption } = useCustomUU();
 
 const budgetStatus = computed(() => {
   if (!props.maxPoints) return 'pass';
@@ -197,37 +201,62 @@ const typeSpecificRules = computed(() => {
   const rules = [];
   const unit = props.unit;
   
+  // Get base unit to check for hybrid units
+  const baseUnit = getBaseUnitOption(unit.baseUnit);
+  const baseUnitRange = baseUnit?.range ?? 0;
+  const isHybridUnit = baseUnit && baseUnit.isRanged && baseUnit.isMelee;
+  
   // Infantry range constraint (see CUSTOM_UU_RULESET.md)
-  // Infantry can have range 0-5: 0=melee, 1=Kamayuk, 3=Throwing Axeman, 5=Gbeto
+  // Honor base unit: Throwing Axeman (base 3), Gbeto (base 5), Kamayuk (base 1) can have +2 range
   if (unit.unitType === 'infantry') {
-    rules.push({
-      id: 'infantry-range',
-      text: 'Infantry range must be 0-5 (0=melee, 1=Kamayuk, 3=Throwing Axeman, 5=Gbeto)',
-      status: unit.range >= 0 && unit.range <= 5 ? 'pass' : 'fail',
-      error: `Current: ${unit.range}. Maximum is 5.`
-    });
+    if (isHybridUnit) {
+      const maxAllowedRange = baseUnitRange + 2;
+      rules.push({
+        id: 'infantry-range-hybrid',
+        text: `${baseUnit.name} can have range ${baseUnitRange}-${maxAllowedRange} (base ${baseUnitRange} + up to 2 at 30 pts/range)`,
+        status: unit.range >= baseUnitRange && unit.range <= maxAllowedRange ? 'pass' : 'fail',
+        error: `Current: ${unit.range}. Must be ${baseUnitRange}-${maxAllowedRange}.`
+      });
+    } else {
+      rules.push({
+        id: 'infantry-range',
+        text: 'Infantry range must be 0-5 (0=melee, 1=Kamayuk, 3=Throwing Axeman, 5=Gbeto)',
+        status: unit.range >= 0 && unit.range <= 5 ? 'pass' : 'fail',
+        error: `Current: ${unit.range}. Maximum is 5.`
+      });
+    }
   }
   
   // Cavalry range constraints (see CUSTOM_UU_RULESET.md)
-  // Cavalry can have range 0-1 or 3-5, but NOT range 2 (gap rule)
+  // Honor base unit: Mameluke (base 3) can have up to range 5 (base 3 + 2), Steppe Lancer (base 1)
   if (unit.unitType === 'cavalry') {
-    // First rule: overall range must be 0-1 or 3-5
-    const validCavRange = (unit.range >= 0 && unit.range <= 1) || (unit.range >= 3 && unit.range <= 5);
-    rules.push({
-      id: 'cavalry-range-overall',
-      text: 'Cavalry range must be 0-1 or 3-5 (0=melee, 1=Steppe Lancer, 3-5=Mameluke)',
-      status: validCavRange ? 'pass' : 'fail',
-      error: `Current: ${unit.range}. Use 0-1 or 3-5.`
-    });
-    
-    // Second rule: specifically block range 2 (gap between Steppe Lancer and Mameluke)
-    if (unit.range === 2) {
+    if (isHybridUnit) {
+      const maxAllowedRange = baseUnitRange + 2;
       rules.push({
-        id: 'cavalry-range-2-blocked',
-        text: 'Cavalry cannot have range 2 (gap between Steppe Lancer and Mameluke)',
-        status: 'fail',
-        error: 'Use range 1 (Steppe Lancer) or 3+ (Mameluke)'
+        id: 'cavalry-range-hybrid',
+        text: `${baseUnit.name} can have range ${baseUnitRange}-${maxAllowedRange} (base ${baseUnitRange} + up to 2 at 30 pts/range)`,
+        status: unit.range >= baseUnitRange && unit.range <= maxAllowedRange ? 'pass' : 'fail',
+        error: `Current: ${unit.range}. Must be ${baseUnitRange}-${maxAllowedRange}.`
       });
+    } else {
+      // First rule: overall range must be 0-1 or 3-5
+      const validCavRange = (unit.range >= 0 && unit.range <= 1) || (unit.range >= 3 && unit.range <= 5);
+      rules.push({
+        id: 'cavalry-range-overall',
+        text: 'Cavalry range must be 0-1 or 3-5 (0=melee, 1=Steppe Lancer, 3-5=Mameluke)',
+        status: validCavRange ? 'pass' : 'fail',
+        error: `Current: ${unit.range}. Use 0-1 or 3-5.`
+      });
+      
+      // Second rule: specifically block range 2 (gap between Steppe Lancer and Mameluke)
+      if (unit.range === 2) {
+        rules.push({
+          id: 'cavalry-range-2-blocked',
+          text: 'Cavalry cannot have range 2 (gap between Steppe Lancer and Mameluke)',
+          status: 'fail',
+          error: 'Use range 1 (Steppe Lancer) or 3+ (Mameluke)'
+        });
+      }
     }
   }
   
