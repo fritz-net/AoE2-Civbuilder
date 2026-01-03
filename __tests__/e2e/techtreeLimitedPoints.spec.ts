@@ -25,7 +25,6 @@ test.describe('TechTree Limited Points - 3 Point Wall Issue', () => {
     const finalTechCount = await demoPage.getTechCount();
     
     // Should have spent some points (stone wall + gate prerequisites)
-    // Assuming stone wall costs 1 point and gate costs 1 point (total 2 points)
     await demoPage.assertPointsInRange(0, 3);
     
     // Points should not go negative
