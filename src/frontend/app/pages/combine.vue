@@ -198,6 +198,10 @@ const vanillaCivNames = [
   'Wei', // 51
   'Jurchens', // 52
   'Khitans', // 53
+  // Chronicle civs (not included):
+  // 'Macedonians', // 54
+  // 'Thracians', // 55
+  // 'Puru', // 56
 ]
 
 async function loadVanillaCivs() {
