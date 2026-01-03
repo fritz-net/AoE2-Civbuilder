@@ -390,6 +390,11 @@ function handleCivCardDrop(event: DragEvent, index: number) {
   if (!files || files.length === 0) return
   
   // Only accept one file for replacement
+  if (files.length > 1) {
+    alert('Please drop only one JSON file to replace this civilization')
+    return
+  }
+  
   const file = files[0]
   if (!file.name.toLowerCase().endsWith('.json')) {
     alert('Please drop a JSON file')
