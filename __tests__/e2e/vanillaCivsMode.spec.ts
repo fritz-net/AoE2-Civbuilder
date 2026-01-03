@@ -45,14 +45,14 @@ test.describe('Vanilla Civs Mode', () => {
     // Check that 50 civilizations are loaded
     await combinePage.assertCivCount(50);
     
-    // Check that warning message about 50 civ limit is shown
-    await combinePage.assertLimitWarning();
+    // Check that NO warning message is shown at 50 civs (warning only shows at 51+)
+    await expect(page.getByText(/Warning:/i)).not.toBeVisible();
     
     // Check that we're now in Vanilla Mode
     await combinePage.assertVanillaMode();
   });
 
-  test('should load vanilla civs in alphabetical order', async ({ page }) => {
+  test('should load vanilla civs in game order', async ({ page }) => {
     const combinePage = new CombinePage(page);
     await combinePage.navigate();
     
@@ -64,16 +64,16 @@ test.describe('Vanilla Civs Mode', () => {
     const count = await combinePage.getCivCount();
     expect(count).toBe(50);
     
-    // Check first few civs are in alphabetical order
-    // Expected order: Armenians, Aztecs, Bengalis, Berbers, Bohemians...
-    await expect(civCards.nth(0).getByRole('heading', { name: 'Armenians' })).toBeVisible();
-    await expect(civCards.nth(1).getByRole('heading', { name: 'Aztecs' })).toBeVisible();
-    await expect(civCards.nth(2).getByRole('heading', { name: 'Bengalis' })).toBeVisible();
-    await expect(civCards.nth(3).getByRole('heading', { name: 'Berbers' })).toBeVisible();
-    await expect(civCards.nth(4).getByRole('heading', { name: 'Bohemians' })).toBeVisible();
+    // Check first few civs are in game order
+    // Expected order: Britons, Franks, Goths, Teutons, Japanese...
+    await expect(civCards.nth(0).getByRole('heading', { name: 'Britons' })).toBeVisible();
+    await expect(civCards.nth(1).getByRole('heading', { name: 'Franks' })).toBeVisible();
+    await expect(civCards.nth(2).getByRole('heading', { name: 'Goths' })).toBeVisible();
+    await expect(civCards.nth(3).getByRole('heading', { name: 'Teutons' })).toBeVisible();
+    await expect(civCards.nth(4).getByRole('heading', { name: 'Japanese' })).toBeVisible();
     
-    // Check last civ (Wu should be last alphabetically)
-    await expect(civCards.nth(49).getByRole('heading', { name: 'Wu' })).toBeVisible();
+    // Check last civ (Khitans should be last in the list)
+    await expect(civCards.nth(49).getByRole('heading', { name: 'Khitans' })).toBeVisible();
   });
 
   test('should show Replace button for each civ in Vanilla Mode', async ({ page }) => {
@@ -100,9 +100,9 @@ test.describe('Vanilla Civs Mode', () => {
     await page.getByRole('button', { name: /Use Vanilla Civs/i }).click();
     await page.waitForTimeout(3000);
     
-    // Verify Armenians is the first civ
+    // Verify Britons is the first civ
     const firstCivCard = page.locator('.civ-card').first();
-    await expect(firstCivCard.getByRole('heading', { name: 'Armenians' })).toBeVisible();
+    await expect(firstCivCard.getByRole('heading', { name: 'Britons' })).toBeVisible();
     
     // Create a temporary custom civ JSON
     const testDir = path.join(__dirname, '../../__tests__/fixtures');
@@ -128,7 +128,7 @@ test.describe('Vanilla Civs Mode', () => {
     fs.writeFileSync(customCivPath, JSON.stringify(customCivJson, null, 2));
     
     try {
-      // Click Replace button on first civ (Armenians)
+      // Click Replace button on first civ (Britons)
       const firstReplaceBtn = page.locator('.replace-btn').first();
       
       // Set up file chooser handler
@@ -149,9 +149,9 @@ test.describe('Vanilla Civs Mode', () => {
       // Verify still 50 civs total
       await expect(page.getByText(/Loaded Civilizations \(50\)/i)).toBeVisible();
       
-      // Verify second civ is still Aztecs (unchanged)
+      // Verify second civ is still Franks (unchanged)
       const secondCivCard = page.locator('.civ-card').nth(1);
-      await expect(secondCivCard.getByRole('heading', { name: 'Aztecs' })).toBeVisible();
+      await expect(secondCivCard.getByRole('heading', { name: 'Franks' })).toBeVisible();
       
     } finally {
       // Clean up test file
@@ -181,12 +181,12 @@ test.describe('Vanilla Civs Mode', () => {
     // Verify only 49 civs remain
     await expect(page.getByText(/Loaded Civilizations \(49\)/i)).toBeVisible();
     
-    // Verify warning message is updated
-    await expect(page.getByText(/49\/50 civilizations loaded/i)).toBeVisible();
+    // Verify NO warning message at 49 civs (warning only shows at 51+)
+    await expect(page.getByText(/Warning:/i)).not.toBeVisible();
     
-    // Verify Armenians is removed (second civ should now be first)
+    // Verify Britons is removed (second civ should now be first)
     const firstCivCard = page.locator('.civ-card').first();
-    await expect(firstCivCard.getByRole('heading', { name: 'Aztecs' })).toBeVisible();
+    await expect(firstCivCard.getByRole('heading', { name: 'Franks' })).toBeVisible();
   });
 
   test('should switch back to Custom Mode from Vanilla Mode', async ({ page }) => {
@@ -399,14 +399,14 @@ test.describe('Vanilla Civs Mode', () => {
     }
   });
 
-  test('should maintain alphabetical order after replacing a civ', async ({ page }) => {
+  test('should maintain game order after replacing a civ', async ({ page }) => {
     await page.goto('/v2/combine');
     
     // Load vanilla civs
     await page.getByRole('button', { name: /Use Vanilla Civs/i }).click();
     await page.waitForTimeout(3000);
     
-    // Create a custom civ with a name that would be in the middle alphabetically
+    // Create a custom civ
     const testDir = path.join(__dirname, '../../__tests__/fixtures');
     if (!fs.existsSync(testDir)) {
       fs.mkdirSync(testDir, { recursive: true });
@@ -415,7 +415,7 @@ test.describe('Vanilla Civs Mode', () => {
     const customCivPath = path.join(testDir, 'order-test-civ.json');
     const customCivJson = {
       alias: 'CustomOrderCiv',
-      description: 'Test alphabetical order',
+      description: 'Test game order',
       flag_palette: [3, 4, 5, 6, 7, 3, 3, 3],
       tree: [[13, 17, 21], [12, 45, 49], [22, 101, 102]],
       bonuses: [[], [], [], [], []],
@@ -430,7 +430,7 @@ test.describe('Vanilla Civs Mode', () => {
     fs.writeFileSync(customCivPath, JSON.stringify(customCivJson, null, 2));
     
     try {
-      // Replace first civ (Armenians) with custom civ
+      // Replace first civ (Britons) with custom civ
       const firstReplaceBtn = page.locator('.replace-btn').first();
       const [fileChooser] = await Promise.all([
         page.waitForEvent('filechooser'),
@@ -439,13 +439,13 @@ test.describe('Vanilla Civs Mode', () => {
       await fileChooser.setFiles(customCivPath);
       await page.waitForTimeout(500);
       
-      // Verify custom civ replaced Armenians at position 0
+      // Verify custom civ replaced Britons at position 0
       const firstCivCard = page.locator('.civ-card').first();
       await expect(firstCivCard.getByRole('heading', { name: 'CustomOrderCiv' })).toBeVisible();
       
-      // Verify rest of order is preserved (Aztecs should still be second)
+      // Verify rest of order is preserved (Franks should still be second)
       const secondCivCard = page.locator('.civ-card').nth(1);
-      await expect(secondCivCard.getByRole('heading', { name: 'Aztecs' })).toBeVisible();
+      await expect(secondCivCard.getByRole('heading', { name: 'Franks' })).toBeVisible();
       
     } finally {
       // Clean up test file
