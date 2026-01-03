@@ -849,6 +849,14 @@ watch(() => customUnit.value, (newVal) => {
     onUnitChange();
   }
 });
+
+// Expose properties for parent components (e.g., validation sidebar)
+defineExpose({
+  customUnit,
+  validationErrors,
+  powerBudget,
+  maxPoints
+});
 </script>
 
 <style scoped>

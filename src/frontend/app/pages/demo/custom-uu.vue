@@ -11,8 +11,13 @@
 
     <div class="demo-content">
       <!-- Validation Dashboard Sidebar (wide screens only) -->
-      <aside class="validation-sidebar" v-if="editorRef">
-        <ValidationDashboard v-if="editorRef" />
+      <aside class="validation-sidebar" v-if="editorRef && customUnit">
+        <ValidationDashboard 
+          :unit="customUnit"
+          :validation-errors="validationErrors"
+          :current-points="powerBudget"
+          :max-points="maxPoints"
+        />
       </aside>
       
       <!-- Main Editor -->
@@ -159,9 +164,15 @@
 <script setup lang="ts">
 import CustomUUEditor from '~/components/CustomUUEditor.vue';
 import ValidationDashboard from '~/components/ValidationDashboard.vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const editorRef = ref(null);
+
+// Access editor's exposed data for validation dashboard
+const customUnit = computed(() => editorRef.value?.customUnit || null);
+const validationErrors = computed(() => editorRef.value?.validationErrors || []);
+const powerBudget = computed(() => editorRef.value?.powerBudget || 0);
+const maxPoints = computed(() => editorRef.value?.maxPoints || null);
 
 const loadExample = (type: string) => {
   // Feature to be implemented - would load example unit into editor
