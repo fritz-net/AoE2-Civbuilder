@@ -96,7 +96,7 @@
       </div>
 
       <!-- Warning/Error Messages for Civ Limit -->
-      <div v-if="civs.length >= 45" class="limit-warning">
+      <div v-if="civs.length >= 51" class="limit-warning">
         <div v-if="civs.length <= 50" class="warning-message">
           <p>⚠️ <strong>Warning:</strong> You have {{ civs.length }}/50 civilizations loaded. Age of Empires II currently does not support more than 50 civilizations in a single mod.</p>
         </div>
@@ -202,6 +202,7 @@ const vanillaCivNames = [
 
 async function loadVanillaCivs() {
   // Load all vanilla civs in parallel for better performance
+  // Promise.all maintains the order of results matching vanillaCivNames array
   const promises = vanillaCivNames.map(async (civName) => {
     try {
       const response = await fetch(`/v2/vanillaFiles/vanillaCivs/VanillaJson/${civName}.json`)
@@ -219,6 +220,7 @@ async function loadVanillaCivs() {
   
   const results = await Promise.all(promises)
   // Filter out any failed loads (null values)
+  // Order is preserved: backend receives civs in the same order as vanillaCivNames
   return results.filter((civ): civ is CivConfig => civ !== null)
 }
 
@@ -761,10 +763,11 @@ function handleDownloadVanilla() {
 
 .warning-message {
   padding: 1rem;
-  background: rgba(139, 69, 19, 0.3);
+  background: rgba(139, 69, 19, 0.7);
   border-left: 4px solid hsl(52, 100%, 50%);
   border-radius: 4px;
   margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .warning-message p {
