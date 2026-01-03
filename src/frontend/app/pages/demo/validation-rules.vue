@@ -76,7 +76,7 @@
             <h3>Health (HP)</h3>
             <div class="rule-details">
               <div class="constraint">
-                <strong>Range:</strong> 15 - 250 HP
+                <strong>Range:</strong> 15 - 400 HP
               </div>
               <div class="examples">
                 <div class="example pass">
@@ -87,13 +87,17 @@
                   <span class="badge">✓ Pass</span>
                   <code>150</code> (high HP unit)
                 </div>
+                <div class="example pass">
+                  <span class="badge">✓ Pass</span>
+                  <code>350</code> (very high HP unit)
+                </div>
                 <div class="example fail">
                   <span class="badge">✗ Fail</span>
                   <code>10</code> (too low)
                 </div>
                 <div class="example fail">
                   <span class="badge">✗ Fail</span>
-                  <code>300</code> (too high)
+                  <code>450</code> (too high)
                 </div>
               </div>
             </div>
@@ -103,7 +107,7 @@
             <h3>Attack</h3>
             <div class="rule-details">
               <div class="constraint">
-                <strong>Range:</strong> 2 - 35 damage
+                <strong>Range:</strong> 1 - 35 damage
               </div>
               <div class="examples">
                 <div class="example pass">
@@ -116,7 +120,7 @@
                 </div>
                 <div class="example fail">
                   <span class="badge">✗ Fail</span>
-                  <code>1</code> (too low)
+                  <code>0</code> (too low)
                 </div>
               </div>
             </div>
@@ -248,6 +252,56 @@
               </div>
             </div>
           </div>
+          
+          <div class="rule-card">
+            <h3>Asymmetric Cost Baselines by Type</h3>
+            <div class="rule-details">
+              <div class="constraint">
+                <strong>Infantry:</strong> 75% food, 25% gold (e.g., 65F + 20G)
+              </div>
+              <div class="constraint">
+                <strong>Cavalry:</strong> 40% food, 60% gold (e.g., 60F + 85G) - expensive units
+              </div>
+              <div class="constraint">
+                <strong>Archer:</strong> 70% wood, 30% gold (e.g., 55W + 20G)
+              </div>
+              <div class="constraint">
+                <strong>Siege:</strong> 75% wood, 25% gold (e.g., 135W + 40G)
+              </div>
+              <div class="description">
+                Cost distributions are intentionally asymmetric to reflect the game's economy.
+                More expensive units (like cavalry) grant more points for customization.
+                Cheaper units cost points from your budget.
+              </div>
+            </div>
+          </div>
+          
+          <div class="rule-card">
+            <h3>Cost-to-Points Relationship</h3>
+            <div class="rule-details">
+              <div class="constraint">
+                <strong>Expensive Units:</strong> +2 points per 10 resources above baseline
+              </div>
+              <div class="constraint">
+                <strong>Cheap Units:</strong> -2 points per 10 resources below baseline
+              </div>
+              <div class="description">
+                Making a unit more expensive grants additional customization points.
+                Making a unit cheaper reduces available customization points.
+                This ensures expensive units can be more powerful to justify their cost.
+              </div>
+              <div class="examples">
+                <div class="example pass">
+                  <span class="badge">Example</span>
+                  Infantry at 100 total cost (vs 85 baseline): +3 points
+                </div>
+                <div class="example pass">
+                  <span class="badge">Example</span>
+                  Cavalry at 180 total cost (vs 145 baseline): +7 points
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- Attack Bonuses -->
@@ -363,8 +417,12 @@
                 <div class="cost-item"><strong>Melee Armor:</strong> 4 points per 1 armor above default</div>
                 <div class="cost-item"><strong>Pierce Armor:</strong> 4 points per 1 armor above default</div>
                 <div class="cost-item"><strong>Speed:</strong> 5 points per 0.1 speed above default</div>
-                <div class="cost-item"><strong>Range:</strong> 6 points per 1 range above default</div>
+                <div class="cost-item"><strong>Range:</strong> 6 points per 1 range above default (all types)</div>
+                <div class="cost-item"><strong>Attack Speed:</strong> 6 points per 0.2 seconds faster (increased cost)</div>
+                <div class="cost-item"><strong>Train Time:</strong> 2 points per 5 seconds faster</div>
                 <div class="cost-item"><strong>Attack Bonuses:</strong> 8 points per 5 bonus damage</div>
+                <div class="cost-item"><strong>Cost Adjustment:</strong> +2 points per 10 resources above default (expensive units get points)</div>
+                <div class="cost-item"><strong>Cost Adjustment:</strong> -2 points per 10 resources below default (cheap units cost points)</div>
               </div>
             </div>
           </div>
@@ -382,9 +440,13 @@
                 <div class="mode-item">
                   <strong>Draft Mode:</strong> 100 points maximum
                 </div>
+                <div class="mode-item">
+                  <strong>Hero Mode Bonus:</strong> +30 points when hero mode is enabled
+                </div>
               </div>
               <div class="description">
-                In Build and Draft modes, sliders automatically limit to available points
+                In Build and Draft modes, sliders automatically limit to available points.
+                Hero mode grants bonus points but makes the unit trainable only once and more expensive.
               </div>
             </div>
           </div>
@@ -478,6 +540,7 @@
   margin: 0 auto 1.5rem;
   font-size: 1.1rem;
   line-height: 1.6;
+  color: #f0f0f0; /* Light text color for dark gradient background */
 }
 
 .back-link {
@@ -520,7 +583,7 @@
 }
 
 .category-description {
-  color: #666;
+  color: #333; /* Darker text for better contrast on white background */
   margin-bottom: 1.5rem;
   font-size: 1.05rem;
 }
@@ -564,7 +627,7 @@
 }
 
 .description {
-  color: #666;
+  color: #555; /* Darker text for better contrast on light background */
   font-style: italic;
   font-size: 0.95rem;
 }

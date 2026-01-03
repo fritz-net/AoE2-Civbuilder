@@ -115,17 +115,17 @@ const propertyRules = computed(() => {
       label: 'Health',
       current: props.unit.health,
       min: 15,
-      max: 250,
-      status: props.unit.health >= 15 && props.unit.health <= 250 ? 'pass' : 'fail',
+      max: 400,
+      status: props.unit.health >= 15 && props.unit.health <= 400 ? 'pass' : 'fail',
       error: 'Out of range'
     },
     {
       field: 'attack',
       label: 'Attack',
       current: props.unit.attack,
-      min: 2,
+      min: 1,
       max: 35,
-      status: props.unit.attack >= 2 && props.unit.attack <= 35 ? 'pass' : 'fail',
+      status: props.unit.attack >= 1 && props.unit.attack <= 35 ? 'pass' : 'fail',
       error: 'Out of range'
     },
     {

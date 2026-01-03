@@ -149,7 +149,7 @@
                 v-model.number="customUnit.health" 
                 type="number" 
                 min="15"
-                max="250"
+                max="400"
                 data-testid="health-input"
                 :class="{ 'over-budget': isStatOverBudget('health', customUnit.health) }"
                 @input="onUnitChange"
@@ -157,7 +157,7 @@
               <BudgetSlider
                 v-model="customUnit.health"
                 :min="15"
-                :max="250"
+                :max="400"
                 :budget-limit="maxPoints ? getMaxValue('health') : null"
                 @change="onUnitChange"
               />
@@ -174,7 +174,7 @@
                 id="attack"
                 v-model.number="customUnit.attack" 
                 type="number" 
-                min="2"
+                min="1"
                 max="35"
                 data-testid="attack-input"
                 :class="{ 'over-budget': isStatOverBudget('attack', customUnit.attack) }"
@@ -182,7 +182,7 @@
               />
               <BudgetSlider
                 v-model="customUnit.attack"
-                :min="2"
+                :min="1"
                 :max="35"
                 :budget-limit="maxPoints ? getMaxValue('attack') : null"
                 @change="onUnitChange"
@@ -245,16 +245,27 @@
             <label for="attack-speed">
               <span class="stat-icon">⚡</span> Attack Speed (seconds)
             </label>
-            <input 
-              id="attack-speed"
-              v-model.number="customUnit.attackSpeed" 
-              type="number" 
-              min="0.8"
-              max="6"
-              step="0.1"
-              @input="onUnitChange"
-            />
-            <span class="help-text">Lower is faster</span>
+            <div class="stat-with-slider">
+              <input 
+                id="attack-speed"
+                v-model.number="customUnit.attackSpeed" 
+                type="number" 
+                min="0.8"
+                max="6"
+                step="0.1"
+                @input="onUnitChange"
+              />
+              <BudgetSlider
+                v-model="customUnit.attackSpeed"
+                :min="0.8"
+                :max="6"
+                :step="0.1"
+                :decimals="1"
+                :budget-limit="null"
+                @change="onUnitChange"
+              />
+              <span class="help-text">Lower is faster (more expensive)</span>
+            </div>
           </div>
 
           <div class="form-group">
@@ -389,7 +400,7 @@
           </button>
         </div>
 
-        <div class="form-group">
+        <div class="form-group train-time-group">
           <label for="train-time">
             <span class="stat-icon">⏱️</span> Train Time (seconds)
           </label>
@@ -1297,23 +1308,26 @@ watch(() => customUnit.value, (newVal) => {
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
-/* In compact mode, hide label text for stats (keep only icons) */
-.compact-mode .form-group label:not(.checkbox-label) {
-  font-size: 0;
-}
-
+/* In compact mode, show icon and label together on same line */
 .compact-mode .form-group label .stat-icon,
 .compact-mode .form-group label .resource-icon {
   font-size: 1.2rem;
 }
 
-/* In compact mode, arrange stat-with-elite in a single line */
+/* In compact mode, arrange stat-with-elite in a single line with icon, slider, and elite text */
 .compact-mode .stat-with-elite {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+.compact-mode .stat-with-elite .budget-slider-container {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Also apply to stat-with-slider */
@@ -1321,9 +1335,15 @@ watch(() => customUnit.value, (newVal) => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: nowrap;
 }
 
-/* In compact mode, only hide number inputs that have sliders (stat-with-elite sections) */
+.compact-mode .stat-with-slider .budget-slider-container {
+  flex: 1;
+  min-width: 0;
+}
+
+/* In compact mode, hide number inputs that have sliders (stat-with-elite sections) */
 .compact-mode .stat-with-elite input[type="number"] {
   display: none;
 }
@@ -1338,25 +1358,83 @@ watch(() => customUnit.value, (newVal) => {
   display: none;
 }
 
+/* Keep attack-speed input visible but make it smaller in compact mode */
+.compact-mode #attack-speed {
+  display: none;
+}
+
 /* Keep unit name visible but smaller */
 .compact-mode #unit-name {
   font-size: 0.9rem;
 }
 
 .compact-mode .char-count,
-.compact-mode .help-text,
 .compact-mode .custom-id-input {
   display: none; /* Hide help text and custom ID input in compact mode */
+}
+
+/* Help text should be hidden in compact mode except for critical ones */
+.compact-mode .help-text {
+  display: none;
 }
 
 .compact-mode .elite-value {
   font-size: 0.75rem;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .compact-mode .form-section {
   margin-bottom: 1rem;
   padding: 0.75rem;
+}
+
+/* Cost fields in compact mode should have icon inside */
+.compact-mode .cost-grid .form-group {
+  position: relative;
+}
+
+.compact-mode .cost-grid .form-group label {
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  pointer-events: none;
+  z-index: 1;
+  font-size: 0;
+}
+
+.compact-mode .cost-grid .form-group label .resource-icon {
+  font-size: 1.3rem;
+}
+
+.compact-mode .cost-grid .form-group input {
+  padding-left: 2.5rem;
+}
+
+/* Train time field in compact mode should have icon inside */
+.compact-mode .train-time-group {
+  position: relative;
+}
+
+.compact-mode .train-time-group > label {
+  position: absolute;
+  left: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  pointer-events: none;
+  z-index: 1;
+  font-size: 0;
+}
+
+.compact-mode .train-time-group > label .stat-icon {
+  font-size: 1.3rem;
+}
+
+.compact-mode .train-time-group .stat-with-slider {
+  padding-left: 2.5rem;
 }
 
 /* In compact mode + draft mode, hide apply cost button (auto-calculated) */

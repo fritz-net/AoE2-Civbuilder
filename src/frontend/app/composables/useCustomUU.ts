@@ -222,20 +222,20 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
       });
     }
 
-    // Health validation
-    if (unit.health < 15 || unit.health > 250) {
+    // Health validation (max increased to 400)
+    if (unit.health < 15 || unit.health > 400) {
       errors.push({
         field: 'health',
-        message: 'Health must be between 15 and 250',
+        message: 'Health must be between 15 and 400',
         severity: 'error'
       });
     }
 
-    // Attack validation
-    if (unit.attack < 2 || unit.attack > 35) {
+    // Attack validation (min changed to 1)
+    if (unit.attack < 1 || unit.attack > 35) {
       errors.push({
         field: 'attack',
-        message: 'Attack must be between 2 and 35',
+        message: 'Attack must be between 1 and 35',
         severity: 'error'
       });
     }
@@ -342,6 +342,11 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     };
 
     let points = basePoints[unit.unitType] || 50;
+    
+    // Hero mode grants bonus points
+    if (unit.heroMode) {
+      points += 30; // Hero mode gives 30 bonus points
+    }
 
     // Health contribution
     const defaults = UNIT_TYPE_DEFAULTS[unit.unitType];
@@ -360,41 +365,60 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     const speedDiff = unit.speed - defaults.speed;
     points += (speedDiff / 0.1) * 5;
 
-    // Attack speed contribution (lower is better)
+    // Attack speed contribution (lower is better, more expensive)
     const attackSpeedBonus = (2.0 - unit.attackSpeed) / 0.2;
-    points += attackSpeedBonus * 3;
+    points += attackSpeedBonus * 6; // Increased from 3 to 6 to make it more expensive
 
-    // Range contribution (for archers)
-    if (unit.unitType === 'archer' || unit.unitType === 'siege') {
-      const rangeDiff = unit.range - defaults.range;
-      points += rangeDiff * 6;
-    }
+    // Range contribution - now included in calculations
+    const rangeDiff = unit.range - defaults.range;
+    points += rangeDiff * 6;
+    
+    // Train time contribution - now included in calculations
+    // Lower train time = better = costs points
+    const trainTimeDiff = defaults.trainTime - unit.trainTime;
+    points += (trainTimeDiff / 5) * 2;
 
     // Attack bonuses
     unit.attackBonuses.forEach(bonus => {
       points += (bonus.amount / 5) * 8;
     });
+    
+    // Cost adjustments: expensive units get points, cheap units cost points
+    const totalCost = unit.cost.food + unit.cost.wood + unit.cost.stone + unit.cost.gold;
+    const defaultCost = defaults.cost.food + defaults.cost.wood + defaults.cost.stone + defaults.cost.gold;
+    const costDiff = totalCost - defaultCost;
+    
+    // For every 10 resources above/below default, give/take 2 points
+    points += (costDiff / 10) * 2;
 
     return Math.round(points);
   };
 
   const calculateRecommendedCost = (unit: CustomUUData): ResourceCost => {
     const points = calculatePowerBudget(unit);
-    const totalCost = Math.round(points * 1.2);
+    
+    // Calculate base total from points
+    let totalCost = Math.round(points * 1.2);
+    
+    // Hero units should be significantly more expensive
+    if (unit.heroMode) {
+      totalCost = Math.round(totalCost * 1.8);
+    }
 
-    // Distribute based on unit type
-    const ratios: Record<string, { primary: number; secondary: number }> = {
-      infantry: { primary: 0.65, secondary: 0.35 }, // food/gold
-      cavalry: { primary: 0.50, secondary: 0.50 },  // food/gold
-      archer: { primary: 0.45, secondary: 0.55 },   // wood/gold
-      siege: { primary: 0.60, secondary: 0.40 }     // wood/gold
+    // Asymmetric cost distribution based on unit type
+    // Different types have different primary/secondary resource ratios
+    const distributions: Record<string, { primary: number; secondary: number; resource: 'food' | 'wood' }> = {
+      infantry: { primary: 0.75, secondary: 0.25, resource: 'food' }, // More food, less gold
+      cavalry: { primary: 0.40, secondary: 0.60, resource: 'food' },  // Less food, more gold (expensive)
+      archer: { primary: 0.70, secondary: 0.30, resource: 'wood' },   // More wood, less gold
+      siege: { primary: 0.75, secondary: 0.25, resource: 'wood' }     // Much more wood, less gold
     };
 
-    const ratio = ratios[unit.unitType];
-    const primaryCost = Math.round(totalCost * ratio.primary);
-    const secondaryCost = Math.round(totalCost * ratio.secondary);
+    const dist = distributions[unit.unitType];
+    const primaryCost = Math.round(totalCost * dist.primary);
+    const secondaryCost = Math.round(totalCost * dist.secondary);
 
-    if (unit.unitType === 'archer' || unit.unitType === 'siege') {
+    if (dist.resource === 'wood') {
       return { food: 0, wood: primaryCost, stone: 0, gold: secondaryCost };
     } else {
       return { food: primaryCost, wood: 0, stone: 0, gold: secondaryCost };
@@ -486,9 +510,9 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     }
   };
 
-  // Normal max values for each stat (used in validation and budget calculations)
+  // Normal max values for each stat (HP updated to 400)
   const STAT_MAX_VALUES: Record<string, number> = {
-    health: 250,
+    health: 400, // Updated from 250
     attack: 35,
     meleeArmor: 10,
     pierceArmor: 10,
