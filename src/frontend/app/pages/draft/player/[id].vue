@@ -289,6 +289,7 @@ const isWaitingPhase3 = ref(false)
 
 const {
   draft,
+  socket,
   playerNumber,
   isLoading,
   error,
@@ -643,13 +644,12 @@ const handleSubmitCustomUU = async () => {
   
   try {
     // Get socket from draft state
-    const socket = initSocket()
-    if (!socket) {
+    if (!socket.value) {
       throw new Error('Socket not available')
     }
     
     // Emit submit event to server
-    socket.emit('submit custom uu', draftId.value, playerNumber.value, customUU.value)
+    socket.value.emit('submit custom uu', draftId.value, playerNumber.value, customUU.value)
     
     // Wait for confirmation from server
     await new Promise<void>((resolve, reject) => {
@@ -657,12 +657,12 @@ const handleSubmitCustomUU = async () => {
         reject(new Error('Submission timeout'))
       }, 10000)
       
-      socket.once('custom uu submitted', () => {
+      socket.value.once('custom uu submitted', () => {
         clearTimeout(timeout)
         resolve()
       })
       
-      socket.once('custom uu error', (errorMsg: string) => {
+      socket.value.once('custom uu error', (errorMsg: string) => {
         clearTimeout(timeout)
         reject(new Error(errorMsg))
       })

@@ -1174,18 +1174,13 @@ function processCardPick(draft, pick) {
 	// If it's the last turn of a round, distribute new cards, otherwise make the card unavailable to others
 	if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
 		if (roundType == 4) {
-			// Last turn of the game - check if custom UU mode is enabled
-			if (draft["preset"]["custom_uu_mode"]) {
-				// Move to custom UU design phase after bonus selection
-				draft["gamestate"]["custom_uu_phase"] = true;
-				for (var i = 0; i < numPlayers; i++) {
-					draft["players"][i]["ready"] = 0;
-				}
-				console.log("Moving to custom UU design phase after bonus selection");
-			} else {
-				// Normal flow: move to tech tree phase
-				draft["gamestate"]["phase"] = 3;
+			// Last turn of the game - move to tech tree phase
+			// (Custom UU phase happens BEFORE bonus selection, not after)
+			draft["gamestate"]["phase"] = 3;
+			for (var i = 0; i < numPlayers; i++) {
+				draft["players"][i]["ready"] = 0;
 			}
+			console.log("Moving to tech tree phase after bonus selection");
 		} else {
 			draft["gamestate"]["cards"] = [];
 			// Use configurable bonuses_per_page, default to 30 for backward compatibility
@@ -1366,61 +1361,72 @@ function draftIO(io) {
 			}
 
 			if (nextPhase == 1) {
-				// Always move to bonus selection phase, regardless of custom UU mode
-				// Custom UU phase will happen AFTER bonus selection if enabled
-				draft["gamestate"]["phase"] = 2;
-				draft["gamestate"]["custom_uu_phase"] = false;
-				for (var i = 0; i < numPlayers; i++) {
-					draft["players"][i]["ready"] = 0;
-				}
-
-				//Distribute the first set of civ bonus cards
-				// First, add any required cards for testing
-				if (draft["preset"]["required_first_roll"] && draft["preset"]["required_first_roll"].length > 0) {
-					for (var reqCard of draft["preset"]["required_first_roll"]) {
-						// Check if card is available
-						var cardIndex = draft["gamestate"]["available_cards"][0].indexOf(reqCard);
-						if (cardIndex !== -1) {
-							draft["gamestate"]["cards"].push(reqCard);
-							draft["gamestate"]["available_cards"][0].splice(cardIndex, 1);
-						}
+				// Check if custom UU mode is enabled
+				if (draft["preset"]["custom_uu_mode"]) {
+					// Move to custom UU design phase BEFORE bonus selection
+					draft["gamestate"]["phase"] = 2;
+					draft["gamestate"]["custom_uu_phase"] = true;
+					for (var i = 0; i < numPlayers; i++) {
+						draft["players"][i]["ready"] = 0;
 					}
-				}
-				
-				// Then fill the rest randomly
-				// Use configurable bonuses_per_page, default to 30 for backward compatibility
-				var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
-				var cardsNeeded = (draft["preset"]["rounds"] - 1) * numPlayers + bonusesPerPage - draft["gamestate"]["cards"].length;
-				for (var i = 0; i < cardsNeeded; i++) {
-					if (draft["gamestate"]["available_cards"][0].length > 0) {
-						var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
-						draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][0][rand]);
-						draft["gamestate"]["available_cards"][0].splice(rand, 1);
+					console.log("Moving to custom UU design phase before bonus selection");
+					// Don't distribute cards yet - that happens after custom UU phase
+				} else {
+					// Normal flow: move to bonus selection phase directly
+					draft["gamestate"]["phase"] = 2;
+					draft["gamestate"]["custom_uu_phase"] = false;
+					for (var i = 0; i < numPlayers; i++) {
+						draft["players"][i]["ready"] = 0;
 					}
-				}
 
-				//Give each player a ranking based off how many techtree points they spent
-				//Edit: we do this randomly now because techtrees are made afterwards
-				var priorities = [];
-				for (var i = 0; i < numPlayers; i++) {
-					priorities.push(Math.random());
-				}
-				for (var i = 0; i < numPlayers; i++) {
-					var maxIndex = 0;
-					for (var j = 0; j < numPlayers; j++) {
-						if (priorities[j] > priorities[maxIndex]) {
-							maxIndex = j;
-						} else if (priorities[j] == priorities[maxIndex]) {
-							//50/50 switching in ties is good enough *cries in perfectionist*
-							//In the long run it advantages players that join the later
-							var rand = Math.floor(Math.random() * 2);
-							if (rand == 0) {
-								maxIndex = j;
+					//Distribute the first set of civ bonus cards
+					// First, add any required cards for testing
+					if (draft["preset"]["required_first_roll"] && draft["preset"]["required_first_roll"].length > 0) {
+						for (var reqCard of draft["preset"]["required_first_roll"]) {
+							// Check if card is available
+							var cardIndex = draft["gamestate"]["available_cards"][0].indexOf(reqCard);
+							if (cardIndex !== -1) {
+								draft["gamestate"]["cards"].push(reqCard);
+								draft["gamestate"]["available_cards"][0].splice(cardIndex, 1);
 							}
 						}
 					}
-					draft["gamestate"]["order"].push(maxIndex);
-					priorities[maxIndex] = -1;
+					
+					// Then fill the rest randomly
+					// Use configurable bonuses_per_page, default to 30 for backward compatibility
+					var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
+					var cardsNeeded = (draft["preset"]["rounds"] - 1) * numPlayers + bonusesPerPage - draft["gamestate"]["cards"].length;
+					for (var i = 0; i < cardsNeeded; i++) {
+						if (draft["gamestate"]["available_cards"][0].length > 0) {
+							var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
+							draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][0][rand]);
+							draft["gamestate"]["available_cards"][0].splice(rand, 1);
+						}
+					}
+
+					//Give each player a ranking based off how many techtree points they spent
+					//Edit: we do this randomly now because techtrees are made afterwards
+					var priorities = [];
+					for (var i = 0; i < numPlayers; i++) {
+						priorities.push(Math.random());
+					}
+					for (var i = 0; i < numPlayers; i++) {
+						var maxIndex = 0;
+						for (var j = 0; j < numPlayers; j++) {
+							if (priorities[j] > priorities[maxIndex]) {
+								maxIndex = j;
+							} else if (priorities[j] == priorities[maxIndex]) {
+								//50/50 switching in ties is good enough *cries in perfectionist*
+								//In the long run it advantages players that join the later
+								var rand = Math.floor(Math.random() * 2);
+								if (rand == 0) {
+									maxIndex = j;
+								}
+							}
+						}
+						draft["gamestate"]["order"].push(maxIndex);
+						priorities[maxIndex] = -1;
+					}
 				}
 				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));
 				io.in(roomID).emit("set gamestate", draft);
@@ -1968,6 +1974,9 @@ function draftIO(io) {
 			draft["players"][playerNumber]["custom_uu"] = customUU;
 			draft["players"][playerNumber]["ready"] = 1;
 			
+			// Also add to bonuses[1] array for display in tech tree sidebar
+			draft["players"][playerNumber]["bonuses"][1] = [customUU];
+			
 			console.log(`Player ${playerNumber} submitted custom UU: ${customUU.name}`);
 			
 			// Save draft state
@@ -1990,14 +1999,60 @@ function draftIO(io) {
 			
 			// If all players submitted, move to next phase
 			if (allSubmitted) {
-				console.log("All players submitted custom UUs, advancing to tech tree phase");
-				// Move to phase 3 (tech tree)
-				draft["gamestate"]["phase"] = 3;
+				console.log("All players submitted custom UUs, advancing to bonus selection phase");
+				// Move to bonus selection phase (Phase 2 with custom_uu_phase=false)
 				draft["gamestate"]["custom_uu_phase"] = false;
 				
-				// Reset ready flags for tech tree phase
+				// Reset ready flags for bonus selection
 				for (var i = 0; i < draft["preset"]["slots"]; i++) {
 					draft["players"][i]["ready"] = 0;
+				}
+				
+				// Distribute the first set of civ bonus cards
+				// First, add any required cards for testing
+				if (draft["preset"]["required_first_roll"] && draft["preset"]["required_first_roll"].length > 0) {
+					for (var reqCard of draft["preset"]["required_first_roll"]) {
+						// Check if card is available
+						var cardIndex = draft["gamestate"]["available_cards"][0].indexOf(reqCard);
+						if (cardIndex !== -1) {
+							draft["gamestate"]["cards"].push(reqCard);
+							draft["gamestate"]["available_cards"][0].splice(cardIndex, 1);
+						}
+					}
+				}
+				
+				// Then fill the rest randomly
+				// Use configurable bonuses_per_page, default to 30 for backward compatibility
+				var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
+				var numPlayers = draft["preset"]["slots"];
+				var cardsNeeded = (draft["preset"]["rounds"] - 1) * numPlayers + bonusesPerPage - draft["gamestate"]["cards"].length;
+				for (var i = 0; i < cardsNeeded; i++) {
+					if (draft["gamestate"]["available_cards"][0].length > 0) {
+						var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][0].length);
+						draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][0][rand]);
+						draft["gamestate"]["available_cards"][0].splice(rand, 1);
+					}
+				}
+				
+				// Give each player a ranking for draft order
+				var priorities = [];
+				for (var i = 0; i < numPlayers; i++) {
+					priorities.push(Math.random());
+				}
+				for (var i = 0; i < numPlayers; i++) {
+					var maxIndex = 0;
+					for (var j = 0; j < numPlayers; j++) {
+						if (priorities[j] > priorities[maxIndex]) {
+							maxIndex = j;
+						} else if (priorities[j] == priorities[maxIndex]) {
+							var rand = Math.floor(Math.random() * 2);
+							if (rand == 0) {
+								maxIndex = j;
+							}
+						}
+					}
+					draft["gamestate"]["order"].push(maxIndex);
+					priorities[maxIndex] = -1;
 				}
 				
 				fs.writeFileSync(`${tempdir}/drafts/${roomID}.json`, JSON.stringify(draft, null, 2));

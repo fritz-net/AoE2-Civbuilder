@@ -383,6 +383,7 @@ export const useDraft = () => {
 
   return {
     draft,
+    socket,
     playerNumber,
     isLoading,
     error,
