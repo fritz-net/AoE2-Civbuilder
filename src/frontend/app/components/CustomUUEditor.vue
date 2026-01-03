@@ -593,8 +593,8 @@
         </div>
       </section>
 
-      <!-- Actions (hidden in compact mode) -->
-      <div v-if="!compactMode" class="form-actions">
+      <!-- Actions (hidden in compact mode or build mode) -->
+      <div v-if="!compactMode && editorMode !== 'build'" class="form-actions">
         <button class="btn-primary" @click="saveUnit" :disabled="!isValid">
           Save Unit
         </button>

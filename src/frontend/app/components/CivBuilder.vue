@@ -743,6 +743,8 @@ function saveToLocalStorage() {
   const saveData = {
     config: { ...civConfig },
     currentStep: currentStep.value,
+    isCustomUUMode: isCustomUUMode.value,
+    customUUData: customUUData.value,
     timestamp: new Date().toISOString()
   }
   
@@ -771,6 +773,12 @@ function loadFromLocalStorage(): boolean {
       restoreBonusSelections()
       if (parsed.currentStep !== undefined) {
         currentStep.value = parsed.currentStep
+      }
+      if (parsed.isCustomUUMode !== undefined) {
+        isCustomUUMode.value = parsed.isCustomUUMode
+      }
+      if (parsed.customUUData !== undefined) {
+        customUUData.value = parsed.customUUData
       }
       if (parsed.timestamp) {
         lastSaved.value = new Date(parsed.timestamp)
@@ -819,7 +827,7 @@ function debouncedSave() {
 }
 
 // Watch for changes and autosave
-watch([civConfig, selectedCivBonuses, selectedUniqueUnit, selectedTeamBonus, currentStep], () => {
+watch([civConfig, selectedCivBonuses, selectedUniqueUnit, selectedTeamBonus, currentStep, isCustomUUMode, customUUData], () => {
   if (autosaveEnabled.value) {
     debouncedSave()
   }
@@ -1235,7 +1243,7 @@ defineExpose({
 .uu-mode-toggle {
   margin-bottom: 2rem;
   padding: 1rem;
-  background: rgba(212, 175, 55, 0.1);
+  background: rgba(139, 69, 19, 0.75);
   border: 2px solid #d4af37;
   border-radius: 8px;
 }
