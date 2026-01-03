@@ -9,6 +9,7 @@ import * as fs from 'fs';
 
 const TEST_DATA_JSON = path.join(__dirname, 'fixtures/test-data.json');
 const TEST_DATA_ARRAY_JSON = path.join(__dirname, 'fixtures/test-data-array.json');
+const TEST_DATA_PARALLEL_JSON = path.join(__dirname, 'fixtures/test-data-parallel.json');
 
 test.describe('Combine Page - data.json Multi-Civ Support', () => {
   test('should upload and parse data.json with multiple civs', async ({ page }) => {
@@ -195,6 +196,44 @@ test.describe('Combine Page - data.json Multi-Civ Support', () => {
     await expect(page.getByRole('heading', { name: /Civilization 1/i })).toBeVisible();
     await expect(page.getByRole('heading', { name: /Civilization 2/i })).toBeVisible();
     await expect(page.getByRole('heading', { name: /Civilization 3/i })).toBeVisible();
+    
+    // Check create button is enabled
+    const createButton = page.getByRole('button', { name: /Create Combined Mod \(3 Civs\)/i });
+    await expect(createButton).toBeEnabled();
+  });
+
+  test('should upload and parse data.json with parallel arrays format', async ({ page }) => {
+    await page.goto('/v2/combine');
+    
+    // Verify test data file exists
+    expect(fs.existsSync(TEST_DATA_PARALLEL_JSON)).toBeTruthy();
+    
+    // Verify file has parallel arrays format (name, description, techtree)
+    const testData = JSON.parse(fs.readFileSync(TEST_DATA_PARALLEL_JSON, 'utf-8'));
+    expect(Array.isArray(testData.name)).toBeTruthy();
+    expect(Array.isArray(testData.description)).toBeTruthy();
+    expect(Array.isArray(testData.techtree)).toBeTruthy();
+    expect(testData.name).toHaveLength(3);
+    
+    // Upload the data.json file with parallel arrays format
+    const fileInput = page.locator('input[type="file"]');
+    await fileInput.setInputFiles([TEST_DATA_PARALLEL_JSON]);
+    
+    // Wait for files to be processed
+    await page.waitForTimeout(1000);
+    
+    // Check that all 3 civilizations are loaded as separate entries
+    await expect(page.getByText(/Loaded Civilizations \(3\)/i)).toBeVisible();
+    
+    // Verify civ names from the name array are used
+    await expect(page.getByRole('heading', { name: 'ECO CAV DPS' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'better cumans' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'better britons + drill' })).toBeVisible();
+    
+    // Verify descriptions are used
+    await expect(page.getByText(/CAV ECO/i)).toBeVisible();
+    await expect(page.getByText(/Cav Archer/i)).toBeVisible();
+    await expect(page.getByText(/archer, siege/i)).toBeVisible();
     
     // Check create button is enabled
     const createButton = page.getByRole('button', { name: /Create Combined Mod \(3 Civs\)/i });
