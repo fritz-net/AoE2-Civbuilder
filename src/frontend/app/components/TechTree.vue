@@ -941,15 +941,15 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
         techtreePoints.value = 0
       }
     }
-  }
-  
-  // Enable linked carets
-  handleLinkedCarets(caretId, true)
-  
-  // Enable parent
-  const parentId = parentConnections.value.get(caretId)
-  if (parentId) {
-    enableCaret(parentId, false)
+    
+    // Enable linked carets (only if tech was actually added)
+    handleLinkedCarets(caretId, true)
+    
+    // Enable parent (only if tech was actually added)
+    const parentId = parentConnections.value.get(caretId)
+    if (parentId) {
+      enableCaret(parentId, false)
+    }
   }
 }
 
