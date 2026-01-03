@@ -164,13 +164,16 @@
                 :class="{ 'over-budget': isStatOverBudget('health', customUnit.health) }"
                 @input="onUnitChange"
               />
-              <BudgetSlider
-                v-model="customUnit.health"
-                :min="15"
-                :max="400"
-                :budget-limit="maxPoints ? getMaxValue('health') : null"
-                @change="onUnitChange"
-              />
+              <div class="slider-with-value">
+                <span class="current-value">{{ customUnit.health }}</span>
+                <BudgetSlider
+                  v-model="customUnit.health"
+                  :min="15"
+                  :max="400"
+                  :budget-limit="maxPoints ? getMaxValue('health') : null"
+                  @change="onUnitChange"
+                />
+              </div>
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.health }} HP</span>
             </div>
           </div>
@@ -190,13 +193,16 @@
                 :class="{ 'over-budget': isStatOverBudget('attack', customUnit.attack) }"
                 @input="onUnitChange"
               />
-              <BudgetSlider
-                v-model="customUnit.attack"
-                :min="1"
-                :max="35"
-                :budget-limit="maxPoints ? getMaxValue('attack') : null"
-                @change="onUnitChange"
-              />
+              <div class="slider-with-value">
+                <span class="current-value">{{ customUnit.attack }}</span>
+                <BudgetSlider
+                  v-model="customUnit.attack"
+                  :min="1"
+                  :max="35"
+                  :budget-limit="maxPoints ? getMaxValue('attack') : null"
+                  @change="onUnitChange"
+                />
+              </div>
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.attack }} ATK</span>
             </div>
           </div>
@@ -215,13 +221,16 @@
                 :class="{ 'over-budget': isStatOverBudget('meleeArmor', customUnit.meleeArmor) }"
                 @input="onUnitChange"
               />
-              <BudgetSlider
-                v-model="customUnit.meleeArmor"
-                :min="-3"
-                :max="10"
-                :budget-limit="maxPoints ? getMaxValue('meleeArmor') : null"
-                @change="onUnitChange"
-              />
+              <div class="slider-with-value">
+                <span class="current-value">{{ customUnit.meleeArmor }}</span>
+                <BudgetSlider
+                  v-model="customUnit.meleeArmor"
+                  :min="-3"
+                  :max="10"
+                  :budget-limit="maxPoints ? getMaxValue('meleeArmor') : null"
+                  @change="onUnitChange"
+                />
+              </div>
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.meleeArmor }} ARM</span>
             </div>
           </div>
@@ -240,13 +249,16 @@
                 :class="{ 'over-budget': isStatOverBudget('pierceArmor', customUnit.pierceArmor) }"
                 @input="onUnitChange"
               />
-              <BudgetSlider
-                v-model="customUnit.pierceArmor"
-                :min="-3"
-                :max="10"
-                :budget-limit="maxPoints ? getMaxValue('pierceArmor') : null"
-                @change="onUnitChange"
-              />
+              <div class="slider-with-value">
+                <span class="current-value">{{ customUnit.pierceArmor }}</span>
+                <BudgetSlider
+                  v-model="customUnit.pierceArmor"
+                  :min="-3"
+                  :max="10"
+                  :budget-limit="maxPoints ? getMaxValue('pierceArmor') : null"
+                  @change="onUnitChange"
+                />
+              </div>
               <span v-if="eliteStats" class="elite-value">Elite: {{ eliteStats.pierceArmor }} ARM</span>
             </div>
           </div>
@@ -265,15 +277,18 @@
                 step="0.1"
                 @input="onUnitChange"
               />
-              <BudgetSlider
-                v-model="customUnit.attackSpeed"
-                :min="0.8"
-                :max="6"
-                :step="0.1"
-                :decimals="1"
-                :budget-limit="null"
-                @change="onUnitChange"
-              />
+              <div class="slider-with-value">
+                <span class="current-value">{{ customUnit.attackSpeed.toFixed(1) }}</span>
+                <BudgetSlider
+                  v-model="customUnit.attackSpeed"
+                  :min="0.8"
+                  :max="6"
+                  :step="0.1"
+                  :decimals="1"
+                  :budget-limit="null"
+                  @change="onUnitChange"
+                />
+              </div>
               <span class="help-text">Lower is faster (more expensive)</span>
             </div>
           </div>
@@ -309,13 +324,16 @@
                 :max="customUnit.range"
                 @input="onUnitChange"
               />
-              <BudgetSlider
-                v-model="customUnit.minRange"
-                :min="0"
-                :max="customUnit.range"
-                :budget-limit="null"
-                @change="onUnitChange"
-              />
+              <div class="slider-with-value">
+                <span class="current-value">{{ customUnit.minRange }}</span>
+                <BudgetSlider
+                  v-model="customUnit.minRange"
+                  :min="0"
+                  :max="customUnit.range"
+                  :budget-limit="null"
+                  @change="onUnitChange"
+                />
+              </div>
               <span class="help-text">Lowering costs points (allows closer attacks)</span>
             </div>
           </div>
@@ -331,38 +349,56 @@
             <label for="speed">
               <span class="stat-icon">🏃</span> Movement Speed
             </label>
-            <input 
-              id="speed"
-              v-model.number="customUnit.speed" 
-              type="number" 
-              min="0.5"
-              max="1.65"
-              step="0.05"
-              @input="onUnitChange"
-            />
-            <BudgetSlider
-              v-model="customUnit.speed"
-              :min="0.5"
-              :max="1.65"
-              :step="0.05"
-              :decimals="2"
-              :budget-limit="maxPoints ? getMaxValue('speed') : null"
-              @change="onUnitChange"
-            />
+            <div class="stat-with-slider">
+              <input 
+                id="speed"
+                v-model.number="customUnit.speed" 
+                type="number" 
+                min="0.5"
+                max="1.65"
+                step="0.05"
+                @input="onUnitChange"
+              />
+              <div class="slider-with-value">
+                <span class="current-value">{{ customUnit.speed.toFixed(2) }}</span>
+                <BudgetSlider
+                  v-model="customUnit.speed"
+                  :min="0.5"
+                  :max="1.65"
+                  :step="0.05"
+                  :decimals="2"
+                  :budget-limit="maxPoints ? getMaxValue('speed') : null"
+                  @change="onUnitChange"
+                />
+              </div>
+            </div>
           </div>
 
           <div class="form-group">
             <label for="los">
               <span class="stat-icon">👁️</span> Line of Sight
             </label>
-            <input 
-              id="los"
-              v-model.number="customUnit.lineOfSight" 
-              type="number" 
-              min="3"
-              max="12"
-              @input="onUnitChange"
-            />
+            <div class="stat-with-slider">
+              <input 
+                id="los"
+                v-model.number="customUnit.lineOfSight" 
+                type="number" 
+                min="3"
+                max="12"
+                @input="onUnitChange"
+              />
+              <div class="slider-with-value">
+                <span class="current-value">{{ customUnit.lineOfSight }}</span>
+                <BudgetSlider
+                  v-model="customUnit.lineOfSight"
+                  :min="3"
+                  :max="12"
+                  :budget-limit="null"
+                  @change="onUnitChange"
+                />
+              </div>
+            </div>
+          </div>
           </div>
         </div>
       </section>
@@ -1368,20 +1404,21 @@ watch(() => customUnit.value, (newVal) => {
   font-size: 1.2rem;
 }
 
-/* In compact mode, arrange stat-with-elite in a single line with icon, slider, and elite text */
+/* In compact mode, arrange stat-with-elite vertically: icon left, slider and elite text stacked on right */
 .compact-mode .stats-grid .form-group {
   display: grid;
   grid-template-columns: auto 1fr;
-  grid-template-rows: auto auto;
+  grid-template-rows: auto;
   gap: 0;
-  align-items: center;
+  align-items: start;
 }
 
 .compact-mode .stats-grid .form-group label {
   grid-column: 1;
-  grid-row: 1 / 3;
+  grid-row: 1;
   margin: 0;
   padding-right: 0.5rem;
+  padding-top: 0.75rem;
   font-size: 0;
   line-height: 1;
 }
@@ -1393,29 +1430,61 @@ watch(() => customUnit.value, (newVal) => {
 
 .compact-mode .stat-with-elite {
   grid-column: 2;
-  grid-row: 1 / 3;
+  grid-row: 1;
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: nowrap;
+  flex-direction: column;
+  gap: 0;
 }
 
-.compact-mode .stat-with-elite .budget-slider-container {
-  flex: 1;
-  min-width: 0;
+.compact-mode .stat-with-elite .slider-with-value {
+  width: 100%;
+  position: relative;
+}
+
+.compact-mode .stat-with-elite .current-value,
+.compact-mode .stat-with-slider .current-value {
+  position: absolute;
+  top: -1.2rem;
+  left: 0;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #333;
+  z-index: 1;
+}
+
+.compact-mode .elite-value {
+  font-size: 0.7rem;
+  color: #666;
+  text-align: center;
+  margin-top: 0.25rem;
+  padding: 0.25rem;
+}
+
+.slider-with-value {
+  position: relative;
+  width: 100%;
+}
+
+/* Hide current value in non-compact mode */
+.current-value {
+  display: none;
+}
+
+.compact-mode .current-value {
+  display: block;
 }
 
 /* Also apply to stat-with-slider */
 .compact-mode .stat-with-slider {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: nowrap;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
 }
 
-.compact-mode .stat-with-slider .budget-slider-container {
-  flex: 1;
-  min-width: 0;
+.compact-mode .stat-with-slider .slider-with-value {
+  width: 100%;
+  position: relative;
 }
 
 /* In compact mode, hide number inputs that have sliders (stat-with-elite sections) */

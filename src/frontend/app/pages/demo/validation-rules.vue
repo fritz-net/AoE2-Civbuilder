@@ -575,10 +575,10 @@
 }
 
 .rule-category h2 {
-  color: #4d3617; /* Dark brown for better contrast on white background */
+  color: #d4af37; /* Gold color as requested */
   font-size: 2rem;
   margin-bottom: 0.5rem;
-  border-bottom: 3px solid #4d3617;
+  border-bottom: 3px solid #d4af37;
   padding-bottom: 0.5rem;
 }
 
@@ -652,11 +652,13 @@
 .example.pass {
   background: #e8f5e9;
   border-left: 4px solid #4caf50;
+  color: #1b5e20; /* Dark green text for readability */
 }
 
 .example.fail {
   background: #ffebee;
   border-left: 4px solid #f44336;
+  color: #b71c1c; /* Dark red text for readability */
 }
 
 .example.warning-example {
