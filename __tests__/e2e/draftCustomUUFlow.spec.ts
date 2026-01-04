@@ -319,8 +319,8 @@ test.describe('Draft Custom UU Flow - Validation and Error Handling', () => {
     }
   });
 
-  test('should not show s.emit error when submitting custom UU', async ({ page }) => {
-    // This test specifically checks for the issue mentioned in the GitHub issue screenshot
+  test('should successfully submit custom UU without errors', async ({ page }) => {
+    // This test verifies successful custom UU submission (fixing the s.emit bug)
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     const { hostLink } = await draftCreatePage.createDraft({
@@ -331,44 +331,28 @@ test.describe('Draft Custom UU Flow - Validation and Error Handling', () => {
     
     const draftHostPage = new DraftHostPage(page);
     await draftHostPage.navigate(hostLink);
-    await draftHostPage.joinAsHost('Error Test');
+    await draftHostPage.joinAsHost('Submit Success Test');
     await draftHostPage.startDraft();
-    await draftHostPage.completeSetupPhase('Error Test Civ');
+    await draftHostPage.completeSetupPhase('Submit Test Civ');
     await draftHostPage.completeCardDrafting(1);
     await page.waitForTimeout(2000);
     
     // Fill and submit custom UU
-    await draftHostPage.fillCustomUU('Error Test Unit');
+    await draftHostPage.fillCustomUU('Success Test Unit');
     await draftHostPage.submitCustomUU();
     
-    // Wait to see if any error appears
-    await page.waitForTimeout(2000);
+    // Wait for submission to complete
+    await page.waitForTimeout(3000);
     
-    // Check for error messages
-    const errorOverlay = page.locator('.error-message, .modal-error');
-    const hasError = await errorOverlay.isVisible().catch(() => false);
+    // Verify we've moved past custom UU phase (submission was successful)
+    const isStillInCustomUUPhase = await draftHostPage.isInPhase('customuu');
+    expect(isStillInCustomUUPhase).toBe(false);
     
-    // Should NOT have error
-    expect(hasError).toBe(false);
-    
-    // Check console for errors
-    const consoleErrors: string[] = [];
-    page.on('console', msg => {
-      if (msg.type() === 'error') {
-        consoleErrors.push(msg.text());
-      }
-    });
-    
-    await page.waitForTimeout(1000);
-    
-    // Filter out irrelevant errors
-    const relevantErrors = consoleErrors.filter(err => 
-      err.includes('s.emit') || 
-      err.includes('custom') || 
-      err.includes('socket')
-    );
-    
-    // Should not have socket-related errors
-    expect(relevantErrors.length).toBe(0);
+    // Verify we're in next phase (drafting or completed)
+    const pageContent = await page.content();
+    const hasProgressed = pageContent.includes('draft-board') || 
+                         pageContent.includes('techtree') ||
+                         pageContent.includes('Castle');
+    expect(hasProgressed).toBe(true);
   });
 });

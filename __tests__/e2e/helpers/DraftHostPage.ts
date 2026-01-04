@@ -232,17 +232,21 @@ export class DraftHostPage extends BasePage {
   async fillCustomUU(name: string = 'Test Unit'): Promise<void> {
     // Wait for custom UU editor to be visible
     await this.waitForElement(this.selectors.customUUEditor, 15000);
-    await this.wait(1000);
+    await this.wait(2000); // Extra wait for editor to fully initialize
     
-    // Fill in unit name
+    // Wait for unit name input to be available
     const nameInput = this.page.locator(this.selectors.unitNameInput);
-    if (await nameInput.isVisible()) {
-      await nameInput.clear();
-      await nameInput.fill(name);
-    }
+    await nameInput.waitFor({ state: 'visible', timeout: 10000 });
+    
+    // Clear and fill unit name
+    await nameInput.clear();
+    await nameInput.fill(name);
+    
+    // Wait a bit for validation to run
+    await this.wait(500);
     
     // The editor should have default values that are valid
-    // We just need to enter a name
+    // We just need to ensure a valid name is entered
   }
 
   /**
@@ -251,6 +255,17 @@ export class DraftHostPage extends BasePage {
   async submitCustomUU(): Promise<void> {
     const submitButton = this.page.locator(this.selectors.submitUUButton);
     await expect(submitButton).toBeVisible({ timeout: 5000 });
+    
+    // Wait for button to be enabled (validation might need a moment)
+    await submitButton.waitFor({ state: 'visible', timeout: 10000 });
+    
+    // Wait for validation to complete and button to be enabled
+    for (let i = 0; i < 10; i++) {
+      const isEnabled = await submitButton.isEnabled();
+      if (isEnabled) break;
+      await this.wait(500);
+    }
+    
     await submitButton.click();
     await this.wait(2000);
   }
