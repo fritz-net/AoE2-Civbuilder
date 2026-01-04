@@ -643,7 +643,10 @@ function restoreBonusSelections() {
     // Convert loaded bonuses to the expected format
     selectedCivBonuses.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.CIV])
     // Unique units are plain numbers in legacy format, but we normalize to [id, 1] internally
-    selectedUniqueUnit.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.UNIQUE_UNIT])
+    // Skip normalizing if we're in custom UU mode (the data is already an object, not a number)
+    if (!isCustomUUMode.value) {
+      selectedUniqueUnit.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.UNIQUE_UNIT])
+    }
     selectedCastleTech.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.CASTLE_TECH])
     selectedImpTech.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.IMPERIAL_TECH])
     selectedTeamBonus.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.TEAM])

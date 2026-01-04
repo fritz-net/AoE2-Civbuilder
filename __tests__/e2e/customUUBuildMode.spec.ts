@@ -147,6 +147,9 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
   test('should persist custom unit data on page reload', async ({ page }) => {
     await page.goto('/v2/build');
     
+    // Wait for restore period to complete (1100ms)
+    await page.waitForTimeout(1200);
+    
     // Navigate and create a custom unit
     await page.getByPlaceholder(/Enter civilization name/i).fill('TestCiv');
     await page.getByRole('button', { name: /Next →/i }).click();
@@ -158,12 +161,14 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     // Customize the unit
     await page.getByLabel(/Unit Name/i).fill('Elite Warrior');
     
-    // Wait for autosave
+    // Wait for autosave (1000ms debounce + safety margin)
     await page.waitForTimeout(1500);
     
     // Reload the page
     await page.reload();
-    await page.waitForTimeout(2000); // Give more time for restore to complete
+    
+    // Wait for restore to complete after reload (1100ms restore + safety margin)
+    await page.waitForTimeout(2000);
     
     // After reload, the page should restore to step 3 (Unique Unit) if autosave worked
     // Verify custom UU checkbox is still checked
@@ -177,6 +182,9 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
   test('should show autosave indicator when changes are made', async ({ page }) => {
     await page.goto('/v2/build');
     
+    // Wait for restore period to complete (1100ms)
+    await page.waitForTimeout(1200);
+    
     // Verify autosave checkbox is enabled by default
     const autosaveCheckbox = page.getByRole('checkbox', { name: /💾 Autosave to browser/i });
     await expect(autosaveCheckbox).toBeChecked();
@@ -184,7 +192,7 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     // Fill in civ name
     await page.getByPlaceholder(/Enter civilization name/i).fill('TestCiv');
     
-    // Wait a moment for autosave to trigger
+    // Wait for autosave to trigger (1000ms debounce + safety margin)
     await page.waitForTimeout(1500);
     
     // Verify autosave status is shown (text contains "Last saved:")
