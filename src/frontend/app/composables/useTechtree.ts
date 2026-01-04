@@ -629,6 +629,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   archerylane.rows.castle_1.push(unit(CAVALRY_ARCHER))
   archerylane.rows.castle_1.push(unit(ELEPHANT_ARCHER))
   archerylane.rows.castle_1.push(unit(SLINGER)) // Bonus unit: Can recruit Slingers
+  archerylane.rows.castle_1.push(unit(GRENADIER)) // Bonus unit: Can recruit Grenadiers
   archerylane.rows.castle_1.push(tech(THUMB_RING))
   archerylane.rows.imperial_1.push(unit(ARBALESTER))
   archerylane.rows.imperial_1.push(unit(HAND_CANNONEER))
@@ -702,7 +703,6 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   siegeworkshoplane.rows.imperial_1.push(unit(HEAVY_SCORPION))
   siegeworkshoplane.rows.imperial_1.push(unit(BOMBARD_CANNON))
   siegeworkshoplane.rows.imperial_1.push(unit(HOUFNICE)) // Bonus unit: Can upgrade to Houfnice
-  siegeworkshoplane.rows.imperial_1.push(unit(GRENADIER)) // Bonus unit: Can recruit Grenadiers
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_RAM))
   siegeworkshoplane.rows.imperial_2.push(unit(TRACTION_TREBUCHET))
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_ONAGER))
