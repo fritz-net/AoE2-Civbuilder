@@ -41,9 +41,9 @@ class ErrorContextReporter implements Reporter {
       } else {
         // Fallback: construct the path following Playwright's convention
         // test-results/<test-file-name>-<test-title>-<project-name>
-        const sanitizedTitle = test.title.replace(/[^a-z0-9]/gi, '-').toLowerCase().substring(0, 50);
+        const sanitizedTitle = test.title.replace(/[^a-z0-9]/gi, '-').toLowerCase().substring(0, 80);
         const sanitizedFile = path.basename(test.location.file, '.spec.ts');
-        const projectName = test.parent.project()?.name || 'chromium';
+        const projectName = test.parent.project()?.name || 'default';
         const dirName = `${sanitizedFile}-${sanitizedTitle}-${projectName}`;
         outputDir = path.join('test-results', dirName);
       }
@@ -98,18 +98,14 @@ class ErrorContextReporter implements Reporter {
     if (result.stdout && result.stdout.length > 0) {
       lines.push('## Standard Output\n');
       lines.push('```');
-      for (const chunk of result.stdout) {
-        lines.push(chunk.toString());
-      }
+      lines.push(result.stdout.map(chunk => chunk.toString()).join(''));
       lines.push('```\n');
     }
 
     if (result.stderr && result.stderr.length > 0) {
       lines.push('## Standard Error\n');
       lines.push('```');
-      for (const chunk of result.stderr) {
-        lines.push(chunk.toString());
-      }
+      lines.push(result.stderr.map(chunk => chunk.toString()).join(''));
       lines.push('```\n');
     }
 
