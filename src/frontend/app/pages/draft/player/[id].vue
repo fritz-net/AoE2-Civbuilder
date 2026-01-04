@@ -367,12 +367,6 @@ const selectedPlayer = computed(() => {
   return null
 })
 
-const showPasturesInTechtree = computed(() => {
-  // Check if PASTURES_BONUS_ID is selected in civ bonuses (bonuses[0] array)
-  if (!currentPlayer.value?.bonuses?.[0]) return false
-  return currentPlayer.value.bonuses[0].includes(PASTURES_BONUS_ID)
-})
-
 // Convert draft bonuses format to TechTree selectedBonuses format
 const selectedBonusesForTechtree = computed(() => {
   if (!currentPlayer.value?.bonuses) {
