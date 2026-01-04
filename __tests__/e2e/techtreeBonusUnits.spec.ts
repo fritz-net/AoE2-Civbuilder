@@ -141,22 +141,16 @@ test.describe('TechTree Bonus-Granted Units', () => {
   });
 
   test('should show Pastures when bonus 356 is selected', async ({ page }) => {
-    // Uncheck "Show Pastures" if checked
-    const showPasturesCheckbox = page.getByLabel(/Show Pastures/i);
-    if (await showPasturesCheckbox.isChecked()) {
-      await showPasturesCheckbox.uncheck();
-      await page.waitForTimeout(300);
-    }
-    
     // Get initial tech count
     const initialText = await page.getByText(/Techs Enabled: \d+/i).textContent();
     const initialCount = parseInt(initialText?.match(/\d+/)?.[0] || '0');
     
-    // Check "Show Pastures"
-    await showPasturesCheckbox.check();
-    await page.waitForTimeout(500);
+    // Select Pastures bonus (ID 356)
+    const pasturesCheckbox = page.getByRole('checkbox', { name: /Pastures \(ID 356\)/i });
+    await pasturesCheckbox.check();
+    await page.waitForTimeout(500); // Allow tree to rebuild
     
-    // Verify Pastures was added (should increase building/tech count)
+    // Verify tech/building count increased (Pastures adds buildings)
     const finalText = await page.getByText(/Techs Enabled: \d+/i).textContent();
     const finalCount = parseInt(finalText?.match(/\d+/)?.[0] || '0');
     expect(finalCount).toBeGreaterThan(initialCount);
