@@ -20,6 +20,7 @@ export class DraftCreatePage extends BasePage {
     timerDurationInput: '#timerDuration',
     blindPicksCheckbox: '#blindPicks',
     snakeDraftCheckbox: '#snakeDraft',
+    customUUModeCheckbox: '#customUUMode',
     modalOverlay: '.modal-overlay',
     hostLinkInput: '#hostLink',
     playerLinkInput: '#playerLink',
@@ -181,6 +182,20 @@ export class DraftCreatePage extends BasePage {
   }
 
   /**
+   * Enable custom UU mode
+   */
+  async enableCustomUUMode(): Promise<void> {
+    await this.page.locator(this.selectors.customUUModeCheckbox).check();
+  }
+
+  /**
+   * Disable custom UU mode
+   */
+  async disableCustomUUMode(): Promise<void> {
+    await this.page.locator(this.selectors.customUUModeCheckbox).uncheck();
+  }
+
+  /**
    * Set required first roll bonus (for testing)
    */
   async setRequiredFirstRoll(bonusId: string): Promise<void> {
@@ -222,6 +237,7 @@ export class DraftCreatePage extends BasePage {
     bonusesPerPage?: number;
     timerEnabled?: boolean;
     timerDuration?: number;
+    customUUMode?: boolean;
     requiredFirstRoll?: string;
   } = {}): Promise<{ hostLink: string; playerLink: string; spectatorLink: string; draftId: string | null }> {
     // Set configuration with defaults
@@ -236,13 +252,16 @@ export class DraftCreatePage extends BasePage {
     }
     
     // Advanced settings
-    if (config.timerEnabled || config.bonusesPerPage !== undefined) {
+    if (config.timerEnabled || config.bonusesPerPage !== undefined || config.customUUMode !== undefined) {
       await this.expandAdvancedSettings();
       if (config.timerEnabled) {
         await this.enableTimer(config.timerDuration);
       }
       if (config.bonusesPerPage !== undefined) {
         await this.setBonusesPerPage(config.bonusesPerPage);
+      }
+      if (config.customUUMode) {
+        await this.enableCustomUUMode();
       }
     }
     

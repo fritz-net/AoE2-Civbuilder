@@ -24,6 +24,12 @@ export class DraftHostPage extends BasePage {
     creatingPhase: '.creating-phase',
     downloadPhase: '.download-phase',
     downloadButton: '.download-button',
+    customUUPhase: '.custom-uu-phase',
+    customUUEditor: '.custom-uu-editor-container',
+    submitUUButton: '.submit-uu-button',
+    unitNameInput: '#unitName',
+    healthSlider: '#health',
+    attackSlider: '#attack',
   };
 
   constructor(page: Page) {
@@ -192,16 +198,74 @@ export class DraftHostPage extends BasePage {
   /**
    * Check if in specific phase
    */
-  async isInPhase(phase: 'lobby' | 'setup' | 'drafting' | 'techtree' | 'creating' | 'download'): Promise<boolean> {
+  async isInPhase(phase: 'lobby' | 'setup' | 'drafting' | 'customuu' | 'techtree' | 'creating' | 'download'): Promise<boolean> {
     const phaseSelectors = {
       lobby: this.selectors.lobbyTitle,
       setup: this.selectors.setupPhase,
       drafting: this.selectors.draftBoard,
+      customuu: this.selectors.customUUPhase,
       techtree: this.selectors.techTreePhase,
       creating: this.selectors.creatingPhase,
       download: this.selectors.downloadPhase,
     };
     
     return await this.isVisible(phaseSelectors[phase]);
+  }
+
+  /**
+   * Wait for custom UU phase to appear
+   */
+  async waitForCustomUUPhase(): Promise<void> {
+    await this.waitForElement(this.selectors.customUUPhase, 15000);
+  }
+
+  /**
+   * Check if custom UU editor is visible
+   */
+  async isCustomUUEditorVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.customUUEditor);
+  }
+
+  /**
+   * Fill in a simple custom UU design (basic values for testing)
+   */
+  async fillCustomUU(name: string = 'Test Unit'): Promise<void> {
+    // Wait for custom UU editor to be visible
+    await this.waitForElement(this.selectors.customUUEditor, 15000);
+    await this.wait(1000);
+    
+    // Fill in unit name
+    const nameInput = this.page.locator(this.selectors.unitNameInput);
+    if (await nameInput.isVisible()) {
+      await nameInput.clear();
+      await nameInput.fill(name);
+    }
+    
+    // The editor should have default values that are valid
+    // We just need to enter a name
+  }
+
+  /**
+   * Submit the custom UU
+   */
+  async submitCustomUU(): Promise<void> {
+    const submitButton = this.page.locator(this.selectors.submitUUButton);
+    await expect(submitButton).toBeVisible({ timeout: 5000 });
+    await submitButton.click();
+    await this.wait(2000);
+  }
+
+  /**
+   * Complete custom UU phase with a simple valid unit
+   */
+  async completeCustomUUPhase(unitName: string = 'Test Custom Unit'): Promise<void> {
+    const isCustomUUPhaseVisible = await this.isInPhase('customuu');
+    
+    if (isCustomUUPhaseVisible) {
+      await this.fillCustomUU(unitName);
+      await this.submitCustomUU();
+      // Wait for phase transition
+      await this.wait(3000);
+    }
   }
 }
