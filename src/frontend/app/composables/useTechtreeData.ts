@@ -239,7 +239,7 @@ export const WARRIOR_PRIEST = 1811
 export const SHRIVAMSHA_RIDER = 1751
 export const ELITE_SHRIVAMSHA_RIDER = 1753
 export const GRENADIER = 1911
-export const TRACTION_TREBUCHET = 1942 // Mounted Trebuchet
+// Note: TRACTION_TREBUCHET (1942) already defined above as Mounted Trebuchet
 export const XIANBEI_RAIDER = 1952
 export const ELITE_XIANBEI_RAIDER = 1954
 export const WAR_CHARIOT = 1962
