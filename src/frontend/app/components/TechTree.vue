@@ -704,10 +704,31 @@ function getCrossPath(): string {
 }
 
 function getCaretColor(caret: Caret): string {
-  if (regionalCarets.includes(caret.id)) {
-    return '#4f3880'
+  // Check if this caret is granted by a bonus (should be colored)
+  const type = idType(caret.id)
+  const numId = idID(caret.id)
+  
+  // Check if this entity is granted by a bonus
+  let isGrantedByBonus = false
+  if (type === 0) {
+    isGrantedByBonus = grantedEntities.value.free.units.has(numId)
+  } else if (type === 1) {
+    isGrantedByBonus = grantedEntities.value.free.buildings.has(numId)
+  } else if (type === 2) {
+    isGrantedByBonus = grantedEntities.value.free.techs.has(numId)
   }
-  return caret.type.colour
+  
+  if (isGrantedByBonus) {
+    // Color bonus-granted units
+    // Blue for regional units (Traction Trebuchet only)
+    if (numId === 1942) { // Traction Trebuchet (Mounted Trebuchet)
+      return '#4f76d9' // Blue for regional
+    }
+    // Purple for special/unique bonus units (default)
+    return '#7b3ad9' // Purple for special
+  }
+  
+  return caret.type.colour // Default color
 }
 
 function getCaretCost(id: string): number {
