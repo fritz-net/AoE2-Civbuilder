@@ -766,6 +766,15 @@ function loadFromLocalStorage(): boolean {
   try {
     const parsed = JSON.parse(savedData)
     if (parsed.config) {
+      // Restore custom UU mode FIRST, before restoring bonuses
+      // This is critical because restoreBonusSelections() needs to know if we're in custom UU mode
+      if (parsed.isCustomUUMode !== undefined) {
+        isCustomUUMode.value = parsed.isCustomUUMode
+      }
+      if (parsed.customUUData !== undefined) {
+        customUUData.value = parsed.customUUData
+      }
+      
       // Use Object.keys to iterate and assign properties individually
       // This ensures Vue's reactivity system properly tracks the changes
       const mergedConfig = { ...createDefaultCiv(), ...parsed.config }
@@ -776,12 +785,6 @@ function loadFromLocalStorage(): boolean {
       restoreBonusSelections()
       if (parsed.currentStep !== undefined) {
         currentStep.value = parsed.currentStep
-      }
-      if (parsed.isCustomUUMode !== undefined) {
-        isCustomUUMode.value = parsed.isCustomUUMode
-      }
-      if (parsed.customUUData !== undefined) {
-        customUUData.value = parsed.customUUData
       }
       if (parsed.timestamp) {
         lastSaved.value = new Date(parsed.timestamp)
