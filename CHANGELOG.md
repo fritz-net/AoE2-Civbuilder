@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.11.0...v1.12.0) (2026-01-03)
+
+
+### Features
+
+* refactor /v2/draft UI: improve spacing, file upload UX, visual selectors, and custom UU workflow ([#221](https://github.com/fritz-net/AoE2-Civbuilder/issues/221)) ([5f9c13c](https://github.com/fritz-net/AoE2-Civbuilder/commit/5f9c13cc16d48ff02b147567da85fca359286976))
+* support multi-civ data.json uploads in combine page (all 3 formats) ([#235](https://github.com/fritz-net/AoE2-Civbuilder/issues/235)) ([d50ab44](https://github.com/fritz-net/AoE2-Civbuilder/commit/d50ab444c2205e4eaefa8f16c9ea37f3c02b7a45))
+
+
+### Bug Fixes
+
+* custom UU builder balance changes and optical fixes ([#228](https://github.com/fritz-net/AoE2-Civbuilder/issues/228)) ([07e4521](https://github.com/fritz-net/AoE2-Civbuilder/commit/07e4521871cde1d19fa8617c4e1002c2a1e5f884))
+* extract filename from Content-Disposition header for /v2/combine and /v2/build downloads ([#233](https://github.com/fritz-net/AoE2-Civbuilder/issues/233)) ([3dc911a](https://github.com/fritz-net/AoE2-Civbuilder/commit/3dc911a0cfbaadda53ce002998daa5e44fe39bf1))
+* hero mode bonus, compact mode layout, validation dashboard sidebar, contrast issues, min range feature, hero cost scaling, hybrid unit ranges, base unit-aware range validation, range point costs, siege bonuses, auto-reset, E2E tests, and add compre... ([#236](https://github.com/fritz-net/AoE2-Civbuilder/issues/236)) ([8391fef](https://github.com/fritz-net/AoE2-Civbuilder/commit/8391fef9272ea3a10012659c9b4089ab035e5972))
+* techtree one-click enabling, linked tech/building pair affordability, and tower prerequisites ([#229](https://github.com/fritz-net/AoE2-Civbuilder/issues/229)) ([3475fae](https://github.com/fritz-net/AoE2-Civbuilder/commit/3475faeaaacbbdd9e7819457003205ec0be8ef22))
+* vanilla civ order to match game internal order with numbered comments, UI improvements, and drag-and-drop enhancements ([#238](https://github.com/fritz-net/AoE2-Civbuilder/issues/238)) ([540e50b](https://github.com/fritz-net/AoE2-Civbuilder/commit/540e50baaba8cc60e638df62077896ecf6d9af00))
+
 ## [1.11.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.10.3...v1.11.0) (2026-01-02)
 
 
