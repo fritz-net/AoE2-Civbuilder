@@ -124,7 +124,7 @@ test.describe('Draft Custom UU Flow - Custom UU Editor Integration', () => {
     expect(isEditorVisible).toBe(true);
     
     // Should have unit name input
-    await expect(page.locator('#unitName')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('#unit-name')).toBeVisible({ timeout: 5000 });
     
     // Should have submit button
     await expect(page.locator('.submit-uu-button')).toBeVisible({ timeout: 5000 });

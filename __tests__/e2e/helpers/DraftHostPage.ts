@@ -230,13 +230,30 @@ export class DraftHostPage extends BasePage {
    * Fill in a simple custom UU design (basic values for testing)
    */
   async fillCustomUU(name: string = 'Test Unit'): Promise<void> {
-    // Wait for custom UU editor to be visible
+    // Wait for custom UU editor container to be visible
     await this.waitForElement(this.selectors.customUUEditor, 15000);
-    await this.wait(2000); // Extra wait for editor to fully initialize
+    await this.wait(3000); // Extra wait for editor to fully initialize
+    
+    // Check if we see the waiting screen instead (player already submitted)
+    const waitingScreen = this.page.locator('.waiting-screen, .waiting-title');
+    const isWaiting = await waitingScreen.isVisible().catch(() => false);
+    if (isWaiting) {
+      console.log('Player is in waiting screen, skipping custom UU fill');
+      return; // Already submitted or waiting
+    }
     
     // Wait for unit name input to be available
     const nameInput = this.page.locator(this.selectors.unitNameInput);
-    await nameInput.waitFor({ state: 'visible', timeout: 10000 });
+    const isInputVisible = await nameInput.isVisible({ timeout: 5000 }).catch(() => false);
+    
+    if (!isInputVisible) {
+      // Debug: log what's actually on the page
+      const pageContent = await this.page.content();
+      console.log('Custom UU editor container found but unit name input not visible');
+      console.log('Page contains custom-uu-editor-container:', pageContent.includes('custom-uu-editor-container'));
+      console.log('Page contains unit-name:', pageContent.includes('unit-name'));
+      throw new Error('Unit name input not found in custom UU editor');
+    }
     
     // Clear and fill unit name
     await nameInput.clear();
