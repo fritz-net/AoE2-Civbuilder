@@ -60,6 +60,20 @@
         </label>
       </div>
       
+      <div class="setting-group">
+        <label class="setting-label">Test Bonuses:</label>
+        <div class="bonus-checkboxes">
+          <label v-for="bonus in testBonuses" :key="bonus.id" class="bonus-option">
+            <input 
+              type="checkbox" 
+              :checked="selectedBonuses.civ.includes(bonus.id)"
+              @change="toggleBonus(bonus.id)"
+            />
+            <span>{{ bonus.name }}</span>
+          </label>
+        </div>
+      </div>
+      
       <button @click="resetTree" class="reset-button">🔄 Reset Tree</button>
       
       <div class="info-box">
@@ -86,6 +100,7 @@
         :sidebar-content="sidebarContent"
         :sidebar-title="sidebarTitle"
         :show-pastures="showPastures"
+        :selected-bonuses="selectedBonuses"
         @done="handleDone"
         @update:tree="handleTreeUpdate"
         @update:points="handlePointsUpdate"
@@ -106,6 +121,36 @@ const mode = ref<'build' | 'draft'>('build')
 const pointLimit = ref(250)
 const editable = ref(true)
 const showPastures = ref(false)
+
+// Selected bonuses for testing
+const selectedBonuses = ref<{
+  civ: number[]
+  uu: number[]
+  castle: number[]
+  imp: number[]
+  team: number[]
+}>({
+  civ: [],
+  uu: [],
+  castle: [],
+  imp: [],
+  team: [],
+})
+
+// Test bonuses - these grant units/techs that should show 0 cost
+const testBonuses = [
+  { id: 51, name: 'Can recruit Longboats (ID 51)' },
+  { id: 53, name: 'Can upgrade to Imperial Camel Riders (ID 53)' },
+  { id: 61, name: 'Can recruit Slingers (ID 61)' },
+  { id: 193, name: 'Can recruit Warrior Priests (ID 193)' },
+  { id: 286, name: 'Can upgrade to Houfnice (ID 286)' },
+  { id: 299, name: 'Can recruit Shrivamsha Riders (ID 299)' },
+  { id: 300, name: 'Can recruit Camel Scouts (ID 300)' },
+  { id: 337, name: 'Can recruit War Chariots (ID 337)' },
+  { id: 343, name: 'Can recruit Jian Swordsmen (ID 343)' },
+  { id: 348, name: 'Can recruit Xianbei Raiders (ID 348)' },
+  { id: 355, name: 'Can recruit Grenadiers (ID 355)' },
+]
 
 // State
 const currentPoints = ref(0)
@@ -141,28 +186,40 @@ const sidebarTitle = 'Tech Tree Demo'
 
 const sidebarContent = computed(() => `
 <span>Demo Civilization</span>
-<p><em>Testing ${mode.value} mode</em></p>
+<p><em>Testing ${mode.value} mode with bonus-granted units</em></p>
 
 <h3>Mode Information</h3>
 <ul>
   <li><strong>Mode:</strong> ${mode.value === 'build' ? 'Build (unlimited)' : 'Draft (limited)'}</li>
   <li><strong>Points:</strong> ${currentPoints.value} ${pointsLabel.value.toLowerCase()}</li>
   <li><strong>Editable:</strong> ${editable.value ? 'Yes' : 'No'}</li>
+  <li><strong>Selected Bonuses:</strong> ${selectedBonuses.value.civ.length}</li>
 </ul>
 
 <hr>
 
 <h3>Test Instructions</h3>
 <ol>
+  <li>Select bonuses from the sidebar</li>
+  <li>Granted units/techs will auto-enable with <strong>0 cost</strong></li>
+  <li>For example, select "Can recruit Slingers" to see Slingers enabled for free</li>
   <li>Switch between Build and Draft modes</li>
-  <li>Click on techs to enable/disable them</li>
-  <li>Watch how points change in each mode</li>
-  <li>Build mode: points increase from 0</li>
-  <li>Draft mode: points decrease from limit</li>
+  <li>Notice how granted units don't consume points</li>
 </ol>
 `)
 
 // Methods
+function toggleBonus(bonusId: number) {
+  const index = selectedBonuses.value.civ.indexOf(bonusId)
+  if (index === -1) {
+    selectedBonuses.value.civ.push(bonusId)
+  } else {
+    selectedBonuses.value.civ.splice(index, 1)
+  }
+  // Force re-render to apply changes
+  treeKey.value++
+}
+
 function handleModeChange() {
   // Reset points when mode changes
   currentPoints.value = initialPoints.value
@@ -359,6 +416,44 @@ watch(pointLimit, (newLimit) => {
 
 .info-box strong {
   color: #d4af37;
+}
+
+.bonus-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: #1a1a1a;
+  border: 2px solid #4a4a4a;
+  border-radius: 6px;
+}
+
+.bonus-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #252525;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.bonus-option:hover {
+  background: #2a2a2a;
+}
+
+.bonus-option input[type="checkbox"] {
+  margin-top: 0.2rem;
+  cursor: pointer;
+}
+
+.bonus-option span {
+  color: #e0e0e0;
+  font-size: 0.85rem;
+  line-height: 1.3;
 }
 
 .techtree-container {
