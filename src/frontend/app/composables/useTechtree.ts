@@ -764,9 +764,9 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   siegeworkshoplane.rows.imperial_1.push(unit(HEAVY_ROCKET_CART))
   siegeworkshoplane.rows.imperial_1.push(unit(HEAVY_SCORPION))
   siegeworkshoplane.rows.imperial_1.push(unit(BOMBARD_CANNON))
-  if (isBonusSelected(286)) siegeworkshoplane.rows.imperial_1.push(unit(HOUFNICE)) // Bonus unit: Can upgrade to Houfnice
+  if (isBonusSelected(BONUS_ID_HOUFNICE)) siegeworkshoplane.rows.imperial_1.push(unit(HOUFNICE)) // Bonus unit: Can upgrade to Houfnice
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_RAM))
-  if (isBonusSelected(361)) siegeworkshoplane.rows.imperial_2.push(unit(TRACTION_TREBUCHET)) // Bonus unit: Can train Mounted Trebuchets
+  if (isBonusSelected(BONUS_ID_MOUNTED_TREBUCHET)) siegeworkshoplane.rows.imperial_2.push(unit(TRACTION_TREBUCHET)) // Bonus unit: Can train Mounted Trebuchets
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_ONAGER))
   tree.lanes.push(siegeworkshoplane)
 
@@ -813,7 +813,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   docklane.rows.imperial_2.push(unit(LOU_CHUAN))
   docklane.rows.imperial_2.push(unit(ELITE_CANNON_GALLEON))
   docklane.rows.imperial_2.push(unit(DROMON))
-  if (isBonusSelected(298)) docklane.rows.imperial_2.push(unit(THIRISADAI)) // Bonus unit: Can train Thirisadai
+  if (isBonusSelected(BONUS_ID_THIRISADAI)) docklane.rows.imperial_2.push(unit(THIRISADAI)) // Bonus unit: Can train Thirisadai
   docklane.rows.imperial_1.push(tech(DRY_DOCK))
   docklane.rows.imperial_1.push(tech(SHIPWRIGHT))
   tree.lanes.push(docklane)
@@ -868,7 +868,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   const monasterylane = createLane()
   monasterylane.rows.castle_1.push(building(MONASTERY))
   monasterylane.rows.castle_2.push(unit(MONK))
-  if (isBonusSelected(193)) monasterylane.rows.castle_2.push(unit(WARRIOR_PRIEST)) // Bonus unit: Can recruit Warrior Priests
+  if (isBonusSelected(BONUS_ID_WARRIOR_PRIEST)) monasterylane.rows.castle_2.push(unit(WARRIOR_PRIEST)) // Bonus unit: Can recruit Warrior Priests
   monasterylane.rows.castle_2.push(tech(REDEMPTION))
   monasterylane.rows.castle_2.push(tech(DEVOTION))
   monasterylane.rows.castle_2.push(tech(ATONEMENT))
