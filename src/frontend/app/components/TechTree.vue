@@ -338,7 +338,7 @@ const svgRef = ref<SVGSVGElement | null>(null)
 const helptextRef = ref<HTMLDivElement | null>(null)
 
 // State
-const tree = ref<Tree>(getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: false, selectedBonuses: [] }))
+const tree = ref<Tree>(getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { selectedBonuses: [] }))
 const data = ref<TechtreeData | null>(null)
 const localtree = ref<number[][]>([
   [13, 17, 21, 74, 545, 539, 331, 125, 83, 128, 440],
@@ -379,7 +379,7 @@ const flattenedSelectedBonuses = computed(() => {
   return allBonuses
 })
 
-const connections = computed(() => getConnections(showPastures.value))
+const connections = computed(() => getConnections(flattenedSelectedBonuses.value))
 const connectionPoints = computed(() => getConnectionPoints(tree.value))
 const parentConnections = computed(() => new Map(connections.value.map(([parent, child]) => [child, parent])))
 
@@ -402,14 +402,6 @@ const grantedEntities = computed(() => {
   }
   
   return getAllGrantedEntities(bonusMap)
-})
-
-// Check if pastures bonus (356) is selected
-const showPastures = computed(() => {
-  const getBonusId = (entry: number | [number, number]): number => {
-    return Array.isArray(entry) ? entry[0] : entry
-  }
-  return props.selectedBonuses.civ.some(entry => getBonusId(entry) === 356)
 })
 
 // Scale factor to fit techtree in viewport without vertical scroll when not maximized
@@ -595,29 +587,11 @@ watch(() => props.initialTree, (newTree) => {
   }
 }, { deep: true })
 
-// Watch for showPastures bonus changes to rebuild the tree and update localtree
-watch(showPastures, (newShowPastures) => {
-  tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: newShowPastures, selectedBonuses: flattenedSelectedBonuses.value })
-  
-  // Update localtree to include/exclude Pasture building
-  if (newShowPastures) {
-    // Pasture will be added by enableGrantedEntities()
-    // Just rebuild tree to show pasture connections
-  } else {
-    // Remove Pasture from buildings if present
-    const index = localtree.value[BUILDINGS_ARRAY_INDEX].indexOf(PASTURE_BUILDING_ID)
-    if (index !== -1) {
-      localtree.value[BUILDINGS_ARRAY_INDEX].splice(index, 1)
-      emit('update:tree', localtree.value)
-    }
-  }
-})
-
 // Watch for changes in selected bonuses to enable granted entities AND rebuild tree
 watch(() => props.selectedBonuses, () => {
   if (data.value) {
     // Rebuild tree with new bonus units included in structure
-    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: showPastures.value, selectedBonuses: flattenedSelectedBonuses.value })
+    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { selectedBonuses: flattenedSelectedBonuses.value })
     // Enable granted entities in localtree
     enableGrantedEntities()
   }
@@ -710,7 +684,7 @@ async function loadLocale(localeCode: string) {
       data.value.strings = strings
       setTechtreeData(data.value)
       // Rebuild tree with localized names
-      tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: showPastures.value, selectedBonuses: flattenedSelectedBonuses.value })
+      tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { selectedBonuses: flattenedSelectedBonuses.value })
     }
   } catch (error) {
     console.error('Failed to load locale:', error)

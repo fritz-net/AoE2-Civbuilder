@@ -390,7 +390,10 @@ function t(techId: number): string {
   return 'tech_' + techId
 }
 
-export function getConnections(showPastures: boolean = false): [string, string][] {
+export function getConnections(selectedBonuses: number[] = []): [string, string][] {
+  // Helper to check if a bonus is selected
+  const isBonusSelected = (bonusId: number) => selectedBonuses.includes(bonusId)
+  const showPastures = isBonusSelected(356) // Pastures bonus
   const connections: [string, string][] = [
     [b(ARCHERY_RANGE), u(ARCHER)],
     [u(ARCHER), u(CROSSBOWMAN)],
@@ -620,15 +623,17 @@ export function setTechtreeData(data: TechtreeData): void {
 }
 
 export interface TreeOptions {
-  showPastures?: boolean // Show pasture building and techs instead of farm techs
-  selectedBonuses?: number[] // Selected bonus IDs to determine which bonus units to include
+  selectedBonuses?: number[] // Selected bonus IDs to determine which bonus units/buildings to include
 }
 
 export function getDefaultTree(windowHeight: number = 600, options: TreeOptions = {}): Tree {
-  const { showPastures = false, selectedBonuses = [] } = options
+  const { selectedBonuses = [] } = options
   
   // Helper to check if a bonus is selected
   const isBonusSelected = (bonusId: number) => selectedBonuses.includes(bonusId)
+  
+  // Check if Pastures bonus is selected (replaces Farm)
+  const showPastures = isBonusSelected(356)
   const tree: Tree = {
     offsets: {
       dark_1: 0,
@@ -942,7 +947,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   }
 
   // Update positions
-  const connections = getConnections(showPastures)
+  const connections = getConnections(selectedBonuses)
   let x = tree.padding + tree.offset_x
   for (let i = 0; i < tree.lanes.length; i++) {
     tree.lanes[i].x = x
