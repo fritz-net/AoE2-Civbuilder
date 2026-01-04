@@ -545,6 +545,41 @@ export function getConnections(showPastures: boolean = false): [string, string][
     [b(SIEGE_WORKSHOP), u(BOMBARD_CANNON)],
     [b(SIEGE_WORKSHOP), u(TRACTION_TREBUCHET)],
     [b(DOCK), u(CANNON_GALLEON)],
+    
+    // Bonus-granted unit connections
+    // Slinger (bonus 61)
+    [b(ARCHERY_RANGE), u(SLINGER)],
+    // Longboat (bonus 51)
+    [b(DOCK), u(LONGBOAT)],
+    [u(LONGBOAT), u(ELITE_LONGBOAT)],
+    // Turtle Ship (bonus 50)
+    [b(DOCK), u(TURTLE_SHIP)],
+    [u(TURTLE_SHIP), u(ELITE_TURTLE_SHIP)],
+    // Thirisadai (bonus 298)
+    [b(DOCK), u(THIRISADAI)],
+    // Camel Scout (bonus 300) - connects to existing camel line
+    [b(STABLE), u(CAMEL_SCOUT)],
+    [u(CAMEL_SCOUT), u(CAMEL_RIDER)],
+    // Imperial Camel Rider (bonus 53) - extends camel line
+    [u(HEAVY_CAMEL_RIDER), u(IMPERIAL_CAMEL_RIDER)],
+    // Shrivamsha Rider (bonus 299)
+    [b(STABLE), u(SHRIVAMSHA_RIDER)],
+    [u(SHRIVAMSHA_RIDER), u(ELITE_SHRIVAMSHA_RIDER)],
+    // War Chariot (bonus 337)
+    [b(STABLE), u(WAR_CHARIOT)],
+    [u(WAR_CHARIOT), u(ELITE_WAR_CHARIOT)],
+    // Xianbei Raider (bonus 348)
+    [b(STABLE), u(XIANBEI_RAIDER)],
+    [u(XIANBEI_RAIDER), u(ELITE_XIANBEI_RAIDER)],
+    // Jian Swordsman (bonus 343)
+    [b(BARRACKS), u(JIAN_SWORDSMAN)],
+    [u(JIAN_SWORDSMAN), u(ELITE_JIAN_SWORDSMAN)],
+    // Houfnice (bonus 286) - extends bombard cannon
+    [u(BOMBARD_CANNON), u(HOUFNICE)],
+    // Grenadier (bonus 355)
+    [b(SIEGE_WORKSHOP), u(GRENADIER)],
+    // Warrior Priest (bonus 193)
+    [b(MONASTERY), u(WARRIOR_PRIEST)],
   ]
 
   // Add farm/pasture specific connections based on showPastures option
