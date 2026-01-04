@@ -338,7 +338,7 @@ const svgRef = ref<SVGSVGElement | null>(null)
 const helptextRef = ref<HTMLDivElement | null>(null)
 
 // State
-const tree = ref<Tree>(getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: false }))
+const tree = ref<Tree>(getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: false, selectedBonuses: props.selectedBonuses }))
 const data = ref<TechtreeData | null>(null)
 const localtree = ref<number[][]>([
   [13, 17, 21, 74, 545, 539, 331, 125, 83, 128, 440],
@@ -579,7 +579,7 @@ watch(() => props.initialTree, (newTree) => {
 
 // Watch for showPastures bonus changes to rebuild the tree and update localtree
 watch(showPastures, (newShowPastures) => {
-  tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: newShowPastures })
+  tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: newShowPastures, selectedBonuses: props.selectedBonuses })
   
   // Update localtree to include/exclude Pasture building
   if (newShowPastures) {
@@ -595,9 +595,12 @@ watch(showPastures, (newShowPastures) => {
   }
 })
 
-// Watch for changes in selected bonuses to enable granted entities
+// Watch for changes in selected bonuses to enable granted entities AND rebuild tree
 watch(() => props.selectedBonuses, () => {
   if (data.value) {
+    // Rebuild tree with new bonus units included in structure
+    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: showPastures.value, selectedBonuses: props.selectedBonuses })
+    // Enable granted entities in localtree
     enableGrantedEntities()
   }
 }, { deep: true })
@@ -659,7 +662,7 @@ async function loadData() {
     setTechtreeData(jsonData)
     
     // Rebuild tree with data and names
-    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: showPastures.value })
+    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: showPastures.value, selectedBonuses: props.selectedBonuses })
     
     // Recalculate points after data is loaded if tree was already set
     if (props.editable && localtree.value.some(arr => arr.length > 0)) {
@@ -689,7 +692,7 @@ async function loadLocale(localeCode: string) {
       data.value.strings = strings
       setTechtreeData(data.value)
       // Rebuild tree with localized names
-      tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: showPastures.value })
+      tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: showPastures.value, selectedBonuses: props.selectedBonuses })
     }
   } catch (error) {
     console.error('Failed to load locale:', error)
