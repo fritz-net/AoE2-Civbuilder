@@ -283,6 +283,34 @@ Key settings:
 - Screenshots on failure
 - Traces on retry
 - HTML reporter
+- Error context reporter (custom)
+
+### Error Context Reporter
+
+When tests fail, the error context reporter automatically generates an `error-context.md` file in the test results directory alongside screenshots and other artifacts. This file contains:
+
+- Test name, file, and location
+- Error message and stack trace
+- Standard output and error
+- Test steps with execution status
+- List of attachments (screenshots, traces, etc.)
+- Debugging hints and commands
+
+**Example output structure:**
+```
+test-results/
+  customUUDraft-Custom-UU-Dr-2c018-ray-and-complete-full-draft-chromium/
+    ├── test-failed-1.png          # Screenshot
+    └── error-context.md           # Error context (auto-generated)
+```
+
+The error context file is automatically uploaded as part of the test results artifact in CI/CD workflows, making it easy to diagnose test failures without needing to reproduce them locally.
+
+**Benefits:**
+- Immediate access to error details without opening HTML reports
+- Structured markdown format for easy reading
+- Includes all relevant debugging information in one place
+- Automatic generation on test failure
 
 ## Best Practices
 
