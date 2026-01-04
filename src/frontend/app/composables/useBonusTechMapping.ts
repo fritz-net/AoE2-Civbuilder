@@ -10,6 +10,10 @@ export interface BonusTechMapping {
   techs?: number[]  // Tech IDs that are granted by this bonus
   buildings?: number[]  // Building IDs that are granted by this bonus
   requiresPrerequisites?: boolean // If true, all prerequisites must also be enabled
+  prerequisites?: {
+    units?: number[]  // Prerequisite units that must be enabled (with cost)
+    techs?: number[]  // Prerequisite techs that must be enabled (with cost)
+  }
 }
 
 /**
@@ -30,6 +34,9 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusType: 'civ',
     units: [207],  // Imperial Camel Rider
     requiresPrerequisites: true,  // Requires Heavy Camel Rider
+    prerequisites: {
+      units: [329, 330],  // Camel Rider, Heavy Camel Rider
+    },
   },
   
   // CIV_BONUS_61: "Can recruit slingers from Archery Ranges"
@@ -52,6 +59,9 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusType: 'civ',
     units: [1709],  // Houfnice
     requiresPrerequisites: true,  // Requires Bombard Cannon
+    prerequisites: {
+      units: [36],  // Bombard Cannon
+    },
   },
   
   // CIV_BONUS_299: "Can recruit Shrivamsha Riders"
@@ -168,17 +178,29 @@ export function bonusRequiresPrerequisites(bonusId: number, bonusType: 'civ' | '
 
 /**
  * Get all units/techs/buildings granted by a list of selected bonuses
- * Returns a map of entity type to entity IDs with 0 cost
+ * Returns separate sets for free entities (0 cost) and prerequisite entities (with cost)
  */
 export function getAllGrantedEntities(selectedBonuses: Map<string, { id: number; count: number }[]>): {
-  units: Set<number>
-  techs: Set<number>
-  buildings: Set<number>
+  free: {
+    units: Set<number>
+    techs: Set<number>
+    buildings: Set<number>
+  }
+  prerequisites: {
+    units: Set<number>
+    techs: Set<number>
+  }
 } {
   const result = {
-    units: new Set<number>(),
-    techs: new Set<number>(),
-    buildings: new Set<number>(),
+    free: {
+      units: new Set<number>(),
+      techs: new Set<number>(),
+      buildings: new Set<number>(),
+    },
+    prerequisites: {
+      units: new Set<number>(),
+      techs: new Set<number>(),
+    },
   }
   
   // Iterate through all bonus types
@@ -186,13 +208,19 @@ export function getAllGrantedEntities(selectedBonuses: Map<string, { id: number;
     const type = bonusType as 'civ' | 'uu' | 'castle' | 'imp' | 'team'
     
     for (const bonus of bonusList) {
-      const units = getUnitsGrantedByBonus(bonus.id, type)
-      const techs = getTechsGrantedByBonus(bonus.id, type)
-      const buildings = getBuildingsGrantedByBonus(bonus.id, type)
+      const mapping = BONUS_TECH_MAPPINGS.find(m => m.bonusId === bonus.id && m.bonusType === type)
+      if (!mapping) continue
       
-      units.forEach(id => result.units.add(id))
-      techs.forEach(id => result.techs.add(id))
-      buildings.forEach(id => result.buildings.add(id))
+      // Add the granted entities (free - 0 cost)
+      mapping.units?.forEach(id => result.free.units.add(id))
+      mapping.techs?.forEach(id => result.free.techs.add(id))
+      mapping.buildings?.forEach(id => result.free.buildings.add(id))
+      
+      // Add prerequisites (with cost) if required
+      if (mapping.requiresPrerequisites && mapping.prerequisites) {
+        mapping.prerequisites.units?.forEach(id => result.prerequisites.units.add(id))
+        mapping.prerequisites.techs?.forEach(id => result.prerequisites.techs.add(id))
+      }
     }
   }
   

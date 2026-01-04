@@ -604,24 +604,38 @@ watch(() => props.selectedBonuses, () => {
 
 // Helper function to enable entities granted by bonuses
 function enableGrantedEntities() {
-  // Enable granted units (localtree[0])
-  for (const unitId of grantedEntities.value.units) {
+  // Enable granted units (localtree[0]) - FREE with 0 cost
+  for (const unitId of grantedEntities.value.free.units) {
     if (!localtree.value[UNITS_INDEX].includes(unitId)) {
       localtree.value[UNITS_INDEX].push(unitId)
     }
   }
   
-  // Enable granted techs (localtree[2])
-  for (const techId of grantedEntities.value.techs) {
+  // Enable granted techs (localtree[2]) - FREE with 0 cost
+  for (const techId of grantedEntities.value.free.techs) {
     if (!localtree.value[TECHS_INDEX].includes(techId)) {
       localtree.value[TECHS_INDEX].push(techId)
     }
   }
   
-  // Enable granted buildings (localtree[1])
-  for (const buildingId of grantedEntities.value.buildings) {
+  // Enable granted buildings (localtree[1]) - FREE with 0 cost
+  for (const buildingId of grantedEntities.value.free.buildings) {
     if (!localtree.value[BUILDINGS_ARRAY_INDEX].includes(buildingId)) {
       localtree.value[BUILDINGS_ARRAY_INDEX].push(buildingId)
+    }
+  }
+  
+  // Enable prerequisite units (localtree[0]) - WITH COST
+  for (const unitId of grantedEntities.value.prerequisites.units) {
+    if (!localtree.value[UNITS_INDEX].includes(unitId)) {
+      localtree.value[UNITS_INDEX].push(unitId)
+    }
+  }
+  
+  // Enable prerequisite techs (localtree[2]) - WITH COST
+  for (const techId of grantedEntities.value.prerequisites.techs) {
+    if (!localtree.value[TECHS_INDEX].includes(techId)) {
+      localtree.value[TECHS_INDEX].push(techId)
     }
   }
   
@@ -708,18 +722,19 @@ function getCaretCost(id: string): number {
   const type = idType(id)
   const numId = idID(id)
   
-  // Check based on entity type (0=buildings, 1=units, 2=techs)
-  if (type === 0 && grantedEntities.value.buildings.has(numId)) {
+  // Check based on entity type (0=units, 1=buildings, 2=techs)
+  // Only FREE entities get 0 cost, prerequisites have normal cost
+  if (type === 0 && grantedEntities.value.free.units.has(numId)) {
     return 0
   }
-  if (type === 1 && grantedEntities.value.units.has(numId)) {
+  if (type === 1 && grantedEntities.value.free.buildings.has(numId)) {
     return 0
   }
-  if (type === 2 && grantedEntities.value.techs.has(numId)) {
+  if (type === 2 && grantedEntities.value.free.techs.has(numId)) {
     return 0
   }
   
-  // Return normal cost from data
+  // Return normal cost from data (including for prerequisites)
   const entityType = caretType(id)
   const entityId = numId.toString()
   return data.value.data[entityType]?.[entityId]?.tech_cost || 0
