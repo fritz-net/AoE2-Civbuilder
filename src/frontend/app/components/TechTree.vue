@@ -314,6 +314,10 @@ const emit = defineEmits<{
 const PASTURE_BUILDING_ID = 1889
 const BUILDINGS_ARRAY_INDEX = 1
 
+// Constants for tree array indices
+const UNITS_INDEX = 0
+const TECHS_INDEX = 2
+
 // Constants for Fortified Wall group dependencies
 const FORTIFIED_WALL_TECH_ID = 'tech_194'
 const FORTIFIED_WALL_BUILDING_ID = 'building_155'
@@ -607,25 +611,21 @@ watch(() => props.selectedBonuses, () => {
 
 // Helper function to enable entities granted by bonuses
 function enableGrantedEntities() {
-  // Units are in localtree[1], techs in localtree[2], buildings in localtree[0]
-  const UNITS_INDEX = 1
-  const TECHS_INDEX = 2
-  
-  // Enable granted units
+  // Enable granted units (localtree[0])
   for (const unitId of grantedEntities.value.units) {
     if (!localtree.value[UNITS_INDEX].includes(unitId)) {
       localtree.value[UNITS_INDEX].push(unitId)
     }
   }
   
-  // Enable granted techs
+  // Enable granted techs (localtree[2])
   for (const techId of grantedEntities.value.techs) {
     if (!localtree.value[TECHS_INDEX].includes(techId)) {
       localtree.value[TECHS_INDEX].push(techId)
     }
   }
   
-  // Enable granted buildings
+  // Enable granted buildings (localtree[1])
   for (const buildingId of grantedEntities.value.buildings) {
     if (!localtree.value[BUILDINGS_ARRAY_INDEX].includes(buildingId)) {
       localtree.value[BUILDINGS_ARRAY_INDEX].push(buildingId)
