@@ -265,6 +265,7 @@ import {
   imagePrefix,
   cost,
 } from '~/composables/useTechtree'
+import { getAllGrantedEntities } from '~/composables/useBonusTechMapping'
 
 interface Props {
   initialTree?: number[][]
@@ -276,6 +277,13 @@ interface Props {
   sidebarTitle?: string
   showPastures?: boolean
   mode?: 'build' | 'draft'
+  selectedBonuses?: {
+    civ: (number | [number, number])[]
+    uu: (number | [number, number])[]
+    castle: (number | [number, number])[]
+    imp: (number | [number, number])[]
+    team: (number | [number, number])[]
+  }
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -287,6 +295,13 @@ const props = withDefaults(defineProps<Props>(), {
   sidebarTitle: 'Civilization Info',
   showPastures: false,
   mode: 'draft',
+  selectedBonuses: () => ({
+    civ: [],
+    uu: [],
+    castle: [],
+    imp: [],
+    team: []
+  })
 })
 
 const emit = defineEmits<{
@@ -347,6 +362,27 @@ const showConfirmDialog = ref(false)
 const connections = computed(() => getConnections(props.showPastures))
 const connectionPoints = computed(() => getConnectionPoints(tree.value))
 const parentConnections = computed(() => new Map(connections.value.map(([parent, child]) => [child, parent])))
+
+// Compute entities granted by selected bonuses (units/techs with 0 cost)
+const grantedEntities = computed(() => {
+  // Convert selected bonuses to Map format expected by getAllGrantedEntities
+  const bonusMap = new Map<string, { id: number; count: number }[]>()
+  
+  // Helper to extract bonus ID from entry (could be number or [id, multiplier] tuple)
+  const getBonusId = (entry: number | [number, number]): number => {
+    return Array.isArray(entry) ? entry[0] : entry
+  }
+  
+  // Process each bonus type
+  for (const [bonusType, bonusList] of Object.entries(props.selectedBonuses)) {
+    bonusMap.set(bonusType, bonusList.map(entry => ({
+      id: getBonusId(entry),
+      count: 1
+    })))
+  }
+  
+  return getAllGrantedEntities(bonusMap)
+})
 
 // Scale factor to fit techtree in viewport without vertical scroll when not maximized
 const techtreeScale = computed(() => {
@@ -562,6 +598,43 @@ watch(() => props.showPastures, (newShowPastures) => {
   }
 })
 
+// Watch for changes in selected bonuses to enable granted entities
+watch(() => props.selectedBonuses, () => {
+  if (data.value) {
+    enableGrantedEntities()
+  }
+}, { deep: true })
+
+// Helper function to enable entities granted by bonuses
+function enableGrantedEntities() {
+  // Units are in localtree[1], techs in localtree[2], buildings in localtree[0]
+  const UNITS_INDEX = 1
+  const TECHS_INDEX = 2
+  
+  // Enable granted units
+  for (const unitId of grantedEntities.value.units) {
+    if (!localtree.value[UNITS_INDEX].includes(unitId)) {
+      localtree.value[UNITS_INDEX].push(unitId)
+    }
+  }
+  
+  // Enable granted techs
+  for (const techId of grantedEntities.value.techs) {
+    if (!localtree.value[TECHS_INDEX].includes(techId)) {
+      localtree.value[TECHS_INDEX].push(techId)
+    }
+  }
+  
+  // Enable granted buildings
+  for (const buildingId of grantedEntities.value.buildings) {
+    if (!localtree.value[BUILDINGS_ARRAY_INDEX].includes(buildingId)) {
+      localtree.value[BUILDINGS_ARRAY_INDEX].push(buildingId)
+    }
+  }
+  
+  emit('update:tree', localtree.value)
+}
+
 // Methods
 async function loadData() {
   try {
@@ -596,6 +669,9 @@ async function loadData() {
   } catch (error) {
     console.error('Failed to load techtree data:', error)
   }
+  
+  // Enable entities granted by bonuses after data is loaded
+  enableGrantedEntities()
 }
 
 async function loadLocale(localeCode: string) {
@@ -634,9 +710,26 @@ function getCaretColor(caret: Caret): string {
 
 function getCaretCost(id: string): number {
   if (!data.value) return 0
-  const type = caretType(id)
-  const numId = idID(id).toString()
-  return data.value.data[type]?.[numId]?.tech_cost || 0
+  
+  // Check if this unit/tech/building is granted by a bonus (should be free)
+  const type = idType(id)
+  const numId = idID(id)
+  
+  // Check based on entity type (0=buildings, 1=units, 2=techs)
+  if (type === 0 && grantedEntities.value.buildings.has(numId)) {
+    return 0
+  }
+  if (type === 1 && grantedEntities.value.units.has(numId)) {
+    return 0
+  }
+  if (type === 2 && grantedEntities.value.techs.has(numId)) {
+    return 0
+  }
+  
+  // Return normal cost from data
+  const entityType = caretType(id)
+  const entityId = numId.toString()
+  return data.value.data[entityType]?.[entityId]?.tech_cost || 0
 }
 
 function getConnectionPath(connection: { from: string; to: string }): string {
