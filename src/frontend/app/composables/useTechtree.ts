@@ -116,6 +116,23 @@ import {
   HEI_GUANG_CAVALRY,
   HEAVY_HEI_GUANG_CAVALRY,
   LOU_CHUAN,
+  // Regional/Bonus-granted units
+  SLINGER,
+  IMPERIAL_CAMEL_RIDER,
+  LONGBOAT,
+  ELITE_LONGBOAT,
+  CAMEL_SCOUT,
+  HOUFNICE,
+  WARRIOR_PRIEST,
+  SHRIVAMSHA_RIDER,
+  ELITE_SHRIVAMSHA_RIDER,
+  GRENADIER,
+  XIANBEI_RAIDER,
+  ELITE_XIANBEI_RAIDER,
+  WAR_CHARIOT,
+  ELITE_WAR_CHARIOT,
+  JIAN_SWORDSMAN,
+  ELITE_JIAN_SWORDSMAN,
   // Tech IDs
   TOWN_WATCH,
   CROP_ROTATION,
@@ -611,6 +628,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   archerylane.rows.castle_1.push(unit(ELITE_SKIRMISHER))
   archerylane.rows.castle_1.push(unit(CAVALRY_ARCHER))
   archerylane.rows.castle_1.push(unit(ELEPHANT_ARCHER))
+  archerylane.rows.castle_1.push(unit(SLINGER)) // Bonus unit: Can recruit Slingers
   archerylane.rows.castle_1.push(tech(THUMB_RING))
   archerylane.rows.imperial_1.push(unit(ARBALESTER))
   archerylane.rows.imperial_1.push(unit(HAND_CANNONEER))
@@ -630,6 +648,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.castle_1.push(unit(PIKEMAN))
   barrackslane.rows.castle_1.push(unit(EAGLE_WARRIOR))
   barrackslane.rows.castle_1.push(unit(FIRE_LANCER))
+  barrackslane.rows.castle_1.push(unit(JIAN_SWORDSMAN)) // Bonus unit: Can recruit Jian Swordsmen
   barrackslane.rows.castle_1.push(tech(GAMBESONS))
   barrackslane.rows.castle_1.push(tech(SQUIRES))
   barrackslane.rows.imperial_1.push(unit(TWO_HANDED_SWORDSMAN))
@@ -637,11 +656,13 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.imperial_1.push(unit(HALBERDIER))
   barrackslane.rows.imperial_1.push(unit(ELITE_EAGLE_WARRIOR))
   barrackslane.rows.imperial_1.push(unit(ELITE_FIRE_LANCER))
+  barrackslane.rows.imperial_1.push(unit(ELITE_JIAN_SWORDSMAN))
   tree.lanes.push(barrackslane)
 
   const stablelane = createLane()
   stablelane.rows.feudal_1.push(building(STABLE))
   stablelane.rows.feudal_2.push(unit(SCOUT_CAVALRY))
+  stablelane.rows.feudal_2.push(unit(CAMEL_SCOUT)) // Bonus unit: Can recruit Camel Scouts
   stablelane.rows.feudal_2.push(tech(BLOODLINES))
   stablelane.rows.castle_1.push(unit(LIGHT_CAVALRY))
   stablelane.rows.castle_1.push(unit(KNIGHT))
@@ -649,13 +670,20 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.castle_1.push(unit(BATTLE_ELEPHANT))
   stablelane.rows.castle_1.push(unit(STEPPE_LANCER))
   stablelane.rows.castle_1.push(unit(HEI_GUANG_CAVALRY))
+  stablelane.rows.castle_1.push(unit(SHRIVAMSHA_RIDER)) // Bonus unit: Can recruit Shrivamsha Riders
+  stablelane.rows.castle_1.push(unit(WAR_CHARIOT)) // Bonus unit: Can recruit War Chariots
+  stablelane.rows.castle_1.push(unit(XIANBEI_RAIDER)) // Bonus unit: Can recruit Xianbei Raiders
   stablelane.rows.castle_1.push(tech(HUSBANDRY))
   stablelane.rows.imperial_1.push(unit(HUSSAR))
   stablelane.rows.imperial_1.push(unit(CAVALIER))
   stablelane.rows.imperial_1.push(unit(HEAVY_CAMEL_RIDER))
+  stablelane.rows.imperial_1.push(unit(IMPERIAL_CAMEL_RIDER)) // Bonus unit: Can upgrade to Imperial Camel Rider
   stablelane.rows.imperial_1.push(unit(ELITE_BATTLE_ELEPHANT))
   stablelane.rows.imperial_1.push(unit(ELITE_STEPPE_LANCER))
   stablelane.rows.imperial_1.push(unit(HEAVY_HEI_GUANG_CAVALRY))
+  stablelane.rows.imperial_1.push(unit(ELITE_SHRIVAMSHA_RIDER))
+  stablelane.rows.imperial_1.push(unit(ELITE_WAR_CHARIOT))
+  stablelane.rows.imperial_1.push(unit(ELITE_XIANBEI_RAIDER))
   stablelane.rows.imperial_2.push(unit(PALADIN))
   tree.lanes.push(stablelane)
 
@@ -673,6 +701,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   siegeworkshoplane.rows.imperial_1.push(unit(HEAVY_ROCKET_CART))
   siegeworkshoplane.rows.imperial_1.push(unit(HEAVY_SCORPION))
   siegeworkshoplane.rows.imperial_1.push(unit(BOMBARD_CANNON))
+  siegeworkshoplane.rows.imperial_1.push(unit(HOUFNICE)) // Bonus unit: Can upgrade to Houfnice
+  siegeworkshoplane.rows.imperial_1.push(unit(GRENADIER)) // Bonus unit: Can recruit Grenadiers
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_RAM))
   siegeworkshoplane.rows.imperial_2.push(unit(TRACTION_TREBUCHET))
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_ONAGER))
@@ -709,11 +739,13 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   docklane.rows.castle_1.push(tech(GILLNETS))
   docklane.rows.castle_1.push(unit(DEMOLITION_SHIP))
   docklane.rows.castle_1.push(unit(WAR_GALLEY))
+  docklane.rows.castle_1.push(unit(LONGBOAT)) // Bonus unit: Can recruit Longboats
   docklane.rows.castle_1.push(tech(CAREENING))
   docklane.rows.imperial_1.push(unit(FAST_FIRE_SHIP))
   docklane.rows.imperial_1.push(unit(CANNON_GALLEON))
   docklane.rows.imperial_1.push(unit(HEAVY_DEMO_SHIP))
   docklane.rows.imperial_1.push(unit(GALLEON))
+  docklane.rows.imperial_1.push(unit(ELITE_LONGBOAT))
   docklane.rows.imperial_2.push(unit(LOU_CHUAN))
   docklane.rows.imperial_2.push(unit(ELITE_CANNON_GALLEON))
   docklane.rows.imperial_2.push(unit(DROMON))
@@ -771,6 +803,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   const monasterylane = createLane()
   monasterylane.rows.castle_1.push(building(MONASTERY))
   monasterylane.rows.castle_2.push(unit(MONK))
+  monasterylane.rows.castle_2.push(unit(WARRIOR_PRIEST)) // Bonus unit: Can recruit Warrior Priests
   monasterylane.rows.castle_2.push(tech(REDEMPTION))
   monasterylane.rows.castle_2.push(tech(DEVOTION))
   monasterylane.rows.castle_2.push(tech(ATONEMENT))

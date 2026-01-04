@@ -225,6 +225,24 @@ export const HEI_GUANG_CAVALRY = 1944
 export const HEAVY_HEI_GUANG_CAVALRY = 1946
 export const LOU_CHUAN = 1948
 
+// Regional/Bonus-granted Unit IDs
+export const SLINGER = 185
+export const IMPERIAL_CAMEL_RIDER = 207
+export const LONGBOAT = 250
+export const ELITE_LONGBOAT = 251
+export const CAMEL_SCOUT = 1755
+export const HOUFNICE = 1709
+export const WARRIOR_PRIEST = 1811
+export const SHRIVAMSHA_RIDER = 1751
+export const ELITE_SHRIVAMSHA_RIDER = 1753
+export const GRENADIER = 1911
+export const XIANBEI_RAIDER = 1952
+export const ELITE_XIANBEI_RAIDER = 1954
+export const WAR_CHARIOT = 1962
+export const ELITE_WAR_CHARIOT = 1964
+export const JIAN_SWORDSMAN = 1974
+export const ELITE_JIAN_SWORDSMAN = 1975
+
 // Tech IDs
 export const TOWN_WATCH = 8
 export const CROP_ROTATION = 12
