@@ -14,24 +14,8 @@ import * as path from 'path';
  * This creates an error-context.md file in the test results directory
  */
 class ErrorContextReporter implements Reporter {
-  private testContextData = new Map<string, {
-    consoleLogs: string[];
-    networkRequests: any[];
-    startTime: Date;
-  }>();
-
   onBegin(config: FullConfig, suite: Suite) {
     console.log(`Starting test run with ${suite.allTests().length} tests`);
-  }
-
-  onTestBegin(test: TestCase, result: TestResult) {
-    // Initialize context for this test
-    const testId = test.id;
-    this.testContextData.set(testId, {
-      consoleLogs: [],
-      networkRequests: [],
-      startTime: new Date()
-    });
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
@@ -39,9 +23,6 @@ class ErrorContextReporter implements Reporter {
     if (result.status !== 'passed' && result.status !== 'skipped') {
       this.saveErrorContext(test, result);
     }
-    
-    // Clean up context data
-    this.testContextData.delete(test.id);
   }
 
   onEnd(result: FullResult) {
@@ -50,10 +31,22 @@ class ErrorContextReporter implements Reporter {
 
   private saveErrorContext(test: TestCase, result: TestResult) {
     try {
-      // Get output directory from test attachments
-      const outputDir = result.attachments.length > 0
-        ? path.dirname(result.attachments[0].path || '')
-        : path.join('test-results', this.sanitizeTestName(test));
+      // Determine output directory
+      // Playwright creates a directory for each test in test-results
+      let outputDir: string;
+      
+      if (result.attachments.length > 0 && result.attachments[0].path) {
+        // Use the directory where screenshots/attachments are saved
+        outputDir = path.dirname(result.attachments[0].path);
+      } else {
+        // Fallback: construct the path following Playwright's convention
+        // test-results/<test-file-name>-<test-title>-<project-name>
+        const sanitizedTitle = test.title.replace(/[^a-z0-9]/gi, '-').toLowerCase().substring(0, 50);
+        const sanitizedFile = path.basename(test.location.file, '.spec.ts');
+        const projectName = test.parent.project()?.name || 'chromium';
+        const dirName = `${sanitizedFile}-${sanitizedTitle}-${projectName}`;
+        outputDir = path.join('test-results', dirName);
+      }
 
       // Ensure directory exists
       if (!fs.existsSync(outputDir)) {
@@ -68,12 +61,6 @@ class ErrorContextReporter implements Reporter {
     } catch (error) {
       console.error('Failed to save error context:', error);
     }
-  }
-
-  private sanitizeTestName(test: TestCase): string {
-    const title = test.title.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    const file = path.basename(test.location.file, '.spec.ts');
-    return `${file}-${title}`;
   }
 
   private buildErrorContextMarkdown(test: TestCase, result: TestResult): string {
