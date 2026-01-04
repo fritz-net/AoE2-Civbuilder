@@ -67,10 +67,10 @@ async function completeSetupPhase(page: Page): Promise<void> {
 // Helper to select first available card
 async function selectFirstCard(page: Page): Promise<void> {
   // Wait for cards to be visible - try multiple selectors
-  await page.waitForSelector('.draft-card:not(.draft-card-hidden), .bonus-card', { timeout: 10000 });
+  await page.waitForSelector('.draft-card, .bonus-card', { timeout: 10000 });
   
   // Find the first visible, clickable card
-  const firstCard = page.locator('.draft-card:not(.draft-card-hidden), .bonus-card').first();
+  const firstCard = page.locator('.draft-card, .bonus-card').first();
   
   // Ensure it's visible and enabled
   await firstCard.waitFor({ state: 'visible', timeout: 5000 });
