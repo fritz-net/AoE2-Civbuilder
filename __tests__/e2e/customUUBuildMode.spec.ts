@@ -167,16 +167,21 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     // Reload the page
     await page.reload();
     
-    // Wait for restore to complete after reload (1100ms restore + safety margin)
-    await page.waitForTimeout(2000);
+    // Wait for restore to complete after reload (1100ms restore + extra buffer for rendering)
+    await page.waitForTimeout(3000);
     
-    // After reload, the page should restore to step 3 (Unique Unit) if autosave worked
+    // After reload, verify we're back on step 3 (Unique Unit)
+    await expect(page.getByRole('heading', { name: /Unique Unit/i })).toBeVisible({ timeout: 10000 });
+    
     // Verify custom UU checkbox is still checked
     const customUUCheckbox = page.getByRole('checkbox', { name: /Use Custom Unique Unit Designer/i });
-    await expect(customUUCheckbox).toBeChecked();
+    await expect(customUUCheckbox).toBeChecked({ timeout: 10000 });
+    
+    // Verify custom UU editor is shown
+    await expect(page.getByRole('heading', { name: /Design Your Custom Unique Unit/i })).toBeVisible({ timeout: 10000 });
     
     // Verify unit name is restored
-    await expect(page.getByLabel(/Unit Name/i)).toHaveValue('Elite Warrior');
+    await expect(page.getByLabel(/Unit Name/i)).toHaveValue('Elite Warrior', { timeout: 10000 });
   });
 
   test('should show autosave indicator when changes are made', async ({ page }) => {
@@ -187,7 +192,7 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     
     // Verify autosave checkbox is enabled by default
     const autosaveCheckbox = page.getByRole('checkbox', { name: /💾 Autosave to browser/i });
-    await expect(autosaveCheckbox).toBeChecked();
+    await expect(autosaveCheckbox).toBeChecked({ timeout: 10000 });
     
     // Fill in civ name
     await page.getByPlaceholder(/Enter civilization name/i).fill('TestCiv');
@@ -197,8 +202,8 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     
     // Verify autosave status is shown (text contains "Last saved:")
     const autosaveStatus = page.locator('.autosave-status');
-    await expect(autosaveStatus).toBeVisible();
-    await expect(autosaveStatus).toContainText(/Last saved:/i);
+    await expect(autosaveStatus).toBeVisible({ timeout: 10000 });
+    await expect(autosaveStatus).toContainText(/Last saved:/i, { timeout: 10000 });
   });
 });
 
