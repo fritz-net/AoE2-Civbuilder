@@ -1186,8 +1186,9 @@ function processCardPick(draft, pick) {
 	
 	// If it's the last turn of a round, distribute new cards, otherwise make the card unavailable to others
 	if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
-		// Determine if this is the last round (team bonuses = roundType 4, or 5 if custom UU mode shifts rounds)
-		var lastRoundType = draft["preset"]["custom_uu_mode"] ? 5 : 4;
+		// Determine if this is the last round (team bonuses = roundType 4)
+		// Note: even with custom UU mode, team bonuses is still the last round (roundType 4)
+		var lastRoundType = 4;
 		
 		if (roundType == lastRoundType) {
 			// Last turn of the game - move to tech tree phase
