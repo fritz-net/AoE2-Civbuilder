@@ -281,10 +281,10 @@ Key settings:
 - Base URL: `http://localhost:4000`
 - Browser: Chromium (Desktop Chrome)
 - Screenshots on failure
-- Traces retained on failure (CI only)
-- Video recording on failure (CI only)
+- Traces: retained on failure for debugging (both local and CI)
+- Video recording on failure (CI only) - disabled locally for performance
 - Multiple reporters on CI: List, HTML, and JSON
-  - JSON results saved to `test-results/results.json`
+  - JSON results saved to `test-results/results.json` (relative to project root)
 - HTML reporter (local development)
 
 ### Error Reporting on CI
