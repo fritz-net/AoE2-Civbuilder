@@ -281,8 +281,23 @@ Key settings:
 - Base URL: `http://localhost:4000`
 - Browser: Chromium (Desktop Chrome)
 - Screenshots on failure
-- Traces on retry
-- HTML reporter
+- Traces retained on failure (CI only)
+- Video recording on failure (CI only)
+- Multiple reporters on CI: List, HTML, and JSON
+  - JSON results saved to `test-results/results.json`
+- HTML reporter (local development)
+
+### Error Reporting on CI
+
+When tests fail on CI, the following artifacts are automatically captured and uploaded:
+- **Screenshots**: Captured for each failed test
+- **Videos**: Full video recording of failed test runs
+- **Traces**: Playwright traces including timeline, network activity, and DOM snapshots
+- **JSON Results**: Structured test results with metadata
+
+These artifacts are uploaded to GitHub Actions and retained for 30 days. Access them from:
+- **Playwright Report**: Uploaded on test failure (includes HTML report)
+- **Test Results**: Always uploaded (includes screenshots, videos, traces, JSON)
 
 ## Best Practices
 
