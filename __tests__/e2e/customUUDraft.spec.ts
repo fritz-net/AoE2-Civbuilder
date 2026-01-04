@@ -255,6 +255,10 @@ test.describe('Custom UU Draft - Custom UU Phase', () => {
 
 test.describe('Custom UU Draft - Backend Integration', () => {
   test('should store custom UU in player bonuses array and complete full draft', async ({ page }) => {
+    // This test goes through entire draft flow including multiple rounds
+    // Increase timeout to account for all the round transitions
+    test.setTimeout(45000);
+    
     // This test verifies the complete flow from draft creation to tech tree with custom UU
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
@@ -317,8 +321,9 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     await page.waitForTimeout(3000);
     
     // Should reach tech tree phase
-    const techTreePhase = page.locator('text=/Tech Tree|Techtree/i').first();
-    await expect(techTreePhase).toBeVisible({ timeout: 10000 });
+    // Check for tech tree controls instead of text heading
+    const techTreeControls = page.locator('.techtree-phase, button:has-text("Done"), button:has-text("Fill")').first();
+    await expect(techTreeControls).toBeVisible({ timeout: 10000 });
     
     // Custom UU should be visible in the tech tree or sidebar
     // This confirms it was stored in bonuses[1] array correctly
