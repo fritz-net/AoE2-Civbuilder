@@ -20,7 +20,13 @@ export default defineConfig({
   workers: process.env.CI ? 4 : undefined,
   
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: process.env.CI 
+    ? [
+        ['list'],
+        ['html', { open: 'never' }],
+        ['json', { outputFile: 'test-results/results.json' }]
+      ]
+    : 'html',
   
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -28,10 +34,13 @@ export default defineConfig({
     baseURL: 'http://localhost:4000',
     
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: process.env.CI ? 'retain-on-failure' : 'on-first-retry',
     
     /* Screenshot on failure */
     screenshot: 'only-on-failure',
+    
+    /* Video on failure (CI only) */
+    video: process.env.CI ? 'retain-on-failure' : 'off',
     
     /* Action timeout - reduced from 30s to 15s */
     actionTimeout: 15 * 1000,
