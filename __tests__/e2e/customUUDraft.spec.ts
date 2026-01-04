@@ -192,8 +192,22 @@ test.describe('Custom UU Draft - Custom UU Phase', () => {
   });
   
   test('should be able to submit custom UU and continue draft', async ({ page }) => {
-    // Create 1-player draft
-    const { hostLink } = await createCustomUUDraft(page, 1);
+    // Create 1-player draft with 1 bonus
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    await draftCreatePage.assertPageLoaded();
+    
+    // Set 1 player and 1 bonus
+    await draftCreatePage.setNumPlayers(1);
+    await draftCreatePage.setBonusesPerPlayer(1);
+    
+    // Enable custom UU mode
+    await draftCreatePage.expandAdvancedSettings();
+    await page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i }).check();
+    
+    // Start draft
+    await draftCreatePage.clickStartDraft();
+    const { hostLink } = await draftCreatePage.getDraftLinks();
     
     // Join and navigate to custom UU phase
     await joinAsPlayer(page, hostLink, 'Test Player');
@@ -203,50 +217,60 @@ test.describe('Custom UU Draft - Custom UU Phase', () => {
     await page.waitForTimeout(2000);
     await selectFirstCard(page);
     
-    // Should be in custom UU phase
+    // Should be in custom UU phase - wait for editor
     await page.waitForTimeout(3000);
     
-    // Try to find and interact with custom UU editor
-    const unitNameInput = page.getByLabel(/Unit Name/i);
-    const isEditorVisible = await unitNameInput.isVisible().catch(() => false);
+    // Should see unit type selection
+    const infantryButton = page.getByRole('button', { name: /Infantry/i });
+    await expect(infantryButton).toBeVisible({ timeout: 10000 });
+    await infantryButton.click();
+    await page.waitForTimeout(500);
     
-    if (isEditorVisible) {
-      // Fill in unit name
-      await unitNameInput.fill('Test Warrior');
-      
-      // Wait a bit for validation
-      await page.waitForTimeout(1000);
-      
-      // Try to submit
-      const submitButton = page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
-      const isSubmitVisible = await submitButton.isVisible().catch(() => false);
-      
-      if (isSubmitVisible) {
-        const isEnabled = await submitButton.isEnabled();
-        
-        // If button is enabled, submit
-        if (isEnabled) {
-          await submitButton.click();
-          
-          // Should advance to next phase
-          await page.waitForTimeout(3000);
-          
-          // Should see castle techs round or waiting screen
-          const nextPhase = page.locator('text=/Castle|Waiting|Tech Tree/i').first();
-          await expect(nextPhase).toBeVisible({ timeout: 10000 });
-        }
-      }
-    }
+    // Now unit name input should be visible
+    const unitNameInput = page.getByLabel(/Unit Name/i);
+    await expect(unitNameInput).toBeVisible({ timeout: 10000 });
+    
+    // Fill in unit name
+    await unitNameInput.fill('Test Warrior');
+    
+    // Wait for validation
+    await page.waitForTimeout(1000);
+    
+    // Submit button should be visible and enabled
+    const submitButton = page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
+    await expect(submitButton).toBeVisible({ timeout: 5000 });
+    await expect(submitButton).toBeEnabled({ timeout: 5000 });
+    
+    // Click submit
+    await submitButton.click();
+    
+    // Should advance to next phase (castle techs or tech tree)
+    await page.waitForTimeout(3000);
+    
+    // Should see castle techs round or tech tree phase
+    const nextPhase = page.locator('text=/Castle|Tech Tree|Techtree/i').first();
+    await expect(nextPhase).toBeVisible({ timeout: 10000 });
   });
 });
 
 test.describe('Custom UU Draft - Backend Integration', () => {
-  test('should store custom UU in player bonuses array', async ({ page, context }) => {
-    // This test verifies that custom UU is stored correctly
-    // We'll need to check the backend state or wait for tech tree phase
-    // where custom UU should be displayed in sidebar
+  test('should store custom UU in player bonuses array and complete full draft', async ({ page }) => {
+    // This test verifies the complete flow from draft creation to tech tree with custom UU
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    await draftCreatePage.assertPageLoaded();
     
-    const { hostLink } = await createCustomUUDraft(page, 1);
+    // Set 1 player and 1 bonus for quick test
+    await draftCreatePage.setNumPlayers(1);
+    await draftCreatePage.setBonusesPerPlayer(1);
+    
+    // Enable custom UU mode
+    await draftCreatePage.expandAdvancedSettings();
+    await page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i }).check();
+    
+    // Start draft
+    await draftCreatePage.clickStartDraft();
+    const { hostLink } = await draftCreatePage.getDraftLinks();
     
     await joinAsPlayer(page, hostLink, 'Test Player');
     await page.waitForTimeout(2000);
@@ -258,53 +282,62 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     await selectFirstCard(page);
     await page.waitForTimeout(3000);
     
-    // If we're in custom UU phase, fill it out
+    // Should be in custom UU phase - select unit type first
+    const infantryButton = page.getByRole('button', { name: /Infantry/i });
+    await expect(infantryButton).toBeVisible({ timeout: 10000 });
+    await infantryButton.click();
+    await page.waitForTimeout(500);
+    
+    // Now fill in unit details
     const unitNameInput = page.getByLabel(/Unit Name/i);
-    if (await unitNameInput.isVisible().catch(() => false)) {
-      await unitNameInput.fill('Elite Guard');
-      await page.waitForTimeout(1000);
-      
-      // Submit if possible
-      const submitButton = page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
-      if (await submitButton.isEnabled().catch(() => false)) {
-        await submitButton.click();
-        await page.waitForTimeout(3000);
-        
-        // Continue through remaining rounds
-        // Castle tech
-        if (await page.locator('.bonus-card, .draft-card').first().isVisible().catch(() => false)) {
-          await selectFirstCard(page);
-          await page.waitForTimeout(2000);
-        }
-        
-        // Imperial tech
-        if (await page.locator('.bonus-card, .draft-card').first().isVisible().catch(() => false)) {
-          await selectFirstCard(page);
-          await page.waitForTimeout(2000);
-        }
-        
-        // Team bonus
-        if (await page.locator('.bonus-card, .draft-card').first().isVisible().catch(() => false)) {
-          await selectFirstCard(page);
-          await page.waitForTimeout(3000);
-        }
-        
-        // Should reach tech tree phase
-        // Custom UU should be visible in sidebar
-        const techTreePhase = page.locator('text=/Tech Tree|Techtree/i');
-        if (await techTreePhase.isVisible().catch(() => false)) {
-          // Look for custom UU in sidebar
-          const customUUInSidebar = page.locator('text=/Elite Guard|Custom Unique Unit/i');
-          await expect(customUUInSidebar).toBeVisible({ timeout: 5000 });
-        }
-      }
-    }
+    await expect(unitNameInput).toBeVisible({ timeout: 10000 });
+    await unitNameInput.fill('Elite Guard');
+    await page.waitForTimeout(1000);
+    
+    // Submit custom UU
+    const submitButton = page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
+    await expect(submitButton).toBeEnabled({ timeout: 5000 });
+    await submitButton.click();
+    await page.waitForTimeout(3000);
+    
+    // Continue through remaining rounds
+    // Castle tech
+    await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
+    await selectFirstCard(page);
+    await page.waitForTimeout(2000);
+    
+    // Imperial tech
+    await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
+    await selectFirstCard(page);
+    await page.waitForTimeout(2000);
+    
+    // Team bonus
+    await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
+    await selectFirstCard(page);
+    await page.waitForTimeout(3000);
+    
+    // Should reach tech tree phase
+    const techTreePhase = page.locator('text=/Tech Tree|Techtree/i').first();
+    await expect(techTreePhase).toBeVisible({ timeout: 10000 });
+    
+    // Custom UU should be visible in the tech tree or sidebar
+    // This confirms it was stored in bonuses[1] array correctly
+    const customUUInSidebar = page.locator('text=/Elite Guard/i');
+    await expect(customUUInSidebar).toBeVisible({ timeout: 5000 });
   });
 });
 
 test.describe('Custom UU Draft - Error Handling', () => {
   test('should not allow submitting invalid custom UU', async ({ page }) => {
-    const { hostLink } = await createCustomUUDraft(page, 1);
+    // Create 1-player draft with 1 bonus
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    await draftCreatePage.setNumPlayers(1);
+    await draftCreatePage.setBonusesPerPlayer(1);
+    await draftCreatePage.expandAdvancedSettings();
+    await page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i }).check();
+    await draftCreatePage.clickStartDraft();
+    const { hostLink } = await draftCreatePage.getDraftLinks();
     
     await joinAsPlayer(page, hostLink, 'Test Player');
     await page.waitForTimeout(2000);
@@ -314,22 +347,26 @@ test.describe('Custom UU Draft - Error Handling', () => {
     await selectFirstCard(page);
     await page.waitForTimeout(3000);
     
-    // Should be in custom UU editor
-    const unitNameInput = page.getByLabel(/Unit Name/i);
-    if (await unitNameInput.isVisible().catch(() => false)) {
-      // Try to submit without filling anything (invalid)
-      const submitButton = page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
-      
-      if (await submitButton.isVisible().catch(() => false)) {
-        // Button should be disabled for invalid UU
-        const isEnabled = await submitButton.isEnabled();
-        expect(isEnabled).toBe(false);
-      }
-    }
+    // Should be in custom UU editor - but don't select unit type or fill anything
+    const infantryButton = page.getByRole('button', { name: /Infantry/i });
+    await expect(infantryButton).toBeVisible({ timeout: 10000 });
+    
+    // Submit button should be disabled without selecting unit type
+    const submitButton = page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
+    await expect(submitButton).toBeVisible({ timeout: 5000 });
+    await expect(submitButton).toBeDisabled({ timeout: 5000 });
   });
   
   test('should show validation errors for invalid custom UU', async ({ page }) => {
-    const { hostLink } = await createCustomUUDraft(page, 1);
+    // Create 1-player draft with 1 bonus
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    await draftCreatePage.setNumPlayers(1);
+    await draftCreatePage.setBonusesPerPlayer(1);
+    await draftCreatePage.expandAdvancedSettings();
+    await page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i }).check();
+    await draftCreatePage.clickStartDraft();
+    const { hostLink } = await draftCreatePage.getDraftLinks();
     
     await joinAsPlayer(page, hostLink, 'Test Player');
     await page.waitForTimeout(2000);
@@ -339,19 +376,22 @@ test.describe('Custom UU Draft - Error Handling', () => {
     await selectFirstCard(page);
     await page.waitForTimeout(3000);
     
-    // Should be in custom UU editor
+    // Should be in custom UU editor - select unit type but clear name
+    const infantryButton = page.getByRole('button', { name: /Infantry/i });
+    await expect(infantryButton).toBeVisible({ timeout: 10000 });
+    await infantryButton.click();
+    await page.waitForTimeout(500);
+    
     const unitNameInput = page.getByLabel(/Unit Name/i);
-    if (await unitNameInput.isVisible().catch(() => false)) {
-      // Clear the name (if it has default value)
-      await unitNameInput.clear();
-      await page.waitForTimeout(500);
-      
-      // Should show validation errors or disabled submit button
-      const submitButton = page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
-      if (await submitButton.isVisible().catch(() => false)) {
-        const isDisabled = !(await submitButton.isEnabled());
-        expect(isDisabled).toBe(true);
-      }
-    }
+    await expect(unitNameInput).toBeVisible({ timeout: 10000 });
+    
+    // Clear the name (if it has default value)
+    await unitNameInput.clear();
+    await page.waitForTimeout(500);
+    
+    // Should show validation errors or disabled submit button
+    const submitButton = page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
+    await expect(submitButton).toBeVisible({ timeout: 5000 });
+    await expect(submitButton).toBeDisabled({ timeout: 5000 });
   });
 });
