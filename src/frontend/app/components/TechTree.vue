@@ -654,7 +654,7 @@ async function loadData() {
     setTechtreeData(jsonData)
     
     // Rebuild tree with data and names
-    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: showPastures.value, selectedBonuses: flattenedSelectedBonuses.value })
+    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { selectedBonuses: flattenedSelectedBonuses.value })
     
     // Recalculate points after data is loaded if tree was already set
     if (props.editable && localtree.value.some(arr => arr.length > 0)) {
