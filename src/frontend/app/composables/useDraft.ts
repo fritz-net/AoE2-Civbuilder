@@ -325,6 +325,35 @@ export const useDraft = () => {
     socket.value.emit('sync timer', draft.value.id)
   }
 
+  // Submit custom unique unit
+  const submitCustomUU = (playerNumber: number, customUU: any) => {
+    if (!socket.value || !draft.value) {
+      console.error('Socket or draft not available')
+      return Promise.reject(new Error('Socket not available'))
+    }
+    
+    return new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Submission timeout'))
+      }, 10000)
+      
+      // Listen for success confirmation
+      socket.value?.once('custom uu submitted', () => {
+        clearTimeout(timeout)
+        resolve()
+      })
+      
+      // Listen for error
+      socket.value?.once('custom uu error', (errorMsg: string) => {
+        clearTimeout(timeout)
+        reject(new Error(errorMsg))
+      })
+      
+      // Emit the custom UU submission
+      socket.value?.emit('submit custom uu', draft.value?.id, playerNumber, customUU)
+    })
+  }
+
   // Setup socket listeners
   const setupSocketListeners = () => {
     if (!socket.value) return
@@ -411,6 +440,7 @@ export const useDraft = () => {
     resumeTimer,
     notifyTimerExpired,
     syncTimer,
+    submitCustomUU,
     setupSocketListeners,
     cleanup,
   }

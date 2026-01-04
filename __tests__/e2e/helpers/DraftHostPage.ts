@@ -24,6 +24,12 @@ export class DraftHostPage extends BasePage {
     creatingPhase: '.creating-phase',
     downloadPhase: '.download-phase',
     downloadButton: '.download-button',
+    customUUPhase: '.custom-uu-phase',
+    customUUEditor: '.custom-uu-editor-container',
+    submitUUButton: '.submit-uu-button',
+    unitNameInput: '#unit-name',
+    healthSlider: '#health',
+    attackSlider: '#attack',
   };
 
   constructor(page: Page) {
@@ -192,16 +198,106 @@ export class DraftHostPage extends BasePage {
   /**
    * Check if in specific phase
    */
-  async isInPhase(phase: 'lobby' | 'setup' | 'drafting' | 'techtree' | 'creating' | 'download'): Promise<boolean> {
+  async isInPhase(phase: 'lobby' | 'setup' | 'drafting' | 'customuu' | 'techtree' | 'creating' | 'download'): Promise<boolean> {
     const phaseSelectors = {
       lobby: this.selectors.lobbyTitle,
       setup: this.selectors.setupPhase,
       drafting: this.selectors.draftBoard,
+      customuu: this.selectors.customUUPhase,
       techtree: this.selectors.techTreePhase,
       creating: this.selectors.creatingPhase,
       download: this.selectors.downloadPhase,
     };
     
     return await this.isVisible(phaseSelectors[phase]);
+  }
+
+  /**
+   * Wait for custom UU phase to appear
+   */
+  async waitForCustomUUPhase(): Promise<void> {
+    await this.waitForElement(this.selectors.customUUPhase, 15000);
+  }
+
+  /**
+   * Check if custom UU editor is visible
+   */
+  async isCustomUUEditorVisible(): Promise<boolean> {
+    return await this.isVisible(this.selectors.customUUEditor);
+  }
+
+  /**
+   * Fill in a simple custom UU design (basic values for testing)
+   */
+  async fillCustomUU(name: string = 'Test Unit'): Promise<void> {
+    // Wait for custom UU editor container to be visible
+    await this.waitForElement(this.selectors.customUUEditor, 15000);
+    await this.wait(3000); // Extra wait for editor to fully initialize
+    
+    // Check if we see the waiting screen instead (player already submitted)
+    const waitingScreen = this.page.locator('.waiting-screen, .waiting-title');
+    const isWaiting = await waitingScreen.isVisible().catch(() => false);
+    if (isWaiting) {
+      console.log('Player is in waiting screen, skipping custom UU fill');
+      return; // Already submitted or waiting
+    }
+    
+    // Wait for unit name input to be available
+    const nameInput = this.page.locator(this.selectors.unitNameInput);
+    const isInputVisible = await nameInput.isVisible({ timeout: 5000 }).catch(() => false);
+    
+    if (!isInputVisible) {
+      // Debug: log what's actually on the page
+      const pageContent = await this.page.content();
+      console.log('Custom UU editor container found but unit name input not visible');
+      console.log('Page contains custom-uu-editor-container:', pageContent.includes('custom-uu-editor-container'));
+      console.log('Page contains unit-name:', pageContent.includes('unit-name'));
+      throw new Error('Unit name input not found in custom UU editor');
+    }
+    
+    // Clear and fill unit name
+    await nameInput.clear();
+    await nameInput.fill(name);
+    
+    // Wait a bit for validation to run
+    await this.wait(500);
+    
+    // The editor should have default values that are valid
+    // We just need to ensure a valid name is entered
+  }
+
+  /**
+   * Submit the custom UU
+   */
+  async submitCustomUU(): Promise<void> {
+    const submitButton = this.page.locator(this.selectors.submitUUButton);
+    await expect(submitButton).toBeVisible({ timeout: 5000 });
+    
+    // Wait for button to be enabled (validation might need a moment)
+    await submitButton.waitFor({ state: 'visible', timeout: 10000 });
+    
+    // Wait for validation to complete and button to be enabled
+    for (let i = 0; i < 10; i++) {
+      const isEnabled = await submitButton.isEnabled();
+      if (isEnabled) break;
+      await this.wait(500);
+    }
+    
+    await submitButton.click();
+    await this.wait(2000);
+  }
+
+  /**
+   * Complete custom UU phase with a simple valid unit
+   */
+  async completeCustomUUPhase(unitName: string = 'Test Custom Unit'): Promise<void> {
+    const isCustomUUPhaseVisible = await this.isInPhase('customuu');
+    
+    if (isCustomUUPhaseVisible) {
+      await this.fillCustomUU(unitName);
+      await this.submitCustomUU();
+      // Wait for phase transition
+      await this.wait(3000);
+    }
   }
 }
