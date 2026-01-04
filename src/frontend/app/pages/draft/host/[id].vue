@@ -336,6 +336,7 @@ const {
   resumeTimer,
   notifyTimerExpired,
   syncTimer,
+  submitCustomUU,
   setupSocketListeners,
   cleanup,
 } = useDraft()
@@ -716,32 +717,8 @@ const handleSubmitCustomUU = async () => {
   isSubmittingUU.value = true
   
   try {
-    // Get socket from draft state
-    const socket = initSocket()
-    if (!socket) {
-      throw new Error('Socket not available')
-    }
-    
-    // Emit submit event to server
-    socket.emit('submit custom uu', draftId.value, playerNumber.value, customUU.value)
-    
-    // Wait for confirmation from server
-    await new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('Submission timeout'))
-      }, 10000)
-      
-      socket.once('custom uu submitted', () => {
-        clearTimeout(timeout)
-        resolve()
-      })
-      
-      socket.once('error', (err: any) => {
-        clearTimeout(timeout)
-        reject(err)
-      })
-    })
-    
+    // Use the submitCustomUU function from the composable
+    await submitCustomUU(playerNumber.value, customUU.value)
     console.log('Custom UU submitted successfully')
   } catch (err) {
     console.error('Failed to submit custom UU:', err)
