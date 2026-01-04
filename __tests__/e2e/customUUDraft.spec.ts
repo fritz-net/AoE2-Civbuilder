@@ -66,15 +66,20 @@ async function completeSetupPhase(page: Page): Promise<void> {
 
 // Helper to select first available card
 async function selectFirstCard(page: Page): Promise<void> {
-  // Wait for cards to be visible
-  await page.waitForSelector('.bonus-card, .draft-card, [class*="card"]', { timeout: 10000 });
+  // Wait for cards to be visible - try multiple selectors
+  await page.waitForSelector('.draft-card:not(.draft-card-hidden), .bonus-card', { timeout: 10000 });
   
-  // Click first card
-  const firstCard = page.locator('.bonus-card, .draft-card, [class*="card"]').first();
+  // Find the first visible, clickable card
+  const firstCard = page.locator('.draft-card:not(.draft-card-hidden), .bonus-card').first();
+  
+  // Ensure it's visible and enabled
+  await firstCard.waitFor({ state: 'visible', timeout: 5000 });
+  
+  // Click the card
   await firstCard.click();
   
-  // Wait a bit for server to process
-  await page.waitForTimeout(1500);
+  // Wait longer for server to process
+  await page.waitForTimeout(2500);
 }
 
 test.describe('Custom UU Draft - Creation', () => {
@@ -148,8 +153,23 @@ test.describe('Custom UU Draft - Flow (Single Player)', () => {
 
 test.describe('Custom UU Draft - Custom UU Phase', () => {
   test('should show custom UU editor after civ bonuses round', async ({ page }) => {
-    // Create 1-player draft with custom UU mode
-    const { hostLink } = await createCustomUUDraft(page, 1);
+    // Create 1-player draft with custom UU mode and 1 bonus per player
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    await draftCreatePage.assertPageLoaded();
+    
+    // Set 1 player and 1 bonus
+    await draftCreatePage.setNumPlayers(1);
+    await draftCreatePage.setBonusesPerPlayer(1);
+    
+    // Enable custom UU mode
+    await draftCreatePage.expandAdvancedSettings();
+    await page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i }).check();
+    await expect(page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i })).toBeChecked();
+    
+    // Start draft
+    await draftCreatePage.clickStartDraft();
+    const { hostLink } = await draftCreatePage.getDraftLinks();
     
     // Join and start
     await joinAsPlayer(page, hostLink, 'Test Player');
@@ -159,12 +179,14 @@ test.describe('Custom UU Draft - Custom UU Phase', () => {
     // Complete setup
     await completeSetupPhase(page);
     
-    // Complete civ bonuses round
+    // Complete civ bonuses round (only need 1 pick with 1 bonus per player)
     await page.waitForTimeout(2000);
     await selectFirstCard(page);
     
+    // Wait for phase transition to custom UU phase
+    await page.waitForTimeout(5000);
+    
     // Should see custom UU editor
-    await page.waitForTimeout(3000);
     const customUUEditor = page.locator('text=/Design Your Custom Unique Unit|Custom Unique Unit/i').first();
     await expect(customUUEditor).toBeVisible({ timeout: 10000 });
   });
