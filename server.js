@@ -1141,6 +1141,13 @@ function updateTimerRemaining(draft) {
 function getCurrentPlayer(draft) {
 	var numPlayers = draft["preset"]["slots"];
 	var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
+	
+	// If custom UU mode is enabled and we would be in roundType 1 (UU selection),
+	// skip to roundType 2 (castle techs) instead
+	if (draft["preset"]["custom_uu_mode"] && roundType >= 1) {
+		roundType += 1; // Shift all subsequent rounds by 1
+	}
+	
 	var turnModPlayers = draft["gamestate"]["turn"] % numPlayers;
 	var player = draft["gamestate"]["order"][turnModPlayers];
 	
@@ -1154,7 +1161,9 @@ function getCurrentPlayer(draft) {
 		}
 	} else {
 		// Legacy mode: only reverse on specific round types
-		if (roundType == 2 || roundType == 4) {
+		// Adjust for shifted round types when custom UU mode is active
+		var reverseRoundTypes = draft["preset"]["custom_uu_mode"] ? [3, 5] : [2, 4];
+		if (reverseRoundTypes.includes(roundType)) {
 			player = draft["gamestate"]["order"][numPlayers - 1 - turnModPlayers];
 		}
 	}
@@ -1173,29 +1182,33 @@ function processCardPick(draft, pick) {
 	
 	// If it's the last turn of a round, distribute new cards, otherwise make the card unavailable to others
 	if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
-		if (roundType == 4) {
-			// Last turn of the game - check if custom UU mode is enabled
-			if (draft["preset"]["custom_uu_mode"]) {
-				// Move to custom UU design phase after bonus selection
-				draft["gamestate"]["custom_uu_phase"] = true;
-				for (var i = 0; i < numPlayers; i++) {
-					draft["players"][i]["ready"] = 0;
-				}
-				console.log("Moving to custom UU design phase after bonus selection");
-			} else {
-				// Normal flow: move to tech tree phase
-				draft["gamestate"]["phase"] = 3;
+		// Determine if this is the last round (team bonuses = roundType 4, or 5 if custom UU mode shifts rounds)
+		var lastRoundType = draft["preset"]["custom_uu_mode"] ? 5 : 4;
+		
+		if (roundType == lastRoundType) {
+			// Last turn of the game - move to tech tree phase
+			draft["gamestate"]["phase"] = 3;
+		} else if (roundType == 0 && draft["preset"]["custom_uu_mode"]) {
+			// After civ bonuses (round 0), enter custom UU design phase if enabled
+			draft["gamestate"]["custom_uu_phase"] = true;
+			for (var i = 0; i < numPlayers; i++) {
+				draft["players"][i]["ready"] = 0;
 			}
+			console.log("Moving to custom UU design phase after civ bonuses");
 		} else {
 			draft["gamestate"]["cards"] = [];
 			// Use configurable bonuses_per_page, default to 30 for backward compatibility
 			var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
 			// For subsequent rounds after first, use a smaller base value (2/3 of bonuses_per_page rounded down)
 			var subsequentBase = Math.floor(bonusesPerPage * 2 / 3);
+			
+			// Next round type is simply current + 1 (shifting is handled in getCurrentPlayer)
+			var nextRoundType = roundType + 1;
+			
 			for (var i = 0; i < 2 * numPlayers + subsequentBase; i++) {
-				var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][roundType + 1].length);
-				draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][roundType + 1][rand]);
-				draft["gamestate"]["available_cards"][roundType + 1].splice(rand, 1);
+				var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][nextRoundType].length);
+				draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][nextRoundType][rand]);
+				draft["gamestate"]["available_cards"][nextRoundType].splice(rand, 1);
 			}
 		}
 	} else {
@@ -1968,6 +1981,9 @@ function draftIO(io) {
 			draft["players"][playerNumber]["custom_uu"] = customUU;
 			draft["players"][playerNumber]["ready"] = 1;
 			
+			// Also store in bonuses[1] array (unique unit slot) as an object
+			draft["players"][playerNumber]["bonuses"][1] = [customUU];
+			
 			console.log(`Player ${playerNumber} submitted custom UU: ${customUU.name}`);
 			
 			// Save draft state
@@ -1990,13 +2006,24 @@ function draftIO(io) {
 			
 			// If all players submitted, move to next phase
 			if (allSubmitted) {
-				console.log("All players submitted custom UUs, advancing to tech tree phase");
-				// Move to phase 3 (tech tree)
-				draft["gamestate"]["phase"] = 3;
+				console.log("All players submitted custom UUs, continuing with castle techs round");
+				// Exit custom UU phase and continue with draft phase 2
 				draft["gamestate"]["custom_uu_phase"] = false;
 				
-				// Reset ready flags for tech tree phase
-				for (var i = 0; i < draft["preset"]["slots"]; i++) {
+				// Distribute castle tech cards (roundType 2)
+				draft["gamestate"]["cards"] = [];
+				var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
+				var subsequentBase = Math.floor(bonusesPerPage * 2 / 3);
+				var numPlayers = draft["preset"]["slots"];
+				
+				for (var i = 0; i < 2 * numPlayers + subsequentBase; i++) {
+					var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][2].length);
+					draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][2][rand]);
+					draft["gamestate"]["available_cards"][2].splice(rand, 1);
+				}
+				
+				// Reset ready flags for next draft round
+				for (var i = 0; i < numPlayers; i++) {
 					draft["players"][i]["ready"] = 0;
 				}
 				
