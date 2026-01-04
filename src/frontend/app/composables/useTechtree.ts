@@ -121,12 +121,16 @@ import {
   IMPERIAL_CAMEL_RIDER,
   LONGBOAT,
   ELITE_LONGBOAT,
+  TURTLE_SHIP,
+  ELITE_TURTLE_SHIP,
   CAMEL_SCOUT,
   HOUFNICE,
+  THIRISADAI,
   WARRIOR_PRIEST,
   SHRIVAMSHA_RIDER,
   ELITE_SHRIVAMSHA_RIDER,
   GRENADIER,
+  TRACTION_TREBUCHET,
   XIANBEI_RAIDER,
   ELITE_XIANBEI_RAIDER,
   WAR_CHARIOT,
@@ -740,15 +744,18 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   docklane.rows.castle_1.push(unit(DEMOLITION_SHIP))
   docklane.rows.castle_1.push(unit(WAR_GALLEY))
   docklane.rows.castle_1.push(unit(LONGBOAT)) // Bonus unit: Can recruit Longboats
+  docklane.rows.castle_1.push(unit(TURTLE_SHIP)) // Bonus unit: Can train Turtle Ships
   docklane.rows.castle_1.push(tech(CAREENING))
   docklane.rows.imperial_1.push(unit(FAST_FIRE_SHIP))
   docklane.rows.imperial_1.push(unit(CANNON_GALLEON))
   docklane.rows.imperial_1.push(unit(HEAVY_DEMO_SHIP))
   docklane.rows.imperial_1.push(unit(GALLEON))
   docklane.rows.imperial_1.push(unit(ELITE_LONGBOAT))
+  docklane.rows.imperial_1.push(unit(ELITE_TURTLE_SHIP))
   docklane.rows.imperial_2.push(unit(LOU_CHUAN))
   docklane.rows.imperial_2.push(unit(ELITE_CANNON_GALLEON))
   docklane.rows.imperial_2.push(unit(DROMON))
+  docklane.rows.imperial_2.push(unit(THIRISADAI)) // Bonus unit: Can train Thirisadai
   docklane.rows.imperial_1.push(tech(DRY_DOCK))
   docklane.rows.imperial_1.push(tech(SHIPWRIGHT))
   tree.lanes.push(docklane)

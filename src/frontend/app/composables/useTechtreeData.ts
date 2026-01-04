@@ -230,12 +230,16 @@ export const SLINGER = 185
 export const IMPERIAL_CAMEL_RIDER = 207
 export const LONGBOAT = 250
 export const ELITE_LONGBOAT = 251
+export const TURTLE_SHIP = 831
+export const ELITE_TURTLE_SHIP = 832
 export const CAMEL_SCOUT = 1755
 export const HOUFNICE = 1709
+export const THIRISADAI = 1750
 export const WARRIOR_PRIEST = 1811
 export const SHRIVAMSHA_RIDER = 1751
 export const ELITE_SHRIVAMSHA_RIDER = 1753
 export const GRENADIER = 1911
+export const TRACTION_TREBUCHET = 1942 // Mounted Trebuchet
 export const XIANBEI_RAIDER = 1952
 export const ELITE_XIANBEI_RAIDER = 1954
 export const WAR_CHARIOT = 1962
@@ -406,6 +410,26 @@ export const regionalCarets = [
   'unit_1746',
   'unit_1795',
   'unit_1948',
+  // Bonus-granted regional units (hidden until bonus selected)
+  'unit_185',   // Slinger
+  'unit_207',   // Imperial Camel Rider
+  'unit_250',   // Longboat
+  'unit_251',   // Elite Longboat
+  'unit_831',   // Turtle Ship
+  'unit_832',   // Elite Turtle Ship
+  'unit_1709',  // Houfnice
+  'unit_1750',  // Thirisadai
+  'unit_1751',  // Shrivamsha Rider
+  'unit_1753',  // Elite Shrivamsha Rider
+  'unit_1755',  // Camel Scout
+  'unit_1811',  // Warrior Priest
+  'unit_1911',  // Grenadier
+  'unit_1952',  // Xianbei Raider
+  'unit_1954',  // Elite Xianbei Raider
+  'unit_1962',  // War Chariot
+  'unit_1964',  // Elite War Chariot
+  'unit_1974',  // Jian Swordsman
+  'unit_1975',  // Elite Jian Swordsman
 ]
 
 export function useTechtreeData() {

@@ -130,11 +130,13 @@ const selectedBonuses = ref<{
 
 // Test bonuses - these grant units/techs that should show 0 cost
 const testBonuses = [
+  { id: 50, name: 'Can train Turtle Ships (ID 50)' },
   { id: 51, name: 'Can recruit Longboats (ID 51)' },
   { id: 53, name: 'Can upgrade to Imperial Camel Riders (ID 53)' },
   { id: 61, name: 'Can recruit Slingers (ID 61)' },
   { id: 193, name: 'Can recruit Warrior Priests (ID 193)' },
   { id: 286, name: 'Can upgrade to Houfnice (ID 286)' },
+  { id: 298, name: 'Can train Thirisadai (ID 298)' },
   { id: 299, name: 'Can recruit Shrivamsha Riders (ID 299)' },
   { id: 300, name: 'Can recruit Camel Scouts (ID 300)' },
   { id: 337, name: 'Can recruit War Chariots (ID 337)' },
@@ -142,6 +144,7 @@ const testBonuses = [
   { id: 348, name: 'Can recruit Xianbei Raiders (ID 348)' },
   { id: 355, name: 'Can recruit Grenadiers (ID 355)' },
   { id: 356, name: 'Pastures (ID 356)' },
+  { id: 361, name: 'Can train Mounted Trebuchets (ID 361)' },
 ]
 
 // State

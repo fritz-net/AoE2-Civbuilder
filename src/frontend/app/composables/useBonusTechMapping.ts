@@ -21,6 +21,13 @@ export interface BonusTechMapping {
  * Bonus IDs are indices in the cardDescriptions array in useBonusData.ts
  */
 export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
+  // CIV_BONUS_50: "Can train Turtle Ships in docks"
+  {
+    bonusId: 50,
+    bonusType: 'civ',
+    units: [831],  // Turtle Ship
+  },
+  
   // CIV_BONUS_51: "Can recruit Longboats from docks"
   {
     bonusId: 51,
@@ -141,6 +148,20 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 356,
     bonusType: 'civ',
     buildings: [1889],  // Pasture building
+  },
+  
+  // CIV_BONUS_298: "Can train Thirisadai in docks"
+  {
+    bonusId: 298,
+    bonusType: 'civ',
+    units: [1750],  // Thirisadai
+  },
+  
+  // CIV_BONUS_361: "Can train Mounted Trebuchets"
+  {
+    bonusId: 361,
+    bonusType: 'civ',
+    units: [1942],  // Traction Trebuchet (Mounted Trebuchet)
   },
 ]
 
