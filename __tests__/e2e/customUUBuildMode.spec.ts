@@ -163,7 +163,12 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     
     // Reload the page
     await page.reload();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(2000); // Give more time for restore to complete
+    
+    // After reload, the page should restore to step 3 (Unique Unit) if autosave worked
+    // Verify custom UU checkbox is still checked
+    const customUUCheckbox = page.getByRole('checkbox', { name: /Use Custom Unique Unit Designer/i });
+    await expect(customUUCheckbox).toBeChecked();
     
     // Verify unit name is restored
     await expect(page.getByLabel(/Unit Name/i)).toHaveValue('Elite Warrior');
@@ -172,15 +177,20 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
   test('should show autosave indicator when changes are made', async ({ page }) => {
     await page.goto('/v2/build');
     
+    // Verify autosave checkbox is enabled by default
+    const autosaveCheckbox = page.getByRole('checkbox', { name: /💾 Autosave to browser/i });
+    await expect(autosaveCheckbox).toBeChecked();
+    
     // Fill in civ name
     await page.getByPlaceholder(/Enter civilization name/i).fill('TestCiv');
     
-    // Wait a moment for autosave
+    // Wait a moment for autosave to trigger
     await page.waitForTimeout(1500);
     
-    // Verify autosave status is shown
-    const autosaveStatus = page.getByText(/Last saved:/i);
+    // Verify autosave status is shown (text contains "Last saved:")
+    const autosaveStatus = page.locator('.autosave-status');
     await expect(autosaveStatus).toBeVisible();
+    await expect(autosaveStatus).toContainText(/Last saved:/i);
   });
 });
 
