@@ -218,6 +218,24 @@ import {
   DOMESTICATION,
 } from './useTechtreeData'
 
+import {
+  BONUS_ID_TURTLE_SHIP,
+  BONUS_ID_LONGBOAT,
+  BONUS_ID_IMPERIAL_CAMEL,
+  BONUS_ID_SLINGER,
+  BONUS_ID_WARRIOR_PRIEST,
+  BONUS_ID_HOUFNICE,
+  BONUS_ID_THIRISADAI,
+  BONUS_ID_SHRIVAMSHA_RIDER,
+  BONUS_ID_CAMEL_SCOUT,
+  BONUS_ID_WAR_CHARIOT,
+  BONUS_ID_JIAN_SWORDSMAN,
+  BONUS_ID_XIANBEI_RAIDER,
+  BONUS_ID_GRENADIER,
+  BONUS_ID_PASTURES,
+  BONUS_ID_MOUNTED_TREBUCHET,
+} from './useBonusTechMapping'
+
 let techtreeData: TechtreeData | null = null
 
 export function formatId(value: string | number): string {
@@ -393,7 +411,6 @@ function t(techId: number): string {
 export function getConnections(selectedBonuses: number[] = []): [string, string][] {
   // Helper to check if a bonus is selected
   const isBonusSelected = (bonusId: number) => selectedBonuses.includes(bonusId)
-  const showPastures = isBonusSelected(356) // Pastures bonus
   const connections: [string, string][] = [
     [b(ARCHERY_RANGE), u(ARCHER)],
     [u(ARCHER), u(CROSSBOWMAN)],
@@ -585,8 +602,8 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(MONASTERY), u(WARRIOR_PRIEST)],
   ]
 
-  // Add farm/pasture specific connections based on showPastures option
-  if (showPastures) {
+  // Add farm/pasture specific connections based on Pastures bonus
+  if (isBonusSelected(BONUS_ID_PASTURES)) {
     // Pasture tech connections - connected to Mill (like farm techs)
     // Pasture building itself is in Dark Age and independent (no connections)
     connections.push([b(MILL), t(DOMESTICATION)])
@@ -632,8 +649,6 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   // Helper to check if a bonus is selected
   const isBonusSelected = (bonusId: number) => selectedBonuses.includes(bonusId)
   
-  // Check if Pastures bonus is selected (replaces Farm)
-  const showPastures = isBonusSelected(356)
   const tree: Tree = {
     offsets: {
       dark_1: 0,
@@ -675,8 +690,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   archerylane.rows.castle_1.push(unit(ELITE_SKIRMISHER))
   archerylane.rows.castle_1.push(unit(CAVALRY_ARCHER))
   archerylane.rows.castle_1.push(unit(ELEPHANT_ARCHER))
-  if (isBonusSelected(61)) archerylane.rows.castle_1.push(unit(SLINGER)) // Bonus unit: Can recruit Slingers
-  if (isBonusSelected(355)) archerylane.rows.castle_1.push(unit(GRENADIER)) // Bonus unit: Can recruit Grenadiers
+  if (isBonusSelected(BONUS_ID_SLINGER)) archerylane.rows.castle_1.push(unit(SLINGER)) // Bonus unit: Can recruit Slingers
+  if (isBonusSelected(BONUS_ID_GRENADIER)) archerylane.rows.castle_1.push(unit(GRENADIER)) // Bonus unit: Can recruit Grenadiers
   archerylane.rows.castle_1.push(tech(THUMB_RING))
   archerylane.rows.imperial_1.push(unit(ARBALESTER))
   archerylane.rows.imperial_1.push(unit(HAND_CANNONEER))
@@ -696,7 +711,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.castle_1.push(unit(PIKEMAN))
   barrackslane.rows.castle_1.push(unit(EAGLE_WARRIOR))
   barrackslane.rows.castle_1.push(unit(FIRE_LANCER))
-  if (isBonusSelected(343)) barrackslane.rows.castle_1.push(unit(JIAN_SWORDSMAN)) // Bonus unit: Can recruit Jian Swordsmen
+  if (isBonusSelected(BONUS_ID_JIAN_SWORDSMAN)) barrackslane.rows.castle_1.push(unit(JIAN_SWORDSMAN)) // Bonus unit: Can recruit Jian Swordsmen
   barrackslane.rows.castle_1.push(tech(GAMBESONS))
   barrackslane.rows.castle_1.push(tech(SQUIRES))
   barrackslane.rows.imperial_1.push(unit(TWO_HANDED_SWORDSMAN))
@@ -704,13 +719,13 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.imperial_1.push(unit(HALBERDIER))
   barrackslane.rows.imperial_1.push(unit(ELITE_EAGLE_WARRIOR))
   barrackslane.rows.imperial_1.push(unit(ELITE_FIRE_LANCER))
-  if (isBonusSelected(343)) barrackslane.rows.imperial_1.push(unit(ELITE_JIAN_SWORDSMAN))
+  if (isBonusSelected(BONUS_ID_JIAN_SWORDSMAN)) barrackslane.rows.imperial_1.push(unit(ELITE_JIAN_SWORDSMAN))
   tree.lanes.push(barrackslane)
 
   const stablelane = createLane()
   stablelane.rows.feudal_1.push(building(STABLE))
   stablelane.rows.feudal_2.push(unit(SCOUT_CAVALRY))
-  if (isBonusSelected(300)) stablelane.rows.feudal_2.push(unit(CAMEL_SCOUT)) // Bonus unit: Can recruit Camel Scouts
+  if (isBonusSelected(BONUS_ID_CAMEL_SCOUT)) stablelane.rows.feudal_2.push(unit(CAMEL_SCOUT)) // Bonus unit: Can recruit Camel Scouts
   stablelane.rows.feudal_2.push(tech(BLOODLINES))
   stablelane.rows.castle_1.push(unit(LIGHT_CAVALRY))
   stablelane.rows.castle_1.push(unit(KNIGHT))
@@ -718,20 +733,20 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.castle_1.push(unit(BATTLE_ELEPHANT))
   stablelane.rows.castle_1.push(unit(STEPPE_LANCER))
   stablelane.rows.castle_1.push(unit(HEI_GUANG_CAVALRY))
-  if (isBonusSelected(299)) stablelane.rows.castle_1.push(unit(SHRIVAMSHA_RIDER)) // Bonus unit: Can recruit Shrivamsha Riders
-  if (isBonusSelected(337)) stablelane.rows.castle_1.push(unit(WAR_CHARIOT)) // Bonus unit: Can recruit War Chariots
-  if (isBonusSelected(348)) stablelane.rows.castle_1.push(unit(XIANBEI_RAIDER)) // Bonus unit: Can recruit Xianbei Raiders
+  if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.castle_1.push(unit(SHRIVAMSHA_RIDER)) // Bonus unit: Can recruit Shrivamsha Riders
+  if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) stablelane.rows.castle_1.push(unit(WAR_CHARIOT)) // Bonus unit: Can recruit War Chariots
+  if (isBonusSelected(BONUS_ID_XIANBEI_RAIDER)) stablelane.rows.castle_1.push(unit(XIANBEI_RAIDER)) // Bonus unit: Can recruit Xianbei Raiders
   stablelane.rows.castle_1.push(tech(HUSBANDRY))
   stablelane.rows.imperial_1.push(unit(HUSSAR))
   stablelane.rows.imperial_1.push(unit(CAVALIER))
   stablelane.rows.imperial_1.push(unit(HEAVY_CAMEL_RIDER))
-  if (isBonusSelected(53)) stablelane.rows.imperial_1.push(unit(IMPERIAL_CAMEL_RIDER)) // Bonus unit: Can upgrade to Imperial Camel Rider
+  if (isBonusSelected(BONUS_ID_IMPERIAL_CAMEL)) stablelane.rows.imperial_1.push(unit(IMPERIAL_CAMEL_RIDER)) // Bonus unit: Can upgrade to Imperial Camel Rider
   stablelane.rows.imperial_1.push(unit(ELITE_BATTLE_ELEPHANT))
   stablelane.rows.imperial_1.push(unit(ELITE_STEPPE_LANCER))
   stablelane.rows.imperial_1.push(unit(HEAVY_HEI_GUANG_CAVALRY))
-  if (isBonusSelected(299)) stablelane.rows.imperial_1.push(unit(ELITE_SHRIVAMSHA_RIDER))
-  if (isBonusSelected(337)) stablelane.rows.imperial_1.push(unit(ELITE_WAR_CHARIOT))
-  if (isBonusSelected(348)) stablelane.rows.imperial_1.push(unit(ELITE_XIANBEI_RAIDER))
+  if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.imperial_1.push(unit(ELITE_SHRIVAMSHA_RIDER))
+  if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) stablelane.rows.imperial_1.push(unit(ELITE_WAR_CHARIOT))
+  if (isBonusSelected(BONUS_ID_XIANBEI_RAIDER)) stablelane.rows.imperial_1.push(unit(ELITE_XIANBEI_RAIDER))
   stablelane.rows.imperial_2.push(unit(PALADIN))
   tree.lanes.push(stablelane)
 
@@ -786,15 +801,15 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   docklane.rows.castle_1.push(tech(GILLNETS))
   docklane.rows.castle_1.push(unit(DEMOLITION_SHIP))
   docklane.rows.castle_1.push(unit(WAR_GALLEY))
-  if (isBonusSelected(51)) docklane.rows.castle_1.push(unit(LONGBOAT)) // Bonus unit: Can recruit Longboats
-  if (isBonusSelected(50)) docklane.rows.castle_1.push(unit(TURTLE_SHIP)) // Bonus unit: Can train Turtle Ships
+  if (isBonusSelected(BONUS_ID_LONGBOAT)) docklane.rows.castle_1.push(unit(LONGBOAT)) // Bonus unit: Can recruit Longboats
+  if (isBonusSelected(BONUS_ID_TURTLE_SHIP)) docklane.rows.castle_1.push(unit(TURTLE_SHIP)) // Bonus unit: Can train Turtle Ships
   docklane.rows.castle_1.push(tech(CAREENING))
   docklane.rows.imperial_1.push(unit(FAST_FIRE_SHIP))
   docklane.rows.imperial_1.push(unit(CANNON_GALLEON))
   docklane.rows.imperial_1.push(unit(HEAVY_DEMO_SHIP))
   docklane.rows.imperial_1.push(unit(GALLEON))
-  if (isBonusSelected(51)) docklane.rows.imperial_1.push(unit(ELITE_LONGBOAT))
-  if (isBonusSelected(50)) docklane.rows.imperial_1.push(unit(ELITE_TURTLE_SHIP))
+  if (isBonusSelected(BONUS_ID_LONGBOAT)) docklane.rows.imperial_1.push(unit(ELITE_LONGBOAT))
+  if (isBonusSelected(BONUS_ID_TURTLE_SHIP)) docklane.rows.imperial_1.push(unit(ELITE_TURTLE_SHIP))
   docklane.rows.imperial_2.push(unit(LOU_CHUAN))
   docklane.rows.imperial_2.push(unit(ELITE_CANNON_GALLEON))
   docklane.rows.imperial_2.push(unit(DROMON))
@@ -916,9 +931,9 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   marketlane.rows.imperial_1.push(tech(GUILDS))
   tree.lanes.push(marketlane)
 
-  // Farm lane (or Pasture lane if showPastures is enabled)
-  if (showPastures) {
-    // When showPastures is enabled, Pasture replaces Farm
+  // Farm lane (or Pasture lane if Pastures bonus is enabled)
+  if (isBonusSelected(BONUS_ID_PASTURES)) {
+    // When Pastures bonus is enabled, Pasture replaces Farm
     // Pasture building is in Dark Age and independent (no tech connections)
     const pasturelane = createLane()
     pasturelane.rows.dark_2.push(building(PASTURE))

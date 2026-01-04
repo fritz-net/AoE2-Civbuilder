@@ -3,6 +3,23 @@
  * These bonuses grant units/techs for free, so they should appear with 0 cost in the techtree
  */
 
+// Bonus ID Constants
+export const BONUS_ID_TURTLE_SHIP = 50
+export const BONUS_ID_LONGBOAT = 51
+export const BONUS_ID_IMPERIAL_CAMEL = 53
+export const BONUS_ID_SLINGER = 61
+export const BONUS_ID_WARRIOR_PRIEST = 193
+export const BONUS_ID_HOUFNICE = 286
+export const BONUS_ID_THIRISADAI = 298
+export const BONUS_ID_SHRIVAMSHA_RIDER = 299
+export const BONUS_ID_CAMEL_SCOUT = 300
+export const BONUS_ID_WAR_CHARIOT = 337
+export const BONUS_ID_JIAN_SWORDSMAN = 343
+export const BONUS_ID_XIANBEI_RAIDER = 348
+export const BONUS_ID_GRENADIER = 355
+export const BONUS_ID_PASTURES = 356
+export const BONUS_ID_MOUNTED_TREBUCHET = 361
+
 export interface BonusTechMapping {
   bonusId: number
   bonusType: 'civ' | 'uu' | 'castle' | 'imp' | 'team'
