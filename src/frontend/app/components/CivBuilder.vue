@@ -181,7 +181,6 @@
         :relative-path="techtreePath"
         :sidebar-content="sidebarContent"
         :sidebar-title="civConfig.alias || 'Custom Civilization'"
-        :show-pastures="showPasturesInTechtree"
         :selected-bonuses="selectedBonusesForTechtree"
         mode="build"
         @done="handleTechtreeDone"
@@ -483,14 +482,6 @@ ${bonusList || '<li>No bonuses selected</li>'}
 <h3>Team Bonus</h3>
 ${teamBonusHtml || '<p>No team bonus selected</p>'}
 `
-})
-
-const showPasturesInTechtree = computed(() => {
-  // Check if bonus 356 is selected in civ bonuses
-  return selectedCivBonuses.value.some(entry => {
-    const bonusId = Array.isArray(entry) ? entry[0] : entry
-    return bonusId === PASTURES_BONUS_ID
-  })
 })
 
 // Computed property for selected bonuses to pass to TechTree

@@ -183,7 +183,7 @@
           :points="techTreePoints"
           :editable="true"
           :relative-path="techtreePath"
-          :show-pastures="showPasturesInTechtree"
+          :selected-bonuses="selectedBonusesForTechtree"
           :sidebar-content="sidebarContent"
           :sidebar-title="sidebarTitle"
           mode="draft"
@@ -371,6 +371,22 @@ const showPasturesInTechtree = computed(() => {
   // Check if PASTURES_BONUS_ID is selected in civ bonuses (bonuses[0] array)
   if (!currentPlayer.value?.bonuses?.[0]) return false
   return currentPlayer.value.bonuses[0].includes(PASTURES_BONUS_ID)
+})
+
+// Convert draft bonuses format to TechTree selectedBonuses format
+const selectedBonusesForTechtree = computed(() => {
+  if (!currentPlayer.value?.bonuses) {
+    return { civ: [], uu: [], castle: [], imp: [], team: [] }
+  }
+  
+  const bonuses = currentPlayer.value.bonuses
+  return {
+    civ: bonuses[0] || [],
+    uu: bonuses[1] || [],
+    castle: bonuses[2] || [],
+    imp: bonuses[3] || [],
+    team: bonuses[4] || []
+  }
 })
 
 // Generate sidebar HTML content from player's selected bonuses

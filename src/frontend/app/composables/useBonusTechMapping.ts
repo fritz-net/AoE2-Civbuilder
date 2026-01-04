@@ -125,6 +125,13 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusType: 'civ',
     units: [1911],  // Grenadier
   },
+  
+  // CIV_BONUS_356: "Pastures replace Farms and Mill upgrades"
+  {
+    bonusId: 356,
+    bonusType: 'civ',
+    buildings: [1889],  // Pasture building
+  },
 ]
 
 /**

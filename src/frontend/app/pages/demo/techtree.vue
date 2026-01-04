@@ -54,13 +54,6 @@
       </div>
       
       <div class="setting-group">
-        <label class="setting-label">
-          <input type="checkbox" v-model="showPastures" />
-          Show Pastures
-        </label>
-      </div>
-      
-      <div class="setting-group">
         <label class="setting-label">Test Bonuses:</label>
         <div class="bonus-checkboxes">
           <label v-for="bonus in testBonuses" :key="bonus.id" class="bonus-option">
@@ -99,7 +92,6 @@
         :relative-path="relativePath"
         :sidebar-content="sidebarContent"
         :sidebar-title="sidebarTitle"
-        :show-pastures="showPastures"
         :selected-bonuses="selectedBonuses"
         @done="handleDone"
         @update:tree="handleTreeUpdate"
@@ -120,7 +112,6 @@ const treeKey = ref(0) // Key to force re-render when needed
 const mode = ref<'build' | 'draft'>('build')
 const pointLimit = ref(250)
 const editable = ref(true)
-const showPastures = ref(false)
 
 // Selected bonuses for testing
 const selectedBonuses = ref<{
@@ -150,6 +141,7 @@ const testBonuses = [
   { id: 343, name: 'Can recruit Jian Swordsmen (ID 343)' },
   { id: 348, name: 'Can recruit Xianbei Raiders (ID 348)' },
   { id: 355, name: 'Can recruit Grenadiers (ID 355)' },
+  { id: 356, name: 'Pastures (ID 356)' },
 ]
 
 // State

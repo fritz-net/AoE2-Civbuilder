@@ -275,7 +275,6 @@ interface Props {
   relativePath?: string
   sidebarContent?: string
   sidebarTitle?: string
-  showPastures?: boolean
   mode?: 'build' | 'draft'
   selectedBonuses?: {
     civ: (number | [number, number])[]
@@ -293,7 +292,6 @@ const props = withDefaults(defineProps<Props>(), {
   relativePath: '/aoe2techtree',
   sidebarContent: '',
   sidebarTitle: 'Civilization Info',
-  showPastures: false,
   mode: 'draft',
   selectedBonuses: () => ({
     civ: [],
@@ -340,7 +338,7 @@ const svgRef = ref<SVGSVGElement | null>(null)
 const helptextRef = ref<HTMLDivElement | null>(null)
 
 // State
-const tree = ref<Tree>(getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: props.showPastures }))
+const tree = ref<Tree>(getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: false }))
 const data = ref<TechtreeData | null>(null)
 const localtree = ref<number[][]>([
   [13, 17, 21, 74, 545, 539, 331, 125, 83, 128, 440],
@@ -363,7 +361,7 @@ const containerHeight = ref(typeof window !== 'undefined' ? window.innerHeight :
 const showConfirmDialog = ref(false)
 
 // Computed
-const connections = computed(() => getConnections(props.showPastures))
+const connections = computed(() => getConnections(showPastures.value))
 const connectionPoints = computed(() => getConnectionPoints(tree.value))
 const parentConnections = computed(() => new Map(connections.value.map(([parent, child]) => [child, parent])))
 
@@ -386,6 +384,14 @@ const grantedEntities = computed(() => {
   }
   
   return getAllGrantedEntities(bonusMap)
+})
+
+// Check if pastures bonus (356) is selected
+const showPastures = computed(() => {
+  const getBonusId = (entry: number | [number, number]): number => {
+    return Array.isArray(entry) ? entry[0] : entry
+  }
+  return props.selectedBonuses.civ.some(entry => getBonusId(entry) === 356)
 })
 
 // Scale factor to fit techtree in viewport without vertical scroll when not maximized
@@ -540,11 +546,7 @@ onMounted(async () => {
   }
   
   // Handle initial showPastures state - add Pasture to buildings if needed
-  if (props.showPastures && !localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
-    localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
-    emit('update:tree', localtree.value)
-  }
-  
+  // This will be handled by enableGrantedEntities() when pastures bonus is selected
   if (typeof window !== 'undefined') {
     window.addEventListener('resize', handleResize)
   }
@@ -559,12 +561,6 @@ onUnmounted(() => {
 watch(() => props.initialTree, (newTree) => {
   if (newTree) {
     localtree.value = JSON.parse(JSON.stringify(newTree))
-    
-    // Ensure Pasture is included/excluded based on showPastures prop
-    if (props.showPastures && !localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
-      localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
-      emit('update:tree', localtree.value)
-    }
     
     // Recalculate points when tree is loaded from props
     if (data.value && props.editable) {
@@ -581,17 +577,14 @@ watch(() => props.initialTree, (newTree) => {
   }
 }, { deep: true })
 
-// Watch for showPastures prop changes to rebuild the tree and update localtree
-watch(() => props.showPastures, (newShowPastures) => {
+// Watch for showPastures bonus changes to rebuild the tree and update localtree
+watch(showPastures, (newShowPastures) => {
   tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: newShowPastures })
   
   // Update localtree to include/exclude Pasture building
   if (newShowPastures) {
-    // Add Pasture to buildings if not already present
-    if (!localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
-      localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
-      emit('update:tree', localtree.value)
-    }
+    // Pasture will be added by enableGrantedEntities()
+    // Just rebuild tree to show pasture connections
   } else {
     // Remove Pasture from buildings if present
     const index = localtree.value[BUILDINGS_ARRAY_INDEX].indexOf(PASTURE_BUILDING_ID)
@@ -652,7 +645,7 @@ async function loadData() {
     setTechtreeData(jsonData)
     
     // Rebuild tree with data and names
-    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: props.showPastures })
+    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: showPastures.value })
     
     // Recalculate points after data is loaded if tree was already set
     if (props.editable && localtree.value.some(arr => arr.length > 0)) {
@@ -682,7 +675,7 @@ async function loadLocale(localeCode: string) {
       data.value.strings = strings
       setTechtreeData(data.value)
       // Rebuild tree with localized names
-      tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: props.showPastures })
+      tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: showPastures.value })
     }
   } catch (error) {
     console.error('Failed to load locale:', error)
