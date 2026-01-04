@@ -190,7 +190,7 @@ test.describe('Draft Custom UU Flow - Custom UU Editor Integration', () => {
     await draftHostPage.waitForCustomUUPhase();
     
     // Clear unit name to make it invalid
-    const nameInput = page.locator('#unitName');
+    const nameInput = page.locator('#unit-name');
     await nameInput.clear();
     await page.waitForTimeout(500);
     
@@ -305,7 +305,7 @@ test.describe('Draft Custom UU Flow - Validation and Error Handling', () => {
     await draftHostPage.waitForCustomUUPhase();
     
     // Clear name to trigger validation error
-    const nameInput = page.locator('#unitName');
+    const nameInput = page.locator('#unit-name');
     await nameInput.clear();
     await page.waitForTimeout(500);
     

@@ -27,7 +27,7 @@ export class DraftHostPage extends BasePage {
     customUUPhase: '.custom-uu-phase',
     customUUEditor: '.custom-uu-editor-container',
     submitUUButton: '.submit-uu-button',
-    unitNameInput: '#unitName',
+    unitNameInput: '#unit-name',
     healthSlider: '#health',
     attackSlider: '#attack',
   };
