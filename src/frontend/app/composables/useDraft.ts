@@ -81,16 +81,16 @@ export const useDraft = () => {
   const currentTurn = computed(() => {
     if (!draft.value) return null
     const numPlayers = draft.value.preset.slots
-    let roundType = Math.max(
+    const baseRoundType = Math.max(
       Math.floor(draft.value.gamestate.turn / numPlayers) - (draft.value.preset.rounds - 1),
       0
     )
     
     // If custom UU mode is enabled and we would be in roundType 1 (UU selection),
     // skip to roundType 2 (castle techs) instead
-    if (draft.value.preset.custom_uu_mode && roundType >= 1) {
-      roundType += 1 // Shift all subsequent rounds by 1
-    }
+    const roundType = (draft.value.preset.custom_uu_mode && baseRoundType >= 1) 
+      ? baseRoundType + 1 
+      : baseRoundType
     
     const turnModPlayers = draft.value.gamestate.turn % numPlayers
     let playerNum = draft.value.gamestate.order[turnModPlayers]
@@ -106,7 +106,11 @@ export const useDraft = () => {
     } else {
       // Legacy mode: only reverse on specific round types
       // Adjust for shifted round types when custom UU mode is active
-      const reverseRoundTypes = draft.value.preset.custom_uu_mode ? [3, 5] : [2, 4]
+      const CASTLE_ROUND_TYPE = 2
+      const IMPERIAL_ROUND_TYPE = 4
+      const reverseRoundTypes = draft.value.preset.custom_uu_mode 
+        ? [CASTLE_ROUND_TYPE + 1, IMPERIAL_ROUND_TYPE + 1] 
+        : [CASTLE_ROUND_TYPE, IMPERIAL_ROUND_TYPE]
       if (reverseRoundTypes.includes(roundType)) {
         playerNum = draft.value.gamestate.order[numPlayers - 1 - turnModPlayers]
       }

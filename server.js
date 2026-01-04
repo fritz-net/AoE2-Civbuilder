@@ -1140,13 +1140,13 @@ function updateTimerRemaining(draft) {
 // Helper function to determine current player's turn based on round type
 function getCurrentPlayer(draft) {
 	var numPlayers = draft["preset"]["slots"];
-	var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
+	var baseRoundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
 	
 	// If custom UU mode is enabled and we would be in roundType 1 (UU selection),
 	// skip to roundType 2 (castle techs) instead
-	if (draft["preset"]["custom_uu_mode"] && roundType >= 1) {
-		roundType += 1; // Shift all subsequent rounds by 1
-	}
+	var roundType = (draft["preset"]["custom_uu_mode"] && baseRoundType >= 1) 
+		? baseRoundType + 1 
+		: baseRoundType;
 	
 	var turnModPlayers = draft["gamestate"]["turn"] % numPlayers;
 	var player = draft["gamestate"]["order"][turnModPlayers];
@@ -1162,8 +1162,12 @@ function getCurrentPlayer(draft) {
 	} else {
 		// Legacy mode: only reverse on specific round types
 		// Adjust for shifted round types when custom UU mode is active
-		var reverseRoundTypes = draft["preset"]["custom_uu_mode"] ? [3, 5] : [2, 4];
-		if (reverseRoundTypes.includes(roundType)) {
+		var CASTLE_ROUND_TYPE = 2;
+		var IMPERIAL_ROUND_TYPE = 4;
+		var reverseRoundTypes = draft["preset"]["custom_uu_mode"] 
+			? [CASTLE_ROUND_TYPE + 1, IMPERIAL_ROUND_TYPE + 1] 
+			: [CASTLE_ROUND_TYPE, IMPERIAL_ROUND_TYPE];
+		if (reverseRoundTypes.indexOf(roundType) !== -1) {
 			player = draft["gamestate"]["order"][numPlayers - 1 - turnModPlayers];
 		}
 	}
