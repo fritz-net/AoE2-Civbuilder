@@ -596,9 +596,8 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     // Shrivamsha Rider (bonus 299)
     [b(STABLE), u(SHRIVAMSHA_RIDER)],
     [u(SHRIVAMSHA_RIDER), u(ELITE_SHRIVAMSHA_RIDER)],
-    // War Chariot (bonus 337)
-    [b(STABLE), u(WAR_CHARIOT)],
-    [u(WAR_CHARIOT), u(ELITE_WAR_CHARIOT)],
+    // War Chariot (bonus 337) - NO ELITE VERSION EXISTS
+    [b(SIEGE_WORKSHOP), u(WAR_CHARIOT)],
     // Xianbei Raider (bonus 348) - NO ELITE VERSION EXISTS - ARCHERY RANGE unit
     [b(ARCHERY_RANGE), u(XIANBEI_RAIDER)],
     // Jian Swordsman (bonus 343) - NO ELITE VERSION EXISTS - BARRACKS unit
@@ -610,6 +609,8 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(ARCHERY_RANGE), u(GRENADIER)],
     // Warrior Priest (bonus 193)
     [b(MONASTERY), u(WARRIOR_PRIEST)],
+    // Missionary (bonus 142)
+    [b(MONASTERY), u(MISSIONARY)],
   ]
 
   // Helper to get Mill or Folwark building ID based on bonus selection

@@ -34,7 +34,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const initialCount = parseInt(initialText?.match(/\d+/)?.[0] || '0');
     
     // Select "Can recruit Slingers" bonus
-    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers \(ID 61\)/i });
+    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers/i });
     await slingerCheckbox.check();
     await page.waitForTimeout(500); // Allow tree to rebuild
     
@@ -44,7 +44,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     expect(finalCount).toBe(initialCount + 1);
     
     // Verify points still at 0 (Slinger should be free)
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
+    await expect(page.getByText(/Points: 0/i)).toBeVisible();
   });
 
   test('should enable Longboat with 0 cost when bonus 51 is selected', async ({ page }) => {
@@ -53,7 +53,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const initialCount = parseInt(initialText?.match(/\d+/)?.[0] || '0');
     
     // Select "Can recruit Longboats" bonus
-    const longboatCheckbox = page.getByRole('checkbox', { name: /Can recruit Longboats \(ID 51\)/i });
+    const longboatCheckbox = page.getByRole('checkbox', { name: /Can recruit Longboats/i });
     await longboatCheckbox.check();
     await page.waitForTimeout(500); // Allow tree to rebuild
     
@@ -63,7 +63,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     expect(finalCount).toBe(initialCount + 2);
     
     // Verify points still at 0 (Longboat and Elite should be free)
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
+    await expect(page.getByText(/Points: 0/i)).toBeVisible();
   });
 
   test('should enable multiple bonus units without consuming points', async ({ page }) => {
@@ -72,12 +72,12 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const initialCount = parseInt(initialText?.match(/\d+/)?.[0] || '0');
     
     // Select "Can recruit Slingers" bonus
-    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers \(ID 61\)/i });
+    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers/i });
     await slingerCheckbox.check();
     await page.waitForTimeout(300);
     
     // Select "Can recruit Longboats" bonus
-    const longboatCheckbox = page.getByRole('checkbox', { name: /Can recruit Longboats \(ID 51\)/i });
+    const longboatCheckbox = page.getByRole('checkbox', { name: /Can recruit Longboats/i });
     await longboatCheckbox.check();
     await page.waitForTimeout(500);
     
@@ -87,39 +87,39 @@ test.describe('TechTree Bonus-Granted Units', () => {
     expect(finalCount).toBe(initialCount + 3);
     
     // Verify points still at 0 (all units should be free)
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
+    await expect(page.getByText(/Points: 0/i)).toBeVisible();
   });
 
   test('should auto-enable prerequisites with point costs for Imperial Camel', async ({ page }) => {
     // Select "Can upgrade to Imperial Camel Riders" bonus
-    const imperialCamelCheckbox = page.getByRole('checkbox', { name: /Can upgrade to Imperial Camel Riders \(ID 53\)/i });
+    const imperialCamelCheckbox = page.getByRole('checkbox', { name: /Can upgrade to Imperial Camel/i });
     await imperialCamelCheckbox.check();
     await page.waitForTimeout(500);
     
     // Verify points increased (should be 9 points for prerequisites)
     // Camel Rider (3) + Heavy Camel Rider (6) = 9 points
     // Imperial Camel Rider itself is free
-    const pointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+    const pointsText = await page.getByText(/Points: \d+/i).textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
     expect(points).toBe(9);
   });
 
   test('should auto-enable Bombard Cannon and Chemistry prerequisites for Houfnice', async ({ page }) => {
     // Select "Can upgrade to Houfnice" bonus
-    const houfniceCheckbox = page.getByRole('checkbox', { name: /Can upgrade to Houfnice \(ID 286\)/i });
+    const houfniceCheckbox = page.getByRole('checkbox', { name: /Can upgrade to Houfnice/i });
     await houfniceCheckbox.check();
     await page.waitForTimeout(500);
     
     // Verify points increased (should be 14 points total: Chemistry (6) + Bombard Cannon (8))
     // Houfnice itself is free
-    const pointsText = await page.getByText(/Points Spent: \d+/i).textContent();
+    const pointsText = await page.getByText(/Points: \d+/i).textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
     expect(points).toBe(14);
   });
 
   test('should remove bonus unit when bonus is deselected', async ({ page }) => {
     // Select "Can recruit Slingers" bonus
-    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers \(ID 61\)/i });
+    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers/i });
     await slingerCheckbox.check();
     await page.waitForTimeout(500);
     
@@ -137,7 +137,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     expect(withoutBonusCount).toBe(withBonusCount - 1);
     
     // Verify points back to 0
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
+    await expect(page.getByText(/Points: 0/i)).toBeVisible();
   });
 
   test('should show Pastures when bonus 356 is selected', async ({ page }) => {
@@ -146,7 +146,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const initialCount = parseInt(initialText?.match(/\d+/)?.[0] || '0');
     
     // Select Pastures bonus (ID 356)
-    const pasturesCheckbox = page.getByRole('checkbox', { name: /Pastures \(ID 356\)/i });
+    const pasturesCheckbox = page.getByRole('checkbox', { name: /Pastures/i });
     await pasturesCheckbox.check();
     await page.waitForTimeout(500); // Allow tree to rebuild
     
@@ -156,7 +156,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     expect(finalCount).toBeGreaterThan(initialCount);
     
     // Verify points still at 0 (Pastures should be free)
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
+    await expect(page.getByText(/Points: 0/i)).toBeVisible();
   });
 
   test('should display correct Selected Bonuses count', async ({ page }) => {
@@ -164,7 +164,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(page.getByText(/Selected Bonuses: 0/i)).toBeVisible();
     
     // Select one bonus
-    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers \(ID 61\)/i });
+    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers/i });
     await slingerCheckbox.check();
     await page.waitForTimeout(300);
     
@@ -172,7 +172,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(page.getByText(/Selected Bonuses: 1/i)).toBeVisible();
     
     // Select another bonus
-    const longboatCheckbox = page.getByRole('checkbox', { name: /Can recruit Longboats \(ID 51\)/i });
+    const longboatCheckbox = page.getByRole('checkbox', { name: /Can recruit Longboats/i });
     await longboatCheckbox.check();
     await page.waitForTimeout(300);
     
@@ -185,7 +185,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await page.waitForTimeout(1000)
     
     // Select Slinger bonus
-    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers \(ID 61\)/i });
+    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers/i });
     await slingerCheckbox.check()
     await page.waitForTimeout(500)
     
@@ -203,21 +203,21 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(techsEnabledAfter).toContainText(/Techs Enabled: 40/)
     
     // Points should still be 0 (bonus units don't consume points)
-    const pointsDisplay = page.locator('text=/Points Spent: \\d+/')
-    await expect(pointsDisplay).toContainText('Points Spent: 0')
+    const pointsDisplay = page.locator('text=/Points: \\d+/')
+    await expect(pointsDisplay).toContainText('Points: 0')
   });
 
   test('should replace Hussar with Winged Hussar when bonus is selected', async ({ page }) => {
     await page.goto('/v2/demo/techtree')
     await page.waitForSelector('.techtree-container')
     
-    // Select Winged Hussar bonus (ID 282) - replaces Hussar
-    const wingedHussarCheckbox = page.getByRole('checkbox', { name: /Winged Hussar.*ID 282/i })
+    // Select Winged Hussar) - replaces Hussar
+    const wingedHussarCheckbox = page.getByRole('checkbox', { name: /Winged Hussar/i })
     await wingedHussarCheckbox.check()
     await page.waitForTimeout(500)
     
     // Verify Winged Hussar is enabled (shown as 1 new tech, 0 cost)
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
+    await expect(page.getByText(/Points: 0/i)).toBeVisible()
     
     // Verify that Hussar caret element is not visible (replaced by Winged Hussar)
     const hussarElement = page.locator('[data-caret-id="0.441"]')
@@ -231,7 +231,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
     
     // Select Houfnice bonus (ID 286) which requires Chemistry + Bombard Cannon
-    const houfniceCheckbox = page.getByRole('checkbox', { name: /Houfnice \(ID 286\)/i })
+    const houfniceCheckbox = page.getByRole('checkbox', { name: /Houfnice/i })
     await houfniceCheckbox.check()
     await expect(houfniceCheckbox).toBeChecked()
     
@@ -249,7 +249,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(chemistryElement).toBeVisible()
     
     // Verify points are 14 (Chemistry 6pts + Bombard Cannon 8pts)
-    await expect(page.getByText(/Points Spent: 14/i)).toBeVisible()
+    await expect(page.getByText(/Points: 14/i)).toBeVisible()
   });
 
   test('should properly replace Hussar with Winged Hussar', async ({ page }) => {
@@ -260,8 +260,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const hussarElement = page.locator('[data-caret-id="unit_441"]')
     await expect(hussarElement).toBeVisible()
     
-    // Select Winged Hussar bonus (ID 282)
-    const wingedHussarCheckbox = page.getByRole('checkbox', { name: /Winged Hussar.*ID 282/i })
+    // Select Winged Hussar)
+    const wingedHussarCheckbox = page.getByRole('checkbox', { name: /Winged Hussar/i })
     await wingedHussarCheckbox.check()
     await page.waitForTimeout(500)
     
@@ -273,7 +273,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(wingedHussarElement).toBeVisible()
     
     // Verify 3 points (Light Cavalry prerequisite)
-    await expect(page.getByText(/Points Spent: 3/i)).toBeVisible()
+    await expect(page.getByText(/Points: 3/i)).toBeVisible()
   });
 
   test('should properly replace Paladin with Savar', async ({ page }) => {
@@ -284,8 +284,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const paladinElement = page.locator('[data-caret-id="unit_569"]')
     await expect(paladinElement).toBeVisible()
     
-    // Select Savar bonus (ID 314)
-    const savarCheckbox = page.getByRole('checkbox', { name: /Savar.*ID 314/i })
+    // Select Savar)
+    const savarCheckbox = page.getByRole('checkbox', { name: /Savar/i })
     await savarCheckbox.check()
     await page.waitForTimeout(500)
     
@@ -297,7 +297,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(savarElement).toBeVisible()
     
     // Verify 6 points (Cavalier prerequisite)
-    await expect(page.getByText(/Points Spent: 6/i)).toBeVisible()
+    await expect(page.getByText(/Points: 6/i)).toBeVisible()
   });
 
   test('should properly replace Two-Handed Swordsman and Champion with Legionary', async ({ page }) => {
@@ -310,8 +310,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(twoHandedSwordsmanElement).toBeVisible()
     await expect(championElement).toBeVisible()
     
-    // Select Legionary bonus (ID 307)
-    const legionaryCheckbox = page.getByRole('checkbox', { name: /Legionary.*ID 307/i })
+    // Select Legionary)
+    const legionaryCheckbox = page.getByRole('checkbox', { name: /Legionary/i })
     await legionaryCheckbox.check()
     await page.waitForTimeout(500)
     
@@ -324,7 +324,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(legionaryElement).toBeVisible()
     
     // Verify 3 points (Long Swordsman prerequisite)
-    await expect(page.getByText(/Points Spent: 3/i)).toBeVisible()
+    await expect(page.getByText(/Points: 3/i)).toBeVisible()
   });
 
   test('should properly replace Mill with Folwark', async ({ page }) => {
@@ -335,8 +335,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const millElement = page.locator('[data-caret-id="building_68"]')
     await expect(millElement).toBeVisible()
     
-    // Select Folwark bonus (ID 280)
-    const folwarkCheckbox = page.getByRole('checkbox', { name: /Folwark.*ID 280/i })
+    // Select Folwark)
+    const folwarkCheckbox = page.getByRole('checkbox', { name: /Folwark/i })
     await folwarkCheckbox.check()
     await page.waitForTimeout(500)
     
@@ -348,7 +348,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(folwarkElement).toBeVisible()
     
     // Verify 0 cost
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
+    await expect(page.getByText(/Points: 0/i)).toBeVisible()
   });
 
   test('should properly replace Monastery with Fortified Church', async ({ page }) => {
@@ -359,8 +359,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const monasteryElement = page.locator('[data-caret-id="building_104"]')
     await expect(monasteryElement).toBeVisible()
     
-    // Select Fortified Church bonus (ID 316)
-    const fortifiedChurchCheckbox = page.getByRole('checkbox', { name: /Fortified Church.*ID 316/i })
+    // Select Fortified Church)
+    const fortifiedChurchCheckbox = page.getByRole('checkbox', { name: /Fortified Church/i })
     await fortifiedChurchCheckbox.check()
     await page.waitForTimeout(500)
     
@@ -372,6 +372,42 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(fortifiedChurchElement).toBeVisible()
     
     // Verify 0 cost
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
+    await expect(page.getByText(/Points: 0/i)).toBeVisible()
+  });
+
+  test('should preserve scroll position when selecting bonuses', async ({ page }) => {
+    // Wait for the tech tree container to be ready
+    const techtreeContainer = page.locator('.techtree-container')
+    await techtreeContainer.waitFor({ state: 'visible' })
+    
+    // Scroll to a specific position
+    await techtreeContainer.evaluate((el) => {
+      el.scrollLeft = 500
+      el.scrollTop = 200
+    })
+    
+    // Wait for scroll to settle
+    await page.waitForTimeout(300)
+    
+    // Get initial scroll position
+    const initialScroll = await techtreeContainer.evaluate((el) => ({
+      scrollLeft: el.scrollLeft,
+      scrollTop: el.scrollTop
+    }))
+    
+    // Select a bonus to trigger tree rebuild
+    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers/i })
+    await slingerCheckbox.check()
+    await page.waitForTimeout(500) // Allow tree to rebuild
+    
+    // Get new scroll position
+    const newScroll = await techtreeContainer.evaluate((el) => ({
+      scrollLeft: el.scrollLeft,
+      scrollTop: el.scrollTop
+    }))
+    
+    // Verify scroll position was preserved (allow small tolerance for rounding)
+    expect(Math.abs(newScroll.scrollLeft - initialScroll.scrollLeft)).toBeLessThan(5)
+    expect(Math.abs(newScroll.scrollTop - initialScroll.scrollTop)).toBeLessThan(5)
   });
 });

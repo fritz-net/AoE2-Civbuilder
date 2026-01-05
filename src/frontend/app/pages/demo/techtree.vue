@@ -182,6 +182,10 @@ const testBonusesGrouped = [
     title: 'Other',
     bonuses: [
       { id: 356, name: 'Pastures' },
+      { id: 68, name: 'Can build Feitoria' },
+      { id: 69, name: 'Can build Caravels' },
+      { id: 93, name: 'Can build Krepost' },
+      { id: 109, name: 'Can build Donjon' },
     ]
   },
 ]
