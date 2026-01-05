@@ -271,6 +271,12 @@ export const SAVAR = 1813
 export const LEGIONARY = 1793
 export const FOLWARK = 1734
 export const FORTIFIED_CHURCH = 1806
+// Can-build bonus units/buildings
+export const FEITORIA = 1021
+export const CARAVEL = 1004
+export const ELITE_CARAVEL = 1006
+export const KREPOST = 1251
+export const DONJON = 1665
 export const GOLD_MINING = 55
 export const KEEP_TECH = 63
 export const BOMBARD_TOWER_TECH = 64

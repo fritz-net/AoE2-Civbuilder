@@ -93,6 +93,12 @@ import {
   WINGED_HUSSAR,
   SAVAR,
   LEGIONARY,
+  // Can-build bonus buildings/units
+  FEITORIA,
+  CARAVEL,
+  ELITE_CARAVEL,
+  KREPOST,
+  DONJON,
   SIEGE_ONAGER,
   ELITE_CANNON_GALLEON,
   EAGLE_SCOUT,
@@ -238,6 +244,10 @@ import {
   BONUS_ID_WINGED_HUSSAR,
   BONUS_ID_LEGIONARY,
   BONUS_ID_SAVAR,
+  BONUS_ID_FEITORIA,
+  BONUS_ID_CARAVEL,
+  BONUS_ID_KREPOST,
+  BONUS_ID_DONJON,
 } from './useBonusTechMapping'
 
 let techtreeData: TechtreeData | null = null

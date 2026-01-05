@@ -44,7 +44,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     expect(finalCount).toBe(initialCount + 1);
     
     // Verify points still at 0 (Slinger should be free)
-    await expect(page.getByText(/Points: 0/i)).toBeVisible();
+    await expect(page.getByText('Points: 0')).toBeVisible();
   });
 
   test('should enable Longboat with 0 cost when bonus 51 is selected', async ({ page }) => {
@@ -63,7 +63,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     expect(finalCount).toBe(initialCount + 2);
     
     // Verify points still at 0 (Longboat and Elite should be free)
-    await expect(page.getByText(/Points: 0/i)).toBeVisible();
+    await expect(page.getByText('Points: 0')).toBeVisible();
   });
 
   test('should enable multiple bonus units without consuming points', async ({ page }) => {
@@ -87,7 +87,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     expect(finalCount).toBe(initialCount + 3);
     
     // Verify points still at 0 (all units should be free)
-    await expect(page.getByText(/Points: 0/i)).toBeVisible();
+    await expect(page.getByText('Points: 0')).toBeVisible();
   });
 
   test('should auto-enable prerequisites with point costs for Imperial Camel', async ({ page }) => {
@@ -99,7 +99,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     // Verify points increased (should be 9 points for prerequisites)
     // Camel Rider (3) + Heavy Camel Rider (6) = 9 points
     // Imperial Camel Rider itself is free
-    const pointsText = await page.getByText(/Points: \d+/i).textContent();
+    const pointsText = await page.locator('text=/Points: \d+/').textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
     expect(points).toBe(9);
   });
@@ -112,7 +112,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     
     // Verify points increased (should be 14 points total: Chemistry (6) + Bombard Cannon (8))
     // Houfnice itself is free
-    const pointsText = await page.getByText(/Points: \d+/i).textContent();
+    const pointsText = await page.locator('text=/Points: \d+/').textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
     expect(points).toBe(14);
   });
@@ -137,7 +137,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     expect(withoutBonusCount).toBe(withBonusCount - 1);
     
     // Verify points back to 0
-    await expect(page.getByText(/Points: 0/i)).toBeVisible();
+    await expect(page.getByText('Points: 0')).toBeVisible();
   });
 
   test('should show Pastures when bonus 356 is selected', async ({ page }) => {
@@ -156,7 +156,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     expect(finalCount).toBeGreaterThan(initialCount);
     
     // Verify points still at 0 (Pastures should be free)
-    await expect(page.getByText(/Points: 0/i)).toBeVisible();
+    await expect(page.getByText('Points: 0')).toBeVisible();
   });
 
   test('should display correct Selected Bonuses count', async ({ page }) => {
@@ -215,7 +215,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await page.waitForTimeout(500)
     
     // Verify Winged Hussar is enabled (shown as 1 new tech, 0 cost)
-    await expect(page.getByText(/Points: 0/i)).toBeVisible()
+    await expect(page.getByText('Points: 0')).toBeVisible()
     
     // Verify that Hussar caret element is not visible (replaced by Winged Hussar)
     const hussarElement = page.locator('[data-caret-id="0.441"]')
@@ -245,7 +245,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(chemistryElement).toBeVisible()
     
     // Verify points are 14 (Chemistry 6pts + Bombard Cannon 8pts)
-    await expect(page.getByText(/Points: 14/i)).toBeVisible()
+    await expect(page.getByText('Points: 14')).toBeVisible()
   });
 
   test('should properly replace Hussar with Winged Hussar', async ({ page }) => {
@@ -267,7 +267,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(wingedHussarElement).toBeVisible()
     
     // Verify 3 points (Light Cavalry prerequisite)
-    await expect(page.getByText(/Points: 3/i)).toBeVisible()
+    await expect(page.getByText('Points: 3')).toBeVisible()
   });
 
   test('should properly replace Paladin with Savar', async ({ page }) => {
@@ -289,7 +289,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(savarElement).toBeVisible()
     
     // Verify 6 points (Cavalier prerequisite)
-    await expect(page.getByText(/Points: 6/i)).toBeVisible()
+    await expect(page.getByText('Points: 6')).toBeVisible()
   });
 
   test('should properly replace Two-Handed Swordsman and Champion with Legionary', async ({ page }) => {
@@ -314,7 +314,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(legionaryElement).toBeVisible()
     
     // Verify 3 points (Long Swordsman prerequisite)
-    await expect(page.getByText(/Points: 3/i)).toBeVisible()
+    await expect(page.getByText('Points: 3')).toBeVisible()
   });
 
   test('should properly replace Mill with Folwark', async ({ page }) => {
@@ -336,7 +336,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(folwarkElement).toBeVisible()
     
     // Verify 0 cost
-    await expect(page.getByText(/Points: 0/i)).toBeVisible()
+    await expect(page.getByText('Points: 0')).toBeVisible()
   });
 
   test('should properly replace Monastery with Fortified Church', async ({ page }) => {
@@ -358,7 +358,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(fortifiedChurchElement).toBeVisible()
     
     // Verify 0 cost
-    await expect(page.getByText(/Points: 0/i)).toBeVisible()
+    await expect(page.getByText('Points: 0')).toBeVisible()
   });
 
   test('should preserve scroll position when selecting bonuses', async ({ page }) => {
