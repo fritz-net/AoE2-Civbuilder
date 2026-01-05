@@ -214,7 +214,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(page.getByText('Points Spent: 3')).toBeVisible()
     
     // Verify that Hussar caret element is not visible (replaced by Winged Hussar)
-    const hussarElement = page.locator('[data-caret-id="0.441"]')
+    const hussarElement = page.locator('[data-caret-id="unit_441"]')
     await expect(hussarElement).not.toBeVisible()
   });
 
@@ -228,8 +228,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(houfniceCheckbox).toBeChecked()
     
     // Verify that Chemistry (ID 47) and Bombard Cannon (ID 36) are enabled
-    const chemistryElement = page.locator('[data-caret-id="2.47"]')
-    const bombardCannonElement = page.locator('[data-caret-id="0.36"]')
+    const chemistryElement = page.locator('[data-caret-id="tech_47"]')
+    const bombardCannonElement = page.locator('[data-caret-id="unit_36"]')
     
     await expect(chemistryElement).toBeVisible()
     await expect(bombardCannonElement).toBeVisible()
