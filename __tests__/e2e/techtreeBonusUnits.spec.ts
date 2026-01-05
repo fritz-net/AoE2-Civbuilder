@@ -57,12 +57,12 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await longboatCheckbox.check();
     await page.waitForTimeout(500); // Allow tree to rebuild
     
-    // Verify tech count increased by 1
+    // Verify tech count increased by 2 (Longboat + Elite Longboat auto-enabled)
     const finalText = await page.getByText(/Techs Enabled: \d+/i).textContent();
     const finalCount = parseInt(finalText?.match(/\d+/)?.[0] || '0');
-    expect(finalCount).toBe(initialCount + 1);
+    expect(finalCount).toBe(initialCount + 2);
     
-    // Verify points still at 0 (Longboat should be free)
+    // Verify points still at 0 (Longboat and Elite should be free)
     await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
   });
 
@@ -81,12 +81,12 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await longboatCheckbox.check();
     await page.waitForTimeout(500);
     
-    // Verify tech count increased by 2
+    // Verify tech count increased by 3 (Slinger + Longboat + Elite Longboat)
     const finalText = await page.getByText(/Techs Enabled: \d+/i).textContent();
     const finalCount = parseInt(finalText?.match(/\d+/)?.[0] || '0');
-    expect(finalCount).toBe(initialCount + 2);
+    expect(finalCount).toBe(initialCount + 3);
     
-    // Verify points still at 0 (both units should be free)
+    // Verify points still at 0 (all units should be free)
     await expect(page.getByText(/Points Spent: 0/i)).toBeVisible();
   });
 
@@ -110,11 +110,11 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await houfniceCheckbox.check();
     await page.waitForTimeout(500);
     
-    // Verify points increased (should be 8 points for Bombard Cannon prerequisite)
+    // Verify points increased (should be 14 points total: Chemistry (6) + Bombard Cannon (8))
     // Houfnice itself is free
     const pointsText = await page.getByText(/Points Spent: \d+/i).textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
-    expect(points).toBe(8);
+    expect(points).toBe(14);
   });
 
   test('should remove bonus unit when bonus is deselected', async ({ page }) => {
