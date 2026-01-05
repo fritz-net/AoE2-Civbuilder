@@ -210,12 +210,12 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await wingedHussarCheckbox.check()
     await page.waitForTimeout(500)
     
-    // Verify Winged Hussar is enabled with prerequisites (Light Cavalry = 3pts)
+    // Verify Winged Hussar is enabled with prerequisites (Scout Cavalry + Light Cavalry = 4pts)
     // Parse the points value from the points display
     const pointsText = await page.locator('.points').textContent()
     const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
     const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
-    expect(points).toBe(3)
+    expect(points).toBe(4)
     
     // Verify that Hussar caret element is not visible (replaced by Winged Hussar)
     const hussarElement = page.locator('[data-caret-id="unit_441"]')
@@ -269,11 +269,11 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const wingedHussarElement = page.locator('[data-caret-id="unit_1707"]')
     await expect(wingedHussarElement).toBeVisible()
     
-    // Verify 3 points (Light Cavalry prerequisite)
+    // Verify 4 points (Scout Cavalry + Light Cavalry prerequisites)
     const pointsText = await page.locator('.points').textContent()
     const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
     const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
-    expect(points).toBe(3)
+    expect(points).toBe(4)
   });
 
   test('should properly replace Paladin with Savar', async ({ page }) => {
@@ -294,11 +294,11 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const savarElement = page.locator('[data-caret-id="unit_1813"]')
     await expect(savarElement).toBeVisible()
     
-    // Verify 5 points (Cavalier prerequisite - actual cost from techtree data)
+    // Verify 8 points (Knight + Cavalier prerequisites)
     const pointsText = await page.locator('.points').textContent()
     const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
     const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
-    expect(points).toBe(5)
+    expect(points).toBe(8)
   });
 
   test('should properly replace Two-Handed Swordsman and Champion with Legionary', async ({ page }) => {
