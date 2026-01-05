@@ -121,7 +121,7 @@
 
         <!-- Nodes -->
         <g
-          v-for="caret in allCarets"
+          v-for="caret in visibleCarets"
           :key="caret.id"
           :class="['node', { 'is-highlight': isHighlighted(caret.id) }]"
         >
@@ -465,6 +465,25 @@ const allCarets = computed(() => {
   return carets
 })
 
+// Filter out replaced entities - units/buildings that are replaced by bonuses
+const visibleCarets = computed(() => {
+  return allCarets.value.filter(caret => {
+    const type = idType(caret.id)
+    const numId = idID(caret.id)
+    
+    // Hide if this unit is replaced by a bonus
+    if (type === 0 && grantedEntities.value.replaces.units.has(numId)) {
+      return false
+    }
+    // Hide if this building is replaced by a bonus
+    if (type === 1 && grantedEntities.value.replaces.buildings.has(numId)) {
+      return false
+    }
+    
+    return true
+  })
+})
+
 // Computed list of unclickable carets - includes base unclickable carets plus bonus-granted entities
 const effectiveUnclickableCarets = computed(() => {
   const unclickable = [...unclickableCarets]
@@ -486,6 +505,14 @@ const effectiveUnclickableCarets = computed(() => {
   }
   for (const techId of grantedEntities.value.prerequisites.techs) {
     unclickable.push(`tech_${techId}`)
+  }
+  
+  // Add all replaced entities - these also cannot be clicked (they're hidden)
+  for (const unitId of grantedEntities.value.replaces.units) {
+    unclickable.push(`unit_${unitId}`)
+  }
+  for (const buildingId of grantedEntities.value.replaces.buildings) {
+    unclickable.push(`building_${buildingId}`)
   }
   
   return unclickable

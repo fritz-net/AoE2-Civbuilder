@@ -283,6 +283,10 @@ export function getAllGrantedEntities(selectedBonuses: Map<string, { id: number;
     units: Set<number>
     techs: Set<number>
   }
+  replaces: {
+    units: Set<number>
+    buildings: Set<number>
+  }
 } {
   const result = {
     free: {
@@ -293,6 +297,10 @@ export function getAllGrantedEntities(selectedBonuses: Map<string, { id: number;
     prerequisites: {
       units: new Set<number>(),
       techs: new Set<number>(),
+    },
+    replaces: {
+      units: new Set<number>(),
+      buildings: new Set<number>(),
     },
   }
   
@@ -313,6 +321,12 @@ export function getAllGrantedEntities(selectedBonuses: Map<string, { id: number;
       if (mapping.requiresPrerequisites && mapping.prerequisites) {
         mapping.prerequisites.units?.forEach(id => result.prerequisites.units.add(id))
         mapping.prerequisites.techs?.forEach(id => result.prerequisites.techs.add(id))
+      }
+      
+      // Add replaced entities (units/buildings that should be hidden)
+      if (mapping.replaces) {
+        mapping.replaces.units?.forEach(id => result.replaces.units.add(id))
+        mapping.replaces.buildings?.forEach(id => result.replaces.buildings.add(id))
       }
     }
   }
