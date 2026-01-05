@@ -645,9 +645,15 @@ watch(() => props.initialTree, (newTree) => {
 // Watch for changes in selected bonuses to enable granted entities AND rebuild tree
 watch(() => props.selectedBonuses, () => {
   if (data.value) {
-    // Save current scroll position before rebuilding tree
-    const currentScrollLeft = techtreeRef.value?.scrollLeft || 0
-    const currentScrollTop = techtreeRef.value?.scrollTop || 0
+    // Find the .techtree-container element (the actual scrollable container)
+    const scrollContainer = techtreeRef.value?.querySelector('.techtree-container') as HTMLElement
+    
+    // Save current scroll position from the CONTAINER (not the root element)
+    const currentScrollLeft = scrollContainer?.scrollLeft || 0
+    const currentScrollTop = scrollContainer?.scrollTop || 0
+    
+    // Debug: Log saved scroll values
+    console.log('[Scroll Debug] Saving scroll:', { left: currentScrollLeft, top: currentScrollTop })
     
     // Rebuild tree with new bonus units included in structure
     tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { selectedBonuses: flattenedSelectedBonuses.value })
@@ -657,23 +663,29 @@ watch(() => props.selectedBonuses, () => {
     // Restore scroll position with multiple attempts for reliability
     // First attempt: nextTick (after Vue DOM update)
     nextTick(() => {
-      if (techtreeRef.value) {
-        techtreeRef.value.scrollLeft = currentScrollLeft
-        techtreeRef.value.scrollTop = currentScrollTop
+      const container = techtreeRef.value?.querySelector('.techtree-container') as HTMLElement
+      if (container) {
+        container.scrollLeft = currentScrollLeft
+        container.scrollTop = currentScrollTop
+        console.log('[Scroll Debug] Attempt 1 (nextTick):', { left: container.scrollLeft, top: container.scrollTop })
       }
       
       // Second attempt: requestAnimationFrame (after browser paint)
       requestAnimationFrame(() => {
-        if (techtreeRef.value) {
-          techtreeRef.value.scrollLeft = currentScrollLeft
-          techtreeRef.value.scrollTop = currentScrollTop
+        const container = techtreeRef.value?.querySelector('.techtree-container') as HTMLElement
+        if (container) {
+          container.scrollLeft = currentScrollLeft
+          container.scrollTop = currentScrollTop
+          console.log('[Scroll Debug] Attempt 2 (RAF):', { left: container.scrollLeft, top: container.scrollTop })
         }
         
         // Third attempt: setTimeout as final fallback
         setTimeout(() => {
-          if (techtreeRef.value) {
-            techtreeRef.value.scrollLeft = currentScrollLeft
-            techtreeRef.value.scrollTop = currentScrollTop
+          const container = techtreeRef.value?.querySelector('.techtree-container') as HTMLElement
+          if (container) {
+            container.scrollLeft = currentScrollLeft
+            container.scrollTop = currentScrollTop
+            console.log('[Scroll Debug] Attempt 3 (setTimeout):', { left: container.scrollLeft, top: container.scrollTop })
           }
         }, 50)
       })

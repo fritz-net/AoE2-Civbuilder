@@ -583,11 +583,9 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(MONASTERY), t(THEOCRACY)],
     [b(TOWN_CENTER), t(TOWN_WATCH)],
     [b(TOWN_CENTER), t(WHEELBARROW)],
-    // Can-build bonus: Krepost and Donjon connections (built from Town Center)
-    [b(TOWN_CENTER), b(KREPOST)],
-    // Krepost can build Petards (like Castle)
+    // Can-build bonus: Krepost can build Petards (like Castle)
+    // NOTE: Krepost and Donjon do NOT have connections to Town Center (they're standalone bonus buildings)
     [b(KREPOST), u(PETARD)],
-    [b(TOWN_CENTER), b(DONJON)],
     [b(MARKET), t(COINAGE)],
     [b(MARKET), t(GUILDS)],
     // Can-build bonus: Feitoria connection (Feitoria is built from Market tech tree)
@@ -961,7 +959,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
 
   const castlelane = createLane()
   castlelane.rows.castle_1.push(building(CASTLE))
-  castlelane.rows.castle_2.push(unit(PETARD))
+  // NOTE: Petard removed from castle lane - now only in Krepost lane (castle_2) to avoid duplication
   castlelane.rows.imperial_1.push(unit(TREBUCHET))
   castlelane.rows.imperial_1.push(tech(HOARDINGS))
   castlelane.rows.imperial_1.push(tech(SAPPERS))
