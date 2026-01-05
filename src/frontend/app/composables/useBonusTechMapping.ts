@@ -220,7 +220,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     units: [1707],  // Winged Hussar
     requiresPrerequisites: true,
     prerequisites: {
-      units: [546],  // Light Cavalry only (Scout Cavalry is base unit, always available)
+      units: [448, 546],  // Scout Cavalry, Light Cavalry (full chain)
     },
     replaces: {
       units: [441],  // Hussar
@@ -248,7 +248,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     units: [1813],  // Savar
     requiresPrerequisites: true,
     prerequisites: {
-      units: [283],  // Cavalier only (Knight is base unit, always available)
+      units: [38, 283],  // Knight, Cavalier (full chain)
     },
     replaces: {
       units: [569],  // Paladin
