@@ -55,7 +55,7 @@
       
       <div class="setting-group">
         <label class="setting-label">Test Bonuses:</label>
-        <div class="bonus-checkboxes">
+        <div class="bonus-checkboxes" style="max-height: 300px; overflow-y: auto;">
           <label v-for="bonus in testBonuses" :key="bonus.id" class="bonus-option">
             <input 
               type="checkbox" 

@@ -82,9 +82,10 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 286,
     bonusType: 'civ',
     units: [1709],  // Houfnice
-    requiresPrerequisites: true,  // Requires Bombard Cannon
+    requiresPrerequisites: true,  // Requires Bombard Cannon and Chemistry
     prerequisites: {
       units: [36],  // Bombard Cannon
+      techs: [47],  // Chemistry (required for Bombard Cannon)
     },
   },
   

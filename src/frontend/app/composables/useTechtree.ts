@@ -588,9 +588,9 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     // War Chariot (bonus 337)
     [b(STABLE), u(WAR_CHARIOT)],
     [u(WAR_CHARIOT), u(ELITE_WAR_CHARIOT)],
-    // Xianbei Raider (bonus 348) - NO ELITE VERSION EXISTS
-    [b(STABLE), u(XIANBEI_RAIDER)],
-    // Jian Swordsman (bonus 343) - NO ELITE VERSION EXISTS
+    // Xianbei Raider (bonus 348) - NO ELITE VERSION EXISTS - ARCHERY RANGE unit
+    [b(ARCHERY_RANGE), u(XIANBEI_RAIDER)],
+    // Jian Swordsman (bonus 343) - NO ELITE VERSION EXISTS - BARRACKS unit
     [b(BARRACKS), u(JIAN_SWORDSMAN)],
     // Houfnice (bonus 286) - extends bombard cannon
     [u(BOMBARD_CANNON), u(HOUFNICE)],
@@ -691,6 +691,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   archerylane.rows.castle_1.push(unit(ELEPHANT_ARCHER))
   if (isBonusSelected(BONUS_ID_SLINGER)) archerylane.rows.castle_1.push(unit(SLINGER)) // Bonus unit: Can recruit Slingers
   if (isBonusSelected(BONUS_ID_GRENADIER)) archerylane.rows.castle_1.push(unit(GRENADIER)) // Bonus unit: Can recruit Grenadiers
+  if (isBonusSelected(BONUS_ID_XIANBEI_RAIDER)) archerylane.rows.castle_1.push(unit(XIANBEI_RAIDER)) // Bonus unit: Can recruit Xianbei Raiders (no elite)
   archerylane.rows.castle_1.push(tech(THUMB_RING))
   archerylane.rows.imperial_1.push(unit(ARBALESTER))
   archerylane.rows.imperial_1.push(unit(HAND_CANNONEER))
@@ -710,6 +711,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.castle_1.push(unit(PIKEMAN))
   barrackslane.rows.castle_1.push(unit(EAGLE_WARRIOR))
   barrackslane.rows.castle_1.push(unit(FIRE_LANCER))
+  if (isBonusSelected(BONUS_ID_JIAN_SWORDSMAN)) barrackslane.rows.castle_1.push(unit(JIAN_SWORDSMAN)) // Bonus unit: Can recruit Jian Swordsmen (no elite)
   barrackslane.rows.castle_1.push(tech(GAMBESONS))
   barrackslane.rows.castle_1.push(tech(SQUIRES))
   barrackslane.rows.imperial_1.push(unit(TWO_HANDED_SWORDSMAN))
@@ -731,8 +733,6 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.castle_1.push(unit(STEPPE_LANCER))
   stablelane.rows.castle_1.push(unit(HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.castle_1.push(unit(SHRIVAMSHA_RIDER)) // Bonus unit: Can recruit Shrivamsha Riders
-  if (isBonusSelected(BONUS_ID_XIANBEI_RAIDER)) stablelane.rows.castle_1.push(unit(XIANBEI_RAIDER)) // Bonus unit: Can recruit Xianbei Raiders (no elite)
-  if (isBonusSelected(BONUS_ID_JIAN_SWORDSMAN)) stablelane.rows.castle_1.push(unit(JIAN_SWORDSMAN)) // Bonus unit: Can recruit Jian Swordsmen (no elite)
   stablelane.rows.castle_1.push(tech(HUSBANDRY))
   stablelane.rows.imperial_1.push(unit(HUSSAR))
   stablelane.rows.imperial_1.push(unit(CAVALIER))
