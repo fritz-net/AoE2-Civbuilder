@@ -298,7 +298,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const pointsText = await page.locator('.points').textContent()
     const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
     const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
-    expect(points).toBe(8)
+    expect(points).toBe(8); // knight (3) + cavalier (5) = 8
   });
 
   test('should properly replace Two-Handed Swordsman and Champion with Legionary', async ({ page }) => {
@@ -326,7 +326,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const pointsText = await page.locator('.points').textContent()
     const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
     const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
-    expect(points).toBe(1)
+    expect(points).toBe(3) // Militia (0) + Man-at-Arms (2) + Long Swordsman (1) = 3 points
   });
 
   test('should properly replace Mill with Folwark', async ({ page }) => {
