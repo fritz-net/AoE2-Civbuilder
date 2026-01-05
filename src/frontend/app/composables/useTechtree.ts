@@ -583,9 +583,6 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(MONASTERY), t(THEOCRACY)],
     [b(TOWN_CENTER), t(TOWN_WATCH)],
     [b(TOWN_CENTER), t(WHEELBARROW)],
-    // Can-build bonus: Krepost can build Petards (like Castle)
-    // NOTE: Krepost and Donjon do NOT have connections to Town Center (they're standalone bonus buildings)
-    [b(KREPOST), u(PETARD)],
     [b(MARKET), t(COINAGE)],
     [b(MARKET), t(GUILDS)],
     // Can-build bonus: Feitoria connection (Feitoria is built from Market tech tree)
@@ -676,6 +673,13 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
   // Add connection for Mounted Trebuchet if bonus is selected
   if (isBonusSelected(BONUS_ID_MOUNTED_TREBUCHET)) {
     connections.push([b(SIEGE_WORKSHOP), u(MOUNTED_TREBUCHET)])
+  }
+  
+  // Add connection for Krepost-Petard if bonus is selected
+  // Can-build bonus: Krepost can build Petards (like Castle)
+  // NOTE: Krepost and Donjon do NOT have connections to Town Center (they're standalone bonus buildings)
+  if (isBonusSelected(BONUS_ID_KREPOST)) {
+    connections.push([b(KREPOST), u(PETARD)])
   }
 
   // Filter out connections to/from replaced units

@@ -95,7 +95,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     // Verify points increased (should be 9 points for prerequisites)
     // Camel Rider (3) + Heavy Camel Rider (6) = 9 points
     // Imperial Camel Rider itself is free
-    const pointsText = await page.locator('text=/Points: \d+/').textContent();
+    const pointsText = await page.locator('text=/Points Spent: \\d+/').textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
     expect(points).toBe(9);
   });
@@ -108,7 +108,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     
     // Verify points increased (should be 14 points total: Chemistry (6) + Bombard Cannon (8))
     // Houfnice itself is free
-    const pointsText = await page.locator('text=/Points: \d+/').textContent();
+    const pointsText = await page.locator('text=/Points Spent: \\d+/').textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
     expect(points).toBe(14);
   });
@@ -198,8 +198,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(techsEnabledAfter).toContainText(/Techs Enabled: 40/)
     
     // Points should still be 0 (bonus units don't consume points)
-    const pointsDisplay = page.locator('text=/Points: \\d+/')
-    await expect(pointsDisplay).toContainText('Points: 0')
+    const pointsDisplay = page.locator('text=/Points Spent: \\d+/')
+    await expect(pointsDisplay).toContainText('Points Spent: 0')
   });
 
   test('should replace Hussar with Winged Hussar when bonus is selected', async ({ page }) => {
