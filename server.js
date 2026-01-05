@@ -1546,6 +1546,7 @@ function draftIO(io) {
 						mod_data.language = [];
 						mod_data.castle = [];
 						mod_data.wonder = [];
+						mod_data.custom_units = []; // Array to store custom UU data for each player
 						mod_data.modifiers = {
 							randomCosts: false,
 							hp: 1,
@@ -1566,10 +1567,24 @@ function draftIO(io) {
 							mod_data.description.push(draft["players"][i]["description"]);
 							mod_data.castle.push(draft["players"][i]["castle"]);
 							mod_data.wonder.push(draft["players"][i]["wonder"]);
-							//Unique Unit
+							//Unique Unit - check if it's a custom UU or regular UU
+							var customUUForPlayer = null;
 							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][1] && draft["players"][i]["bonuses"][1][0] !== undefined) {
-								player_techtree[0] = extractBonusId(draft["players"][i]["bonuses"][1][0], "unique unit");
+								var uuData = draft["players"][i]["bonuses"][1][0];
+								// Check if this is a custom UU object (has type: 'custom')
+								if (typeof uuData === 'object' && uuData !== null && uuData.type === 'custom') {
+									// It's a custom UU - store it separately and don't add to techtree
+									customUUForPlayer = uuData;
+									console.log(`[${draft["id"]}]: Player ${i} has custom UU: ${uuData.name}`);
+									// Set techtree[0] to 0 (no unique unit in traditional sense)
+									player_techtree[0] = 0;
+								} else {
+									// Regular unique unit - extract the ID
+									player_techtree[0] = extractBonusId(uuData, "unique unit");
+								}
 							}
+							// Store custom UU (or null if player doesn't have one)
+							mod_data.custom_units.push(customUUForPlayer);
 							//Castle Tech
 							var castletechs = [];
 							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][2] && draft["players"][i]["bonuses"][2][0] !== undefined) {
@@ -1622,38 +1637,42 @@ function draftIO(io) {
 							for (var i = 0; i < blanks.length; i++) {
 								osUtil.execCommand(`cp ./public/img/uniticons/blank.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${blanks[i]}_50730.png`, function () {});
 							}
+							
+							// Process unique unit icons
+							var iconCopyNeeded = false;
+							var lastIconIndex = -1;
+							
+							// First, determine if any icon copying is needed and find the last valid index
 							for (var i = 0; i < mod_data.techtree.length; i++) {
 								var unitId = mod_data.techtree[i][0];
 								
-								// Validate that unitId is defined and within valid range
-								if (unitId === undefined || unitId === null) {
-									console.error(`[${draft["id"]}]: Warning - Unit ID is undefined for civ techtree index ${i}`);
+								// Skip icon copying for custom UUs (unitId will be 0)
+								if (mod_data.custom_units && mod_data.custom_units[i] !== null && mod_data.custom_units[i] !== undefined) {
 									continue;
 								}
 								
-								var iconsrc = iconids[unitId];
-								
-								// Validate that icon source exists
-								if (iconsrc === undefined) {
-									console.error(`[${draft["id"]}]: Warning - No icon found for unit ID ${unitId} at techtree index ${i}`);
-									continue;
+								// Check if this unit needs icon copying
+								if (unitId && unitId !== 0 && iconids[unitId] !== undefined) {
+									iconCopyNeeded = true;
+									lastIconIndex = i;
 								}
-								
-								if (i == mod_data.techtree.length - 1) {
-									osUtil.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {
-										//Write Tech Tree
-										createTechtreeJson.createTechtreeJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civTechTrees.json`);
-										createCivilizationsJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civilizations.json`);
-										//Add voices
-										let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ./public/vanillaFiles/voiceFiles`;
-										let uniqueLanguages = [];
-										for (var i = 0; i < mod_data.language.length; i++) {
-											if (uniqueLanguages.indexOf(mod_data.language[i]) == -1) {
-												uniqueLanguages.push(mod_data.language[i]);
-												command += ` ${mod_data.language[i]}`;
-											}
-										}
-										osUtil.execCommand(command, function () {
+							}
+							
+							// Function to continue after icon copying (or immediately if no icons needed)
+							var continueToTechTree = function() {
+								//Write Tech Tree
+								createTechtreeJson.createTechtreeJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civTechTrees.json`);
+								createCivilizationsJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civilizations.json`);
+								//Add voices
+								let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ./public/vanillaFiles/voiceFiles`;
+								let uniqueLanguages = [];
+								for (var i = 0; i < mod_data.language.length; i++) {
+									if (uniqueLanguages.indexOf(mod_data.language[i]) == -1) {
+										uniqueLanguages.push(mod_data.language[i]);
+										command += ` ${mod_data.language[i]}`;
+									}
+								}
+								osUtil.execCommand(command, function () {
 											//Write Dat File
 											osUtil.execCommand(`./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`, function () {
 												// Copy JSON files to mod folder for user reference
@@ -1708,8 +1727,45 @@ function draftIO(io) {
 											});
 										});
 									});
-								} else {
-									osUtil.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {});
+								};
+							
+							// If no icons need to be copied, proceed directly
+							if (!iconCopyNeeded) {
+								console.log(`[${draft["id"]}]: No unique unit icons to copy (all players have custom UUs or no UUs)`);
+								continueToTechTree();
+							} else {
+								// Copy icons for players with regular (non-custom) unique units
+								for (var i = 0; i < mod_data.techtree.length; i++) {
+									var unitId = mod_data.techtree[i][0];
+									
+									// Skip icon copying for custom UUs
+									if (mod_data.custom_units && mod_data.custom_units[i] !== null && mod_data.custom_units[i] !== undefined) {
+										console.log(`[${draft["id"]}]: Skipping icon copy for player ${i} (has custom UU: ${mod_data.custom_units[i].name})`);
+										continue;
+									}
+									
+									// Skip if no unit or unitId is invalid
+									if (!unitId || unitId === 0) {
+										console.log(`[${draft["id"]}]: No unique unit for player ${i}`);
+										continue;
+									}
+									
+									var iconsrc = iconids[unitId];
+									
+									// Validate that icon source exists
+									if (iconsrc === undefined) {
+										console.error(`[${draft["id"]}]: Warning - No icon found for unit ID ${unitId} at techtree index ${i}`);
+										continue;
+									}
+									
+									// Copy the icon, and if this is the last one, continue to tech tree
+									if (i == lastIconIndex) {
+										osUtil.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {
+											continueToTechTree();
+										});
+									} else {
+										osUtil.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {});
+									}
 								}
 							}
 						});

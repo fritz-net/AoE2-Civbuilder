@@ -258,7 +258,7 @@ test.describe('Custom UU Draft - Custom UU Phase', () => {
 
 test.describe('Custom UU Draft - Backend Integration', () => {
   test('should store custom UU in player bonuses array and complete full draft', async ({ page }) => {
-    // This test verifies the complete flow from draft creation to tech tree with custom UU
+    // This test verifies the complete flow from draft creation to zip download with custom UU
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     await draftCreatePage.assertPageLoaded();
@@ -326,6 +326,18 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     // This confirms it was stored in bonuses[1] array correctly
     const customUUInSidebar = page.locator('text=/Elite Guard/i');
     await expect(customUUInSidebar).toBeVisible({ timeout: 5000 });
+    
+    // Complete the tech tree and wait for mod generation (zip download)
+    const finishButton = page.getByRole('button', { name: /Finish|Complete|Done|Submit Tree/i });
+    await expect(finishButton).toBeVisible({ timeout: 5000 });
+    await finishButton.click();
+    
+    // Wait for mod generation to complete and download link to appear
+    // This may take 30-60 seconds for the C++ mod builder to process the custom UU
+    const downloadLink = page.locator('a[href*=".zip"], button:has-text("Download"), a:has-text("Download")').first();
+    await expect(downloadLink).toBeVisible({ timeout: 90000 });
+    
+    console.log('Custom UU draft completed successfully with zip download!');
   });
 });
 
