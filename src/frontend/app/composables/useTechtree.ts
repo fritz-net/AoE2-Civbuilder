@@ -588,12 +588,10 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     // War Chariot (bonus 337)
     [b(STABLE), u(WAR_CHARIOT)],
     [u(WAR_CHARIOT), u(ELITE_WAR_CHARIOT)],
-    // Xianbei Raider (bonus 348)
+    // Xianbei Raider (bonus 348) - NO ELITE VERSION EXISTS
     [b(STABLE), u(XIANBEI_RAIDER)],
-    [u(XIANBEI_RAIDER), u(ELITE_XIANBEI_RAIDER)],
-    // Jian Swordsman (bonus 343)
+    // Jian Swordsman (bonus 343) - NO ELITE VERSION EXISTS
     [b(BARRACKS), u(JIAN_SWORDSMAN)],
-    [u(JIAN_SWORDSMAN), u(ELITE_JIAN_SWORDSMAN)],
     // Houfnice (bonus 286) - extends bombard cannon
     [u(BOMBARD_CANNON), u(HOUFNICE)],
     // Grenadier (bonus 355)
