@@ -299,16 +299,17 @@ function createTechtreeJson(data_json, techtree_json) {
 					}
 					break;
 				case 193:
-					// Can recruit Warrior Priests (handled by case 316 Fortified Church, but this is standalone)
-					addSpecialNodes([specialNodes["warrior_priest"]], techtree.civ_techs_units, civ.techtree[i][146]);
+					// Can recruit Warrior Priests (Note: case 316 also adds warrior priest for Fortified Church bonus)
+					// This is for standalone warrior priest recruitment without Fortified Church
+					// Skip to avoid duplication if both bonuses are present - handled by case 316
 					break;
 				case 337:
 					// Can recruit War Chariots
 					addSpecialNodes([specialNodes["war_chariot"]], techtree.civ_techs_units, 1);
 					break;
 				case 343:
-					// Can recruit Jian Swordsmen
-					addSpecialNodes([specialNodes["jian_swordsman"], specialNodes["elite_jian_swordsman"]], techtree.civ_techs_units, 1);
+					// Can recruit Jian Swordsmen (no elite version)
+					addSpecialNodes([specialNodes["jian_swordsman"]], techtree.civ_techs_units, 1);
 					break;
 				case 348:
 					// Can recruit Xianbei Raiders
@@ -1221,7 +1222,7 @@ const specialNodes = {
 		"Node ID": 1180,
 		"Node Status": "ResearchedCompleted",
 		"Node Type": "UniqueUnit",
-		"Picture Index": 444,
+		"Picture Index": 246,
 		"Prerequisite IDs": [0, 0, 0, 0, 0],
 		"Prerequisite Types": ["None", "None", "None", "None", "None"],
 		"Trigger Tech ID": -1,
@@ -1239,7 +1240,7 @@ const specialNodes = {
 		"Node ID": 1181,
 		"Node Status": "ResearchedCompleted",
 		"Node Type": "UniqueUnit",
-		"Picture Index": 445,
+		"Picture Index": 274,
 		"Prerequisite IDs": [0, 0, 0, 0, 0],
 		"Prerequisite Types": ["None", "None", "None", "None", "None"],
 		"Trigger Tech ID": -1,
@@ -1247,7 +1248,7 @@ const specialNodes = {
 	},
 	war_chariot: {
 		"Age ID": 3,
-		"Building ID": 87,
+		"Building ID": 49,
 		"Draw Node Type": "UnitTech",
 		"Help String ID": 102150,
 		"Link ID": -1,
@@ -1281,27 +1282,9 @@ const specialNodes = {
 		"Trigger Tech ID": -1,
 		"Use Type": "Unit",
 	},
-	elite_jian_swordsman: {
-		"Age ID": 4,
-		"Building ID": 12,
-		"Draw Node Type": "UnitTech",
-		"Help String ID": 101976,
-		"Link ID": 1974,
-		"Link Node Type": "UniqueUnit",
-		Name: "Elite Jian Swordsman",
-		"Name String ID": 11976,
-		"Node ID": 1976,
-		"Node Status": "ResearchedCompleted",
-		"Node Type": "UniqueUnit",
-		"Picture Index": 461,
-		"Prerequisite IDs": [0, 0, 0, 0, 0],
-		"Prerequisite Types": ["None", "None", "None", "None", "None"],
-		"Trigger Tech ID": 1075,
-		"Use Type": "Unit",
-	},
 	xianbei_raider: {
 		"Age ID": 2,
-		"Building ID": 101,
+		"Building ID": 87,
 		"Draw Node Type": "UnitTech",
 		"Help String ID": 101952,
 		"Link ID": -1,
@@ -1319,7 +1302,7 @@ const specialNodes = {
 	},
 	grenadier: {
 		"Age ID": 3,
-		"Building ID": 12,
+		"Building ID": 87,
 		"Draw Node Type": "UnitTech",
 		"Help String ID": 101911,
 		"Link ID": -1,
