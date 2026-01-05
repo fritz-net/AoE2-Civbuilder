@@ -181,6 +181,7 @@ export const CANNON_GALLEON = 420
 export const CAPPED_RAM = 422
 export const PETARD = 440
 export const HUSSAR = 441
+export const MISSIONARY = 775
 export const GALLEON = 442
 export const SCOUT_CAVALRY = 448
 export const TWO_HANDED_SWORDSMAN = 473

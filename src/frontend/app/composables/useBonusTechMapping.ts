@@ -8,6 +8,7 @@ export const BONUS_ID_TURTLE_SHIP = 50
 export const BONUS_ID_LONGBOAT = 51
 export const BONUS_ID_IMPERIAL_CAMEL = 53
 export const BONUS_ID_SLINGER = 61
+export const BONUS_ID_MISSIONARY = 142
 export const BONUS_ID_WARRIOR_PRIEST = 193
 export const BONUS_ID_HOUFNICE = 286
 export const BONUS_ID_THIRISADAI = 298
@@ -191,6 +192,13 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     units: [1923],  // Mounted Trebuchet - NOT Traction Trebuchet (1942 is a different unit)
   },
   
+  // CIV_BONUS_142: "Missionaries can be trained in monasteries"
+  {
+    bonusId: 142,
+    bonusType: 'civ',
+    units: [775],  // Missionary
+  },
+  
   // CIV_BONUS_280: "Folwark replaces Mill"
   {
     bonusId: 280,
@@ -206,6 +214,9 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 282,
     bonusType: 'civ',
     units: [1707],  // Winged Hussar
+    prerequisites: {
+      units: [546],  // Light Cavalry
+    },
     replaces: {
       units: [441],  // Hussar
     },
@@ -216,6 +227,9 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 307,
     bonusType: 'civ',
     units: [1793],  // Legionary
+    prerequisites: {
+      units: [77],  // Long Swordsman
+    },
     replaces: {
       units: [473, 567],  // Two-Handed Swordsman, Champion
     },
@@ -226,6 +240,9 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 314,
     bonusType: 'civ',
     units: [1813],  // Savar
+    prerequisites: {
+      units: [283],  // Cavalier
+    },
     replaces: {
       units: [569],  // Paladin
     },

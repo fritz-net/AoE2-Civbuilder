@@ -486,6 +486,7 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(GUARD_TOWER), b(KEEP)],
     [b(STONE_WALL), b(FORTIFIED_WALL)],
     [b(MONASTERY), u(MONK)],
+    [b(MONASTERY), u(MISSIONARY)],
     [b(MONASTERY), t(REDEMPTION)],
     [b(MONASTERY), t(ATONEMENT)],
     [b(MONASTERY), t(HERBAL_MEDICINE)],
@@ -960,7 +961,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   monasterylane.rows.castle_2.push(tech(SANCTITY))
   monasterylane.rows.castle_2.push(tech(FERVOR))
   if (isBonusSelected(BONUS_ID_WARRIOR_PRIEST)) monasterylane.rows.castle_2.push(unit(WARRIOR_PRIEST)) // Bonus unit: Can recruit Warrior Priests
-  // TODO add missionaries from boni "missionaries can be trained in monasteries"
+  if (isBonusSelected(BONUS_ID_MISSIONARY)) monasterylane.rows.castle_2.push(unit(MISSIONARY)) // Bonus unit: Missionaries can be trained in monasteries
   monasterylane.rows.imperial_1.push(tech(ILLUMINATION))
   monasterylane.rows.imperial_1.push(tech(BLOCK_PRINTING))
   monasterylane.rows.imperial_1.push(tech(FAITH))
