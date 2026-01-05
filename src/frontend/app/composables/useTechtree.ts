@@ -597,7 +597,8 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     // Houfnice (bonus 286) - extends bombard cannon
     [u(BOMBARD_CANNON), u(HOUFNICE)],
     // Grenadier (bonus 355)
-    [b(SIEGE_WORKSHOP), u(GRENADIER)],
+    // Grenadier (bonus 355) - ARCHERY RANGE not siege workshop
+    [b(ARCHERY_RANGE), u(GRENADIER)],
     // Warrior Priest (bonus 193)
     [b(MONASTERY), u(WARRIOR_PRIEST)],
   ]
@@ -711,7 +712,6 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.castle_1.push(unit(PIKEMAN))
   barrackslane.rows.castle_1.push(unit(EAGLE_WARRIOR))
   barrackslane.rows.castle_1.push(unit(FIRE_LANCER))
-  if (isBonusSelected(BONUS_ID_JIAN_SWORDSMAN)) barrackslane.rows.castle_1.push(unit(JIAN_SWORDSMAN)) // Bonus unit: Can recruit Jian Swordsmen
   barrackslane.rows.castle_1.push(tech(GAMBESONS))
   barrackslane.rows.castle_1.push(tech(SQUIRES))
   barrackslane.rows.imperial_1.push(unit(TWO_HANDED_SWORDSMAN))
@@ -719,7 +719,6 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.imperial_1.push(unit(HALBERDIER))
   barrackslane.rows.imperial_1.push(unit(ELITE_EAGLE_WARRIOR))
   barrackslane.rows.imperial_1.push(unit(ELITE_FIRE_LANCER))
-  if (isBonusSelected(BONUS_ID_JIAN_SWORDSMAN)) barrackslane.rows.imperial_1.push(unit(ELITE_JIAN_SWORDSMAN))
   tree.lanes.push(barrackslane)
 
   const stablelane = createLane()
@@ -734,20 +733,19 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.castle_1.push(unit(STEPPE_LANCER))
   stablelane.rows.castle_1.push(unit(HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.castle_1.push(unit(SHRIVAMSHA_RIDER)) // Bonus unit: Can recruit Shrivamsha Riders
-  if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) stablelane.rows.castle_1.push(unit(WAR_CHARIOT)) // Bonus unit: Can recruit War Chariots
-  if (isBonusSelected(BONUS_ID_XIANBEI_RAIDER)) stablelane.rows.castle_1.push(unit(XIANBEI_RAIDER)) // Bonus unit: Can recruit Xianbei Raiders
+  if (isBonusSelected(BONUS_ID_XIANBEI_RAIDER)) stablelane.rows.castle_1.push(unit(XIANBEI_RAIDER)) // Bonus unit: Can recruit Xianbei Raiders (no elite)
+  if (isBonusSelected(BONUS_ID_JIAN_SWORDSMAN)) stablelane.rows.castle_1.push(unit(JIAN_SWORDSMAN)) // Bonus unit: Can recruit Jian Swordsmen (no elite)
   stablelane.rows.castle_1.push(tech(HUSBANDRY))
   stablelane.rows.imperial_1.push(unit(HUSSAR))
   stablelane.rows.imperial_1.push(unit(CAVALIER))
   stablelane.rows.imperial_1.push(unit(HEAVY_CAMEL_RIDER))
-  if (isBonusSelected(BONUS_ID_IMPERIAL_CAMEL)) stablelane.rows.imperial_1.push(unit(IMPERIAL_CAMEL_RIDER)) // Bonus unit: Can upgrade to Imperial Camel Rider
   stablelane.rows.imperial_1.push(unit(ELITE_BATTLE_ELEPHANT))
   stablelane.rows.imperial_1.push(unit(ELITE_STEPPE_LANCER))
   stablelane.rows.imperial_1.push(unit(HEAVY_HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.imperial_1.push(unit(ELITE_SHRIVAMSHA_RIDER))
   if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) stablelane.rows.imperial_1.push(unit(ELITE_WAR_CHARIOT))
-  if (isBonusSelected(BONUS_ID_XIANBEI_RAIDER)) stablelane.rows.imperial_1.push(unit(ELITE_XIANBEI_RAIDER))
   stablelane.rows.imperial_2.push(unit(PALADIN))
+  if (isBonusSelected(BONUS_ID_IMPERIAL_CAMEL)) stablelane.rows.imperial_2.push(unit(IMPERIAL_CAMEL_RIDER)) // Bonus unit: Can upgrade to Imperial Camel Rider (after Heavy Camel)
   tree.lanes.push(stablelane)
 
   const siegeworkshoplane = createLane()
@@ -758,14 +756,16 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   siegeworkshoplane.rows.castle_2.push(unit(ROCKET_CART))
   siegeworkshoplane.rows.castle_2.push(unit(SCORPION))
   siegeworkshoplane.rows.castle_2.push(unit(SIEGE_TOWER))
+  if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) siegeworkshoplane.rows.castle_2.push(unit(WAR_CHARIOT)) // Bonus unit: Can recruit War Chariots (siege workshop not stable)
   siegeworkshoplane.rows.imperial_1.push(unit(CAPPED_RAM))
   siegeworkshoplane.rows.imperial_1.push(unit(SIEGE_ELEPHANT))
   siegeworkshoplane.rows.imperial_1.push(unit(ONAGER))
   siegeworkshoplane.rows.imperial_1.push(unit(HEAVY_ROCKET_CART))
   siegeworkshoplane.rows.imperial_1.push(unit(HEAVY_SCORPION))
   siegeworkshoplane.rows.imperial_1.push(unit(BOMBARD_CANNON))
-  if (isBonusSelected(BONUS_ID_HOUFNICE)) siegeworkshoplane.rows.imperial_1.push(unit(HOUFNICE)) // Bonus unit: Can upgrade to Houfnice
+  if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) siegeworkshoplane.rows.imperial_1.push(unit(ELITE_WAR_CHARIOT)) // Elite War Chariot
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_RAM))
+  if (isBonusSelected(BONUS_ID_HOUFNICE)) siegeworkshoplane.rows.imperial_2.push(unit(HOUFNICE)) // Bonus unit: Can upgrade to Houfnice (after Bombard Cannon)
   if (isBonusSelected(BONUS_ID_MOUNTED_TREBUCHET)) siegeworkshoplane.rows.imperial_2.push(unit(TRACTION_TREBUCHET)) // Bonus unit: Can train Mounted Trebuchets
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_ONAGER))
   tree.lanes.push(siegeworkshoplane)

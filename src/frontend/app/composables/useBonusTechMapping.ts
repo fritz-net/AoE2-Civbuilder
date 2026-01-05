@@ -42,14 +42,14 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
   {
     bonusId: 50,
     bonusType: 'civ',
-    units: [831],  // Turtle Ship
+    units: [831, 832],  // Turtle Ship + Elite Turtle Ship (auto-enable elite)
   },
   
   // CIV_BONUS_51: "Can recruit Longboats from docks"
   {
     bonusId: 51,
     bonusType: 'civ',
-    units: [250],  // Longboat
+    units: [250, 251],  // Longboat + Elite Longboat (auto-enable elite)
   },
   
   // CIV_BONUS_53: "Can upgrade Heavy Camel Riders to Imperial Camel Riders"
@@ -92,7 +92,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
   {
     bonusId: 299,
     bonusType: 'civ',
-    units: [1751],  // Shrivamsha Rider
+    units: [1751, 1753],  // Shrivamsha Rider + Elite Shrivamsha Rider (auto-enable elite)
   },
   
   // CIV_BONUS_300: "Can recruit Camel Scouts in Feudal Age"
@@ -136,21 +136,23 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
   {
     bonusId: 337,
     bonusType: 'civ',
-    units: [1962],  // War Chariot
+    units: [1962, 1964],  // War Chariot + Elite War Chariot (auto-enable elite)
   },
   
-  // CIV_BONUS_343: "Can recruit Jian Swordsmen"
+  // CIV_BONUS_343: "Can recruit Jian Swordsmen" - NO ELITE VERSION EXISTS
   {
     bonusId: 343,
     bonusType: 'civ',
+    units: [1974],  // Jian Swordsman only (no elite version in game)
+  },
     units: [1974],  // Jian Swordsman
   },
   
-  // CIV_BONUS_348: "Can recruit Xianbei Raiders"
+  // CIV_BONUS_348: "Can recruit Xianbei Raiders" - NO ELITE VERSION EXISTS
   {
     bonusId: 348,
     bonusType: 'civ',
-    units: [1952],  // Xianbei Raider
+    units: [1952],  // Xianbei Raider only (no elite version in game)
   },
   
   // CIV_BONUS_355: "Can recruit Grenadiers"
