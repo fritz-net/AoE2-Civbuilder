@@ -317,10 +317,10 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
     await selectFirstCard(page);
     
-    // Should reach tech tree phase - look for tech tree controls
-    // The tech tree phase has specific UI elements like "Done" button
-    const doneButton = page.getByRole('button', { name: /Done/i });
-    await expect(doneButton).toBeVisible({ timeout: 10000 });
+    // Should reach tech tree phase
+    // In phase 3, the techtree component should be visible
+    const techTreeContainer = page.locator('.techtree-container').first();
+    await expect(techTreeContainer).toBeVisible({ timeout: 10000 });
     
     // Custom UU should be visible in the tech tree or sidebar
     // This confirms it was stored in bonuses[1] array correctly

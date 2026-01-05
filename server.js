@@ -1138,9 +1138,14 @@ function updateTimerRemaining(draft) {
 }
 
 // Helper function to determine current player's turn based on round type
+function getBaseRoundType(draft) {
+	var numPlayers = draft["preset"]["slots"];
+	return Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
+}
+
 function getCurrentPlayer(draft) {
 	var numPlayers = draft["preset"]["slots"];
-	var baseRoundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
+	var baseRoundType = getBaseRoundType(draft);
 	
 	// If custom UU mode is enabled and we would be in roundType 1 (UU selection),
 	// skip to roundType 2 (castle techs) instead
@@ -1186,11 +1191,15 @@ function processCardPick(draft, pick) {
 	
 	// If it's the last turn of a round, distribute new cards, otherwise make the card unavailable to others
 	if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
-		// Determine if this is the last round (team bonuses = roundType 4)
-		// Note: even with custom UU mode, team bonuses is still the last round (roundType 4)
-		var lastRoundType = 4;
+		// Determine if this is the last round (team bonuses)
+		// Use the shared helper to calculate base round type
+		var baseRoundType = getBaseRoundType(draft);
 		
-		if (roundType == lastRoundType) {
+		// In custom UU mode, we skip one round (UU selection), so the last round happens at baseRoundType 3
+		// In normal mode, the last round is at baseRoundType 4
+		var lastBaseRoundType = draft["preset"]["custom_uu_mode"] ? 3 : 4;
+		
+		if (baseRoundType == lastBaseRoundType) {
 			// Last turn of the game - move to tech tree phase
 			draft["gamestate"]["phase"] = 3;
 		} else if (roundType == 0 && draft["preset"]["custom_uu_mode"]) {
