@@ -487,6 +487,9 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [t(CAREENING), t(DRY_DOCK)],
     [b(DOCK), t(SHIPWRIGHT)],
     [b(DOCK), b(FISH_TRAP)],
+    // Can-build bonus: Caravel connections
+    [b(DOCK), u(CARAVEL)],
+    [u(CARAVEL), u(ELITE_CARAVEL)],
     [u(FIRE_GALLEY), u(FIRE_SHIP)],
     [u(FIRE_SHIP), u(FAST_FIRE_SHIP)],
     [u(CANNON_GALLEON), u(ELITE_CANNON_GALLEON)],
@@ -580,8 +583,13 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(MONASTERY), t(THEOCRACY)],
     [b(TOWN_CENTER), t(TOWN_WATCH)],
     [b(TOWN_CENTER), t(WHEELBARROW)],
+    // Can-build bonus: Krepost and Donjon connections (built from Town Center)
+    [b(TOWN_CENTER), b(KREPOST)],
+    [b(TOWN_CENTER), b(DONJON)],
     [b(MARKET), t(COINAGE)],
     [b(MARKET), t(GUILDS)],
+    // Can-build bonus: Feitoria connection (Feitoria is built from Market tech tree)
+    [b(MARKET), b(FEITORIA)],
     [b(SIEGE_WORKSHOP), u(BOMBARD_CANNON)],
     [b(SIEGE_WORKSHOP), u(TRACTION_TREBUCHET)],
     [b(DOCK), u(CANNON_GALLEON)],
@@ -895,6 +903,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   docklane.rows.castle_1.push(unit(WAR_GALLEY))
   if (isBonusSelected(BONUS_ID_LONGBOAT)) docklane.rows.castle_1.push(unit(LONGBOAT)) // Bonus unit: Can recruit Longboats
   if (isBonusSelected(BONUS_ID_TURTLE_SHIP)) docklane.rows.castle_1.push(unit(TURTLE_SHIP)) // Bonus unit: Can train Turtle Ships
+  if (isBonusSelected(BONUS_ID_CARAVEL)) docklane.rows.castle_1.push(unit(CARAVEL)) // Bonus unit: Can build Caravels
   docklane.rows.castle_1.push(tech(CAREENING))
   docklane.rows.imperial_1.push(unit(FAST_FIRE_SHIP))
   docklane.rows.imperial_1.push(unit(CANNON_GALLEON))
@@ -902,6 +911,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   docklane.rows.imperial_1.push(unit(GALLEON))
   if (isBonusSelected(BONUS_ID_LONGBOAT)) docklane.rows.imperial_1.push(unit(ELITE_LONGBOAT))
   if (isBonusSelected(BONUS_ID_TURTLE_SHIP)) docklane.rows.imperial_1.push(unit(ELITE_TURTLE_SHIP))
+  if (isBonusSelected(BONUS_ID_CARAVEL)) docklane.rows.imperial_1.push(unit(ELITE_CARAVEL)) // Bonus unit: Elite Caravel (auto-enabled with Caravel)
   docklane.rows.imperial_2.push(unit(LOU_CHUAN))
   docklane.rows.imperial_2.push(unit(ELITE_CANNON_GALLEON))
   docklane.rows.imperial_2.push(unit(DROMON))
@@ -957,6 +967,22 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   castlelane.rows.imperial_1.push(tech(SPIES_TREASON))
   tree.lanes.push(castlelane)
 
+  // Krepost lane - bonus building (Can build Krepost, ID 93)
+  // NOTE: Civbuilder uses custom techtree, NOT default aoe2techtree - must be explicitly added
+  if (isBonusSelected(BONUS_ID_KREPOST)) {
+    const krepostlane = createLane()
+    krepostlane.rows.castle_1.push(building(KREPOST))
+    tree.lanes.push(krepostlane)
+  }
+
+  // Donjon lane - bonus building (Can build Donjon, ID 109)
+  // NOTE: Civbuilder uses custom techtree, NOT default aoe2techtree - must be explicitly added
+  if (isBonusSelected(BONUS_ID_DONJON)) {
+    const donjonlane = createLane()
+    donjonlane.rows.feudal_1.push(building(DONJON))
+    tree.lanes.push(donjonlane)
+  }
+
   const monasterylane = createLane()
   // Monastery or Fortified Church (replacement bonus 316)
   if (isBonusSelected(BONUS_ID_FORTIFIED_CHURCH)) {
@@ -982,6 +1008,9 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
 
   const houselane = createLane()
   houselane.rows.dark_1.push(building(HOUSE))
+  // NOTE: Civbuilder uses custom techtree (useTechtree.ts), NOT default aoe2techtree
+  // Can-build bonuses must be explicitly added here, not assumed from default tree
+  if (isBonusSelected(BONUS_ID_FEITORIA)) houselane.rows.imperial_2.push(building(FEITORIA)) // Bonus: Can build Feitoria
   tree.lanes.push(houselane)
 
   const towncenterlane = createLane()
