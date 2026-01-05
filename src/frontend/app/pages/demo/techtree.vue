@@ -55,7 +55,7 @@
       
       <div class="setting-group">
         <label class="setting-label">Test Bonuses:</label>
-        <div class="bonus-checkboxes" style="max-height: 300px; overflow-y: auto;">
+        <div class="bonus-checkboxes">
           <label v-for="bonus in testBonuses" :key="bonus.id" class="bonus-option">
             <input 
               type="checkbox" 
@@ -422,8 +422,6 @@ watch(pointLimit, (newLimit) => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  max-height: 300px;
-  overflow-y: auto;
   padding: 0.5rem;
   background: #1a1a1a;
   border: 2px solid #4a4a4a;

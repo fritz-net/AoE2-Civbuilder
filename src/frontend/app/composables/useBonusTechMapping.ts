@@ -31,6 +31,10 @@ export interface BonusTechMapping {
     units?: number[]  // Prerequisite units that must be enabled (with cost)
     techs?: number[]  // Prerequisite techs that must be enabled (with cost)
   }
+  replaces?: {
+    units?: number[]  // Unit IDs that this bonus replaces (hides/disables)
+    buildings?: number[]  // Building IDs that this bonus replaces (hides/disables)
+  }
 }
 
 /**
@@ -82,10 +86,9 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 286,
     bonusType: 'civ',
     units: [1709],  // Houfnice
-    requiresPrerequisites: true,  // Requires Bombard Cannon and Chemistry
+    requiresPrerequisites: true,  // Requires Bombard Cannon
     prerequisites: {
-      units: [36],  // Bombard Cannon
-      techs: [47],  // Chemistry (required for Bombard Cannon)
+      units: [36],  // Bombard Cannon (Chemistry is already required by Bombard Cannon itself)
     },
   },
   
@@ -180,6 +183,56 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 361,
     bonusType: 'civ',
     units: [1923],  // Mounted Trebuchet - NOT Traction Trebuchet (1942 is a different unit)
+  },
+  
+  // CIV_BONUS_280: "Folwark replaces Mill"
+  {
+    bonusId: 280,
+    bonusType: 'civ',
+    buildings: [1734],  // Folwark
+    replaces: {
+      buildings: [68],  // Mill
+    },
+  },
+  
+  // CIV_BONUS_282: "Winged Hussar replaces Hussar"
+  {
+    bonusId: 282,
+    bonusType: 'civ',
+    units: [1707],  // Winged Hussar
+    replaces: {
+      units: [441],  // Hussar
+    },
+  },
+  
+  // CIV_BONUS_307: "Legionary replaces Two-Handed Swordsman and Champion"
+  {
+    bonusId: 307,
+    bonusType: 'civ',
+    units: [1793],  // Legionary
+    replaces: {
+      units: [473, 567],  // Two-Handed Swordsman, Champion
+    },
+  },
+  
+  // CIV_BONUS_314: "Savar replaces Paladin"
+  {
+    bonusId: 314,
+    bonusType: 'civ',
+    units: [1813],  // Savar
+    replaces: {
+      units: [569],  // Paladin
+    },
+  },
+  
+  // CIV_BONUS_316: "Fortified Church replaces Monastery"
+  {
+    bonusId: 316,
+    bonusType: 'civ',
+    buildings: [1806],  // Fortified Church
+    replaces: {
+      buildings: [104],  // Monastery
+    },
   },
 ]
 
