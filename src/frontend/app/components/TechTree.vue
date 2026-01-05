@@ -720,9 +720,9 @@ function getCaretColor(caret: Caret): string {
   
   if (isGrantedByBonus) {
     // Color bonus-granted units
-    // Blue for regional units (Traction Trebuchet only)
-    const TRACTION_TREBUCHET_ID = 1942
-    if (numId === TRACTION_TREBUCHET_ID) {
+    // Blue for regional units (Mounted Trebuchet only - ID 1923)
+    const MOUNTED_TREBUCHET_ID = 1923
+    if (numId === MOUNTED_TREBUCHET_ID) {
       return '#4f76d9' // Blue for regional
     }
     // Purple for special/unique bonus units (default)

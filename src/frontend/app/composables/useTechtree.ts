@@ -113,6 +113,7 @@ import {
   ROCKET_CART,
   HEAVY_ROCKET_CART,
   TRACTION_TREBUCHET,
+  MOUNTED_TREBUCHET, // Bonus unit (361) - different from Traction Trebuchet
   HEI_GUANG_CAVALRY,
   HEAVY_HEI_GUANG_CAVALRY,
   LOU_CHUAN,
@@ -564,6 +565,7 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(MARKET), t(GUILDS)],
     [b(SIEGE_WORKSHOP), u(BOMBARD_CANNON)],
     [b(SIEGE_WORKSHOP), u(TRACTION_TREBUCHET)],
+    [b(SIEGE_WORKSHOP), u(MOUNTED_TREBUCHET)], // Bonus-granted (361) - different from Traction Trebuchet
     [b(DOCK), u(CANNON_GALLEON)],
     
     // Bonus-granted unit connections
@@ -766,7 +768,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) siegeworkshoplane.rows.imperial_1.push(unit(ELITE_WAR_CHARIOT)) // Elite War Chariot
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_RAM))
   if (isBonusSelected(BONUS_ID_HOUFNICE)) siegeworkshoplane.rows.imperial_2.push(unit(HOUFNICE)) // Bonus unit: Can upgrade to Houfnice (after Bombard Cannon)
-  if (isBonusSelected(BONUS_ID_MOUNTED_TREBUCHET)) siegeworkshoplane.rows.imperial_2.push(unit(TRACTION_TREBUCHET)) // Bonus unit: Can train Mounted Trebuchets
+  if (isBonusSelected(BONUS_ID_MOUNTED_TREBUCHET)) siegeworkshoplane.rows.imperial_2.push(unit(MOUNTED_TREBUCHET)) // Bonus unit: Can train Mounted Trebuchets
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_ONAGER))
   tree.lanes.push(siegeworkshoplane)
 

@@ -229,7 +229,7 @@ export const LOU_CHUAN = 1948
 export const SLINGER = 185
 export const IMPERIAL_CAMEL_RIDER = 207
 export const LONGBOAT = 250
-export const ELITE_LONGBOAT = 251
+export const ELITE_LONGBOAT = 533 // Correct ID from aoe2techtree (was 251)
 export const TURTLE_SHIP = 831
 export const ELITE_TURTLE_SHIP = 832
 export const CAMEL_SCOUT = 1755
@@ -239,13 +239,14 @@ export const WARRIOR_PRIEST = 1811
 export const SHRIVAMSHA_RIDER = 1751
 export const ELITE_SHRIVAMSHA_RIDER = 1753
 export const GRENADIER = 1911
-// Note: TRACTION_TREBUCHET (1942) already defined above as Mounted Trebuchet
+export const MOUNTED_TREBUCHET = 1923 // Bonus-granted unit (bonus 361) - different from Traction Trebuchet
+// Note: TRACTION_TREBUCHET (1942) defined above - different unit, not bonus-granted
 export const XIANBEI_RAIDER = 1952
-export const ELITE_XIANBEI_RAIDER = 1954
+// Note: No Elite Xianbei Raider exists in game
 export const WAR_CHARIOT = 1962
 export const ELITE_WAR_CHARIOT = 1964
 export const JIAN_SWORDSMAN = 1974
-export const ELITE_JIAN_SWORDSMAN = 1975
+// Note: No Elite Jian Swordsman exists in game
 
 // Tech IDs
 export const TOWN_WATCH = 8

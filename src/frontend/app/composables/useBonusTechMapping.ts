@@ -49,7 +49,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
   {
     bonusId: 51,
     bonusType: 'civ',
-    units: [250, 251],  // Longboat + Elite Longboat (auto-enable elite)
+    units: [250, 533],  // Longboat + Elite Longboat (auto-enable elite) - Elite ID is 533 not 251
   },
   
   // CIV_BONUS_53: "Can upgrade Heavy Camel Riders to Imperial Camel Riders"
@@ -145,8 +145,6 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusType: 'civ',
     units: [1974],  // Jian Swordsman only (no elite version in game)
   },
-    units: [1974],  // Jian Swordsman
-  },
   
   // CIV_BONUS_348: "Can recruit Xianbei Raiders" - NO ELITE VERSION EXISTS
   {
@@ -180,7 +178,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
   {
     bonusId: 361,
     bonusType: 'civ',
-    units: [1942],  // Traction Trebuchet (Mounted Trebuchet)
+    units: [1923],  // Mounted Trebuchet - NOT Traction Trebuchet (1942 is a different unit)
   },
 ]
 
