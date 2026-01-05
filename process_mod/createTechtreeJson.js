@@ -298,6 +298,30 @@ function createTechtreeJson(data_json, techtree_json) {
 						}
 					}
 					break;
+				case 193:
+					// Can recruit Warrior Priests (handled by case 316 Fortified Church, but this is standalone)
+					addSpecialNodes([specialNodes["warrior_priest"]], techtree.civ_techs_units, civ.techtree[i][146]);
+					break;
+				case 337:
+					// Can recruit War Chariots
+					addSpecialNodes([specialNodes["war_chariot"]], techtree.civ_techs_units, 1);
+					break;
+				case 343:
+					// Can recruit Jian Swordsmen
+					addSpecialNodes([specialNodes["jian_swordsman"], specialNodes["elite_jian_swordsman"]], techtree.civ_techs_units, 1);
+					break;
+				case 348:
+					// Can recruit Xianbei Raiders
+					addSpecialNodes([specialNodes["xianbei_raider"]], techtree.civ_techs_units, 1);
+					break;
+				case 355:
+					// Can recruit Grenadiers
+					addSpecialNodes([specialNodes["grenadier"]], techtree.civ_techs_units, 1);
+					break;
+				case 361:
+					// Can train Mounted Trebuchets
+					addSpecialNodes([specialNodes["mounted_trebuchet"]], techtree.civ_techs_units, 1);
+					break;
 				case 309:
 					// Can upgrade Elite Battle Elephants to Royal Battle Elephants
 					addSpecialNodes([specialNodes["royal_elephant"]], techtree.civ_techs_units, civ.techtree[i][38]);
@@ -1216,6 +1240,114 @@ const specialNodes = {
 		"Node Status": "ResearchedCompleted",
 		"Node Type": "UniqueUnit",
 		"Picture Index": 445,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	war_chariot: {
+		"Age ID": 3,
+		"Building ID": 87,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 102150,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "War Chariot",
+		"Name String ID": 12150,
+		"Node ID": 2150,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 458,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	jian_swordsman: {
+		"Age ID": 3,
+		"Building ID": 12,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101974,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Jian Swordsman",
+		"Name String ID": 11974,
+		"Node ID": 1974,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 461,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	elite_jian_swordsman: {
+		"Age ID": 4,
+		"Building ID": 12,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101976,
+		"Link ID": 1974,
+		"Link Node Type": "UniqueUnit",
+		Name: "Elite Jian Swordsman",
+		"Name String ID": 11976,
+		"Node ID": 1976,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 461,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": 1075,
+		"Use Type": "Unit",
+	},
+	xianbei_raider: {
+		"Age ID": 2,
+		"Building ID": 101,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101952,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Xianbei Raider",
+		"Name String ID": 11952,
+		"Node ID": 1952,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 460,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	grenadier: {
+		"Age ID": 3,
+		"Building ID": 12,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101911,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Grenadier",
+		"Name String ID": 11911,
+		"Node ID": 1911,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 456,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	mounted_trebuchet: {
+		"Age ID": 4,
+		"Building ID": 49,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101923,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Mounted Trebuchet",
+		"Name String ID": 11923,
+		"Node ID": 1923,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 459,
 		"Prerequisite IDs": [0, 0, 0, 0, 0],
 		"Prerequisite Types": ["None", "None", "None", "None", "None"],
 		"Trigger Tech ID": -1,
