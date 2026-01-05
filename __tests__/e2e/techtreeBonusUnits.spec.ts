@@ -211,7 +211,11 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await page.waitForTimeout(500)
     
     // Verify Winged Hussar is enabled with prerequisites (Light Cavalry = 3pts)
-    await expect(page.getByText('Points Spent: 3')).toBeVisible()
+    // Parse the points value from the points display
+    const pointsText = await page.locator('.points').textContent()
+    const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
+    const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
+    expect(points).toBe(3)
     
     // Verify that Hussar caret element is not visible (replaced by Winged Hussar)
     const hussarElement = page.locator('[data-caret-id="unit_441"]')
@@ -241,7 +245,10 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(chemistryElement).toBeVisible()
     
     // Verify points are 14 (Chemistry 6pts + Bombard Cannon 8pts)
-    await expect(page.getByText('Points Spent: 14')).toBeVisible()
+    const pointsText = await page.locator('.points').textContent()
+    const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
+    const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
+    expect(points).toBe(14)
   });
 
   test('should properly replace Hussar with Winged Hussar', async ({ page }) => {
@@ -263,7 +270,10 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(wingedHussarElement).toBeVisible()
     
     // Verify 3 points (Light Cavalry prerequisite)
-    await expect(page.getByText('Points Spent: 3')).toBeVisible()
+    const pointsText = await page.locator('.points').textContent()
+    const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
+    const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
+    expect(points).toBe(3)
   });
 
   test('should properly replace Paladin with Savar', async ({ page }) => {
@@ -285,7 +295,10 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(savarElement).toBeVisible()
     
     // Verify 6 points (Cavalier prerequisite)
-    await expect(page.getByText('Points Spent: 6')).toBeVisible()
+    const pointsText = await page.locator('.points').textContent()
+    const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
+    const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
+    expect(points).toBe(6)
   });
 
   test('should properly replace Two-Handed Swordsman and Champion with Legionary', async ({ page }) => {
@@ -310,7 +323,10 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await expect(legionaryElement).toBeVisible()
     
     // Verify 3 points (Long Swordsman prerequisite)
-    await expect(page.getByText('Points Spent: 3')).toBeVisible()
+    const pointsText = await page.locator('.points').textContent()
+    const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
+    const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
+    expect(points).toBe(3)
   });
 
   test('should properly replace Mill with Folwark', async ({ page }) => {
