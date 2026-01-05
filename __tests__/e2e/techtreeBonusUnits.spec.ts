@@ -179,4 +179,31 @@ test.describe('TechTree Bonus-Granted Units', () => {
     // Should be 2
     await expect(page.getByText(/Selected Bonuses: 2/i)).toBeVisible();
   });
+
+  test('should preserve bonus units after reset', async ({ page }) => {
+    await page.goto('/v2/demo/techtree')
+    await page.waitForTimeout(1000)
+    
+    // Select Slinger bonus
+    const slingerCheckbox = page.getByRole('checkbox', { name: /Can recruit Slingers \(ID 61\)/i });
+    await slingerCheckbox.check()
+    await page.waitForTimeout(500)
+    
+    // Verify Slinger is enabled (tech count increases)
+    const techsEnabledBefore = page.locator('text=/Techs Enabled: \\d+/')
+    await expect(techsEnabledBefore).toContainText(/Techs Enabled: 40/)
+    
+    // Click Reset Tree button
+    const resetButton = page.getByRole('button', { name: /Reset Tree/i })
+    await resetButton.click()
+    await page.waitForTimeout(500)
+    
+    // Slinger should still be enabled after reset (bonus is still selected)
+    const techsEnabledAfter = page.locator('text=/Techs Enabled: \\d+/')
+    await expect(techsEnabledAfter).toContainText(/Techs Enabled: 40/)
+    
+    // Points should still be 0 (bonus units don't consume points)
+    const pointsDisplay = page.locator('text=/Points Spent: \\d+/')
+    await expect(pointsDisplay).toContainText('Points Spent: 0')
+  });
 });

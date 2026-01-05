@@ -1235,6 +1235,9 @@ function handleReset() {
     [22, 101, 102, 103, 408],
   ]
   
+  // Re-enable bonus-granted units after reset
+  enableGrantedEntities()
+  
   if (props.mode === 'build') {
     // Build mode: reset to 0 (starting point)
     techtreePoints.value = 0
