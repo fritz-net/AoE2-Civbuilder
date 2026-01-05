@@ -660,6 +660,19 @@ watch(() => props.selectedBonuses, () => {
     // Enable granted entities in localtree
     enableGrantedEntities()
     
+    // Recalculate points after enabling granted entities
+    if (props.editable) {
+      const usedPoints = calculatePoints()
+      if (props.mode === 'build') {
+        // Build mode: show total points spent
+        techtreePoints.value = usedPoints
+      } else {
+        // Draft mode: show remaining points
+        techtreePoints.value = props.points - usedPoints
+      }
+      emit('update:points', techtreePoints.value)
+    }
+    
     // Restore scroll position with multiple attempts for reliability
     // First attempt: nextTick (after Vue DOM update)
     nextTick(() => {
