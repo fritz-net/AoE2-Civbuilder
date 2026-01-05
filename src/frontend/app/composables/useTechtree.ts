@@ -725,8 +725,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   const stablelane = createLane()
   stablelane.rows.feudal_1.push(building(STABLE))
   stablelane.rows.feudal_2.push(unit(SCOUT_CAVALRY))
-  if (isBonusSelected(BONUS_ID_CAMEL_SCOUT)) stablelane.rows.feudal_2.push(unit(CAMEL_SCOUT)) // Bonus unit: Can recruit Camel Scouts
   stablelane.rows.feudal_2.push(tech(BLOODLINES))
+  if (isBonusSelected(BONUS_ID_CAMEL_SCOUT)) stablelane.rows.feudal_2.push(unit(CAMEL_SCOUT)) // Bonus unit: Can recruit Camel Scouts
   stablelane.rows.castle_1.push(unit(LIGHT_CAVALRY))
   stablelane.rows.castle_1.push(unit(KNIGHT))
   stablelane.rows.castle_1.push(unit(CAMEL_RIDER))
