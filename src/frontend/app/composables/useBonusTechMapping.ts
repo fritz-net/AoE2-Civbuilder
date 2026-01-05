@@ -214,6 +214,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 282,
     bonusType: 'civ',
     units: [1707],  // Winged Hussar
+    requiresPrerequisites: true,
     prerequisites: {
       units: [546],  // Light Cavalry
     },
@@ -227,6 +228,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 307,
     bonusType: 'civ',
     units: [1793],  // Legionary
+    requiresPrerequisites: true,
     prerequisites: {
       units: [77],  // Long Swordsman
     },
@@ -240,6 +242,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 314,
     bonusType: 'civ',
     units: [1813],  // Savar
+    requiresPrerequisites: true,
     prerequisites: {
       units: [283],  // Cavalier
     },
@@ -339,8 +342,9 @@ export function getAllGrantedEntities(selectedBonuses: Map<string, { id: number;
       mapping.techs?.forEach(id => result.free.techs.add(id))
       mapping.buildings?.forEach(id => result.free.buildings.add(id))
       
-      // Add prerequisites (with cost) if required
-      if (mapping.requiresPrerequisites && mapping.prerequisites) {
+      // Add prerequisites (with cost) if they exist
+      // Check both requiresPrerequisites flag and existence of prerequisites (defensive)
+      if (mapping.prerequisites && (mapping.requiresPrerequisites || mapping.prerequisites.units || mapping.prerequisites.techs)) {
         mapping.prerequisites.units?.forEach(id => result.prerequisites.units.add(id))
         mapping.prerequisites.techs?.forEach(id => result.prerequisites.techs.add(id))
       }

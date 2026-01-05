@@ -56,14 +56,17 @@
       <div class="setting-group">
         <label class="setting-label">Test Bonuses:</label>
         <div class="bonus-checkboxes">
-          <label v-for="bonus in testBonuses" :key="bonus.id" class="bonus-option">
-            <input 
-              type="checkbox" 
-              :checked="selectedBonuses.civ.includes(bonus.id)"
-              @change="toggleBonus(bonus.id)"
-            />
-            <span>{{ bonus.name }}</span>
-          </label>
+          <div v-for="group in testBonusesGrouped" :key="group.title" class="bonus-group">
+            <h4 class="bonus-group-title">{{ group.title }}</h4>
+            <label v-for="bonus in group.bonuses" :key="bonus.id" class="bonus-option">
+              <input 
+                type="checkbox" 
+                :checked="selectedBonuses.civ.includes(bonus.id)"
+                @change="toggleBonus(bonus.id)"
+              />
+              <span>{{ bonus.name }}</span>
+            </label>
+          </div>
         </div>
       </div>
       
@@ -128,28 +131,59 @@ const selectedBonuses = ref<{
   team: [],
 })
 
-// Test bonuses - these grant units/techs that should show 0 cost
-const testBonuses = [
-  { id: 50, name: 'Can train Turtle Ships (ID 50)' },
-  { id: 51, name: 'Can recruit Longboats (ID 51)' },
-  { id: 53, name: 'Can upgrade to Imperial Camel Riders (ID 53)' },
-  { id: 61, name: 'Can recruit Slingers (ID 61)' },
-  { id: 193, name: 'Can recruit Warrior Priests (ID 193)' },
-  { id: 280, name: 'Folwark replaces Mill (ID 280)' },
-  { id: 282, name: 'Winged Hussar replaces Hussar (ID 282)' },
-  { id: 286, name: 'Can upgrade to Houfnice (ID 286)' },
-  { id: 298, name: 'Can train Thirisadai (ID 298)' },
-  { id: 299, name: 'Can recruit Shrivamsha Riders (ID 299)' },
-  { id: 300, name: 'Can recruit Camel Scouts (ID 300)' },
-  { id: 307, name: 'Legionary replaces Two-Handed Swordsman (ID 307)' },
-  { id: 314, name: 'Savar replaces Paladin (ID 314)' },
-  { id: 316, name: 'Fortified Church replaces Monastery (ID 316)' },
-  { id: 337, name: 'Can recruit War Chariots (ID 337)' },
-  { id: 343, name: 'Can recruit Jian Swordsmen (ID 343)' },
-  { id: 348, name: 'Can recruit Xianbei Raiders (ID 348)' },
-  { id: 355, name: 'Can recruit Grenadiers (ID 355)' },
-  { id: 356, name: 'Pastures (ID 356)' },
-  { id: 361, name: 'Can train Mounted Trebuchets (ID 361)' },
+// Test bonuses - grouped by type for easier navigation
+const testBonusesGrouped = [
+  {
+    title: 'Can recruit units',
+    bonuses: [
+      { id: 51, name: 'Can recruit Longboats' },
+      { id: 61, name: 'Can recruit Slingers' },
+      { id: 193, name: 'Can recruit Warrior Priests' },
+      { id: 299, name: 'Can recruit Shrivamsha Riders' },
+      { id: 300, name: 'Can recruit Camel Scouts' },
+      { id: 337, name: 'Can recruit War Chariots' },
+      { id: 343, name: 'Can recruit Jian Swordsmen' },
+      { id: 348, name: 'Can recruit Xianbei Raiders' },
+      { id: 355, name: 'Can recruit Grenadiers' },
+      { id: 142, name: 'Can recruit Missionaries' },
+    ]
+  },
+  {
+    title: 'Can train units',
+    bonuses: [
+      { id: 50, name: 'Can train Turtle Ships' },
+      { id: 298, name: 'Can train Thirisadai' },
+      { id: 361, name: 'Can train Mounted Trebuchets' },
+    ]
+  },
+  {
+    title: 'Can upgrade to units',
+    bonuses: [
+      { id: 53, name: 'Can upgrade to Imperial Camel Riders' },
+      { id: 286, name: 'Can upgrade to Houfnice' },
+    ]
+  },
+  {
+    title: 'Replacement units',
+    bonuses: [
+      { id: 282, name: 'Winged Hussar replaces Hussar' },
+      { id: 307, name: 'Legionary replaces Two-Handed Swordsman' },
+      { id: 314, name: 'Savar replaces Paladin' },
+    ]
+  },
+  {
+    title: 'Replacement buildings',
+    bonuses: [
+      { id: 280, name: 'Folwark replaces Mill' },
+      { id: 316, name: 'Fortified Church replaces Monastery' },
+    ]
+  },
+  {
+    title: 'Other',
+    bonuses: [
+      { id: 356, name: 'Pastures' },
+    ]
+  },
 ]
 
 // State
@@ -412,6 +446,23 @@ watch(pointLimit, (newLimit) => {
 
 .info-box li:last-child {
   border-bottom: none;
+}
+
+.bonus-group {
+  margin-bottom: 1rem;
+}
+
+.bonus-group-title {
+  color: #d4af37;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.bonus-group:last-child {
+  margin-bottom: 0;
 }
 
 .info-box strong {

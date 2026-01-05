@@ -643,10 +643,22 @@ watch(() => props.initialTree, (newTree) => {
 // Watch for changes in selected bonuses to enable granted entities AND rebuild tree
 watch(() => props.selectedBonuses, () => {
   if (data.value) {
+    // Save current scroll position before rebuilding tree
+    const currentScrollLeft = techtreeRef.value?.scrollLeft || 0
+    const currentScrollTop = techtreeRef.value?.scrollTop || 0
+    
     // Rebuild tree with new bonus units included in structure
     tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { selectedBonuses: flattenedSelectedBonuses.value })
     // Enable granted entities in localtree
     enableGrantedEntities()
+    
+    // Restore scroll position on next tick (after DOM update)
+    nextTick(() => {
+      if (techtreeRef.value) {
+        techtreeRef.value.scrollLeft = currentScrollLeft
+        techtreeRef.value.scrollTop = currentScrollTop
+      }
+    })
   }
 }, { deep: true })
 
