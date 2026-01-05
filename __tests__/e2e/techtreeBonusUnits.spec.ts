@@ -219,8 +219,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     // Verify Winged Hussar is enabled (shown as 1 new tech, 0 cost)
     await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
     
-    // Note: Visual verification that Hussar card is hidden would require
-    // checking that the Hussar caret element is not rendered in the DOM
-    // This functionality is implemented but difficult to test visually in e2e
+    // Verify that Hussar caret element is not visible (replaced by Winged Hussar)
+    const hussarElement = page.locator('[data-caret-id="0.441"]')
+    await expect(hussarElement).not.toBeVisible()
   });
 });
