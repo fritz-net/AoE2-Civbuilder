@@ -652,14 +652,28 @@ watch(() => props.selectedBonuses, () => {
     // Enable granted entities in localtree
     enableGrantedEntities()
     
-    // Restore scroll position on next tick (after DOM update)
-    // Use requestAnimationFrame for more reliable timing after Vue's DOM updates
+    // Restore scroll position with multiple attempts for reliability
+    // First attempt: nextTick (after Vue DOM update)
     nextTick(() => {
+      if (techtreeRef.value) {
+        techtreeRef.value.scrollLeft = currentScrollLeft
+        techtreeRef.value.scrollTop = currentScrollTop
+      }
+      
+      // Second attempt: requestAnimationFrame (after browser paint)
       requestAnimationFrame(() => {
         if (techtreeRef.value) {
           techtreeRef.value.scrollLeft = currentScrollLeft
           techtreeRef.value.scrollTop = currentScrollTop
         }
+        
+        // Third attempt: setTimeout as final fallback
+        setTimeout(() => {
+          if (techtreeRef.value) {
+            techtreeRef.value.scrollLeft = currentScrollLeft
+            techtreeRef.value.scrollTop = currentScrollTop
+          }
+        }, 50)
       })
     })
   }

@@ -585,6 +585,8 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(TOWN_CENTER), t(WHEELBARROW)],
     // Can-build bonus: Krepost and Donjon connections (built from Town Center)
     [b(TOWN_CENTER), b(KREPOST)],
+    // Krepost can build Petards (like Castle)
+    [b(KREPOST), u(PETARD)],
     [b(TOWN_CENTER), b(DONJON)],
     [b(MARKET), t(COINAGE)],
     [b(MARKET), t(GUILDS)],
@@ -969,17 +971,20 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
 
   // Krepost lane - bonus building (Can build Krepost, ID 93)
   // NOTE: Civbuilder uses custom techtree, NOT default aoe2techtree - must be explicitly added
+  // Krepost can now build Petards (moved to castle_2 to be next to Petard)
   if (isBonusSelected(BONUS_ID_KREPOST)) {
     const krepostlane = createLane()
     krepostlane.rows.castle_1.push(building(KREPOST))
+    krepostlane.rows.castle_2.push(unit(PETARD))
     tree.lanes.push(krepostlane)
   }
 
   // Donjon lane - bonus building (Can build Donjon, ID 109)
   // NOTE: Civbuilder uses custom techtree, NOT default aoe2techtree - must be explicitly added
+  // Donjon is now available in Dark Age (as of latest patch)
   if (isBonusSelected(BONUS_ID_DONJON)) {
     const donjonlane = createLane()
-    donjonlane.rows.feudal_1.push(building(DONJON))
+    donjonlane.rows.dark_1.push(building(DONJON))
     tree.lanes.push(donjonlane)
   }
 
