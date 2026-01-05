@@ -120,6 +120,16 @@ function createTechtreeJson(data_json, techtree_json) {
 		}
 
 		//Add special technology nodes for civ bonuses
+		// Helper function to check if a bonus is active
+		const hasBonusId = (checkBonusId) => {
+			for (let k = 0; k < civ.civ_bonus[i].length; k++) {
+				if (extractBonusId(civ.civ_bonus[i][k]) === checkBonusId) {
+					return true;
+				}
+			}
+			return false;
+		};
+		
 		for (let j = 0; j < civ.civ_bonus[i].length; j++) {
 			const bonusId = extractBonusId(civ.civ_bonus[i][j]);
 			switch (bonusId) {
@@ -211,6 +221,11 @@ function createTechtreeJson(data_json, techtree_json) {
 					}
 					break;
 				case 280:
+					// Folwark replaces Mill - skip if Pastures bonus is also active (they're mutually exclusive)
+					if (hasBonusId(356)) {
+						// Pastures takes precedence, skip Folwark
+						break;
+					}
 					removeNode("Mill", techtree.civ_techs_buildings);
 					addSpecialNodes([specialNodes["folwark"]], techtree.civ_techs_buildings, 1);
 					for (let k = 0; k < techtree.civ_techs_buildings.length; k++) {
@@ -333,14 +348,16 @@ function createTechtreeJson(data_json, techtree_json) {
 					break;
 				case 356:
 					// Pastures replace Farms and Mill upgrades
+					// Note: If Folwark is also active, Pastures takes precedence (this is applied after Folwark check)
 					removeNode("Mill", techtree.civ_techs_buildings);
 					removeNode("Farm", techtree.civ_techs_buildings);
+					removeNode("Folwark", techtree.civ_techs_buildings); // Also remove Folwark if it was added
 					addSpecialNodes([specialNodes["pasture"]], techtree.civ_techs_buildings, 1);
 					// Add pasture upgrade techs
 					addSpecialNodes([specialNodes["domestication"]], techtree.civ_techs_units, 1);
 					addSpecialNodes([specialNodes["pastoralism"]], techtree.civ_techs_units, 1);
 					addSpecialNodes([specialNodes["transhumance"]], techtree.civ_techs_units, 1);
-					// Remove farm upgrades (they're replaced by pasture upgrades)
+					// Remove farm upgrades (they're replaced by pasture upgrades) and reset their building if changed by Folwark
 					removeNode("Horse Collar", techtree.civ_techs_units);
 					removeNode("Heavy Plow", techtree.civ_techs_units);
 					removeNode("Crop Rotation", techtree.civ_techs_units);
