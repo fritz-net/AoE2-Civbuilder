@@ -1546,7 +1546,11 @@ function draftIO(io) {
 						mod_data.language = [];
 						mod_data.castle = [];
 						mod_data.wonder = [];
-						mod_data.custom_units = []; // Array to store custom UU data for each player
+						// Array to store custom UU data for each player
+						// Each entry is either null (regular UU or no UU) or a custom UU object
+						// Custom UU objects have: type, unitType, baseUnit, name, health, attack, armor, speed, etc.
+						// This array parallels the players array and is used by the C++ mod builder
+						mod_data.custom_units = [];
 						mod_data.modifiers = {
 							randomCosts: false,
 							hp: 1,

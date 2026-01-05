@@ -258,7 +258,12 @@ test.describe('Custom UU Draft - Custom UU Phase', () => {
 
 test.describe('Custom UU Draft - Backend Integration', () => {
   test('should store custom UU in player bonuses array and complete full draft', async ({ page }) => {
-    // This test verifies the complete flow from draft creation to zip download with custom UU
+    // This test verifies the complete custom UU integration:
+    // 1. Custom UU is stored in bonuses[1] array when submitted
+    // 2. Draft completes all rounds (civ bonuses → custom UU → castle → imperial → team bonuses)
+    // 3. Transitions to tech tree phase correctly
+    // 4. Mod generation handles custom UU objects (no "[object Object]" errors)
+    // 5. Zip file is generated successfully
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     await draftCreatePage.assertPageLoaded();
