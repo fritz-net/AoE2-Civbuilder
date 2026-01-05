@@ -235,7 +235,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     units: [1793],  // Legionary
     requiresPrerequisites: true,
     prerequisites: {
-      units: [77],  // Long Swordsman
+      units: [75, 77],  // Man-at-Arms, Long Swordsman
     },
     replaces: {
       units: [473, 567],  // Two-Handed Swordsman, Champion
