@@ -11,18 +11,49 @@
       @reset="handleReset"
       @config-loaded="handleConfigLoaded"
     />
+    
+    <!-- Install Method Dialog -->
+    <InstallMethodDialog
+      :show="showInstallDialog"
+      @auto-install="handleAutoInstall"
+      @download="handleDownloadOption"
+      @cancel="handleDialogCancel"
+      ref="installDialogRef"
+    />
+    
+    <!-- Profile Selector Dialog -->
+    <ProfileSelector
+      :show="showProfileSelector"
+      :profiles="steamProfiles"
+      @select="handleProfileSelect"
+      @cancel="handleProfileCancel"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { CivConfig } from '~/composables/useCivData'
-import { useModApi } from '~/composables/useModApi'
+import { useModApi, type ModCreationResult } from '~/composables/useModApi'
+import { useFileSystemInstall, type SteamProfile } from '~/composables/useFileSystemInstall'
+import InstallMethodDialog from '~/components/InstallMethodDialog.vue'
+import ProfileSelector from '~/components/ProfileSelector.vue'
 
 const router = useRouter()
 const civBuilderRef = ref<{ civConfig: CivConfig } | null>(null)
 const { isCreating, error, createMod } = useModApi()
+const { install: installToFileSystem } = useFileSystemInstall()
 
 const initialConfig = ref<Partial<CivConfig>>({})
+
+// Dialog state
+const showInstallDialog = ref(false)
+const showProfileSelector = ref(false)
+const steamProfiles = ref<SteamProfile[]>([])
+const installDialogRef = ref<any>(null)
+
+// Store the mod result for installation
+const currentModResult = ref<ModCreationResult | null>(null)
+const currentCivName = ref('')
 
 // Track if user has made changes
 const hasUnsavedChanges = computed(() => {
@@ -56,23 +87,130 @@ async function handleNext(config: CivConfig) {
   console.log('Creating mod for civ config:', config)
   
   try {
-    const filename = await createMod([config])
+    // Create mod without downloading
+    const result = await createMod([config], {}, false)
     
-    // Set flag to allow navigation without warning
-    allowNavigation.value = true
+    // Store for later use
+    currentModResult.value = result
+    currentCivName.value = config.alias
     
-    // Navigate to download success page
-    await router.push({
-      path: '/download-success',
-      query: {
-        civs: config.alias,
-        filename: filename
-      }
-    })
+    // Show install method dialog
+    showInstallDialog.value = true
   } catch (err) {
     console.error('Error creating mod:', err)
     alert(`Failed to create mod: ${error.value || 'Unknown error'}`)
   }
+}
+
+async function handleAutoInstall() {
+  if (!currentModResult.value) return
+  
+  try {
+    // Profile selector callback
+    const onProfileSelect = async (profiles: SteamProfile[]): Promise<SteamProfile> => {
+      return new Promise((resolve, reject) => {
+        steamProfiles.value = profiles
+        showProfileSelector.value = true
+        
+        // Store resolve/reject for later use
+        ;(window as any).__profileSelectResolve = resolve
+        ;(window as any).__profileSelectReject = reject
+      })
+    }
+    
+    // Attempt auto-install
+    const success = await installToFileSystem(
+      currentModResult.value.blob,
+      currentModResult.value.filename.replace('.zip', ''),
+      onProfileSelect
+    )
+    
+    if (success) {
+      // Close dialogs
+      showInstallDialog.value = false
+      showProfileSelector.value = false
+      
+      // Set flag to allow navigation
+      allowNavigation.value = true
+      
+      // Navigate to success page
+      await router.push({
+        path: '/download-success',
+        query: {
+          civs: currentCivName.value,
+          filename: currentModResult.value.filename,
+          autoInstalled: 'true'
+        }
+      })
+    } else {
+      // User cancelled or installation failed
+      installDialogRef.value?.resetProcessing()
+    }
+  } catch (err) {
+    console.error('Error auto-installing mod:', err)
+    const message = err instanceof Error ? err.message : 'Failed to install mod'
+    installDialogRef.value?.setError(message)
+  }
+}
+
+function handleDownloadOption() {
+  if (!currentModResult.value) return
+  
+  // Trigger download
+  const url = window.URL.createObjectURL(currentModResult.value.blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = currentModResult.value.filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  window.URL.revokeObjectURL(url)
+  
+  // Close dialog
+  showInstallDialog.value = false
+  
+  // Set flag to allow navigation
+  allowNavigation.value = true
+  
+  // Navigate to success page
+  router.push({
+    path: '/download-success',
+    query: {
+      civs: currentCivName.value,
+      filename: currentModResult.value.filename
+    }
+  })
+}
+
+function handleDialogCancel() {
+  showInstallDialog.value = false
+  currentModResult.value = null
+  currentCivName.value = ''
+}
+
+function handleProfileSelect(profile: SteamProfile) {
+  showProfileSelector.value = false
+  
+  // Resolve the promise
+  if ((window as any).__profileSelectResolve) {
+    ;(window as any).__profileSelectResolve(profile)
+    delete (window as any).__profileSelectResolve
+    delete (window as any).__profileSelectReject
+  }
+}
+
+function handleProfileCancel() {
+  showProfileSelector.value = false
+  
+  // Reject the promise
+  if ((window as any).__profileSelectReject) {
+    ;(window as any).__profileSelectReject(new Error('User cancelled profile selection'))
+    delete (window as any).__profileSelectResolve
+    delete (window as any).__profileSelectReject
+  }
+  
+  // Reset install dialog
+  installDialogRef.value?.resetProcessing()
 }
 
 function handleDownload(config: CivConfig) {
