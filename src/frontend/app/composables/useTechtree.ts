@@ -90,6 +90,15 @@ import {
   ONAGER,
   CHAMPION,
   PALADIN,
+  WINGED_HUSSAR,
+  SAVAR,
+  LEGIONARY,
+  // Can-build bonus buildings/units
+  FEITORIA,
+  CARAVEL,
+  ELITE_CARAVEL,
+  KREPOST,
+  DONJON,
   SIEGE_ONAGER,
   ELITE_CANNON_GALLEON,
   EAGLE_SCOUT,
@@ -113,9 +122,27 @@ import {
   ROCKET_CART,
   HEAVY_ROCKET_CART,
   TRACTION_TREBUCHET,
+  MOUNTED_TREBUCHET, // Bonus unit (361) - different from Traction Trebuchet
   HEI_GUANG_CAVALRY,
   HEAVY_HEI_GUANG_CAVALRY,
   LOU_CHUAN,
+  // Regional/Bonus-granted units
+  SLINGER,
+  IMPERIAL_CAMEL_RIDER,
+  LONGBOAT,
+  ELITE_LONGBOAT,
+  TURTLE_SHIP,
+  ELITE_TURTLE_SHIP,
+  CAMEL_SCOUT,
+  HOUFNICE,
+  THIRISADAI,
+  WARRIOR_PRIEST,
+  SHRIVAMSHA_RIDER,
+  ELITE_SHRIVAMSHA_RIDER,
+  GRENADIER,
+  XIANBEI_RAIDER,
+  WAR_CHARIOT,
+  JIAN_SWORDSMAN,
   // Tech IDs
   TOWN_WATCH,
   CROP_ROTATION,
@@ -197,6 +224,31 @@ import {
   PASTORALISM,
   DOMESTICATION,
 } from './useTechtreeData'
+
+import {
+  BONUS_ID_TURTLE_SHIP,
+  BONUS_ID_LONGBOAT,
+  BONUS_ID_IMPERIAL_CAMEL,
+  BONUS_ID_SLINGER,
+  BONUS_ID_WARRIOR_PRIEST,
+  BONUS_ID_HOUFNICE,
+  BONUS_ID_THIRISADAI,
+  BONUS_ID_SHRIVAMSHA_RIDER,
+  BONUS_ID_CAMEL_SCOUT,
+  BONUS_ID_WAR_CHARIOT,
+  BONUS_ID_JIAN_SWORDSMAN,
+  BONUS_ID_XIANBEI_RAIDER,
+  BONUS_ID_GRENADIER,
+  BONUS_ID_PASTURES,
+  BONUS_ID_MOUNTED_TREBUCHET,
+  BONUS_ID_WINGED_HUSSAR,
+  BONUS_ID_LEGIONARY,
+  BONUS_ID_SAVAR,
+  BONUS_ID_FEITORIA,
+  BONUS_ID_CARAVEL,
+  BONUS_ID_KREPOST,
+  BONUS_ID_DONJON,
+} from './useBonusTechMapping'
 
 let techtreeData: TechtreeData | null = null
 
@@ -370,7 +422,11 @@ function t(techId: number): string {
   return 'tech_' + techId
 }
 
-export function getConnections(showPastures: boolean = false): [string, string][] {
+export function getConnections(selectedBonuses: number[] = []): [string, string][] {
+  // Helper to check if a bonus is selected
+  const isBonusSelected = (bonusId: number) => selectedBonuses.includes(bonusId)
+  
+  // Build list of all connections
   const connections: [string, string][] = [
     [b(ARCHERY_RANGE), u(ARCHER)],
     [u(ARCHER), u(CROSSBOWMAN)],
@@ -388,6 +444,7 @@ export function getConnections(showPastures: boolean = false): [string, string][
     [u(MILITIA), u(MAN_AT_ARMS)],
     [u(MAN_AT_ARMS), u(LONG_SWORDSMAN)],
     [u(LONG_SWORDSMAN), u(TWO_HANDED_SWORDSMAN)],
+    [u(LONG_SWORDSMAN), u(LEGIONARY)], // Replacement: Legionary replaces Two-Handed Swordsman
     [u(TWO_HANDED_SWORDSMAN), u(CHAMPION)],
     [b(BARRACKS), u(SPEARMAN)],
     [u(SPEARMAN), u(PIKEMAN)],
@@ -402,6 +459,7 @@ export function getConnections(showPastures: boolean = false): [string, string][
     [b(STABLE), u(SCOUT_CAVALRY)],
     [u(SCOUT_CAVALRY), u(LIGHT_CAVALRY)],
     [u(LIGHT_CAVALRY), u(HUSSAR)],
+    [u(LIGHT_CAVALRY), u(WINGED_HUSSAR)], // Replacement: Winged Hussar replaces Hussar
     [b(STABLE), t(BLOODLINES)],
     [b(STABLE), u(CAMEL_RIDER)],
     [u(CAMEL_RIDER), u(HEAVY_CAMEL_RIDER)],
@@ -414,6 +472,7 @@ export function getConnections(showPastures: boolean = false): [string, string][
     [b(STABLE), t(HUSBANDRY)],
     [u(KNIGHT), u(CAVALIER)],
     [u(CAVALIER), u(PALADIN)],
+    [u(CAVALIER), u(SAVAR)], // Replacement: Savar replaces Paladin
     [b(DOCK), u(FISHING_SHIP)],
     [b(DOCK), u(TRANSPORT_SHIP)],
     [b(DOCK), u(DROMON)],
@@ -428,6 +487,9 @@ export function getConnections(showPastures: boolean = false): [string, string][
     [t(CAREENING), t(DRY_DOCK)],
     [b(DOCK), t(SHIPWRIGHT)],
     [b(DOCK), b(FISH_TRAP)],
+    // Can-build bonus: Caravel connections
+    [b(DOCK), u(CARAVEL)],
+    [u(CARAVEL), u(ELITE_CARAVEL)],
     [u(FIRE_GALLEY), u(FIRE_SHIP)],
     [u(FIRE_SHIP), u(FAST_FIRE_SHIP)],
     [u(CANNON_GALLEON), u(ELITE_CANNON_GALLEON)],
@@ -436,6 +498,7 @@ export function getConnections(showPastures: boolean = false): [string, string][
     [b(GUARD_TOWER), b(KEEP)],
     [b(STONE_WALL), b(FORTIFIED_WALL)],
     [b(MONASTERY), u(MONK)],
+    [b(MONASTERY), u(MISSIONARY)],
     [b(MONASTERY), t(REDEMPTION)],
     [b(MONASTERY), t(ATONEMENT)],
     [b(MONASTERY), t(HERBAL_MEDICINE)],
@@ -522,27 +585,130 @@ export function getConnections(showPastures: boolean = false): [string, string][
     [b(TOWN_CENTER), t(WHEELBARROW)],
     [b(MARKET), t(COINAGE)],
     [b(MARKET), t(GUILDS)],
+    // Can-build bonus: Feitoria connection (Feitoria is built from Market tech tree)
+    [b(MARKET), b(FEITORIA)],
     [b(SIEGE_WORKSHOP), u(BOMBARD_CANNON)],
     [b(SIEGE_WORKSHOP), u(TRACTION_TREBUCHET)],
     [b(DOCK), u(CANNON_GALLEON)],
+    
+    // Bonus-granted unit connections
+    // Slinger (bonus 61)
+    [b(ARCHERY_RANGE), u(SLINGER)],
+    // Longboat (bonus 51)
+    [b(DOCK), u(LONGBOAT)],
+    [u(LONGBOAT), u(ELITE_LONGBOAT)],
+    // Turtle Ship (bonus 50)
+    [b(DOCK), u(TURTLE_SHIP)],
+    [u(TURTLE_SHIP), u(ELITE_TURTLE_SHIP)],
+    // Thirisadai (bonus 298)
+    [b(DOCK), u(THIRISADAI)],
+    // Camel Scout (bonus 300) - connects to existing camel line
+    [b(STABLE), u(CAMEL_SCOUT)],
+    [u(CAMEL_SCOUT), u(CAMEL_RIDER)],
+    // Imperial Camel Rider (bonus 53) - extends camel line
+    [u(HEAVY_CAMEL_RIDER), u(IMPERIAL_CAMEL_RIDER)],
+    // Shrivamsha Rider (bonus 299)
+    [b(STABLE), u(SHRIVAMSHA_RIDER)],
+    [u(SHRIVAMSHA_RIDER), u(ELITE_SHRIVAMSHA_RIDER)],
+    // War Chariot (bonus 337) - NO ELITE VERSION EXISTS
+    [b(SIEGE_WORKSHOP), u(WAR_CHARIOT)],
+    // Xianbei Raider (bonus 348) - NO ELITE VERSION EXISTS - ARCHERY RANGE unit
+    [b(ARCHERY_RANGE), u(XIANBEI_RAIDER)],
+    // Jian Swordsman (bonus 343) - NO ELITE VERSION EXISTS - BARRACKS unit
+    [b(BARRACKS), u(JIAN_SWORDSMAN)],
+    // Houfnice (bonus 286) - extends bombard cannon
+    [u(BOMBARD_CANNON), u(HOUFNICE)],
+    // Grenadier (bonus 355)
+    // Grenadier (bonus 355) - ARCHERY RANGE not siege workshop
+    [b(ARCHERY_RANGE), u(GRENADIER)],
+    // Warrior Priest (bonus 193)
+    [b(MONASTERY), u(WARRIOR_PRIEST)],
+    // Missionary (bonus 142)
+    [b(MONASTERY), u(MISSIONARY)],
   ]
 
-  // Add farm/pasture specific connections based on showPastures option
-  if (showPastures) {
-    // Pasture tech connections - connected to Mill (like farm techs)
+  // Helper to get Mill or Folwark building ID based on bonus selection
+  const millBuilding = isBonusSelected(BONUS_ID_FOLWARK) ? FOLWARK : MILL
+  const monasteryBuilding = isBonusSelected(BONUS_ID_FORTIFIED_CHURCH) ? FORTIFIED_CHURCH : MONASTERY
+  
+  // Add farm/pasture specific connections based on Pastures bonus
+  if (isBonusSelected(BONUS_ID_PASTURES)) {
+    // Pasture tech connections - connected to Mill/Folwark (like farm techs)
     // Pasture building itself is in Dark Age and independent (no connections)
-    connections.push([b(MILL), t(DOMESTICATION)])
+    connections.push([b(millBuilding), t(DOMESTICATION)])
     connections.push([t(DOMESTICATION), t(PASTORALISM)])
     connections.push([t(PASTORALISM), t(TRANSHUMANCE)])
   } else {
     // Farm tech connections (default)
-    connections.push([b(MILL), t(HORSE_COLLAR)])
+    connections.push([b(millBuilding), t(HORSE_COLLAR)])
     connections.push([t(HORSE_COLLAR), t(HEAVY_PLOW)])
     connections.push([t(HEAVY_PLOW), t(CROP_ROTATION)])
-    connections.push([b(MILL), b(FARM)])
+    connections.push([b(millBuilding), b(FARM)])
+  }
+  
+  // Add connections for Fortified Church if selected (same as Monastery)
+  if (isBonusSelected(BONUS_ID_FORTIFIED_CHURCH)) {
+    // Fortified Church connections (same as Monastery since it replaces it)
+    connections.push([b(FORTIFIED_CHURCH), u(MONK)])
+    connections.push([b(FORTIFIED_CHURCH), t(REDEMPTION)])
+    connections.push([b(FORTIFIED_CHURCH), t(ATONEMENT)])
+    connections.push([b(FORTIFIED_CHURCH), t(HERBAL_MEDICINE)])
+    connections.push([b(FORTIFIED_CHURCH), t(HERESY)])
+    connections.push([b(FORTIFIED_CHURCH), t(SANCTITY)])
+    connections.push([b(FORTIFIED_CHURCH), t(FERVOR)])
+    connections.push([b(FORTIFIED_CHURCH), t(DEVOTION)])
+    connections.push([b(FORTIFIED_CHURCH), t(ILLUMINATION)])
+    connections.push([b(FORTIFIED_CHURCH), t(BLOCK_PRINTING)])
+    connections.push([b(FORTIFIED_CHURCH), t(THEOCRACY)])
+    if (isBonusSelected(BONUS_ID_WARRIOR_PRIEST)) {
+      connections.push([b(FORTIFIED_CHURCH), u(WARRIOR_PRIEST)])
+    }
+  }
+  
+  // Add connections for Folwark if selected (same Mill->Market connection)
+  if (isBonusSelected(BONUS_ID_FOLWARK)) {
+    connections.push([b(FOLWARK), b(MARKET)])
+  }
+  
+  // Add connection for Mounted Trebuchet if bonus is selected
+  if (isBonusSelected(BONUS_ID_MOUNTED_TREBUCHET)) {
+    connections.push([b(SIEGE_WORKSHOP), u(MOUNTED_TREBUCHET)])
+  }
+  
+  // Add connection for Krepost-Petard if bonus is selected
+  // Can-build bonus: Krepost can build Petards (like Castle)
+  // NOTE: Krepost and Donjon do NOT have connections to Town Center (they're standalone bonus buildings)
+  if (isBonusSelected(BONUS_ID_KREPOST)) {
+    connections.push([b(KREPOST), u(PETARD)])
   }
 
-  return connections.map(([from, to]) => [formatId(from), formatId(to)])
+  // Filter out connections to/from replaced units
+  // Get all replaced unit/building IDs based on selected replacement bonuses
+  const replacedIds = new Set<string>()
+  
+  if (isBonusSelected(BONUS_ID_WINGED_HUSSAR)) {
+    replacedIds.add(u(HUSSAR))  // Hussar replaced by Winged Hussar
+  }
+  if (isBonusSelected(BONUS_ID_LEGIONARY)) {
+    replacedIds.add(u(TWO_HANDED_SWORDSMAN))  // Two-Handed Swordsman replaced by Legionary
+    replacedIds.add(u(CHAMPION))  // Champion also replaced
+  }
+  if (isBonusSelected(BONUS_ID_SAVAR)) {
+    replacedIds.add(u(PALADIN))  // Paladin replaced by Savar
+  }
+  if (isBonusSelected(BONUS_ID_FOLWARK)) {
+    replacedIds.add(b(MILL))  // Mill replaced by Folwark
+  }
+  if (isBonusSelected(BONUS_ID_FORTIFIED_CHURCH)) {
+    replacedIds.add(b(MONASTERY))  // Monastery replaced by Fortified Church
+  }
+  
+  // Filter connections - remove any that involve replaced units/buildings
+  const filteredConnections = connections.filter(([from, to]) => {
+    return !replacedIds.has(from) && !replacedIds.has(to)
+  })
+
+  return filteredConnections.map(([from, to]) => [formatId(from), formatId(to)])
 }
 
 export function getConnectionPoints(tree: Tree): Map<string, { x: number; y: number }> {
@@ -565,11 +731,15 @@ export function setTechtreeData(data: TechtreeData): void {
 }
 
 export interface TreeOptions {
-  showPastures?: boolean // Show pasture building and techs instead of farm techs
+  selectedBonuses?: number[] // Selected bonus IDs to determine which bonus units/buildings to include
 }
 
 export function getDefaultTree(windowHeight: number = 600, options: TreeOptions = {}): Tree {
-  const { showPastures = false } = options
+  const { selectedBonuses = [] } = options
+  
+  // Helper to check if a bonus is selected
+  const isBonusSelected = (bonusId: number) => selectedBonuses.includes(bonusId)
+  
   const tree: Tree = {
     offsets: {
       dark_1: 0,
@@ -611,6 +781,9 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   archerylane.rows.castle_1.push(unit(ELITE_SKIRMISHER))
   archerylane.rows.castle_1.push(unit(CAVALRY_ARCHER))
   archerylane.rows.castle_1.push(unit(ELEPHANT_ARCHER))
+  if (isBonusSelected(BONUS_ID_SLINGER)) archerylane.rows.castle_1.push(unit(SLINGER)) // Bonus unit: Can recruit Slingers
+  if (isBonusSelected(BONUS_ID_GRENADIER)) archerylane.rows.castle_1.push(unit(GRENADIER)) // Bonus unit: Can recruit Grenadiers
+  if (isBonusSelected(BONUS_ID_XIANBEI_RAIDER)) archerylane.rows.castle_1.push(unit(XIANBEI_RAIDER)) // Bonus unit: Can recruit Xianbei Raiders (no elite)
   archerylane.rows.castle_1.push(tech(THUMB_RING))
   archerylane.rows.imperial_1.push(unit(ARBALESTER))
   archerylane.rows.imperial_1.push(unit(HAND_CANNONEER))
@@ -630,10 +803,16 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.castle_1.push(unit(PIKEMAN))
   barrackslane.rows.castle_1.push(unit(EAGLE_WARRIOR))
   barrackslane.rows.castle_1.push(unit(FIRE_LANCER))
+  if (isBonusSelected(BONUS_ID_JIAN_SWORDSMAN)) barrackslane.rows.castle_1.push(unit(JIAN_SWORDSMAN)) // Bonus unit: Can recruit Jian Swordsmen (no elite)
   barrackslane.rows.castle_1.push(tech(GAMBESONS))
   barrackslane.rows.castle_1.push(tech(SQUIRES))
-  barrackslane.rows.imperial_1.push(unit(TWO_HANDED_SWORDSMAN))
-  barrackslane.rows.imperial_2.push(unit(CHAMPION))
+  // Two-Handed Swordsman or Legionary (replacement bonus 307)
+  if (isBonusSelected(BONUS_ID_LEGIONARY)) {
+    barrackslane.rows.imperial_1.push(unit(LEGIONARY)) // Legionary replaces Two-Handed Swordsman (and Champion)
+  } else {
+    barrackslane.rows.imperial_1.push(unit(TWO_HANDED_SWORDSMAN))
+    barrackslane.rows.imperial_2.push(unit(CHAMPION))
+  }
   barrackslane.rows.imperial_1.push(unit(HALBERDIER))
   barrackslane.rows.imperial_1.push(unit(ELITE_EAGLE_WARRIOR))
   barrackslane.rows.imperial_1.push(unit(ELITE_FIRE_LANCER))
@@ -643,20 +822,34 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.feudal_1.push(building(STABLE))
   stablelane.rows.feudal_2.push(unit(SCOUT_CAVALRY))
   stablelane.rows.feudal_2.push(tech(BLOODLINES))
+  if (isBonusSelected(BONUS_ID_CAMEL_SCOUT)) stablelane.rows.feudal_2.push(unit(CAMEL_SCOUT)) // Bonus unit: Can recruit Camel Scouts
   stablelane.rows.castle_1.push(unit(LIGHT_CAVALRY))
   stablelane.rows.castle_1.push(unit(KNIGHT))
   stablelane.rows.castle_1.push(unit(CAMEL_RIDER))
   stablelane.rows.castle_1.push(unit(BATTLE_ELEPHANT))
   stablelane.rows.castle_1.push(unit(STEPPE_LANCER))
   stablelane.rows.castle_1.push(unit(HEI_GUANG_CAVALRY))
+  if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.castle_1.push(unit(SHRIVAMSHA_RIDER)) // Bonus unit: Can recruit Shrivamsha Riders
   stablelane.rows.castle_1.push(tech(HUSBANDRY))
-  stablelane.rows.imperial_1.push(unit(HUSSAR))
+  // Hussar or Winged Hussar (replacement bonus 282)
+  if (isBonusSelected(BONUS_ID_WINGED_HUSSAR)) {
+    stablelane.rows.imperial_1.push(unit(WINGED_HUSSAR)) // Winged Hussar replaces Hussar
+  } else {
+    stablelane.rows.imperial_1.push(unit(HUSSAR))
+  }
   stablelane.rows.imperial_1.push(unit(CAVALIER))
   stablelane.rows.imperial_1.push(unit(HEAVY_CAMEL_RIDER))
   stablelane.rows.imperial_1.push(unit(ELITE_BATTLE_ELEPHANT))
   stablelane.rows.imperial_1.push(unit(ELITE_STEPPE_LANCER))
   stablelane.rows.imperial_1.push(unit(HEAVY_HEI_GUANG_CAVALRY))
-  stablelane.rows.imperial_2.push(unit(PALADIN))
+  if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.imperial_1.push(unit(ELITE_SHRIVAMSHA_RIDER))
+  // Paladin or Savar (replacement bonus 314)
+  if (isBonusSelected(BONUS_ID_SAVAR)) {
+    stablelane.rows.imperial_2.push(unit(SAVAR)) // Savar replaces Paladin
+  } else {
+    stablelane.rows.imperial_2.push(unit(PALADIN))
+  }
+  if (isBonusSelected(BONUS_ID_IMPERIAL_CAMEL)) stablelane.rows.imperial_2.push(unit(IMPERIAL_CAMEL_RIDER)) // Bonus unit: Can upgrade to Imperial Camel Rider (after Heavy Camel)
   tree.lanes.push(stablelane)
 
   const siegeworkshoplane = createLane()
@@ -667,6 +860,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   siegeworkshoplane.rows.castle_2.push(unit(ROCKET_CART))
   siegeworkshoplane.rows.castle_2.push(unit(SCORPION))
   siegeworkshoplane.rows.castle_2.push(unit(SIEGE_TOWER))
+  if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) siegeworkshoplane.rows.castle_2.push(unit(WAR_CHARIOT)) // Bonus unit: Can recruit War Chariots (NO ELITE VERSION EXISTS)
   siegeworkshoplane.rows.imperial_1.push(unit(CAPPED_RAM))
   siegeworkshoplane.rows.imperial_1.push(unit(SIEGE_ELEPHANT))
   siegeworkshoplane.rows.imperial_1.push(unit(ONAGER))
@@ -674,8 +868,10 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   siegeworkshoplane.rows.imperial_1.push(unit(HEAVY_SCORPION))
   siegeworkshoplane.rows.imperial_1.push(unit(BOMBARD_CANNON))
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_RAM))
-  siegeworkshoplane.rows.imperial_2.push(unit(TRACTION_TREBUCHET))
+  siegeworkshoplane.rows.imperial_2.push(unit(TRACTION_TREBUCHET)) // Standard unit - different from Mounted Trebuchet
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_ONAGER))
+  if (isBonusSelected(BONUS_ID_MOUNTED_TREBUCHET)) siegeworkshoplane.rows.imperial_2.push(unit(MOUNTED_TREBUCHET)) // Bonus unit: Can train Mounted Trebuchets
+  if (isBonusSelected(BONUS_ID_HOUFNICE)) siegeworkshoplane.rows.imperial_2.push(unit(HOUFNICE)) // Bonus unit: Can upgrade to Houfnice (after Bombard Cannon)
   tree.lanes.push(siegeworkshoplane)
 
   const blacksmithlane = createLane()
@@ -709,14 +905,21 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   docklane.rows.castle_1.push(tech(GILLNETS))
   docklane.rows.castle_1.push(unit(DEMOLITION_SHIP))
   docklane.rows.castle_1.push(unit(WAR_GALLEY))
+  if (isBonusSelected(BONUS_ID_LONGBOAT)) docklane.rows.castle_1.push(unit(LONGBOAT)) // Bonus unit: Can recruit Longboats
+  if (isBonusSelected(BONUS_ID_TURTLE_SHIP)) docklane.rows.castle_1.push(unit(TURTLE_SHIP)) // Bonus unit: Can train Turtle Ships
+  if (isBonusSelected(BONUS_ID_CARAVEL)) docklane.rows.castle_1.push(unit(CARAVEL)) // Bonus unit: Can build Caravels
   docklane.rows.castle_1.push(tech(CAREENING))
   docklane.rows.imperial_1.push(unit(FAST_FIRE_SHIP))
   docklane.rows.imperial_1.push(unit(CANNON_GALLEON))
   docklane.rows.imperial_1.push(unit(HEAVY_DEMO_SHIP))
   docklane.rows.imperial_1.push(unit(GALLEON))
+  if (isBonusSelected(BONUS_ID_LONGBOAT)) docklane.rows.imperial_1.push(unit(ELITE_LONGBOAT))
+  if (isBonusSelected(BONUS_ID_TURTLE_SHIP)) docklane.rows.imperial_1.push(unit(ELITE_TURTLE_SHIP))
+  if (isBonusSelected(BONUS_ID_CARAVEL)) docklane.rows.imperial_1.push(unit(ELITE_CARAVEL)) // Bonus unit: Elite Caravel (auto-enabled with Caravel)
   docklane.rows.imperial_2.push(unit(LOU_CHUAN))
   docklane.rows.imperial_2.push(unit(ELITE_CANNON_GALLEON))
   docklane.rows.imperial_2.push(unit(DROMON))
+  if (isBonusSelected(BONUS_ID_THIRISADAI)) docklane.rows.imperial_2.push(unit(THIRISADAI)) // Bonus unit: Can train Thirisadai
   docklane.rows.imperial_1.push(tech(DRY_DOCK))
   docklane.rows.imperial_1.push(tech(SHIPWRIGHT))
   tree.lanes.push(docklane)
@@ -760,7 +963,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
 
   const castlelane = createLane()
   castlelane.rows.castle_1.push(building(CASTLE))
-  castlelane.rows.castle_2.push(unit(PETARD))
+  // NOTE: Petard removed from castle lane - now only in Krepost lane (castle_2) to avoid duplication
   castlelane.rows.imperial_1.push(unit(TREBUCHET))
   castlelane.rows.imperial_1.push(tech(HOARDINGS))
   castlelane.rows.imperial_1.push(tech(SAPPERS))
@@ -768,8 +971,32 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   castlelane.rows.imperial_1.push(tech(SPIES_TREASON))
   tree.lanes.push(castlelane)
 
+  // Krepost lane - bonus building (Can build Krepost, ID 93)
+  // NOTE: Civbuilder uses custom techtree, NOT default aoe2techtree - must be explicitly added
+  // Krepost can now build Petards (moved to castle_2 to be next to Petard)
+  if (isBonusSelected(BONUS_ID_KREPOST)) {
+    const krepostlane = createLane()
+    krepostlane.rows.castle_1.push(building(KREPOST))
+    krepostlane.rows.castle_2.push(unit(PETARD))
+    tree.lanes.push(krepostlane)
+  }
+
+  // Donjon lane - bonus building (Can build Donjon, ID 109)
+  // NOTE: Civbuilder uses custom techtree, NOT default aoe2techtree - must be explicitly added
+  // Donjon is now available in Dark Age (as of latest patch)
+  if (isBonusSelected(BONUS_ID_DONJON)) {
+    const donjonlane = createLane()
+    donjonlane.rows.dark_1.push(building(DONJON))
+    tree.lanes.push(donjonlane)
+  }
+
   const monasterylane = createLane()
-  monasterylane.rows.castle_1.push(building(MONASTERY))
+  // Monastery or Fortified Church (replacement bonus 316)
+  if (isBonusSelected(BONUS_ID_FORTIFIED_CHURCH)) {
+    monasterylane.rows.castle_1.push(building(FORTIFIED_CHURCH))
+  } else {
+    monasterylane.rows.castle_1.push(building(MONASTERY))
+  }
   monasterylane.rows.castle_2.push(unit(MONK))
   monasterylane.rows.castle_2.push(tech(REDEMPTION))
   monasterylane.rows.castle_2.push(tech(DEVOTION))
@@ -778,6 +1005,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   monasterylane.rows.castle_2.push(tech(HERESY))
   monasterylane.rows.castle_2.push(tech(SANCTITY))
   monasterylane.rows.castle_2.push(tech(FERVOR))
+  if (isBonusSelected(BONUS_ID_WARRIOR_PRIEST)) monasterylane.rows.castle_2.push(unit(WARRIOR_PRIEST)) // Bonus unit: Can recruit Warrior Priests
+  if (isBonusSelected(BONUS_ID_MISSIONARY)) monasterylane.rows.castle_2.push(unit(MISSIONARY)) // Bonus unit: Missionaries can be trained in monasteries
   monasterylane.rows.imperial_1.push(tech(ILLUMINATION))
   monasterylane.rows.imperial_1.push(tech(BLOCK_PRINTING))
   monasterylane.rows.imperial_1.push(tech(FAITH))
@@ -786,6 +1015,9 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
 
   const houselane = createLane()
   houselane.rows.dark_1.push(building(HOUSE))
+  // NOTE: Civbuilder uses custom techtree (useTechtree.ts), NOT default aoe2techtree
+  // Can-build bonuses must be explicitly added here, not assumed from default tree
+  if (isBonusSelected(BONUS_ID_FEITORIA)) houselane.rows.imperial_2.push(building(FEITORIA)) // Bonus: Can build Feitoria
   tree.lanes.push(houselane)
 
   const towncenterlane = createLane()
@@ -833,17 +1065,22 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   marketlane.rows.imperial_1.push(tech(GUILDS))
   tree.lanes.push(marketlane)
 
-  // Farm lane (or Pasture lane if showPastures is enabled)
-  if (showPastures) {
-    // When showPastures is enabled, Pasture replaces Farm
+  // Farm lane (or Pasture lane if Pastures bonus is enabled)
+  if (isBonusSelected(BONUS_ID_PASTURES)) {
+    // When Pastures bonus is enabled, Pasture replaces Farm
     // Pasture building is in Dark Age and independent (no tech connections)
     const pasturelane = createLane()
     pasturelane.rows.dark_2.push(building(PASTURE))
     tree.lanes.push(pasturelane)
 
-    // Mill lane with pasture techs (Mill is connected to pasture techs)
+    // Mill or Folwark lane with pasture techs (Mill is connected to pasture techs)
     const milllane = createLane()
-    milllane.rows.dark_1.push(building(MILL))
+    // Folwark replaces Mill (bonus 280)
+    if (isBonusSelected(BONUS_ID_FOLWARK)) {
+      milllane.rows.dark_1.push(building(FOLWARK))
+    } else {
+      milllane.rows.dark_1.push(building(MILL))
+    }
     milllane.rows.feudal_1.push(tech(DOMESTICATION))
     milllane.rows.castle_1.push(tech(PASTORALISM))
     milllane.rows.imperial_1.push(tech(TRANSHUMANCE))
@@ -854,9 +1091,14 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
     farmlane.rows.dark_2.push(building(FARM))
     tree.lanes.push(farmlane)
 
-    // Mill lane with farm techs
+    // Mill or Folwark lane with farm techs
     const milllane = createLane()
-    milllane.rows.dark_1.push(building(MILL))
+    // Folwark replaces Mill (bonus 280)
+    if (isBonusSelected(BONUS_ID_FOLWARK)) {
+      milllane.rows.dark_1.push(building(FOLWARK))
+    } else {
+      milllane.rows.dark_1.push(building(MILL))
+    }
     milllane.rows.feudal_1.push(tech(HORSE_COLLAR))
     milllane.rows.castle_1.push(tech(HEAVY_PLOW))
     milllane.rows.imperial_1.push(tech(CROP_ROTATION))
@@ -864,7 +1106,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   }
 
   // Update positions
-  const connections = getConnections(showPastures)
+  const connections = getConnections(selectedBonuses)
   let x = tree.padding + tree.offset_x
   for (let i = 0; i < tree.lanes.length; i++) {
     tree.lanes[i].x = x

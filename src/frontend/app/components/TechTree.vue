@@ -121,7 +121,7 @@
 
         <!-- Nodes -->
         <g
-          v-for="caret in allCarets"
+          v-for="caret in visibleCarets"
           :key="caret.id"
           :class="['node', { 'is-highlight': isHighlighted(caret.id) }]"
         >
@@ -265,6 +265,7 @@ import {
   imagePrefix,
   cost,
 } from '~/composables/useTechtree'
+import { getAllGrantedEntities } from '~/composables/useBonusTechMapping'
 
 interface Props {
   initialTree?: number[][]
@@ -274,8 +275,14 @@ interface Props {
   relativePath?: string
   sidebarContent?: string
   sidebarTitle?: string
-  showPastures?: boolean
   mode?: 'build' | 'draft'
+  selectedBonuses?: {
+    civ: (number | [number, number])[]
+    uu: (number | [number, number])[]
+    castle: (number | [number, number])[]
+    imp: (number | [number, number])[]
+    team: (number | [number, number])[]
+  }
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -285,8 +292,14 @@ const props = withDefaults(defineProps<Props>(), {
   relativePath: '/aoe2techtree',
   sidebarContent: '',
   sidebarTitle: 'Civilization Info',
-  showPastures: false,
   mode: 'draft',
+  selectedBonuses: () => ({
+    civ: [],
+    uu: [],
+    castle: [],
+    imp: [],
+    team: []
+  })
 })
 
 const emit = defineEmits<{
@@ -298,6 +311,10 @@ const emit = defineEmits<{
 // Constants for Pasture building management
 const PASTURE_BUILDING_ID = 1889
 const BUILDINGS_ARRAY_INDEX = 1
+
+// Constants for tree array indices
+const UNITS_INDEX = 0
+const TECHS_INDEX = 2
 
 // Constants for Fortified Wall group dependencies
 const FORTIFIED_WALL_TECH_ID = 'tech_194'
@@ -321,7 +338,7 @@ const svgRef = ref<SVGSVGElement | null>(null)
 const helptextRef = ref<HTMLDivElement | null>(null)
 
 // State
-const tree = ref<Tree>(getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: props.showPastures }))
+const tree = ref<Tree>(getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { selectedBonuses: [] }))
 const data = ref<TechtreeData | null>(null)
 const localtree = ref<number[][]>([
   [13, 17, 21, 74, 545, 539, 331, 125, 83, 128, 440],
@@ -344,9 +361,48 @@ const containerHeight = ref(typeof window !== 'undefined' ? window.innerHeight :
 const showConfirmDialog = ref(false)
 
 // Computed
-const connections = computed(() => getConnections(props.showPastures))
+// Flatten selectedBonuses object into a simple array for tree generation
+const flattenedSelectedBonuses = computed(() => {
+  if (!props.selectedBonuses) return []
+  
+  const allBonuses: number[] = []
+  
+  // Extract bonus IDs from all arrays in the object
+  for (const category of Object.values(props.selectedBonuses)) {
+    for (const item of category) {
+      // Handle both number and [number, number] tuple formats
+      const bonusId = Array.isArray(item) ? item[0] : item
+      allBonuses.push(bonusId)
+    }
+  }
+  
+  return allBonuses
+})
+
+const connections = computed(() => getConnections(flattenedSelectedBonuses.value))
 const connectionPoints = computed(() => getConnectionPoints(tree.value))
 const parentConnections = computed(() => new Map(connections.value.map(([parent, child]) => [child, parent])))
+
+// Compute entities granted by selected bonuses (units/techs with 0 cost)
+const grantedEntities = computed(() => {
+  // Convert selected bonuses to Map format expected by getAllGrantedEntities
+  const bonusMap = new Map<string, { id: number; count: number }[]>()
+  
+  // Helper to extract bonus ID from entry (could be number or [id, multiplier] tuple)
+  const getBonusId = (entry: number | [number, number]): number => {
+    return Array.isArray(entry) ? entry[0] : entry
+  }
+  
+  // Process each bonus type
+  for (const [bonusType, bonusList] of Object.entries(props.selectedBonuses)) {
+    bonusMap.set(bonusType, bonusList.map(entry => ({
+      id: getBonusId(entry),
+      count: 1
+    })))
+  }
+  
+  return getAllGrantedEntities(bonusMap)
+})
 
 // Scale factor to fit techtree in viewport without vertical scroll when not maximized
 const techtreeScale = computed(() => {
@@ -409,6 +465,59 @@ const allCarets = computed(() => {
   return carets
 })
 
+// Filter out replaced entities - units/buildings that are replaced by bonuses
+const visibleCarets = computed(() => {
+  return allCarets.value.filter(caret => {
+    const type = idType(caret.id)
+    const numId = idID(caret.id)
+    
+    // Hide if this unit is replaced by a bonus
+    if (type === 0 && grantedEntities.value.replaces.units.has(numId)) {
+      return false
+    }
+    // Hide if this building is replaced by a bonus
+    if (type === 1 && grantedEntities.value.replaces.buildings.has(numId)) {
+      return false
+    }
+    
+    return true
+  })
+})
+
+// Computed list of unclickable carets - includes base unclickable carets plus bonus-granted entities
+const effectiveUnclickableCarets = computed(() => {
+  const unclickable = [...unclickableCarets]
+  
+  // Add all bonus-granted entities (free units/techs/buildings) - these cannot be disabled
+  for (const unitId of grantedEntities.value.free.units) {
+    unclickable.push(`unit_${unitId}`)
+  }
+  for (const techId of grantedEntities.value.free.techs) {
+    unclickable.push(`tech_${techId}`)
+  }
+  for (const buildingId of grantedEntities.value.free.buildings) {
+    unclickable.push(`building_${buildingId}`)
+  }
+  
+  // Add all prerequisites of bonus-granted entities - these also cannot be disabled
+  for (const unitId of grantedEntities.value.prerequisites.units) {
+    unclickable.push(`unit_${unitId}`)
+  }
+  for (const techId of grantedEntities.value.prerequisites.techs) {
+    unclickable.push(`tech_${techId}`)
+  }
+  
+  // Add all replaced entities - these also cannot be clicked (they're hidden)
+  for (const unitId of grantedEntities.value.replaces.units) {
+    unclickable.push(`unit_${unitId}`)
+  }
+  for (const buildingId of grantedEntities.value.replaces.buildings) {
+    unclickable.push(`building_${buildingId}`)
+  }
+  
+  return unclickable
+})
+
 const iconHeight = computed(() => Math.min(tree.value.height / 4 / 2, 112))
 
 const ageIcons = computed(() => {
@@ -438,7 +547,7 @@ const doneButtonText = computed(() => 'Done')
 // Tooltip texts for Fill and Reset buttons
 const fillButtonTooltip = computed(() => {
   if (!data.value) return 'Fill all available techs and units'
-  const totalTechs = allCarets.value.filter(c => !unclickableCarets.includes(c.id) && !isEnabled(c.id)).length
+  const totalTechs = allCarets.value.filter(c => !effectiveUnclickableCarets.value.includes(c.id) && !isEnabled(c.id)).length
   return `Fill all empty tech slots (${totalTechs} remaining techs)`
 })
 
@@ -478,6 +587,8 @@ const confirmDialogMessage = computed(() => {
 
 const confirmDialogWarning = computed(() => {
   if (!props.editable) return ''
+  // In build mode, don't show warning about points since there's no limit
+  if (props.mode === 'build') return ''
   if (techtreePoints.value > 0) {
     const pointsText = techtreePoints.value === 1 ? 'point' : 'points'
     return `You have ${techtreePoints.value} ${pointsText} remaining! You can spend these ${pointsText} on more techs, units, or buildings.`
@@ -500,11 +611,7 @@ onMounted(async () => {
   }
   
   // Handle initial showPastures state - add Pasture to buildings if needed
-  if (props.showPastures && !localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
-    localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
-    emit('update:tree', localtree.value)
-  }
-  
+  // This will be handled by enableGrantedEntities() when pastures bonus is selected
   if (typeof window !== 'undefined') {
     window.addEventListener('resize', handleResize)
   }
@@ -519,12 +626,6 @@ onUnmounted(() => {
 watch(() => props.initialTree, (newTree) => {
   if (newTree) {
     localtree.value = JSON.parse(JSON.stringify(newTree))
-    
-    // Ensure Pasture is included/excluded based on showPastures prop
-    if (props.showPastures && !localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
-      localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
-      emit('update:tree', localtree.value)
-    }
     
     // Recalculate points when tree is loaded from props
     if (data.value && props.editable) {
@@ -541,26 +642,109 @@ watch(() => props.initialTree, (newTree) => {
   }
 }, { deep: true })
 
-// Watch for showPastures prop changes to rebuild the tree and update localtree
-watch(() => props.showPastures, (newShowPastures) => {
-  tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: newShowPastures })
-  
-  // Update localtree to include/exclude Pasture building
-  if (newShowPastures) {
-    // Add Pasture to buildings if not already present
-    if (!localtree.value[BUILDINGS_ARRAY_INDEX].includes(PASTURE_BUILDING_ID)) {
-      localtree.value[BUILDINGS_ARRAY_INDEX].push(PASTURE_BUILDING_ID)
-      emit('update:tree', localtree.value)
+// Watch for changes in selected bonuses to enable granted entities AND rebuild tree
+watch(() => props.selectedBonuses, () => {
+  if (data.value) {
+    // Find the .techtree-container element (the actual scrollable container)
+    const scrollContainer = techtreeRef.value?.querySelector('.techtree-container') as HTMLElement
+    
+    // Save current scroll position from the CONTAINER (not the root element)
+    const currentScrollLeft = scrollContainer?.scrollLeft || 0
+    const currentScrollTop = scrollContainer?.scrollTop || 0
+    
+    // Debug: Log saved scroll values
+    console.log('[Scroll Debug] Saving scroll:', { left: currentScrollLeft, top: currentScrollTop })
+    
+    // Rebuild tree with new bonus units included in structure
+    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { selectedBonuses: flattenedSelectedBonuses.value })
+    // Enable granted entities in localtree
+    enableGrantedEntities()
+    
+    // Recalculate points after enabling granted entities
+    if (props.editable) {
+      const usedPoints = calculatePoints()
+      if (props.mode === 'build') {
+        // Build mode: show total points spent
+        techtreePoints.value = usedPoints
+      } else {
+        // Draft mode: show remaining points
+        techtreePoints.value = props.points - usedPoints
+      }
+      emit('update:points', techtreePoints.value)
     }
-  } else {
-    // Remove Pasture from buildings if present
-    const index = localtree.value[BUILDINGS_ARRAY_INDEX].indexOf(PASTURE_BUILDING_ID)
-    if (index !== -1) {
-      localtree.value[BUILDINGS_ARRAY_INDEX].splice(index, 1)
-      emit('update:tree', localtree.value)
+    
+    // Restore scroll position with multiple attempts for reliability
+    // First attempt: nextTick (after Vue DOM update)
+    nextTick(() => {
+      const container = techtreeRef.value?.querySelector('.techtree-container') as HTMLElement
+      if (container) {
+        container.scrollLeft = currentScrollLeft
+        container.scrollTop = currentScrollTop
+        console.log('[Scroll Debug] Attempt 1 (nextTick):', { left: container.scrollLeft, top: container.scrollTop })
+      }
+      
+      // Second attempt: requestAnimationFrame (after browser paint)
+      requestAnimationFrame(() => {
+        const container = techtreeRef.value?.querySelector('.techtree-container') as HTMLElement
+        if (container) {
+          container.scrollLeft = currentScrollLeft
+          container.scrollTop = currentScrollTop
+          console.log('[Scroll Debug] Attempt 2 (RAF):', { left: container.scrollLeft, top: container.scrollTop })
+        }
+        
+        // Third attempt: setTimeout as final fallback
+        setTimeout(() => {
+          const container = techtreeRef.value?.querySelector('.techtree-container') as HTMLElement
+          if (container) {
+            container.scrollLeft = currentScrollLeft
+            container.scrollTop = currentScrollTop
+            console.log('[Scroll Debug] Attempt 3 (setTimeout):', { left: container.scrollLeft, top: container.scrollTop })
+          }
+        }, 50)
+      })
+    })
+  }
+}, { deep: true, flush: 'post' })
+
+// Helper function to enable entities granted by bonuses
+function enableGrantedEntities() {
+  // Enable granted units (localtree[0]) - FREE with 0 cost
+  for (const unitId of grantedEntities.value.free.units) {
+    if (!localtree.value[UNITS_INDEX].includes(unitId)) {
+      localtree.value[UNITS_INDEX].push(unitId)
     }
   }
-})
+  
+  // Enable granted techs (localtree[2]) - FREE with 0 cost
+  for (const techId of grantedEntities.value.free.techs) {
+    if (!localtree.value[TECHS_INDEX].includes(techId)) {
+      localtree.value[TECHS_INDEX].push(techId)
+    }
+  }
+  
+  // Enable granted buildings (localtree[1]) - FREE with 0 cost
+  for (const buildingId of grantedEntities.value.free.buildings) {
+    if (!localtree.value[BUILDINGS_ARRAY_INDEX].includes(buildingId)) {
+      localtree.value[BUILDINGS_ARRAY_INDEX].push(buildingId)
+    }
+  }
+  
+  // Enable prerequisite units (localtree[0]) - WITH COST
+  for (const unitId of grantedEntities.value.prerequisites.units) {
+    if (!localtree.value[UNITS_INDEX].includes(unitId)) {
+      localtree.value[UNITS_INDEX].push(unitId)
+    }
+  }
+  
+  // Enable prerequisite techs (localtree[2]) - WITH COST
+  for (const techId of grantedEntities.value.prerequisites.techs) {
+    if (!localtree.value[TECHS_INDEX].includes(techId)) {
+      localtree.value[TECHS_INDEX].push(techId)
+    }
+  }
+  
+  emit('update:tree', localtree.value)
+}
 
 // Methods
 async function loadData() {
@@ -579,7 +763,7 @@ async function loadData() {
     setTechtreeData(jsonData)
     
     // Rebuild tree with data and names
-    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: props.showPastures })
+    tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { selectedBonuses: flattenedSelectedBonuses.value })
     
     // Recalculate points after data is loaded if tree was already set
     if (props.editable && localtree.value.some(arr => arr.length > 0)) {
@@ -596,6 +780,9 @@ async function loadData() {
   } catch (error) {
     console.error('Failed to load techtree data:', error)
   }
+  
+  // Enable entities granted by bonuses after data is loaded
+  enableGrantedEntities()
 }
 
 async function loadLocale(localeCode: string) {
@@ -606,7 +793,7 @@ async function loadLocale(localeCode: string) {
       data.value.strings = strings
       setTechtreeData(data.value)
       // Rebuild tree with localized names
-      tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { showPastures: props.showPastures })
+      tree.value = getDefaultTree(typeof window !== 'undefined' ? window.innerHeight : 600, { selectedBonuses: flattenedSelectedBonuses.value })
     }
   } catch (error) {
     console.error('Failed to load locale:', error)
@@ -626,17 +813,57 @@ function getCrossPath(): string {
 }
 
 function getCaretColor(caret: Caret): string {
-  if (regionalCarets.includes(caret.id)) {
-    return '#4f3880'
+  // Check if this caret is granted by a bonus (should be colored)
+  const type = idType(caret.id)
+  const numId = idID(caret.id)
+  
+  // Check if this entity is granted by a bonus
+  let isGrantedByBonus = false
+  if (type === 0) {
+    isGrantedByBonus = grantedEntities.value.free.units.has(numId)
+  } else if (type === 1) {
+    isGrantedByBonus = grantedEntities.value.free.buildings.has(numId)
+  } else if (type === 2) {
+    isGrantedByBonus = grantedEntities.value.free.techs.has(numId)
   }
-  return caret.type.colour
+  
+  if (isGrantedByBonus) {
+    // Color bonus-granted units
+    // Blue for regional units (Mounted Trebuchet only - ID 1923)
+    const MOUNTED_TREBUCHET_ID = 1923
+    if (numId === MOUNTED_TREBUCHET_ID) {
+      return '#4f76d9' // Blue for regional
+    }
+    // Purple for special/unique bonus units (default)
+    return '#7b3ad9' // Purple for special
+  }
+  
+  return caret.type.colour // Default color
 }
 
 function getCaretCost(id: string): number {
   if (!data.value) return 0
-  const type = caretType(id)
-  const numId = idID(id).toString()
-  return data.value.data[type]?.[numId]?.tech_cost || 0
+  
+  // Check if this unit/tech/building is granted by a bonus (should be free)
+  const type = idType(id)
+  const numId = idID(id)
+  
+  // Check based on entity type (0=units, 1=buildings, 2=techs)
+  // Only FREE entities get 0 cost, prerequisites have normal cost
+  if (type === 0 && grantedEntities.value.free.units.has(numId)) {
+    return 0
+  }
+  if (type === 1 && grantedEntities.value.free.buildings.has(numId)) {
+    return 0
+  }
+  if (type === 2 && grantedEntities.value.free.techs.has(numId)) {
+    return 0
+  }
+  
+  // Return normal cost from data (including for prerequisites)
+  const entityType = caretType(id)
+  const entityId = numId.toString()
+  return data.value.data[entityType]?.[entityId]?.tech_cost || 0
 }
 
 function getConnectionPath(connection: { from: string; to: string }): string {
@@ -812,7 +1039,7 @@ function getHelpText(caret: Caret): string {
 
 function handleCaretClick(caret: Caret) {
   if (!props.editable) return
-  if (unclickableCarets.includes(caret.id)) return
+  if (effectiveUnclickableCarets.value.includes(caret.id)) return
   
   toggleCaret(caret.id)
 }
@@ -1003,6 +1230,9 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
 function disableCaret(caretId: string) {
   if (caretId === 'tech_408') return // Spies/Treason is always enabled
   
+  // Prevent disabling bonus-granted units/techs and their prerequisites
+  if (effectiveUnclickableCarets.value.includes(caretId)) return
+  
   const type = idType(caretId)
   const id = idID(caretId)
   
@@ -1081,7 +1311,7 @@ function handleFill() {
   
   for (const caret of allCarets.value) {
     // Skip unclickable and already enabled carets
-    if (unclickableCarets.includes(caret.id)) continue
+    if (effectiveUnclickableCarets.value.includes(caret.id)) continue
     if (isEnabled(caret.id)) continue
     
     const cost = getCaretCost(caret.id)
@@ -1116,6 +1346,9 @@ function handleReset() {
     [12, 45, 49, 50, 68, 70, 72, 79, 82, 84, 87, 101, 103, 104, 109, 199, 209, 276, 562, 584, 598, 621, 792],
     [22, 101, 102, 103, 408],
   ]
+  
+  // Re-enable bonus-granted units after reset
+  enableGrantedEntities()
   
   if (props.mode === 'build') {
     // Build mode: reset to 0 (starting point)
