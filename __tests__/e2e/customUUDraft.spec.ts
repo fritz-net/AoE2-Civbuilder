@@ -78,8 +78,11 @@ async function selectFirstCard(page: Page): Promise<void> {
   // Click the card
   await firstCard.click();
   
-  // Wait longer for server to process
-  await page.waitForTimeout(2500);
+  // Wait for the click to be processed - the card should disappear or become unavailable
+  // Or new cards should appear, indicating the turn has progressed
+  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
+    // Ignore timeout - networkidle might not occur if there's ongoing polling
+  });
 }
 
 test.describe('Custom UU Draft - Creation', () => {
@@ -273,48 +276,46 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     const { hostLink } = await draftCreatePage.getDraftLinks();
     
     await joinAsPlayer(page, hostLink, 'Test Player');
-    await page.waitForTimeout(2000);
-    await page.getByRole('button', { name: /Start Draft/i }).click();
+    
+    // Wait for Start Draft button to be enabled before clicking
+    const startDraftButton = page.getByRole('button', { name: /Start Draft/i });
+    await expect(startDraftButton).toBeEnabled({ timeout: 5000 });
+    await startDraftButton.click();
+    
     await completeSetupPhase(page);
-    await page.waitForTimeout(2000);
     
     // Complete civ bonuses round to get to custom UU
+    // Wait for cards to appear before selecting
+    await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
     await selectFirstCard(page);
-    await page.waitForTimeout(3000);
     
     // Should be in custom UU phase - select unit type first
     const infantryButton = page.getByRole('button', { name: /Infantry/i });
     await expect(infantryButton).toBeVisible({ timeout: 10000 });
     await infantryButton.click();
-    await page.waitForTimeout(500);
     
     // Now fill in unit details
     const unitNameInput = page.getByLabel(/Unit Name/i);
     await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await unitNameInput.fill('Elite Guard');
-    await page.waitForTimeout(1000);
     
-    // Submit custom UU
+    // Submit custom UU - wait for it to be enabled (validation complete)
     const submitButton = page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
     await expect(submitButton).toBeEnabled({ timeout: 5000 });
     await submitButton.click();
-    await page.waitForTimeout(3000);
     
     // Continue through remaining rounds
-    // Castle tech
+    // Castle tech - wait for cards to appear
     await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
     await selectFirstCard(page);
-    await page.waitForTimeout(2000);
     
-    // Imperial tech
+    // Imperial tech - wait for cards to appear
     await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
     await selectFirstCard(page);
-    await page.waitForTimeout(2000);
     
-    // Team bonus
+    // Team bonus - wait for cards to appear
     await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
     await selectFirstCard(page);
-    await page.waitForTimeout(3000);
     
     // Should reach tech tree phase
     // In phase 3, the techtree component should be visible
