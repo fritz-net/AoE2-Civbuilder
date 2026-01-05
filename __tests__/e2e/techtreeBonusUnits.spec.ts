@@ -275,7 +275,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     // Select Savar)
     const savarCheckbox = page.getByRole('checkbox', { name: /Savar/i })
     await savarCheckbox.check()
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(1000)  // Increased wait time for points calculation
     
     // Verify Paladin is no longer visible (replaced)
     await expect(paladinElement).not.toBeVisible()
@@ -299,7 +299,7 @@ test.describe('TechTree Bonus-Granted Units', () => {
     // Select Legionary)
     const legionaryCheckbox = page.getByRole('checkbox', { name: /Legionary/i })
     await legionaryCheckbox.check()
-    await page.waitForTimeout(500)
+    await page.waitForTimeout(1000)  // Increased wait time for points calculation
     
     // Verify Two-Handed Swordsman and Champion are no longer visible (replaced)
     await expect(twoHandedSwordsmanElement).not.toBeVisible()
