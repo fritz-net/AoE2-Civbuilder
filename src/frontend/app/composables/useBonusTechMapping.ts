@@ -19,6 +19,11 @@ export const BONUS_ID_XIANBEI_RAIDER = 348
 export const BONUS_ID_GRENADIER = 355
 export const BONUS_ID_PASTURES = 356
 export const BONUS_ID_MOUNTED_TREBUCHET = 361
+export const BONUS_ID_FOLWARK = 280
+export const BONUS_ID_WINGED_HUSSAR = 282
+export const BONUS_ID_LEGIONARY = 307
+export const BONUS_ID_SAVAR = 314
+export const BONUS_ID_FORTIFIED_CHURCH = 316
 
 export interface BonusTechMapping {
   bonusId: number

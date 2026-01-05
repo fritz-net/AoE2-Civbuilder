@@ -90,6 +90,9 @@ import {
   ONAGER,
   CHAMPION,
   PALADIN,
+  WINGED_HUSSAR,
+  SAVAR,
+  LEGIONARY,
   SIEGE_ONAGER,
   ELITE_CANNON_GALLEON,
   EAGLE_SCOUT,
@@ -233,6 +236,9 @@ import {
   BONUS_ID_GRENADIER,
   BONUS_ID_PASTURES,
   BONUS_ID_MOUNTED_TREBUCHET,
+  BONUS_ID_WINGED_HUSSAR,
+  BONUS_ID_LEGIONARY,
+  BONUS_ID_SAVAR,
 } from './useBonusTechMapping'
 
 let techtreeData: TechtreeData | null = null
@@ -427,6 +433,7 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [u(MILITIA), u(MAN_AT_ARMS)],
     [u(MAN_AT_ARMS), u(LONG_SWORDSMAN)],
     [u(LONG_SWORDSMAN), u(TWO_HANDED_SWORDSMAN)],
+    [u(LONG_SWORDSMAN), u(LEGIONARY)], // Replacement: Legionary replaces Two-Handed Swordsman
     [u(TWO_HANDED_SWORDSMAN), u(CHAMPION)],
     [b(BARRACKS), u(SPEARMAN)],
     [u(SPEARMAN), u(PIKEMAN)],
@@ -441,6 +448,7 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(STABLE), u(SCOUT_CAVALRY)],
     [u(SCOUT_CAVALRY), u(LIGHT_CAVALRY)],
     [u(LIGHT_CAVALRY), u(HUSSAR)],
+    [u(LIGHT_CAVALRY), u(WINGED_HUSSAR)], // Replacement: Winged Hussar replaces Hussar
     [b(STABLE), t(BLOODLINES)],
     [b(STABLE), u(CAMEL_RIDER)],
     [u(CAMEL_RIDER), u(HEAVY_CAMEL_RIDER)],
@@ -453,6 +461,7 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(STABLE), t(HUSBANDRY)],
     [u(KNIGHT), u(CAVALIER)],
     [u(CAVALIER), u(PALADIN)],
+    [u(CAVALIER), u(SAVAR)], // Replacement: Savar replaces Paladin
     [b(DOCK), u(FISHING_SHIP)],
     [b(DOCK), u(TRANSPORT_SHIP)],
     [b(DOCK), u(DROMON)],
@@ -715,6 +724,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.castle_1.push(tech(GAMBESONS))
   barrackslane.rows.castle_1.push(tech(SQUIRES))
   barrackslane.rows.imperial_1.push(unit(TWO_HANDED_SWORDSMAN))
+  if (isBonusSelected(BONUS_ID_LEGIONARY)) barrackslane.rows.imperial_1.push(unit(LEGIONARY)) // Bonus unit: Legionary replaces Two-Handed Swordsman
   barrackslane.rows.imperial_2.push(unit(CHAMPION))
   barrackslane.rows.imperial_1.push(unit(HALBERDIER))
   barrackslane.rows.imperial_1.push(unit(ELITE_EAGLE_WARRIOR))
@@ -735,6 +745,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.castle_1.push(unit(SHRIVAMSHA_RIDER)) // Bonus unit: Can recruit Shrivamsha Riders
   stablelane.rows.castle_1.push(tech(HUSBANDRY))
   stablelane.rows.imperial_1.push(unit(HUSSAR))
+  if (isBonusSelected(BONUS_ID_WINGED_HUSSAR)) stablelane.rows.imperial_1.push(unit(WINGED_HUSSAR)) // Bonus unit: Winged Hussar replaces Hussar
   stablelane.rows.imperial_1.push(unit(CAVALIER))
   stablelane.rows.imperial_1.push(unit(HEAVY_CAMEL_RIDER))
   stablelane.rows.imperial_1.push(unit(ELITE_BATTLE_ELEPHANT))
@@ -743,6 +754,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.imperial_1.push(unit(ELITE_SHRIVAMSHA_RIDER))
   if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) stablelane.rows.imperial_1.push(unit(ELITE_WAR_CHARIOT))
   stablelane.rows.imperial_2.push(unit(PALADIN))
+  if (isBonusSelected(BONUS_ID_SAVAR)) stablelane.rows.imperial_2.push(unit(SAVAR)) // Bonus unit: Savar replaces Paladin
   if (isBonusSelected(BONUS_ID_IMPERIAL_CAMEL)) stablelane.rows.imperial_2.push(unit(IMPERIAL_CAMEL_RIDER)) // Bonus unit: Can upgrade to Imperial Camel Rider (after Heavy Camel)
   tree.lanes.push(stablelane)
 

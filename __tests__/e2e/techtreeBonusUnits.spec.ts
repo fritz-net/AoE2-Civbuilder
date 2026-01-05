@@ -223,4 +223,32 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const hussarElement = page.locator('[data-caret-id="0.441"]')
     await expect(hussarElement).not.toBeVisible()
   });
+
+  test('should lock prerequisites when bonus unit is enabled', async ({ page }) => {
+    await page.goto('/v2/demo/techtree')
+    
+    // Wait for page to load
+    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
+    
+    // Select Houfnice bonus (ID 286) which requires Chemistry + Bombard Cannon
+    const houfniceCheckbox = page.getByRole('checkbox', { name: /Houfnice \(ID 286\)/i })
+    await houfniceCheckbox.check()
+    await expect(houfniceCheckbox).toBeChecked()
+    
+    // Verify that Chemistry (ID 47) and Bombard Cannon (ID 36) are enabled
+    const chemistryElement = page.locator('[data-caret-id="2.47"]')
+    const bombardCannonElement = page.locator('[data-caret-id="0.36"]')
+    
+    await expect(chemistryElement).toBeVisible()
+    await expect(bombardCannonElement).toBeVisible()
+    
+    // Try to click Chemistry to disable it - should not work (prerequisite is locked)
+    await chemistryElement.click()
+    
+    // Verify Chemistry is still enabled (prerequisite cannot be disabled)
+    await expect(chemistryElement).toBeVisible()
+    
+    // Verify points are 14 (Chemistry 6pts + Bombard Cannon 8pts)
+    await expect(page.getByText(/Points Spent: 14/i)).toBeVisible()
+  });
 });
