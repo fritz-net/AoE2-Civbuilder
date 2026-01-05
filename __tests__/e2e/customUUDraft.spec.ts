@@ -317,8 +317,9 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     await page.waitForTimeout(3000);
     
     // Should reach tech tree phase
-    const techTreePhase = page.locator('text=/Tech Tree|Techtree/i').first();
-    await expect(techTreePhase).toBeVisible({ timeout: 10000 });
+    // In phase 3, the techtree component should be visible
+    const techTreeContainer = page.locator('.techtree-container').first();
+    await expect(techTreeContainer).toBeVisible({ timeout: 10000 });
     
     // Custom UU should be visible in the tech tree or sidebar
     // This confirms it was stored in bonuses[1] array correctly

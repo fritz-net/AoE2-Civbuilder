@@ -1186,11 +1186,15 @@ function processCardPick(draft, pick) {
 	
 	// If it's the last turn of a round, distribute new cards, otherwise make the card unavailable to others
 	if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
-		// Determine if this is the last round (team bonuses = roundType 4)
-		// Note: even with custom UU mode, team bonuses is still the last round (roundType 4)
-		var lastRoundType = 4;
+		// Determine if this is the last round (team bonuses)
+		// Calculate base round type (without custom UU shift) to check if we've completed team bonuses
+		var baseRoundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
 		
-		if (roundType == lastRoundType) {
+		// In custom UU mode, we skip one round (UU selection), so the last round happens at baseRoundType 3
+		// In normal mode, the last round is at baseRoundType 4
+		var lastBaseRoundType = draft["preset"]["custom_uu_mode"] ? 3 : 4;
+		
+		if (baseRoundType == lastBaseRoundType) {
 			// Last turn of the game - move to tech tree phase
 			draft["gamestate"]["phase"] = 3;
 		} else if (roundType == 0 && draft["preset"]["custom_uu_mode"]) {
