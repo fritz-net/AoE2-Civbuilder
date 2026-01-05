@@ -575,7 +575,6 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(MARKET), t(GUILDS)],
     [b(SIEGE_WORKSHOP), u(BOMBARD_CANNON)],
     [b(SIEGE_WORKSHOP), u(TRACTION_TREBUCHET)],
-    [b(SIEGE_WORKSHOP), u(MOUNTED_TREBUCHET)], // Bonus-granted (361) - different from Traction Trebuchet
     [b(DOCK), u(CANNON_GALLEON)],
     
     // Bonus-granted unit connections
@@ -654,6 +653,11 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
   // Add connections for Folwark if selected (same Mill->Market connection)
   if (isBonusSelected(BONUS_ID_FOLWARK)) {
     connections.push([b(FOLWARK), b(MARKET)])
+  }
+  
+  // Add connection for Mounted Trebuchet if bonus is selected
+  if (isBonusSelected(BONUS_ID_MOUNTED_TREBUCHET)) {
+    connections.push([b(SIEGE_WORKSHOP), u(MOUNTED_TREBUCHET)])
   }
 
   // Filter out connections to/from replaced units

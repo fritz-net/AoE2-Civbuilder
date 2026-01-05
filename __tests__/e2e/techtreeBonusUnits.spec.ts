@@ -272,8 +272,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const wingedHussarElement = page.locator('[data-caret-id="unit_1707"]')
     await expect(wingedHussarElement).toBeVisible()
     
-    // Verify 0 cost (bonus unit is free)
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
+    // Verify 3 points (Light Cavalry prerequisite)
+    await expect(page.getByText(/Points Spent: 3/i)).toBeVisible()
   });
 
   test('should properly replace Paladin with Savar', async ({ page }) => {
@@ -296,8 +296,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const savarElement = page.locator('[data-caret-id="unit_1813"]')
     await expect(savarElement).toBeVisible()
     
-    // Verify 0 cost
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
+    // Verify 6 points (Cavalier prerequisite)
+    await expect(page.getByText(/Points Spent: 6/i)).toBeVisible()
   });
 
   test('should properly replace Two-Handed Swordsman and Champion with Legionary', async ({ page }) => {
@@ -323,8 +323,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const legionaryElement = page.locator('[data-caret-id="unit_1793"]')
     await expect(legionaryElement).toBeVisible()
     
-    // Verify 0 cost
-    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
+    // Verify 3 points (Long Swordsman prerequisite)
+    await expect(page.getByText(/Points Spent: 3/i)).toBeVisible()
   });
 
   test('should properly replace Mill with Folwark', async ({ page }) => {
