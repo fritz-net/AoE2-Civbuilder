@@ -416,6 +416,8 @@ function t(techId: number): string {
 export function getConnections(selectedBonuses: number[] = []): [string, string][] {
   // Helper to check if a bonus is selected
   const isBonusSelected = (bonusId: number) => selectedBonuses.includes(bonusId)
+  
+  // Build list of all connections
   const connections: [string, string][] = [
     [b(ARCHERY_RANGE), u(ARCHER)],
     [u(ARCHER), u(CROSSBOWMAN)],
@@ -610,22 +612,76 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(MONASTERY), u(WARRIOR_PRIEST)],
   ]
 
+  // Helper to get Mill or Folwark building ID based on bonus selection
+  const millBuilding = isBonusSelected(BONUS_ID_FOLWARK) ? FOLWARK : MILL
+  const monasteryBuilding = isBonusSelected(BONUS_ID_FORTIFIED_CHURCH) ? FORTIFIED_CHURCH : MONASTERY
+  
   // Add farm/pasture specific connections based on Pastures bonus
   if (isBonusSelected(BONUS_ID_PASTURES)) {
-    // Pasture tech connections - connected to Mill (like farm techs)
+    // Pasture tech connections - connected to Mill/Folwark (like farm techs)
     // Pasture building itself is in Dark Age and independent (no connections)
-    connections.push([b(MILL), t(DOMESTICATION)])
+    connections.push([b(millBuilding), t(DOMESTICATION)])
     connections.push([t(DOMESTICATION), t(PASTORALISM)])
     connections.push([t(PASTORALISM), t(TRANSHUMANCE)])
   } else {
     // Farm tech connections (default)
-    connections.push([b(MILL), t(HORSE_COLLAR)])
+    connections.push([b(millBuilding), t(HORSE_COLLAR)])
     connections.push([t(HORSE_COLLAR), t(HEAVY_PLOW)])
     connections.push([t(HEAVY_PLOW), t(CROP_ROTATION)])
-    connections.push([b(MILL), b(FARM)])
+    connections.push([b(millBuilding), b(FARM)])
+  }
+  
+  // Add connections for Fortified Church if selected (same as Monastery)
+  if (isBonusSelected(BONUS_ID_FORTIFIED_CHURCH)) {
+    // Fortified Church connections (same as Monastery since it replaces it)
+    connections.push([b(FORTIFIED_CHURCH), u(MONK)])
+    connections.push([b(FORTIFIED_CHURCH), t(REDEMPTION)])
+    connections.push([b(FORTIFIED_CHURCH), t(ATONEMENT)])
+    connections.push([b(FORTIFIED_CHURCH), t(HERBAL_MEDICINE)])
+    connections.push([b(FORTIFIED_CHURCH), t(HERESY)])
+    connections.push([b(FORTIFIED_CHURCH), t(SANCTITY)])
+    connections.push([b(FORTIFIED_CHURCH), t(FERVOR)])
+    connections.push([b(FORTIFIED_CHURCH), t(DEVOTION)])
+    connections.push([b(FORTIFIED_CHURCH), t(ILLUMINATION)])
+    connections.push([b(FORTIFIED_CHURCH), t(BLOCK_PRINTING)])
+    connections.push([b(FORTIFIED_CHURCH), t(THEOCRACY)])
+    if (isBonusSelected(BONUS_ID_WARRIOR_PRIEST)) {
+      connections.push([b(FORTIFIED_CHURCH), u(WARRIOR_PRIEST)])
+    }
+  }
+  
+  // Add connections for Folwark if selected (same Mill->Market connection)
+  if (isBonusSelected(BONUS_ID_FOLWARK)) {
+    connections.push([b(FOLWARK), b(MARKET)])
   }
 
-  return connections.map(([from, to]) => [formatId(from), formatId(to)])
+  // Filter out connections to/from replaced units
+  // Get all replaced unit/building IDs based on selected replacement bonuses
+  const replacedIds = new Set<string>()
+  
+  if (isBonusSelected(BONUS_ID_WINGED_HUSSAR)) {
+    replacedIds.add(u(HUSSAR))  // Hussar replaced by Winged Hussar
+  }
+  if (isBonusSelected(BONUS_ID_LEGIONARY)) {
+    replacedIds.add(u(TWO_HANDED_SWORDSMAN))  // Two-Handed Swordsman replaced by Legionary
+    replacedIds.add(u(CHAMPION))  // Champion also replaced
+  }
+  if (isBonusSelected(BONUS_ID_SAVAR)) {
+    replacedIds.add(u(PALADIN))  // Paladin replaced by Savar
+  }
+  if (isBonusSelected(BONUS_ID_FOLWARK)) {
+    replacedIds.add(b(MILL))  // Mill replaced by Folwark
+  }
+  if (isBonusSelected(BONUS_ID_FORTIFIED_CHURCH)) {
+    replacedIds.add(b(MONASTERY))  // Monastery replaced by Fortified Church
+  }
+  
+  // Filter connections - remove any that involve replaced units/buildings
+  const filteredConnections = connections.filter(([from, to]) => {
+    return !replacedIds.has(from) && !replacedIds.has(to)
+  })
+
+  return filteredConnections.map(([from, to]) => [formatId(from), formatId(to)])
 }
 
 export function getConnectionPoints(tree: Tree): Map<string, { x: number; y: number }> {
@@ -723,9 +779,13 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   if (isBonusSelected(BONUS_ID_JIAN_SWORDSMAN)) barrackslane.rows.castle_1.push(unit(JIAN_SWORDSMAN)) // Bonus unit: Can recruit Jian Swordsmen (no elite)
   barrackslane.rows.castle_1.push(tech(GAMBESONS))
   barrackslane.rows.castle_1.push(tech(SQUIRES))
-  barrackslane.rows.imperial_1.push(unit(TWO_HANDED_SWORDSMAN))
-  if (isBonusSelected(BONUS_ID_LEGIONARY)) barrackslane.rows.imperial_1.push(unit(LEGIONARY)) // Bonus unit: Legionary replaces Two-Handed Swordsman
-  barrackslane.rows.imperial_2.push(unit(CHAMPION))
+  // Two-Handed Swordsman or Legionary (replacement bonus 307)
+  if (isBonusSelected(BONUS_ID_LEGIONARY)) {
+    barrackslane.rows.imperial_1.push(unit(LEGIONARY)) // Legionary replaces Two-Handed Swordsman (and Champion)
+  } else {
+    barrackslane.rows.imperial_1.push(unit(TWO_HANDED_SWORDSMAN))
+    barrackslane.rows.imperial_2.push(unit(CHAMPION))
+  }
   barrackslane.rows.imperial_1.push(unit(HALBERDIER))
   barrackslane.rows.imperial_1.push(unit(ELITE_EAGLE_WARRIOR))
   barrackslane.rows.imperial_1.push(unit(ELITE_FIRE_LANCER))
@@ -744,8 +804,12 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.castle_1.push(unit(HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.castle_1.push(unit(SHRIVAMSHA_RIDER)) // Bonus unit: Can recruit Shrivamsha Riders
   stablelane.rows.castle_1.push(tech(HUSBANDRY))
-  stablelane.rows.imperial_1.push(unit(HUSSAR))
-  if (isBonusSelected(BONUS_ID_WINGED_HUSSAR)) stablelane.rows.imperial_1.push(unit(WINGED_HUSSAR)) // Bonus unit: Winged Hussar replaces Hussar
+  // Hussar or Winged Hussar (replacement bonus 282)
+  if (isBonusSelected(BONUS_ID_WINGED_HUSSAR)) {
+    stablelane.rows.imperial_1.push(unit(WINGED_HUSSAR)) // Winged Hussar replaces Hussar
+  } else {
+    stablelane.rows.imperial_1.push(unit(HUSSAR))
+  }
   stablelane.rows.imperial_1.push(unit(CAVALIER))
   stablelane.rows.imperial_1.push(unit(HEAVY_CAMEL_RIDER))
   stablelane.rows.imperial_1.push(unit(ELITE_BATTLE_ELEPHANT))
@@ -753,8 +817,12 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.imperial_1.push(unit(HEAVY_HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.imperial_1.push(unit(ELITE_SHRIVAMSHA_RIDER))
   if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) stablelane.rows.imperial_1.push(unit(ELITE_WAR_CHARIOT))
-  stablelane.rows.imperial_2.push(unit(PALADIN))
-  if (isBonusSelected(BONUS_ID_SAVAR)) stablelane.rows.imperial_2.push(unit(SAVAR)) // Bonus unit: Savar replaces Paladin
+  // Paladin or Savar (replacement bonus 314)
+  if (isBonusSelected(BONUS_ID_SAVAR)) {
+    stablelane.rows.imperial_2.push(unit(SAVAR)) // Savar replaces Paladin
+  } else {
+    stablelane.rows.imperial_2.push(unit(PALADIN))
+  }
   if (isBonusSelected(BONUS_ID_IMPERIAL_CAMEL)) stablelane.rows.imperial_2.push(unit(IMPERIAL_CAMEL_RIDER)) // Bonus unit: Can upgrade to Imperial Camel Rider (after Heavy Camel)
   tree.lanes.push(stablelane)
 
@@ -877,7 +945,12 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   tree.lanes.push(castlelane)
 
   const monasterylane = createLane()
-  monasterylane.rows.castle_1.push(building(MONASTERY))
+  // Monastery or Fortified Church (replacement bonus 316)
+  if (isBonusSelected(BONUS_ID_FORTIFIED_CHURCH)) {
+    monasterylane.rows.castle_1.push(building(FORTIFIED_CHURCH))
+  } else {
+    monasterylane.rows.castle_1.push(building(MONASTERY))
+  }
   monasterylane.rows.castle_2.push(unit(MONK))
   if (isBonusSelected(BONUS_ID_WARRIOR_PRIEST)) monasterylane.rows.castle_2.push(unit(WARRIOR_PRIEST)) // Bonus unit: Can recruit Warrior Priests
   monasterylane.rows.castle_2.push(tech(REDEMPTION))
@@ -950,9 +1023,14 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
     pasturelane.rows.dark_2.push(building(PASTURE))
     tree.lanes.push(pasturelane)
 
-    // Mill lane with pasture techs (Mill is connected to pasture techs)
+    // Mill or Folwark lane with pasture techs (Mill is connected to pasture techs)
     const milllane = createLane()
-    milllane.rows.dark_1.push(building(MILL))
+    // Folwark replaces Mill (bonus 280)
+    if (isBonusSelected(BONUS_ID_FOLWARK)) {
+      milllane.rows.dark_1.push(building(FOLWARK))
+    } else {
+      milllane.rows.dark_1.push(building(MILL))
+    }
     milllane.rows.feudal_1.push(tech(DOMESTICATION))
     milllane.rows.castle_1.push(tech(PASTORALISM))
     milllane.rows.imperial_1.push(tech(TRANSHUMANCE))
@@ -963,9 +1041,14 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
     farmlane.rows.dark_2.push(building(FARM))
     tree.lanes.push(farmlane)
 
-    // Mill lane with farm techs
+    // Mill or Folwark lane with farm techs
     const milllane = createLane()
-    milllane.rows.dark_1.push(building(MILL))
+    // Folwark replaces Mill (bonus 280)
+    if (isBonusSelected(BONUS_ID_FOLWARK)) {
+      milllane.rows.dark_1.push(building(FOLWARK))
+    } else {
+      milllane.rows.dark_1.push(building(MILL))
+    }
     milllane.rows.feudal_1.push(tech(HORSE_COLLAR))
     milllane.rows.castle_1.push(tech(HEAVY_PLOW))
     milllane.rows.imperial_1.push(tech(CROP_ROTATION))
