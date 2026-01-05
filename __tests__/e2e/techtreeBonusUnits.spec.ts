@@ -210,8 +210,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await wingedHussarCheckbox.check()
     await page.waitForTimeout(500)
     
-    // Verify Winged Hussar is enabled (shown as 1 new tech, 0 cost)
-    await expect(page.getByText('Points Spent: 0')).toBeVisible()
+    // Verify Winged Hussar is enabled with prerequisites (Light Cavalry = 3pts)
+    await expect(page.getByText('Points Spent: 3')).toBeVisible()
     
     // Verify that Hussar caret element is not visible (replaced by Winged Hussar)
     const hussarElement = page.locator('[data-caret-id="0.441"]')
