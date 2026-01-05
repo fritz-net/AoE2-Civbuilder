@@ -294,11 +294,11 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const savarElement = page.locator('[data-caret-id="unit_1813"]')
     await expect(savarElement).toBeVisible()
     
-    // Verify 6 points (Cavalier prerequisite)
+    // Verify 5 points (Cavalier prerequisite - actual cost from techtree data)
     const pointsText = await page.locator('.points').textContent()
     const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
     const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
-    expect(points).toBe(6)
+    expect(points).toBe(5)
   });
 
   test('should properly replace Two-Handed Swordsman and Champion with Legionary', async ({ page }) => {
@@ -322,11 +322,11 @@ test.describe('TechTree Bonus-Granted Units', () => {
     const legionaryElement = page.locator('[data-caret-id="unit_1793"]')
     await expect(legionaryElement).toBeVisible()
     
-    // Verify 3 points (Long Swordsman prerequisite)
+    // Verify 1 point (Long Swordsman prerequisite - actual cost from techtree data)
     const pointsText = await page.locator('.points').textContent()
     const pointsMatch = pointsText?.match(/Points.*:\s*(\d+)/)
     const points = pointsMatch ? parseInt(pointsMatch[1], 10) : 0
-    expect(points).toBe(3)
+    expect(points).toBe(1)
   });
 
   test('should properly replace Mill with Folwark', async ({ page }) => {
