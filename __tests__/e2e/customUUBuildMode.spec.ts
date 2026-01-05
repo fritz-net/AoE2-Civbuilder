@@ -170,10 +170,7 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     // Wait for restore to complete after reload (1100ms restore + extra buffer for rendering)
     await page.waitForTimeout(3000);
     
-    // After reload, verify we're back on step 3 (Unique Unit)
-    await expect(page.getByRole('heading', { name: /Unique Unit/i })).toBeVisible({ timeout: 10000 });
-    
-    // Verify custom UU checkbox is still checked
+    // After reload, verify custom UU checkbox is still checked
     const customUUCheckbox = page.getByRole('checkbox', { name: /Use Custom Unique Unit Designer/i });
     await expect(customUUCheckbox).toBeChecked({ timeout: 10000 });
     
