@@ -8,6 +8,10 @@ export const BONUS_ID_TURTLE_SHIP = 50
 export const BONUS_ID_LONGBOAT = 51
 export const BONUS_ID_IMPERIAL_CAMEL = 53
 export const BONUS_ID_SLINGER = 61
+export const BONUS_ID_FEITORIA = 68
+export const BONUS_ID_CARAVEL = 69
+export const BONUS_ID_KREPOST = 93
+export const BONUS_ID_DONJON = 109
 export const BONUS_ID_MISSIONARY = 142
 export const BONUS_ID_WARRIOR_PRIEST = 193
 export const BONUS_ID_HOUFNICE = 286
@@ -259,6 +263,34 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     replaces: {
       buildings: [104],  // Monastery
     },
+  },
+  
+  // CIV_BONUS_68: "Can build Feitoria"
+  {
+    bonusId: 68,
+    bonusType: 'civ',
+    buildings: [1021],  // Feitoria
+  },
+  
+  // CIV_BONUS_69: "Can build Caravels"
+  {
+    bonusId: 69,
+    bonusType: 'civ',
+    units: [1004, 1006],  // Caravel + Elite Caravel (auto-enable elite)
+  },
+  
+  // CIV_BONUS_93: "Can build Krepost"
+  {
+    bonusId: 93,
+    bonusType: 'civ',
+    buildings: [1251],  // Krepost
+  },
+  
+  // CIV_BONUS_109: "Can build Donjon"
+  {
+    bonusId: 109,
+    bonusType: 'civ',
+    buildings: [1665],  // Donjon
   },
 ]
 
