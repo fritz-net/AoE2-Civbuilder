@@ -220,6 +220,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     units: [1707],  // Winged Hussar
     requiresPrerequisites: true,
     prerequisites: {
+      // these should NOT be removed because then we could have scout cavalry without light cavalry enabled
       units: [448, 546],  // Scout Cavalry, Light Cavalry (full chain)
     },
     replaces: {
@@ -248,6 +249,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     units: [1813],  // Savar
     requiresPrerequisites: true,
     prerequisites: {
+      // these should NOT be removed because then we could have Cavalier without Knight enabled
       units: [38, 283],  // Knight, Cavalier (full chain)
     },
     replaces: {
