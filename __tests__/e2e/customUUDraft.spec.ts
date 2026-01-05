@@ -78,8 +78,11 @@ async function selectFirstCard(page: Page): Promise<void> {
   // Click the card
   await firstCard.click();
   
-  // Wait longer for server to process
-  await page.waitForTimeout(2500);
+  // Wait for the click to be processed - the card should disappear or become unavailable
+  // Or new cards should appear, indicating the turn has progressed
+  await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {
+    // Ignore timeout - networkidle might not occur if there's ongoing polling
+  });
 }
 
 test.describe('Custom UU Draft - Creation', () => {
@@ -255,10 +258,6 @@ test.describe('Custom UU Draft - Custom UU Phase', () => {
 
 test.describe('Custom UU Draft - Backend Integration', () => {
   test('should store custom UU in player bonuses array and complete full draft', async ({ page }) => {
-    // This test goes through entire draft flow including multiple rounds
-    // Increase timeout to account for all the round transitions
-    test.setTimeout(45000);
-    
     // This test verifies the complete flow from draft creation to tech tree with custom UU
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
@@ -277,53 +276,51 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     const { hostLink } = await draftCreatePage.getDraftLinks();
     
     await joinAsPlayer(page, hostLink, 'Test Player');
-    await page.waitForTimeout(2000);
-    await page.getByRole('button', { name: /Start Draft/i }).click();
+    
+    // Wait for Start Draft button to be enabled before clicking
+    const startDraftButton = page.getByRole('button', { name: /Start Draft/i });
+    await expect(startDraftButton).toBeEnabled({ timeout: 5000 });
+    await startDraftButton.click();
+    
     await completeSetupPhase(page);
-    await page.waitForTimeout(2000);
     
     // Complete civ bonuses round to get to custom UU
+    // Wait for cards to appear before selecting
+    await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
     await selectFirstCard(page);
-    await page.waitForTimeout(3000);
     
     // Should be in custom UU phase - select unit type first
     const infantryButton = page.getByRole('button', { name: /Infantry/i });
     await expect(infantryButton).toBeVisible({ timeout: 10000 });
     await infantryButton.click();
-    await page.waitForTimeout(500);
     
     // Now fill in unit details
     const unitNameInput = page.getByLabel(/Unit Name/i);
     await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await unitNameInput.fill('Elite Guard');
-    await page.waitForTimeout(1000);
     
-    // Submit custom UU
+    // Submit custom UU - wait for it to be enabled (validation complete)
     const submitButton = page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
     await expect(submitButton).toBeEnabled({ timeout: 5000 });
     await submitButton.click();
-    await page.waitForTimeout(3000);
     
     // Continue through remaining rounds
-    // Castle tech
+    // Castle tech - wait for cards to appear
     await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
     await selectFirstCard(page);
-    await page.waitForTimeout(2000);
     
-    // Imperial tech
+    // Imperial tech - wait for cards to appear
     await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
     await selectFirstCard(page);
-    await page.waitForTimeout(2000);
     
-    // Team bonus
+    // Team bonus - wait for cards to appear
     await expect(page.locator('.draft-card, .bonus-card').first()).toBeVisible({ timeout: 10000 });
     await selectFirstCard(page);
-    await page.waitForTimeout(3000);
     
-    // Should reach tech tree phase
-    // Check for tech tree controls instead of text heading
-    const techTreeControls = page.locator('.techtree-phase, button:has-text("Done"), button:has-text("Fill")').first();
-    await expect(techTreeControls).toBeVisible({ timeout: 10000 });
+    // Should reach tech tree phase - look for tech tree controls
+    // The tech tree phase has specific UI elements like "Done" button
+    const doneButton = page.getByRole('button', { name: /Done/i });
+    await expect(doneButton).toBeVisible({ timeout: 10000 });
     
     // Custom UU should be visible in the tech tree or sidebar
     // This confirms it was stored in bonuses[1] array correctly

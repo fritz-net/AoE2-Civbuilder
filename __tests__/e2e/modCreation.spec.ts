@@ -146,9 +146,6 @@ test.describe('Combine Page - Multi-Civ Mod Creation', () => {
   // Note: The following test requires C++ binary to be built
   // It's enabled in CI where the binary is available
   (shouldSkipDownloadTests ? test.skip : test)('should create combined mod and navigate to success page', async ({ page }) => {
-    // Mod creation can be slow in CI, increase timeout
-    test.setTimeout(45000);
-    
     await page.goto('/v2/combine');
     
     // Upload files
@@ -164,8 +161,8 @@ test.describe('Combine Page - Multi-Civ Mod Creation', () => {
     
     // Wait for navigation to success page
     // C++ backend must be running for this test to pass
-    // Increased timeout to 40s to account for slow mod creation in CI
-    await page.waitForURL('**/v2/download-success*', { timeout: 40000 });
+    // Using 30s timeout to match other stable mod creation tests
+    await page.waitForURL('**/v2/download-success*', { timeout: 30000 });
     
     // Verify we're on the success page
     await expect(page.getByText(/Mod Created Successfully/i)).toBeVisible();
@@ -760,9 +757,7 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
   });
 
   test('should extract JSON from actual draft zip created via full draft flow and use in combine', async ({ page }) => {
-    // Draft completion + mod creation can be slow in CI, especially under load
-    // Increased timeout to 70s to account for potential delays
-    test.setTimeout(70000);
+    test.setTimeout(60000); // Reduced timeout - mod creation takes ~5s, draft+extraction should complete well within 60s
     
     const projectRoot = path.join(__dirname, '../..');
     const modsDir = path.join(projectRoot, 'modding', 'requested_mods');
@@ -791,10 +786,9 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
       }
       
       // Wait for the download button to appear (indicates phase 6 - mod creation complete)
-      // Mod creation can be very slow in CI, especially under load from parallel tests
-      // Increased timeout to 35s to reduce flakiness
+      // Mod creation typically takes ~5 seconds, using 15s timeout to account for CI variability
       console.log('[Test] Waiting for download button (phase 6)...');
-      await page.waitForSelector('.download-button', { timeout: 35000 });
+      await page.waitForSelector('.download-button', { timeout: 15000 });
       console.log('[Test] Download button appeared - mod creation complete!');
       
       // Give server a moment to ensure file is fully written
