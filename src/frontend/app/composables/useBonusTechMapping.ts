@@ -143,11 +143,11 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     requiresPrerequisites: true,  // Requires Elite Steppe Lancer
   },
   
-  // CIV_BONUS_337: "Can recruit War Chariots"
+  // CIV_BONUS_337: "Can recruit War Chariots" - NO ELITE VERSION EXISTS
   {
     bonusId: 337,
     bonusType: 'civ',
-    units: [1962, 1964],  // War Chariot + Elite War Chariot (auto-enable elite)
+    units: [1962],  // War Chariot only (no elite version in game)
   },
   
   // CIV_BONUS_343: "Can recruit Jian Swordsmen" - NO ELITE VERSION EXISTS

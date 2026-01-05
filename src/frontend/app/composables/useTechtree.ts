@@ -136,7 +136,6 @@ import {
   GRENADIER,
   XIANBEI_RAIDER,
   WAR_CHARIOT,
-  ELITE_WAR_CHARIOT,
   JIAN_SWORDSMAN,
   // Tech IDs
   TOWN_WATCH,
@@ -822,7 +821,6 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.imperial_1.push(unit(ELITE_STEPPE_LANCER))
   stablelane.rows.imperial_1.push(unit(HEAVY_HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.imperial_1.push(unit(ELITE_SHRIVAMSHA_RIDER))
-  if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) stablelane.rows.imperial_1.push(unit(ELITE_WAR_CHARIOT))
   // Paladin or Savar (replacement bonus 314)
   if (isBonusSelected(BONUS_ID_SAVAR)) {
     stablelane.rows.imperial_2.push(unit(SAVAR)) // Savar replaces Paladin
@@ -840,14 +838,13 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   siegeworkshoplane.rows.castle_2.push(unit(ROCKET_CART))
   siegeworkshoplane.rows.castle_2.push(unit(SCORPION))
   siegeworkshoplane.rows.castle_2.push(unit(SIEGE_TOWER))
-  if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) siegeworkshoplane.rows.castle_2.push(unit(WAR_CHARIOT)) // Bonus unit: Can recruit War Chariots (siege workshop not stable)
+  if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) siegeworkshoplane.rows.castle_2.push(unit(WAR_CHARIOT)) // Bonus unit: Can recruit War Chariots (NO ELITE VERSION EXISTS)
   siegeworkshoplane.rows.imperial_1.push(unit(CAPPED_RAM))
   siegeworkshoplane.rows.imperial_1.push(unit(SIEGE_ELEPHANT))
   siegeworkshoplane.rows.imperial_1.push(unit(ONAGER))
   siegeworkshoplane.rows.imperial_1.push(unit(HEAVY_ROCKET_CART))
   siegeworkshoplane.rows.imperial_1.push(unit(HEAVY_SCORPION))
   siegeworkshoplane.rows.imperial_1.push(unit(BOMBARD_CANNON))
-  if (isBonusSelected(BONUS_ID_WAR_CHARIOT)) siegeworkshoplane.rows.imperial_1.push(unit(ELITE_WAR_CHARIOT)) // Elite War Chariot
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_RAM))
   siegeworkshoplane.rows.imperial_2.push(unit(TRACTION_TREBUCHET)) // Standard unit - different from Mounted Trebuchet
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_ONAGER))
