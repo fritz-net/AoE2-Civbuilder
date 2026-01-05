@@ -1726,8 +1726,7 @@ function draftIO(io) {
 												});
 											});
 										});
-									});
-								};
+									};
 							
 							// If no icons need to be copied, proceed directly
 							if (!iconCopyNeeded) {
