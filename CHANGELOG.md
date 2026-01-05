@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.1](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.12.0...v1.12.1) (2026-01-05)
+
+
+### Bug Fixes
+
+* remove points warning modal in build mode ([#256](https://github.com/fritz-net/AoE2-Civbuilder/issues/256)) ([a94c48e](https://github.com/fritz-net/AoE2-Civbuilder/commit/a94c48e46b45f2caa3fb3d77868afc4100d3e681))
+* Update architecture/wonder modals to 2-column grid layout ([#245](https://github.com/fritz-net/AoE2-Civbuilder/issues/245)) ([b89a23d](https://github.com/fritz-net/AoE2-Civbuilder/commit/b89a23d7b1a312ba0defe9bd6b16ad2f1332485c))
+
 ## [1.12.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.11.0...v1.12.0) (2026-01-03)
 
 
