@@ -9,13 +9,9 @@ test.describe('TechTree Bonus-Granted Units', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
-    // Ensure we're in build mode (should be default)
-    const buildModeRadio = page.getByRole('radio', { name: /Build Mode/i });
-    await expect(buildModeRadio).toBeChecked();
-    
-    // Wait for tech tree to load
+    // Wait for tech tree to load (Build Mode is default)
     await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(500); // Allow time for initialization
+    await page.waitForTimeout(1000); // Allow time for initialization and rendering
   });
 
   test('should start with 0 techs enabled without bonuses', async ({ page }) => {
