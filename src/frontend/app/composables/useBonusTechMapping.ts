@@ -88,7 +88,8 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     units: [1709],  // Houfnice
     requiresPrerequisites: true,  // Requires Bombard Cannon
     prerequisites: {
-      units: [36],  // Bombard Cannon (Chemistry is already required by Bombard Cannon itself)
+      units: [36],  // Bombard Cannon
+      techs: [47],  // Chemistry (required by both Bombard Cannon and Houfnice)
     },
   },
   
