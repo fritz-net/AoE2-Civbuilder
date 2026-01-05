@@ -215,7 +215,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
   {
     bonusId: 307,
     bonusType: 'civ',
-    units: [1793],  // Legionary
+    units: [1793],  // Legionary (corrected - was 1699 which is Flemish Pikeman)
     replaces: {
       units: [473, 567],  // Two-Handed Swordsman, Champion
     },
