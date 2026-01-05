@@ -181,6 +181,7 @@ export const CANNON_GALLEON = 420
 export const CAPPED_RAM = 422
 export const PETARD = 440
 export const HUSSAR = 441
+export const MISSIONARY = 775
 export const GALLEON = 442
 export const SCOUT_CAVALRY = 448
 export const TWO_HANDED_SWORDSMAN = 473
@@ -225,6 +226,29 @@ export const HEI_GUANG_CAVALRY = 1944
 export const HEAVY_HEI_GUANG_CAVALRY = 1946
 export const LOU_CHUAN = 1948
 
+// Regional/Bonus-granted Unit IDs
+export const SLINGER = 185
+export const IMPERIAL_CAMEL_RIDER = 207
+export const LONGBOAT = 250
+export const ELITE_LONGBOAT = 533 // Correct ID from aoe2techtree (was 251)
+export const TURTLE_SHIP = 831
+export const ELITE_TURTLE_SHIP = 832
+export const CAMEL_SCOUT = 1755
+export const HOUFNICE = 1709
+export const THIRISADAI = 1750
+export const WARRIOR_PRIEST = 1811
+export const SHRIVAMSHA_RIDER = 1751
+export const ELITE_SHRIVAMSHA_RIDER = 1753
+export const GRENADIER = 1911
+export const MOUNTED_TREBUCHET = 1923 // Bonus-granted unit (bonus 361) - different from Traction Trebuchet
+// Note: TRACTION_TREBUCHET (1942) defined above - different unit, not bonus-granted
+export const XIANBEI_RAIDER = 1952
+// Note: No Elite Xianbei Raider exists in game
+export const WAR_CHARIOT = 1962
+export const ELITE_WAR_CHARIOT = 1964
+export const JIAN_SWORDSMAN = 1974
+// Note: No Elite Jian Swordsman exists in game
+
 // Tech IDs
 export const TOWN_WATCH = 8
 export const CROP_ROTATION = 12
@@ -242,6 +266,17 @@ export const CARAVAN = 48
 export const MASONRY = 50
 export const ARCHITECTURE = 51
 export const TREADMILL_CRANE = 54
+export const WINGED_HUSSAR = 1707
+export const SAVAR = 1813
+export const LEGIONARY = 1793
+export const FOLWARK = 1734
+export const FORTIFIED_CHURCH = 1806
+// Can-build bonus units/buildings
+export const FEITORIA = 1021
+export const CARAVEL = 1004
+export const ELITE_CARAVEL = 1006
+export const KREPOST = 1251
+export const DONJON = 1665
 export const GOLD_MINING = 55
 export const KEEP_TECH = 63
 export const BOMBARD_TOWER_TECH = 64
@@ -388,6 +423,26 @@ export const regionalCarets = [
   'unit_1746',
   'unit_1795',
   'unit_1948',
+  // Bonus-granted regional units (hidden until bonus selected)
+  'unit_185',   // Slinger
+  'unit_207',   // Imperial Camel Rider
+  'unit_250',   // Longboat
+  'unit_251',   // Elite Longboat
+  'unit_831',   // Turtle Ship
+  'unit_832',   // Elite Turtle Ship
+  'unit_1709',  // Houfnice
+  'unit_1750',  // Thirisadai
+  'unit_1751',  // Shrivamsha Rider
+  'unit_1753',  // Elite Shrivamsha Rider
+  'unit_1755',  // Camel Scout
+  'unit_1811',  // Warrior Priest
+  'unit_1911',  // Grenadier
+  'unit_1952',  // Xianbei Raider
+  'unit_1954',  // Elite Xianbei Raider
+  'unit_1962',  // War Chariot
+  'unit_1964',  // Elite War Chariot
+  'unit_1974',  // Jian Swordsman
+  'unit_1975',  // Elite Jian Swordsman
 ]
 
 export function useTechtreeData() {

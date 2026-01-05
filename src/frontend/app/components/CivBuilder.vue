@@ -56,13 +56,7 @@
         <div class="builder-column selectors-column">
           <ArchitectureSelector v-model="civConfig.architecture" :disabled="readOnly" />
           
-          <div class="advanced-toggle">
-            <button class="toggle-btn" @click="showAdvanced = !showAdvanced">
-              {{ showAdvanced ? 'Hide Advanced' : 'Show Advanced' }}
-            </button>
-          </div>
-          
-          <div v-if="showAdvanced" class="advanced-options">
+          <div class="advanced-options">
             <LanguageSelector v-model="civConfig.language" :disabled="readOnly" />
             <WonderSelector v-model="civConfig.wonder" :disabled="readOnly" />
           </div>
@@ -88,7 +82,22 @@
     
     <!-- Step 3: Unique Unit -->
     <div v-show="currentStep === 2" class="step-content">
+      <!-- Toggle between existing and custom UU -->
+      <div class="uu-mode-toggle">
+        <label class="toggle-label">
+          <input 
+            type="checkbox" 
+            v-model="isCustomUUMode" 
+            :disabled="readOnly"
+            @change="handleUUModeChange"
+          />
+          <span class="toggle-text">Use Custom Unique Unit Designer</span>
+        </label>
+      </div>
+
+      <!-- Existing UU Selector -->
       <BonusSelectorGrid
+        v-if="!isCustomUUMode"
         title="Unique Unit"
         subtitle="Select one unique unit for your civilization"
         bonus-type="uu"
@@ -100,6 +109,18 @@
         :disabled="readOnly"
         :allow-multiplier="false"
       />
+
+      <!-- Custom UU Editor -->
+      <div v-else class="custom-uu-section">
+        <h2 class="section-title">Design Your Custom Unique Unit</h2>
+        <p class="section-subtitle">Create a unique unit with customizable stats and abilities (150 point budget)</p>
+        <CustomUUEditor 
+          ref="customUUEditorRef"
+          :show-mode-selector="false"
+          :initial-mode="'build'"
+          @update="handleCustomUUUpdate"
+        />
+      </div>
     </div>
 
     <!-- Step 4: Castle Age Tech -->
@@ -160,7 +181,7 @@
         :relative-path="techtreePath"
         :sidebar-content="sidebarContent"
         :sidebar-title="civConfig.alias || 'Custom Civilization'"
-        :show-pastures="showPasturesInTechtree"
+        :selected-bonuses="selectedBonusesForTechtree"
         mode="build"
         @done="handleTechtreeDone"
         @update:tree="handleTechtreeUpdate"
@@ -291,6 +312,8 @@ import { createDefaultCiv, architectures, languages, wonders, type CivConfig } f
 import { getBonusCards, maxSelections as bonusMaxSelections } from '~/composables/useBonusData'
 import { PASTURES_BONUS_ID } from '~/composables/useCivConstants'
 import { BONUS_INDEX } from '~/../../shared/bonusConstants'
+import { useCustomUU, type CustomUUData } from '~/composables/useCustomUU'
+import CustomUUEditor from '~/components/CustomUUEditor.vue'
 
 const props = withDefaults(defineProps<{
   initialConfig?: Partial<CivConfig>
@@ -319,7 +342,7 @@ const AUTOSAVE_KEY = 'aoe2-civbuilder-autosave'
 // Steps: Basic Info, Civ Bonuses, Unique Unit, Castle Tech, Imperial Tech, Team Bonus, Tech Tree, Review
 const stepLabels = ['Basic Info', 'Civ Bonuses', 'Unique Unit', 'Castle Tech', 'Imperial Tech', 'Team Bonus', 'Tech Tree', 'Review']
 const currentStep = ref(0)
-const showAdvanced = ref(false)
+const showAdvanced = ref(true)
 const fileInput = ref<HTMLInputElement | null>(null)
 const autosaveEnabled = ref(false)
 const lastSaved = ref<Date | null>(null)
@@ -364,6 +387,12 @@ const selectedUniqueUnit = ref<(number | [number, number])[]>([])
 const selectedCastleTech = ref<(number | [number, number])[]>([])
 const selectedImpTech = ref<(number | [number, number])[]>([])
 const selectedTeamBonus = ref<(number | [number, number])[]>([])
+
+// Custom UU state
+const isCustomUUMode = ref(false)
+const customUUEditorRef = ref<any>(null)
+const customUUData = ref<CustomUUData | null>(null)
+const { setMode } = useCustomUU('build')
 
 // Computed sidebar content for techtree
 const sidebarContent = computed(() => {
@@ -455,13 +484,14 @@ ${teamBonusHtml || '<p>No team bonus selected</p>'}
 `
 })
 
-const showPasturesInTechtree = computed(() => {
-  // Check if bonus 356 is selected in civ bonuses
-  return selectedCivBonuses.value.some(entry => {
-    const bonusId = Array.isArray(entry) ? entry[0] : entry
-    return bonusId === PASTURES_BONUS_ID
-  })
-})
+// Computed property for selected bonuses to pass to TechTree
+const selectedBonusesForTechtree = computed(() => ({
+  civ: selectedCivBonuses.value,
+  uu: selectedUniqueUnit.value,
+  castle: selectedCastleTech.value,
+  imp: selectedImpTech.value,
+  team: selectedTeamBonus.value,
+}))
 
 // Computed properties for civ bonus limit enforcement
 const civBonusMaxUniqueSelections = computed(() => {
@@ -487,6 +517,9 @@ const canProceed = computed(() => {
 
 // Helper function to get unique unit name for review
 function getUniqueUnitName(): string {
+  if (isCustomUUMode.value && customUUData.value) {
+    return customUUData.value.name || 'Custom Unit'
+  }
   if (!selectedUniqueUnit.value || selectedUniqueUnit.value.length === 0) return 'Not set'
   const firstUnit = selectedUniqueUnit.value[0]
   if (!firstUnit) return 'Not set'
@@ -497,6 +530,22 @@ function getUniqueUnitName(): string {
   const units = uniqueUnits.value
   const unit = units.find(u => u.id === unitId)
   return unit?.name || 'Unknown'
+}
+
+// Handle switching between custom and existing UU modes
+function handleUUModeChange() {
+  if (isCustomUUMode.value) {
+    // Switching to custom mode, clear existing selection
+    selectedUniqueUnit.value = []
+  } else {
+    // Switching to existing mode, clear custom data
+    customUUData.value = null
+  }
+}
+
+// Handle custom UU updates from the editor
+function handleCustomUUUpdate(unit: CustomUUData) {
+  customUUData.value = unit
 }
 
 function nextStep() {
@@ -626,8 +675,10 @@ function updateBonusesInConfig() {
   // Use BONUS_INDEX constants for clarity
   civConfig.bonuses = [
     selectedCivBonuses.value,
-    // Unique units should be stored as plain numbers in legacy format (not tuples)
-    selectedUniqueUnit.value.map(entry => entry[0]), // Extract just the ID
+    // Handle custom UU or standard UU
+    isCustomUUMode.value && customUUData.value 
+      ? [customUUData.value] // Store custom UU data object
+      : selectedUniqueUnit.value.map(entry => entry[0]), // Extract just the ID for legacy format
     selectedCastleTech.value,
     selectedImpTech.value,
     selectedTeamBonus.value
@@ -672,6 +723,8 @@ function handleReset() {
   selectedTeamBonus.value = []
   techtreePointsRemaining.value = 0
   currentStep.value = 0
+  isCustomUUMode.value = false
+  customUUData.value = null
   
   // Clear local storage if autosave was enabled
   if (typeof window !== 'undefined') {
@@ -1177,5 +1230,53 @@ defineExpose({
   color: hsla(52, 100%, 50%, 0.7);
   font-size: 0.85rem;
   font-style: italic;
+}
+
+/* Custom UU Mode Toggle */
+.uu-mode-toggle {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(212, 175, 55, 0.1);
+  border: 2px solid #d4af37;
+  border-radius: 8px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #d4af37;
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  accent-color: #d4af37;
+}
+
+.toggle-text {
+  user-select: none;
+}
+
+.custom-uu-section {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.custom-uu-section .section-title {
+  color: #d4af37;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.custom-uu-section .section-subtitle {
+  color: #666;
+  margin-bottom: 1.5rem;
 }
 </style>

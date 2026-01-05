@@ -3,8 +3,21 @@
     <h3>Validation Dashboard</h3>
     <p class="dashboard-description">Real-time display of all validation rules and their status</p>
     
+    <!-- Show instructions if no unit is selected -->
+    <div v-if="!unit" class="no-unit-message">
+      <p><strong>👇 Select a unit type below to begin validation</strong></p>
+      <p>Once you select a unit type (Infantry, Cavalry, Archer, or Siege), this dashboard will show:</p>
+      <ul>
+        <li>✓ Property constraints (Health, Attack, Armor, Speed, Range)</li>
+        <li>✓ Type-specific rules for your chosen unit type</li>
+        <li>✓ Attack bonus limits</li>
+        <li>✓ Point budget status (if in Build/Draft mode)</li>
+        <li>✓ Balance warnings for overpowered combinations</li>
+      </ul>
+    </div>
+    
     <!-- Budget Status (if applicable) -->
-    <section v-if="maxPoints" class="validation-section">
+    <section v-if="unit && maxPoints" class="validation-section">
       <h4>Point Budget</h4>
       <div class="rule-list">
         <div :class="['rule-item', budgetStatus]">
@@ -18,7 +31,7 @@
     </section>
 
     <!-- Property Constraints -->
-    <section class="validation-section">
+    <section v-if="unit" class="validation-section">
       <h4>Property Constraints</h4>
       <div class="rule-list">
         <div v-for="rule in propertyRules" :key="rule.field" :class="['rule-item', rule.status]">
@@ -33,7 +46,7 @@
     </section>
 
     <!-- Type-Specific Rules -->
-    <section v-if="typeSpecificRules.length > 0" class="validation-section">
+    <section v-if="unit && typeSpecificRules.length > 0" class="validation-section">
       <h4>Type-Specific Rules ({{ unitType }})</h4>
       <div class="rule-list">
         <div v-for="rule in typeSpecificRules" :key="rule.id" :class="['rule-item', rule.status]">
@@ -47,7 +60,7 @@
     </section>
 
     <!-- Attack Bonuses -->
-    <section v-if="attackBonusRules.length > 0" class="validation-section">
+    <section v-if="unit && attackBonusRules.length > 0" class="validation-section">
       <h4>Attack Bonuses</h4>
       <div class="rule-list">
         <div v-for="rule in attackBonusRules" :key="rule.id" :class="['rule-item', rule.status]">
@@ -61,7 +74,7 @@
     </section>
 
     <!-- General Warnings -->
-    <section v-if="warnings.length > 0" class="validation-section">
+    <section v-if="unit && warnings.length > 0" class="validation-section">
       <h4>Warnings</h4>
       <div class="rule-list">
         <div v-for="warning in warnings" :key="warning" class="rule-item warning">
@@ -76,6 +89,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { CustomUUData, ValidationError } from '~/composables/useCustomUU';
+import { useCustomUU } from '~/composables/useCustomUU';
 
 interface Props {
   unit: CustomUUData | null;
@@ -85,6 +99,9 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+// Get access to helper functions
+const { getBaseUnitOption } = useCustomUU();
 
 const budgetStatus = computed(() => {
   if (!props.maxPoints) return 'pass';
@@ -115,17 +132,17 @@ const propertyRules = computed(() => {
       label: 'Health',
       current: props.unit.health,
       min: 15,
-      max: 250,
-      status: props.unit.health >= 15 && props.unit.health <= 250 ? 'pass' : 'fail',
+      max: 400,
+      status: props.unit.health >= 15 && props.unit.health <= 400 ? 'pass' : 'fail',
       error: 'Out of range'
     },
     {
       field: 'attack',
       label: 'Attack',
       current: props.unit.attack,
-      min: 2,
+      min: 1,
       max: 35,
-      status: props.unit.attack >= 2 && props.unit.attack <= 35 ? 'pass' : 'fail',
+      status: props.unit.attack >= 1 && props.unit.attack <= 35 ? 'pass' : 'fail',
       error: 'Out of range'
     },
     {
@@ -164,6 +181,15 @@ const propertyRules = computed(() => {
       status: props.unit.range >= 0 && props.unit.range <= 12 ? 'pass' : 'fail',
       error: 'Out of range'
     },
+    {
+      field: 'minRange',
+      label: 'Min Range',
+      current: props.unit.minRange,
+      min: 0,
+      max: props.unit.range,
+      status: props.unit.minRange >= 0 && props.unit.minRange <= props.unit.range ? 'pass' : 'fail',
+      error: 'Must be 0 to range value'
+    },
   ];
 
   return rules;
@@ -175,24 +201,63 @@ const typeSpecificRules = computed(() => {
   const rules = [];
   const unit = props.unit;
   
-  // Infantry range constraint
+  // Get base unit to check for hybrid units
+  const baseUnit = getBaseUnitOption(unit.baseUnit);
+  const baseUnitRange = baseUnit?.range ?? 0;
+  const isHybridUnit = baseUnit && baseUnit.isRanged && baseUnit.isMelee;
+  
+  // Infantry range constraint (see CUSTOM_UU_RULESET.md)
+  // Honor base unit: Throwing Axeman (base 3), Gbeto (base 5), Kamayuk (base 1) can have +2 range
   if (unit.unitType === 'infantry') {
-    rules.push({
-      id: 'infantry-range',
-      text: 'Infantry range must be 0-1 (Kamayuk-like)',
-      status: unit.range <= 1 ? 'pass' : 'fail',
-      error: `Current: ${unit.range}`
-    });
+    if (isHybridUnit) {
+      const maxAllowedRange = baseUnitRange + 2;
+      rules.push({
+        id: 'infantry-range-hybrid',
+        text: `${baseUnit.name} can have range ${baseUnitRange}-${maxAllowedRange} (base ${baseUnitRange} + up to 2 at 30 pts/range)`,
+        status: unit.range >= baseUnitRange && unit.range <= maxAllowedRange ? 'pass' : 'fail',
+        error: `Current: ${unit.range}. Must be ${baseUnitRange}-${maxAllowedRange}.`
+      });
+    } else {
+      rules.push({
+        id: 'infantry-range',
+        text: 'Infantry range must be 0-5 (0=melee, 1=Kamayuk, 3=Throwing Axeman, 5=Gbeto)',
+        status: unit.range >= 0 && unit.range <= 5 ? 'pass' : 'fail',
+        error: `Current: ${unit.range}. Maximum is 5.`
+      });
+    }
   }
   
-  // Cavalry range constraint
+  // Cavalry range constraints (see CUSTOM_UU_RULESET.md)
+  // Honor base unit: Mameluke (base 3) can have up to range 5 (base 3 + 2), Steppe Lancer (base 1)
   if (unit.unitType === 'cavalry') {
-    rules.push({
-      id: 'cavalry-range',
-      text: 'Cavalry must be melee (range = 0)',
-      status: unit.range === 0 ? 'pass' : 'fail',
-      error: `Current: ${unit.range}`
-    });
+    if (isHybridUnit) {
+      const maxAllowedRange = baseUnitRange + 2;
+      rules.push({
+        id: 'cavalry-range-hybrid',
+        text: `${baseUnit.name} can have range ${baseUnitRange}-${maxAllowedRange} (base ${baseUnitRange} + up to 2 at 30 pts/range)`,
+        status: unit.range >= baseUnitRange && unit.range <= maxAllowedRange ? 'pass' : 'fail',
+        error: `Current: ${unit.range}. Must be ${baseUnitRange}-${maxAllowedRange}.`
+      });
+    } else {
+      // First rule: overall range must be 0-1 or 3-5
+      const validCavRange = (unit.range >= 0 && unit.range <= 1) || (unit.range >= 3 && unit.range <= 5);
+      rules.push({
+        id: 'cavalry-range-overall',
+        text: 'Cavalry range must be 0-1 or 3-5 (0=melee, 1=Steppe Lancer, 3-5=Mameluke)',
+        status: validCavRange ? 'pass' : 'fail',
+        error: `Current: ${unit.range}. Use 0-1 or 3-5.`
+      });
+      
+      // Second rule: specifically block range 2 (gap between Steppe Lancer and Mameluke)
+      if (unit.range === 2) {
+        rules.push({
+          id: 'cavalry-range-2-blocked',
+          text: 'Cavalry cannot have range 2 (gap between Steppe Lancer and Mameluke)',
+          status: 'fail',
+          error: 'Use range 1 (Steppe Lancer) or 3+ (Mameluke)'
+        });
+      }
+    }
   }
   
   // Archer range requirement
@@ -287,6 +352,40 @@ function getStatusIcon(status: string): string {
   font-size: 0.9rem;
 }
 
+.no-unit-message {
+  background: #e3f2fd;
+  border: 2px solid #2196f3;
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  color: #1565c0;
+}
+
+.no-unit-message p {
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
+}
+
+.no-unit-message p:last-child {
+  margin-bottom: 0;
+}
+
+.no-unit-message strong {
+  font-size: 1.1rem;
+  color: #0d47a1;
+}
+
+.no-unit-message ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.5rem 0 0 0;
+}
+
+.no-unit-message li {
+  padding: 0.4rem 0;
+  color: #1565c0;
+}
+
 .validation-section {
   margin-bottom: 1.5rem;
 }
@@ -323,16 +422,19 @@ function getStatusIcon(status: string): string {
 .rule-item.pass {
   background: #d4edda;
   border-left: 3px solid #28a745;
+  color: #155724; /* Dark green text for readability */
 }
 
 .rule-item.fail {
   background: #f8d7da;
   border-left: 3px solid #dc3545;
+  color: #721c24; /* Dark red text for readability */
 }
 
 .rule-item.warning {
   background: #fff3cd;
   border-left: 3px solid #ffc107;
+  color: #856404; /* Dark amber text for readability */
 }
 
 .rule-indicator {

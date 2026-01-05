@@ -45,10 +45,12 @@
               v-model="civConfig.flag_palette"
               v-model:custom-flag="civConfig.customFlag"
               v-model:custom-flag-data="civConfig.customFlagData"
+              class="selector-spacing"
             />
             
-            <ArchitectureSelector v-model="civConfig.architecture" />
-            <LanguageSelector v-model="civConfig.language" />
+            <ArchitectureSelector v-model="civConfig.architecture" class="selector-spacing" />
+            <LanguageSelector v-model="civConfig.language" class="selector-spacing" />
+            <WonderSelector v-model="civConfig.wonder" class="selector-spacing" />
             
             <div class="civ-name-input">
               <label for="civName">Civilization Name</label>
@@ -78,9 +80,74 @@
       </div>
     </div>
 
-    <!-- Phase 2: Draft Cards -->
+    <!-- Phase 2: Draft Cards OR Custom UU Design -->
     <div v-if="currentPhase === 2 && draft">
+      <!-- Custom UU Design Phase -->
+      <div v-if="draft.gamestate.custom_uu_phase" class="custom-uu-phase">
+        <!-- If host has submitted, show waiting/spectator screen -->
+        <div v-if="currentPlayer?.ready === 1">
+          <h1 class="phase-title">Players Designing Custom Unique Units</h1>
+          <p class="phase-subtitle">Each player is creating their own unique unit (100 point budget)</p>
+          
+          <div class="players-status-container">
+            <h3>Player Progress:</h3>
+            <div class="players-status-grid">
+              <div v-for="(player, idx) in draft.players" :key="idx" class="player-status-card">
+                <div class="player-info">
+                  <span class="player-name">{{ player.alias || `Player ${idx + 1}` }}</span>
+                  <span class="status-badge" :class="{ 'status-ready': player.ready === 1 }">
+                    {{ player.ready === 1 ? '✓ Ready' : 'Designing...' }}
+                  </span>
+                </div>
+                <div v-if="player.custom_uu && player.custom_uu.name" class="uu-preview">
+                  <strong>{{ player.custom_uu.name }}</strong>
+                  <span class="uu-type">({{ player.custom_uu.unitType }})</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="waiting-phase-box">
+            <div class="loading-spinner"></div>
+            <p class="waiting-text">Waiting for all players to submit their custom units...</p>
+          </div>
+        </div>
+        
+        <!-- Otherwise, show Custom UU Editor for host to design their own unit -->
+        <div v-else class="custom-uu-editor-container">
+          <h1 class="phase-title">Design Your Custom Unique Unit</h1>
+          <p class="phase-subtitle">Create your civilization's unique unit with a 100 point budget</p>
+          
+          <CustomUUEditor
+            :initial-mode="'draft'"
+            :show-mode-selector="false"
+            @update="handleCustomUUUpdate"
+          />
+          
+          <div class="custom-uu-actions">
+            <button
+              class="submit-uu-button"
+              :disabled="!isValidCustomUU || isSubmittingUU"
+              @click="handleSubmitCustomUU"
+            >
+              {{ isSubmittingUU ? 'Submitting...' : 'Submit Custom Unit' }}
+            </button>
+            
+            <div v-if="customUUValidationErrors.length > 0" class="validation-errors">
+              <h4>Please fix these errors before submitting:</h4>
+              <ul>
+                <li v-for="(err, idx) in customUUValidationErrors" :key="idx" class="error-item">
+                  {{ err.message }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Normal Draft Board (bonus selection) -->
       <DraftBoard
+      v-else
       :phase-title="roundTypeName"
       :round-number="(currentTurn?.roundType || 0) + 1"
       :players="draft.players"
@@ -124,7 +191,7 @@
           :points="techTreePoints"
           :editable="true"
           :relative-path="techtreePath"
-          :show-pastures="showPasturesInTechtree"
+          :selected-bonuses="selectedBonusesForTechtree"
           :sidebar-content="sidebarContent"
           :sidebar-title="sidebarTitle"
           mode="draft"
@@ -210,13 +277,16 @@ import { useDraft } from '~/composables/useDraft'
 import { useBonusData, roundTypeToBonusType } from '~/composables/useBonusData'
 import { PASTURES_BONUS_ID } from '~/composables/useCivConstants'
 import type { CivConfig } from '~/composables/useCivData'
+import { useCustomUU, type CustomUUData } from '~/composables/useCustomUU'
 import DraftLobby from '~/components/draft/DraftLobby.vue'
 import DraftBoard from '~/components/draft/DraftBoard.vue'
 import FlagCreator from '~/components/FlagCreator.vue'
 import ArchitectureSelector from '~/components/ArchitectureSelector.vue'
 import LanguageSelector from '~/components/LanguageSelector.vue'
+import WonderSelector from '~/components/WonderSelector.vue'
 import TechTree from '~/components/TechTree.vue'
 import PlayerViewModal from '~/components/draft/PlayerViewModal.vue'
+import CustomUUEditor from '~/components/CustomUUEditor.vue'
 
 const config = useRuntimeConfig()
 const route = useRoute()
@@ -305,10 +375,33 @@ const selectedPlayer = computed(() => {
   return null
 })
 
-const showPasturesInTechtree = computed(() => {
-  // Check if PASTURES_BONUS_ID is selected in civ bonuses (bonuses[0] array)
-  if (!currentPlayer.value?.bonuses?.[0]) return false
-  return currentPlayer.value.bonuses[0].includes(PASTURES_BONUS_ID)
+// Custom UU state and handlers
+const { validateUnit } = useCustomUU('draft')
+const customUU = ref<CustomUUData | null>(null)
+const isSubmittingUU = ref(false)
+const customUUValidationErrors = computed(() => {
+  if (!customUU.value) return []
+  const errors = validateUnit(customUU.value)
+  return errors.filter(e => e.severity === 'error')
+})
+const isValidCustomUU = computed(() => {
+  return customUU.value !== null && customUUValidationErrors.value.length === 0
+})
+
+// Convert draft bonuses format to TechTree selectedBonuses format
+const selectedBonusesForTechtree = computed(() => {
+  if (!currentPlayer.value?.bonuses) {
+    return { civ: [], uu: [], castle: [], imp: [], team: [] }
+  }
+  
+  const bonuses = currentPlayer.value.bonuses
+  return {
+    civ: bonuses[0] || [],
+    uu: bonuses[1] || [],
+    castle: bonuses[2] || [],
+    imp: bonuses[3] || [],
+    team: bonuses[4] || []
+  }
 })
 
 // Generate sidebar HTML content from player's selected bonuses
@@ -347,14 +440,44 @@ const sidebarContent = computed(() => {
     html += '</ul>'
   }
   
-  // Unique Unit
+  // Unique Unit - handle both legacy (number) and custom (object) formats
   if (player.bonuses[1] && Array.isArray(player.bonuses[1]) && player.bonuses[1].length > 0) {
-    const unitId = player.bonuses[1][0]
-    const unit = allCards.uniqueUnits[unitId]
-    if (unit && unit.name) {
+    const unitData = player.bonuses[1][0]
+    
+    // Check if it's a custom UU object
+    if (typeof unitData === 'object' && unitData.type === 'custom') {
       if (hasAnyBonus) html += '<hr>'
-      html += `<h3>Unique Unit</h3><p>${unit.name}</p>`
+      html += `<h3>Custom Unique Unit</h3>`
+      html += `<p><strong>${unitData.name}</strong></p>`
+      html += `<p style="color: rgba(240, 230, 210, 0.7); font-style: italic; font-size: 0.9em;">${unitData.unitType.charAt(0).toUpperCase() + unitData.unitType.slice(1)}</p>`
+      html += '<div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(0, 0, 0, 0.2); border-radius: 4px; border-left: 3px solid hsl(52, 100%, 50%);">'
+      html += `<p><strong>HP:</strong> ${unitData.health} | <strong>Attack:</strong> ${unitData.attack}</p>`
+      html += `<p><strong>Armor:</strong> ${unitData.meleeArmor}/${unitData.pierceArmor} | <strong>Speed:</strong> ${unitData.speed}</p>`
+      if (unitData.range > 0) {
+        html += `<p><strong>Range:</strong> ${unitData.range}</p>`
+      }
+      html += `<p><strong>Cost:</strong> ${unitData.cost.food}F `
+      if (unitData.cost.wood > 0) html += `${unitData.cost.wood}W `
+      if (unitData.cost.gold > 0) html += `${unitData.cost.gold}G `
+      if (unitData.cost.stone > 0) html += `${unitData.cost.stone}S`
+      html += `</p>`
+      if (unitData.attackBonuses && unitData.attackBonuses.length > 0) {
+        html += '<p><strong>Bonuses:</strong></p><ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">'
+        unitData.attackBonuses.forEach((bonus: any) => {
+          html += `<li style="margin: 0.25rem 0; font-size: 0.85em;">+${bonus.amount} vs armor class ${bonus.class}</li>`
+        })
+        html += '</ul>'
+      }
+      html += '</div>'
       hasAnyBonus = true
+    } else if (typeof unitData === 'number') {
+      // Legacy format: numeric unit ID
+      const unit = allCards.uniqueUnits[unitData]
+      if (unit && unit.name) {
+        if (hasAnyBonus) html += '<hr>'
+        html += `<h3>Unique Unit</h3><p>${unit.name}</p>`
+        hasAnyBonus = true
+      }
     }
   }
   
@@ -481,7 +604,7 @@ const handleToggleReady = () => {
   }
 }
 
-// Phase 1: Save civ info (flag, architecture, language, civ name) - NO tech tree
+// Phase 1: Save civ info (flag, architecture, language, wonder, civ name) - NO tech tree
 const handleSaveCivInfo = () => {
   if (playerNumber.value >= 0) {
     // Immediately show waiting screen (optimistic update like legacy code)
@@ -491,8 +614,11 @@ const handleSaveCivInfo = () => {
       playerNumber.value,
       civConfig.value.alias,
       civConfig.value.flag_palette,
+      civConfig.value.customFlag,
+      civConfig.value.customFlagData,
       civConfig.value.architecture,
-      civConfig.value.language
+      civConfig.value.language,
+      civConfig.value.wonder
     )
   }
 }
@@ -579,6 +705,60 @@ const handlePauseTimer = () => {
 
 const handleResumeTimer = () => {
   resumeTimer()
+}
+
+// Custom UU handlers
+const handleCustomUUUpdate = (unit: CustomUUData) => {
+  customUU.value = unit
+}
+
+const handleSubmitCustomUU = async () => {
+  if (!customUU.value || !isValidCustomUU.value) {
+    console.error('Cannot submit invalid custom UU')
+    return
+  }
+  
+  if (playerNumber.value < 0) {
+    console.error('Invalid player number')
+    return
+  }
+  
+  isSubmittingUU.value = true
+  
+  try {
+    // Get socket from draft state
+    const socket = initSocket()
+    if (!socket) {
+      throw new Error('Socket not available')
+    }
+    
+    // Emit submit event to server
+    socket.emit('submit custom uu', draftId.value, playerNumber.value, customUU.value)
+    
+    // Wait for confirmation from server
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Submission timeout'))
+      }, 10000)
+      
+      socket.once('custom uu submitted', () => {
+        clearTimeout(timeout)
+        resolve()
+      })
+      
+      socket.once('error', (err: any) => {
+        clearTimeout(timeout)
+        reject(err)
+      })
+    })
+    
+    console.log('Custom UU submitted successfully')
+  } catch (err) {
+    console.error('Failed to submit custom UU:', err)
+    error.value = err instanceof Error ? err.message : 'Failed to submit custom UU'
+  } finally {
+    isSubmittingUU.value = false
+  }
 }
 
 const handleDownload = () => {
@@ -845,6 +1025,10 @@ onUnmounted(() => {
 .tech-tree-section {
   overflow: auto;
   max-height: 70vh;
+}
+
+.selector-spacing {
+  margin-bottom: 1.5rem;
 }
 
 .civ-name-input {
@@ -1137,5 +1321,168 @@ onUnmounted(() => {
   margin-top: 2rem;
   text-align: center;
   max-width: 500px;
+}
+
+/* Custom UU Phase Styles */
+.custom-uu-phase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.phase-subtitle {
+  color: #f0e6d2;
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.players-status-container {
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 2rem;
+}
+
+.players-status-container h3 {
+  color: hsl(52, 100%, 50%);
+  font-size: 1.3rem;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+}
+
+.players-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.player-status-card {
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border: 2px solid rgba(255, 204, 0, 0.5);
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.player-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.player-name {
+  color: #f0e6d2;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.status-badge {
+  padding: 0.35rem 0.85rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  background: rgba(100, 100, 100, 0.5);
+  color: #ccc;
+  font-weight: 500;
+}
+
+.status-badge.status-ready {
+  background: rgba(0, 150, 0, 0.3);
+  color: #90ee90;
+  border: 1px solid rgba(0, 255, 0, 0.4);
+}
+
+.uu-preview {
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 204, 0, 0.2);
+  color: rgba(240, 230, 210, 0.8);
+  font-size: 0.95rem;
+}
+
+.uu-preview strong {
+  color: hsl(52, 100%, 50%);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.uu-type {
+  font-size: 0.85rem;
+  color: rgba(240, 230, 210, 0.6);
+  text-transform: capitalize;
+}
+
+.custom-uu-editor-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: min(1800px, 95vw); /* Responsive: 1800px for HD screens, 95vw for smaller screens */
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.custom-uu-actions {
+  width: 100%;
+  max-width: min(1200px, 90vw); /* Responsive: 1200px for HD screens, 90vw for smaller screens */
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.submit-uu-button {
+  width: 100%;
+  max-width: 400px;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: linear-gradient(to bottom, rgba(139, 69, 19, 0.9), rgba(101, 67, 33, 0.9));
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  color: hsl(52, 100%, 50%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submit-uu-button:hover:not(:disabled) {
+  background: hsl(52, 100%, 50%);
+  color: #1a0f0a;
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
+}
+
+.submit-uu-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.validation-errors {
+  width: 100%;
+  max-width: 600px;
+  background: rgba(200, 0, 0, 0.2);
+  border: 2px solid rgba(255, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.validation-errors h4 {
+  color: #ffb6c1;
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+}
+
+.validation-errors ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.error-item {
+  color: #ffb6c1;
+  padding: 0.5rem 0;
+  font-size: 0.95rem;
 }
 </style>

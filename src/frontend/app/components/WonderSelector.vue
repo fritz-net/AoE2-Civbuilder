@@ -9,20 +9,47 @@
         <img 
           :src="wonderImageSrc" 
           :alt="currentWonderName"
-          class="wonder-image"
+          class="wonder-image clickable"
           @error="handleImageError"
+          @click="showOverlay = true"
+          title="Click to view all wonders"
         />
-        <span class="wonder-name">{{ currentWonderName }}</span>
+        <select 
+          v-model="selectedWonder" 
+          @change="handleDropdownChange"
+          class="wonder-dropdown"
+          :disabled="disabled"
+        >
+          <option 
+            v-for="(wonder, index) in wonders" 
+            :key="index" 
+            :value="index"
+          >
+            {{ wonder }}
+          </option>
+        </select>
       </div>
       
       <button class="nav-btn" @click="next">&gt;</button>
     </div>
+    
+    <ImageGridOverlay
+      :show="showOverlay"
+      title="Select Wonder"
+      :items="wonders"
+      :selected-index="props.modelValue"
+      :image-path-template="`${baseURL}img/wonders/wonder_{index}.png`"
+      :index-offset="0"
+      @close="showOverlay = false"
+      @select="handleOverlaySelect"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { wonders } from '~/composables/useCivData'
+import ImageGridOverlay from './ImageGridOverlay.vue'
 
 const props = withDefaults(defineProps<{
   modelValue: number
@@ -38,6 +65,14 @@ const emit = defineEmits<{
 const config = useRuntimeConfig()
 const baseURL = config.app.baseURL || '/v2/'
 
+const selectedWonder = ref(props.modelValue)
+const showOverlay = ref(false)
+
+// Watch for external changes to modelValue
+watch(() => props.modelValue, (newVal) => {
+  selectedWonder.value = newVal
+})
+
 const currentWonderName = computed(() => wonders[props.modelValue])
 
 const wonderImageSrc = computed(() => `${baseURL}img/wonders/wonder_${props.modelValue}.png`)
@@ -45,6 +80,15 @@ const wonderImageSrc = computed(() => `${baseURL}img/wonders/wonder_${props.mode
 function handleImageError(e: Event) {
   const img = e.target as HTMLImageElement
   img.style.display = 'none'
+}
+
+function handleDropdownChange() {
+  emit('update:modelValue', selectedWonder.value)
+}
+
+function handleOverlaySelect(index: number) {
+  // Wonders are 0-indexed, so use the index directly
+  emit('update:modelValue', index)
 }
 
 function next() {
@@ -58,6 +102,7 @@ function previous() {
   const newValue = (props.modelValue - 1 + wonders.length) % wonders.length
   emit('update:modelValue', newValue)
 }
+
 </script>
 
 <style scoped>
@@ -117,17 +162,44 @@ function previous() {
   object-fit: contain;
   border: 2px solid hsl(52, 100%, 50%);
   border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
-.wonder-name {
+.wonder-image.clickable {
+  cursor: pointer;
+}
+
+.wonder-image.clickable:hover {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
+  transform: scale(1.05);
+}
+
+.wonder-dropdown {
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
   color: hsl(52, 100%, 50%);
   font-size: 0.85rem;
+  cursor: pointer;
   text-align: center;
-  width: 200px;
-  height: 2.5em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1.2;
+  transition: all 0.2s ease;
+}
+
+.wonder-dropdown:hover:not(:disabled) {
+  border-color: hsl(52, 100%, 60%);
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+}
+
+.wonder-dropdown:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.wonder-dropdown option {
+  background: rgba(139, 69, 19, 0.95);
+  color: hsl(52, 100%, 50%);
 }
 </style>

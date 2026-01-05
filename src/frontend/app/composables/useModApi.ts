@@ -31,7 +31,7 @@ function generateSeed(): string {
  * Create a mod from one or more civ configurations
  * @param civs Array of civ configurations to include in the mod
  * @param options Optional parameters for mod creation
- * @returns Promise that resolves with seed (filename) when download starts
+ * @returns Promise that resolves with the actual filename (e.g., "2025-12-02T23-15-30Z_a3f2_v1.6.2.zip") when download starts
  */
 export async function createMod(
   civs: CivConfig[],
@@ -92,6 +92,24 @@ export async function createMod(
       throw new Error(`Mod creation failed: ${response.statusText}`)
     }
     
+    // Extract filename from Content-Disposition header
+    // Server sends: attachment; filename="2025-12-02T23-15-30Z_a3f2_v1.6.2.zip"
+    // Note: Express res.download() always quotes filenames
+    const contentDisposition = response.headers.get('Content-Disposition')
+    let filename = `${seed}.zip` // Fallback to old format
+    
+    if (contentDisposition) {
+      // RFC 6266: Match both quoted and unquoted filenames for robustness
+      const filenameMatch = contentDisposition.match(/filename=(?:"([^"]+)"|([^;,]+))/)
+      if (filenameMatch) {
+        filename = (filenameMatch[1] || filenameMatch[2] || '').trim()
+        // If we couldn't extract a valid filename, keep the fallback
+        if (!filename) {
+          filename = `${seed}.zip`
+        }
+      }
+    }
+    
     // Get the blob from the response
     const blob = await response.blob()
     
@@ -99,14 +117,14 @@ export async function createMod(
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${seed}.zip`
+    a.download = filename
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     window.URL.revokeObjectURL(url)
     
-    // Return the seed (filename) for navigation purposes
-    return seed
+    // Return the actual filename (not seed) for navigation purposes
+    return filename
   } catch (error) {
     console.error('Error creating mod:', error)
     throw error

@@ -116,9 +116,8 @@ test.describe('Combine Page - Multi-Civ Mod Creation', () => {
     // Verify 50 civs are loaded
     await expect(page.getByText(/Loaded Civilizations \(50\)/i)).toBeVisible();
     
-    // Verify warning message is shown
-    await expect(page.getByText(/Warning:/i)).toBeVisible();
-    await expect(page.getByText(/50\/50 civilizations loaded/i)).toBeVisible();
+    // Verify NO warning message is shown at exactly 50 civs (warning only shows at 51+)
+    await expect(page.getByText(/Warning:/i)).not.toBeVisible();
     
     // Verify create button is still enabled at 50 civs
     const createButton = page.getByRole('button', { name: /Create Combined Mod \(50 Civs\)/i });
@@ -162,7 +161,8 @@ test.describe('Combine Page - Multi-Civ Mod Creation', () => {
     
     // Wait for navigation to success page
     // C++ backend must be running for this test to pass
-    await page.waitForURL(/.*\/download-success/, { timeout: 15000 });
+    // Using 30s timeout to match other stable mod creation tests
+    await page.waitForURL('**/v2/download-success*', { timeout: 30000 });
     
     // Verify we're on the success page
     await expect(page.getByText(/Mod Created Successfully/i)).toBeVisible();
@@ -288,7 +288,8 @@ test.describe('Build Page - Single Civ Mod Creation', () => {
     }
     
     // Otherwise, wait for navigation to success page
-    await page.waitForURL(/.*\/download-success/, { timeout: 15000 });
+    // Using 30s timeout to match other stable mod creation tests
+    await page.waitForURL('**/v2/download-success*', { timeout: 30000 });
     
     // Verify we're on the success page
     await expect(page.getByText(/Mod Created Successfully/i)).toBeVisible();

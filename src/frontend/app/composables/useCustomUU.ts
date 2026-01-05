@@ -1,6 +1,9 @@
 /**
  * Composable for managing Custom Unique Unit data and validation
  * Based on the ruleset defined in docs/CUSTOM_UU_RULESET.md
+ * 
+ * IMPORTANT: Keep this file in sync with docs/CUSTOM_UU_RULESET.md
+ * Any rule changes should be documented in both locations.
  */
 
 import { ref, computed, type Ref } from 'vue';
@@ -38,6 +41,7 @@ export interface CustomUUData {
   attackSpeed: number;
   speed: number;
   range: number;
+  minRange: number; // Minimum range (1 for ranged units, 0 for melee)
   cost: ResourceCost;
   trainTime: number;
   lineOfSight: number;
@@ -59,8 +63,11 @@ export interface BaseUnitOption {
   name: string;
   type: 'infantry' | 'cavalry' | 'archer' | 'siege';
   isRanged: boolean;
+  isMelee: boolean; // Some units like Throwing Axeman, Mameluk are both ranged AND melee
   uuGraphicId: number | null; // UU graphic ID for icon (0-87), null means use techtree
   techtreeIconId?: number; // Unit ID for techtree icon
+  range?: number; // Override default range for this base unit
+  minRange?: number; // Override default min range for this base unit
 }
 
 interface UnitTypeDefaults {
@@ -140,43 +147,48 @@ const ARMOR_CLASS_NAMES: Record<number, string> = {
 // 6=Cataphract, 7=Chu Ko Nu, 8=Mameluke, 9=Janissary, 10=War Wagon, 11=Mangudai, etc.
 const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
   infantry: [
-    { id: 1067, name: 'Jaguar Warrior', type: 'infantry', isRanged: false, uuGraphicId: 14 },
-    { id: 1723, name: 'Teutonic Knight', type: 'infantry', isRanged: false, uuGraphicId: 3 },
-    { id: 1570, name: 'Woad Raider', type: 'infantry', isRanged: false, uuGraphicId: 12 },
-    { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false, uuGraphicId: 2 },
-    { id: 1306, name: 'Samurai', type: 'infantry', isRanged: false, uuGraphicId: 4 },
-    { id: 1317, name: 'Berserk', type: 'infantry', isRanged: false, uuGraphicId: 13 },
-    { id: 75, name: 'Militia Line', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 75 },
-    { id: 93, name: 'Spearman Line', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 93 },
-    { id: 473, name: 'Champion', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 473 },
-    { id: 555, name: 'Halberdier', type: 'infantry', isRanged: false, uuGraphicId: null, techtreeIconId: 555 },
+    { id: 1067, name: 'Jaguar Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 14 },
+    { id: 1723, name: 'Teutonic Knight', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 3 },
+    { id: 1570, name: 'Woad Raider', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 12 },
+    { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 2 },
+    { id: 1306, name: 'Samurai', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 4 },
+    { id: 1317, name: 'Berserk', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 13 },
+    { id: 1645, name: 'Throwing Axeman', type: 'infantry', isRanged: true, isMelee: true, range: 3, minRange: 0, uuGraphicId: 16 }, // Hybrid ranged+melee
+    { id: 1009, name: 'Gbeto', type: 'infantry', isRanged: true, isMelee: true, range: 5, minRange: 0, uuGraphicId: 53 }, // Hybrid ranged+melee
+    { id: 1800, name: 'Kamayuk', type: 'infantry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 55 }, // Hybrid ranged+melee (1 range)
+    { id: 75, name: 'Militia Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 75 },
+    { id: 93, name: 'Spearman Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 93 },
+    { id: 473, name: 'Champion', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 473 },
+    { id: 555, name: 'Halberdier', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 555 },
   ],
   cavalry: [
-    { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false, uuGraphicId: 6 },
-    { id: 1269, name: 'Boyar', type: 'cavalry', isRanged: false, uuGraphicId: 22 },
-    { id: 1755, name: 'War Elephant', type: 'cavalry', isRanged: false, uuGraphicId: 5 },
-    { id: 1132, name: 'Battle Elephant', type: 'cavalry', isRanged: false, uuGraphicId: 19 },
-    { id: 1721, name: 'Knight Line', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 37 }, // Knight
-    { id: 207, name: 'Camel Line', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 207 },
-    { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 546 },
-    { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false, uuGraphicId: null, techtreeIconId: 441 },
+    { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 6 },
+    { id: 1269, name: 'Boyar', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 22 },
+    { id: 1755, name: 'War Elephant', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 5 },
+    { id: 1132, name: 'Battle Elephant', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 19 },
+    { id: 1663, name: 'Mameluke', type: 'cavalry', isRanged: true, isMelee: true, range: 3, minRange: 0, uuGraphicId: 8 }, // Hybrid ranged+melee
+    { id: 1794, name: 'Steppe Lancer', type: 'cavalry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 77 }, // Hybrid ranged+melee (1 range, 0 min range)
+    { id: 1721, name: 'Knight Line', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 37 }, // Knight
+    { id: 207, name: 'Camel Line', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 207 },
+    { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 546 },
+    { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 441 },
   ],
   archer: [
-    { id: 873, name: 'Longbowman', type: 'archer', isRanged: true, uuGraphicId: 0 },
-    { id: 850, name: 'Plumed Archer', type: 'archer', isRanged: true, uuGraphicId: 15 },
-    { id: 1225, name: 'Chu Ko Nu', type: 'archer', isRanged: true, uuGraphicId: 7 },
-    { id: 1231, name: 'Mangudai', type: 'archer', isRanged: true, uuGraphicId: 11 },
-    { id: 1036, name: 'Genitour', type: 'archer', isRanged: true, uuGraphicId: 25 },
-    { id: 5, name: 'Archer Line', type: 'archer', isRanged: true, uuGraphicId: null, techtreeIconId: 5 },
-    { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true, uuGraphicId: null, techtreeIconId: 24 },
-    { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, uuGraphicId: null, techtreeIconId: 943 },
+    { id: 873, name: 'Longbowman', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 0 },
+    { id: 850, name: 'Plumed Archer', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 15 },
+    { id: 1225, name: 'Chu Ko Nu', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 7 },
+    { id: 1231, name: 'Mangudai', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 11 },
+    { id: 1036, name: 'Genitour', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 25 },
+    { id: 5, name: 'Archer Line', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 5 },
+    { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 24 },
+    { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 943 },
   ],
   siege: [
-    { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, uuGraphicId: 10 },
-    { id: 280, name: 'Mangonel Line', type: 'siege', isRanged: true, uuGraphicId: null, techtreeIconId: 280 },
-    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, uuGraphicId: null, techtreeIconId: 279 },
-    { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, uuGraphicId: null, techtreeIconId: 36 },
-    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false, uuGraphicId: null, techtreeIconId: 706 },
+    { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, isMelee: false, range: 6, minRange: 1, uuGraphicId: 10 },
+    { id: 280, name: 'Mangonel Line', type: 'siege', isRanged: true, isMelee: false, range: 7, minRange: 3, uuGraphicId: null, techtreeIconId: 280 },
+    { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, isMelee: false, range: 5, minRange: 1, uuGraphicId: null, techtreeIconId: 279 },
+    { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, isMelee: false, range: 12, minRange: 5, uuGraphicId: null, techtreeIconId: 36 },
+    { id: 706, name: 'Battering Ram', type: 'siege', isRanged: false, isMelee: true, range: 0, minRange: 0, uuGraphicId: null, techtreeIconId: 706 },
   ]
 };
 
@@ -189,6 +201,13 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
 
   const createCustomUnit = (unitType: 'infantry' | 'cavalry' | 'archer' | 'siege'): CustomUUData => {
     const defaults = UNIT_TYPE_DEFAULTS[unitType];
+    const isRangedType = defaults.range > 0;
+    
+    // Siege units get +10 attack vs buildings for free (see CUSTOM_UU_RULESET.md)
+    const bonuses: AttackBonus[] = [];
+    if (unitType === 'siege') {
+      bonuses.push({ class: 11, amount: 10 }); // +10 vs Buildings
+    }
     
     return {
       type: 'custom',
@@ -202,11 +221,12 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
       attackSpeed: 2.0,
       speed: defaults.speed,
       range: defaults.range,
+      minRange: isRangedType ? 1 : 0, // Start with 1 min range for ranged units, 0 for melee
       cost: { ...defaults.cost },
       trainTime: defaults.trainTime,
       lineOfSight: 5,
       heroMode: false,
-      attackBonuses: []
+      attackBonuses: bonuses
     };
   };
 
@@ -222,20 +242,20 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
       });
     }
 
-    // Health validation
-    if (unit.health < 15 || unit.health > 250) {
+    // Health validation (max increased to 400)
+    if (unit.health < 15 || unit.health > 400) {
       errors.push({
         field: 'health',
-        message: 'Health must be between 15 and 250',
+        message: 'Health must be between 15 and 400',
         severity: 'error'
       });
     }
 
-    // Attack validation
-    if (unit.attack < 2 || unit.attack > 35) {
+    // Attack validation (min changed to 1)
+    if (unit.attack < 1 || unit.attack > 35) {
       errors.push({
         field: 'attack',
-        message: 'Attack must be between 2 and 35',
+        message: 'Attack must be between 1 and 35',
         severity: 'error'
       });
     }
@@ -275,13 +295,79 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
       });
     }
 
-    // Type-specific range validation
-    if (unit.unitType === 'infantry' && unit.range > 1) {
+    // Min range validation
+    if (unit.minRange < 0 || unit.minRange > unit.range) {
       errors.push({
-        field: 'range',
-        message: 'Infantry can only have range 0 (or 1 for Kamayuk-like)',
+        field: 'minRange',
+        message: `Minimum range must be between 0 and ${unit.range}`,
         severity: 'error'
       });
+    }
+
+    // Min range should be 0 for melee-only units
+    if (unit.range === 0 && unit.minRange !== 0) {
+      errors.push({
+        field: 'minRange',
+        message: 'Minimum range must be 0 for melee units (range = 0)',
+        severity: 'error'
+      });
+    }
+
+    // Type-specific range validation (see CUSTOM_UU_RULESET.md)
+    // Honor base unit ranges: if unit started from hybrid base unit (Throwing Axeman, Gbeto, Mameluke),
+    // allow up to +2 range from base unit starting range
+    const baseUnit = getBaseUnitOption(unit.baseUnit);
+    const baseUnitRange = baseUnit?.range ?? 0;
+    
+    // Hybrid units (Throwing Axeman, Gbeto, Mameluke) can have +2 range beyond their base at 30 pts/range
+    const isHybridUnit = baseUnit && baseUnit.isRanged && baseUnit.isMelee;
+    const maxAllowedRange = isHybridUnit ? baseUnitRange + 2 : (unit.unitType === 'infantry' ? 5 : 5);
+    
+    // Infantry: generally melee (range 0) or 1 for Kamayuk
+    // Throwing Axeman (base 3) and Gbeto (base 5) can have up to +2 range
+    if (unit.unitType === 'infantry' && unit.range > maxAllowedRange) {
+      if (isHybridUnit) {
+        errors.push({
+          field: 'range',
+          message: `${baseUnit.name} can have up to range ${maxAllowedRange} (base ${baseUnitRange} + 2)`,
+          severity: 'error'
+        });
+      } else {
+        errors.push({
+          field: 'range',
+          message: 'Infantry can have range 0-5 (typical: 0=melee, 1=Kamayuk, 3=Throwing Axeman, 5=Gbeto)',
+          severity: 'error'
+        });
+      }
+    }
+    
+    // Cavalry: range 0 (melee), 1 for Steppe Lancer, or 3-5 for Mameluke
+    // Mameluke (base 3) can have up to range 5 (base 3 + 2)
+    if (unit.unitType === 'cavalry') {
+      if (unit.range > maxAllowedRange) {
+        if (isHybridUnit) {
+          errors.push({
+            field: 'range',
+            message: `${baseUnit.name} can have up to range ${maxAllowedRange} (base ${baseUnitRange} + 2)`,
+            severity: 'error'
+          });
+        } else {
+          errors.push({
+            field: 'range',
+            message: 'Cavalry can have range 0-1 or 3-5 (typical: 0=melee, 1=Steppe Lancer, 3=Mameluke). Range 2 not allowed.',
+            severity: 'error'
+          });
+        }
+      }
+      
+      // Cavalry with range 2 is not allowed UNLESS it's a hybrid unit with base range >= 1
+      if (unit.range === 2 && !(isHybridUnit && baseUnitRange >= 1)) {
+        errors.push({
+          field: 'range',
+          message: 'Cavalry cannot have range 2 (gap between unit types). Use 0-1 or 3-5.',
+          severity: 'error'
+        });
+      }
     }
 
     // Cost validation
@@ -342,6 +428,11 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     };
 
     let points = basePoints[unit.unitType] || 50;
+    
+    // Hero mode gives bonus points (allows more powerful unit)
+    if (unit.heroMode) {
+      points -= 30; // Hero mode gives 30 points to use
+    }
 
     // Health contribution
     const defaults = UNIT_TYPE_DEFAULTS[unit.unitType];
@@ -360,41 +451,105 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     const speedDiff = unit.speed - defaults.speed;
     points += (speedDiff / 0.1) * 5;
 
-    // Attack speed contribution (lower is better)
+    // Attack speed contribution (lower is better, more expensive)
     const attackSpeedBonus = (2.0 - unit.attackSpeed) / 0.2;
-    points += attackSpeedBonus * 3;
+    points += attackSpeedBonus * 6; // Increased from 3 to 6 to make it more expensive
 
-    // Range contribution (for archers)
-    if (unit.unitType === 'archer' || unit.unitType === 'siege') {
-      const rangeDiff = unit.range - defaults.range;
-      points += rangeDiff * 6;
+    // Range contribution - now included in calculations
+    // IMPORTANT: Make range very expensive for melee units (infantry, cavalry)
+    // This prevents cheap melee units from becoming ranged easily
+    // SPECIAL CASE: Hybrid units (Throwing Axeman, Gbeto, Mameluke) can increase range
+    // beyond their base at 30 points per range (instead of standard 14 points)
+    const baseUnit = getBaseUnitOption(unit.baseUnit);
+    const baseUnitRange = baseUnit?.range ?? defaults.range;
+    const isHybridUnit = baseUnit && baseUnit.isRanged && baseUnit.isMelee;
+    
+    const rangeDiff = unit.range - defaults.range;
+    const rangeDiffFromBase = unit.range - baseUnitRange;
+    let rangePoints = 0;
+    
+    if (rangeDiff > 0) {
+      if (isHybridUnit && rangeDiffFromBase > 0) {
+        // Hybrid units: charge 30 points per range beyond their base unit range
+        // e.g., Throwing Axeman base 3 -> 4 = 30 pts, 5 = 60 pts
+        rangePoints = rangeDiffFromBase * 30;
+      } else {
+        // Standard calculation: 6 base + 8 penalty for melee types
+        rangePoints = rangeDiff * 6;
+        
+        // Extra cost for melee unit types gaining range (standard units like Militia -> ranged)
+        if (unit.unitType === 'infantry' || unit.unitType === 'cavalry') {
+          rangePoints += rangeDiff * 8; // Additional 8 points per range for melee types (total 14)
+        }
+      }
     }
+    points += rangePoints;
+    
+    // Min range contribution - lowering min range costs points (allows closer attacks)
+    // Start: ranged units have min range 1, melee have 0
+    // Lowering min range from default makes unit stronger
+    const defaultMinRange = defaults.range > 0 ? 1 : 0;
+    const minRangeDiff = defaultMinRange - unit.minRange; // Positive = lower min range = costs points
+    points += minRangeDiff * 4; // 4 points per 1 min range reduction
+    
+    // Train time contribution - now included in calculations
+    // Lower train time = better = costs points
+    const trainTimeDiff = defaults.trainTime - unit.trainTime;
+    points += (trainTimeDiff / 5) * 2;
 
     // Attack bonuses
     unit.attackBonuses.forEach(bonus => {
       points += (bonus.amount / 5) * 8;
     });
+    
+    // Cost adjustments: expensive units get points, cheap units cost points
+    const totalCost = unit.cost.food + unit.cost.wood + unit.cost.stone + unit.cost.gold;
+    const defaultCost = defaults.cost.food + defaults.cost.wood + defaults.cost.stone + defaults.cost.gold;
+    const costDiff = totalCost - defaultCost;
+    
+    // For every 10 resources above/below default, give/take 2 points
+    points += (costDiff / 10) * 2;
 
     return Math.round(points);
   };
 
   const calculateRecommendedCost = (unit: CustomUUData): ResourceCost => {
     const points = calculatePowerBudget(unit);
-    const totalCost = Math.round(points * 1.2);
+    
+    // Calculate base total from points
+    let totalCost = Math.round(points * 1.2);
+    
+    // Hero units should be significantly more expensive (see CUSTOM_UU_RULESET.md)
+    // Multipliers ensure that max-point heroes reach appropriate cost levels (400-600 range)
+    if (unit.heroMode) {
+      // Cavalry heroes get an extra multiplier to reach ~500-600 cost at max points
+      if (unit.unitType === 'cavalry') {
+        totalCost = Math.round(totalCost * 3.0); // Increased from 2.2x to 3.0x for proper scaling
+      } else {
+        totalCost = Math.round(totalCost * 2.5); // Increased from 1.8x to 2.5x
+      }
+    }
 
-    // Distribute based on unit type
-    const ratios: Record<string, { primary: number; secondary: number }> = {
-      infantry: { primary: 0.65, secondary: 0.35 }, // food/gold
-      cavalry: { primary: 0.50, secondary: 0.50 },  // food/gold
-      archer: { primary: 0.45, secondary: 0.55 },   // wood/gold
-      siege: { primary: 0.60, secondary: 0.40 }     // wood/gold
+    // Asymmetric cost distribution based on unit type
+    // Different types have different primary/secondary resource ratios
+    const distributions: Record<string, { primary: number; secondary: number; resource: 'food' | 'wood' }> = {
+      infantry: { primary: 0.75, secondary: 0.25, resource: 'food' }, // More food, less gold
+      cavalry: { primary: 0.40, secondary: 0.60, resource: 'food' },  // Less food, more gold (expensive)
+      archer: { primary: 0.70, secondary: 0.30, resource: 'wood' },   // More wood, less gold
+      siege: { primary: 0.75, secondary: 0.25, resource: 'wood' }     // Much more wood, less gold
     };
 
-    const ratio = ratios[unit.unitType];
-    const primaryCost = Math.round(totalCost * ratio.primary);
-    const secondaryCost = Math.round(totalCost * ratio.secondary);
+    const dist = distributions[unit.unitType];
+    let primaryCost = Math.round(totalCost * dist.primary);
+    let secondaryCost = Math.round(totalCost * dist.secondary);
 
-    if (unit.unitType === 'archer' || unit.unitType === 'siege') {
+    // Hero mode cost penalty: minimum 300 for each of the 2 selected resources
+    if (unit.heroMode) {
+      primaryCost = Math.max(primaryCost, 300);
+      secondaryCost = Math.max(secondaryCost, 300);
+    }
+
+    if (dist.resource === 'wood') {
       return { food: 0, wood: primaryCost, stone: 0, gold: secondaryCost };
     } else {
       return { food: primaryCost, wood: 0, stone: 0, gold: secondaryCost };
@@ -414,6 +569,15 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
 
   const getBaseUnitOptions = (unitType: string): BaseUnitOption[] => {
     return BASE_UNIT_OPTIONS[unitType] || [];
+  };
+
+  const getBaseUnitOption = (baseUnitId: number): BaseUnitOption | undefined => {
+    // Search through all unit types to find the base unit option
+    for (const unitType in BASE_UNIT_OPTIONS) {
+      const found = BASE_UNIT_OPTIONS[unitType].find(opt => opt.id === baseUnitId);
+      if (found) return found;
+    }
+    return undefined;
   };
 
   const getUnitIconUrl = (option: BaseUnitOption): string => {
@@ -486,9 +650,9 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     }
   };
 
-  // Normal max values for each stat (used in validation and budget calculations)
+  // Normal max values for each stat (HP updated to 400)
   const STAT_MAX_VALUES: Record<string, number> = {
-    health: 250,
+    health: 400, // Updated from 250
     attack: 35,
     meleeArmor: 10,
     pierceArmor: 10,
@@ -567,6 +731,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     exportToTechtree,
     getArmorClassName,
     getBaseUnitOptions,
+    getBaseUnitOption,
     getUnitIconUrl,
     setMode,
     getMaxStatValue,

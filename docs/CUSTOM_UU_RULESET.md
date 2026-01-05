@@ -119,10 +119,45 @@ Custom unique units must belong to one of four primary categories. Each category
 ### Special Constraints
 
 **Range Limitations:**
-- Infantry: Range 0 only (exception: Kamayuk can have range 1)
+- Infantry: Range 0 (melee), 1 (Kamayuk), up to 3 (Throwing Axeman), or up to 5 (Gbeto)
+  - Most infantry are melee only
+  - Gaining range as infantry is VERY expensive (14 points per range)
+  - Throwing Axeman and Gbeto types allowed but costly
+- Cavalry: Range 0 (melee), 1 (Steppe Lancer), or 3-5 (Mameluke)
+  - Range 2 is not allowed for cavalry (gap between Steppe Lancer and Mameluke)
+  - Most cavalry are melee only
+  - Gaining range as cavalry is VERY expensive (14 points per range)
+  - Mameluke-type units can have 3-5 range but at very high cost
 - Foot Archers: Range 3-9
 - Cavalry Archers: Range 3-7
 - Siege: Range 2-12
+
+**Range Point Costs:**
+- Base range cost: 6 points per range unit
+- Infantry/Cavalry gaining range: Additional 8 points per range (total 14 points per range)
+  - This makes it prohibitively expensive for melee units to become ranged
+  - Example: Infantry with +3 range = 3 * 14 = 42 points (nearly full budget)
+
+**Minimum Range:**
+- Ranged units start with minimum range = 1 (cannot fire at melee range)
+- Melee units (range = 0) have minimum range = 0 (locked)
+- Hybrid units (Steppe Lancer, Mameluke, Kamayuk) have minimum range = 0 (can attack at any range)
+- Lowering minimum range from default costs 4 points per unit
+
+**Hybrid Ranged+Melee Units:**
+- Some units can attack at both range and melee (Throwing Axeman, Gbeto, Kamayuk, Mameluke, Steppe Lancer)
+- These units have both `isRanged: true` and `isMelee: true` flags
+- Specific base units with custom ranges:
+  - Kamayuk: range 1, minRange 0
+  - Throwing Axeman: range 3, minRange 0
+  - Gbeto: range 5, minRange 0
+  - Mameluke: range 3, minRange 0
+  - Steppe Lancer: range 1, minRange 0
+
+**Siege Unit Bonuses:**
+- All siege units automatically receive +10 attack vs Buildings (class 11)
+- This bonus is free and does not cost points
+- Additional building bonuses can be added at normal point cost
 
 **Attack Type Consistency:**
 - Infantry: Must use melee attack (attack type is implied by base unit)
@@ -157,7 +192,8 @@ Each unit has a "power budget" based on its statistics. Higher stats require hig
 | +1 Pierce Armor | 4 points |
 | +0.1 Movement Speed | 5 points |
 | -0.2 Attack Speed | 3 points |
-| +1 Range (archers) | 6 points |
+| +1 Range (archers/siege) | 6 points |
+| +1 Range (infantry/cavalry) | 14 points (6 base + 8 penalty) |
 | Attack Bonus (+5 vs class) | 8 points |
 
 **Example Calculation:**
@@ -189,16 +225,23 @@ Distribution: 55 food + 31 gold
 
 ### Hero Mode Adjustments
 
-When **Hero Mode** is enabled:
+When **Hero Mode** is enabled (see implementation in `src/frontend/app/composables/useCustomUU.ts`):
 - Unit can only be trained once per game
-- Costs multiplied by 1.5-2.5x
-- Player gains +20-40 bonus points for other customizations
+- Player gains +30 bonus points for customizations
+- Costs multiplied significantly:
+  - Cavalry: 3.0x multiplier
+  - Other types: 2.5x multiplier
+- Minimum cost enforced: 300 resources per resource type (e.g., 300 Food + 300 Gold)
 - Recommended for very powerful or specialized units
+- Total hero unit cost at max points should reach 400-600 resources
 
 **Hero Mode Example:**
 ```
-Normal Unit: 60 food + 45 gold
-Hero Mode: 120 food + 90 gold + 30 bonus points
+Normal Cavalry Unit (65 points): 60 food + 85 gold = 145 total
+Hero Cavalry Unit (65 - 30 = 35 base, but can spend up to 95):
+  - At max points (95 spent): ~180 power
+  - Cost: 180 * 1.2 * 3.0 = 648 total
+  - Distribution: ~259F + 389G (or enforced minimum 300F + 300G)
 ```
 
 ## Optic/Sprite Selection
@@ -266,11 +309,15 @@ Units must have weaknesses:
 ### Type-Specific Restrictions
 
 **Infantry:**
-- Cannot have ranged attack (exception: Kamayuk with range 1)
+- Can have range 0 (melee), 1 (Kamayuk), up to 3 (Throwing Axeman), or up to 5 (Gbeto)
+- Gaining range is VERY expensive (14 points per range)
 - If HP > 100, speed must be ≤ 1.0
 - If speed > 1.15, armor must be ≤ 2/2
 
 **Cavalry:**
+- Can have range 0 (melee), 1 (Steppe Lancer), or 3-5 (Mameluke)
+- Range 2 is not allowed (gap between Steppe Lancer and Mameluke types)
+- Gaining range is VERY expensive (14 points per range)
 - If HP > 150, speed must be ≤ 1.35
 - Cannot have pierce armor > melee armor by more than 1
 - If speed > 1.5, HP must be ≤ 100
