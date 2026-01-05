@@ -251,4 +251,127 @@ test.describe('TechTree Bonus-Granted Units', () => {
     // Verify points are 14 (Chemistry 6pts + Bombard Cannon 8pts)
     await expect(page.getByText(/Points Spent: 14/i)).toBeVisible()
   });
+
+  test('should properly replace Hussar with Winged Hussar', async ({ page }) => {
+    await page.goto('/v2/demo/techtree')
+    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
+    
+    // Verify Hussar is initially visible
+    const hussarElement = page.locator('[data-caret-id="unit_441"]')
+    await expect(hussarElement).toBeVisible()
+    
+    // Select Winged Hussar bonus (ID 282)
+    const wingedHussarCheckbox = page.getByRole('checkbox', { name: /Winged Hussar.*ID 282/i })
+    await wingedHussarCheckbox.check()
+    await page.waitForTimeout(500)
+    
+    // Verify Hussar is no longer visible (replaced)
+    await expect(hussarElement).not.toBeVisible()
+    
+    // Verify Winged Hussar is now visible
+    const wingedHussarElement = page.locator('[data-caret-id="unit_1707"]')
+    await expect(wingedHussarElement).toBeVisible()
+    
+    // Verify 0 cost (bonus unit is free)
+    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
+  });
+
+  test('should properly replace Paladin with Savar', async ({ page }) => {
+    await page.goto('/v2/demo/techtree')
+    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
+    
+    // Verify Paladin is initially visible
+    const paladinElement = page.locator('[data-caret-id="unit_569"]')
+    await expect(paladinElement).toBeVisible()
+    
+    // Select Savar bonus (ID 314)
+    const savarCheckbox = page.getByRole('checkbox', { name: /Savar.*ID 314/i })
+    await savarCheckbox.check()
+    await page.waitForTimeout(500)
+    
+    // Verify Paladin is no longer visible (replaced)
+    await expect(paladinElement).not.toBeVisible()
+    
+    // Verify Savar is now visible
+    const savarElement = page.locator('[data-caret-id="unit_1813"]')
+    await expect(savarElement).toBeVisible()
+    
+    // Verify 0 cost
+    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
+  });
+
+  test('should properly replace Two-Handed Swordsman and Champion with Legionary', async ({ page }) => {
+    await page.goto('/v2/demo/techtree')
+    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
+    
+    // Verify Two-Handed Swordsman and Champion are initially visible
+    const twoHandedSwordsmanElement = page.locator('[data-caret-id="unit_473"]')
+    const championElement = page.locator('[data-caret-id="unit_567"]')
+    await expect(twoHandedSwordsmanElement).toBeVisible()
+    await expect(championElement).toBeVisible()
+    
+    // Select Legionary bonus (ID 307)
+    const legionaryCheckbox = page.getByRole('checkbox', { name: /Legionary.*ID 307/i })
+    await legionaryCheckbox.check()
+    await page.waitForTimeout(500)
+    
+    // Verify Two-Handed Swordsman and Champion are no longer visible (replaced)
+    await expect(twoHandedSwordsmanElement).not.toBeVisible()
+    await expect(championElement).not.toBeVisible()
+    
+    // Verify Legionary is now visible
+    const legionaryElement = page.locator('[data-caret-id="unit_1793"]')
+    await expect(legionaryElement).toBeVisible()
+    
+    // Verify 0 cost
+    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
+  });
+
+  test('should properly replace Mill with Folwark', async ({ page }) => {
+    await page.goto('/v2/demo/techtree')
+    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
+    
+    // Verify Mill is initially visible
+    const millElement = page.locator('[data-caret-id="building_68"]')
+    await expect(millElement).toBeVisible()
+    
+    // Select Folwark bonus (ID 280)
+    const folwarkCheckbox = page.getByRole('checkbox', { name: /Folwark.*ID 280/i })
+    await folwarkCheckbox.check()
+    await page.waitForTimeout(500)
+    
+    // Verify Mill is no longer visible (replaced)
+    await expect(millElement).not.toBeVisible()
+    
+    // Verify Folwark is now visible
+    const folwarkElement = page.locator('[data-caret-id="building_1734"]')
+    await expect(folwarkElement).toBeVisible()
+    
+    // Verify 0 cost
+    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
+  });
+
+  test('should properly replace Monastery with Fortified Church', async ({ page }) => {
+    await page.goto('/v2/demo/techtree')
+    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
+    
+    // Verify Monastery is initially visible
+    const monasteryElement = page.locator('[data-caret-id="building_104"]')
+    await expect(monasteryElement).toBeVisible()
+    
+    // Select Fortified Church bonus (ID 316)
+    const fortifiedChurchCheckbox = page.getByRole('checkbox', { name: /Fortified Church.*ID 316/i })
+    await fortifiedChurchCheckbox.check()
+    await page.waitForTimeout(500)
+    
+    // Verify Monastery is no longer visible (replaced)
+    await expect(monasteryElement).not.toBeVisible()
+    
+    // Verify Fortified Church is now visible
+    const fortifiedChurchElement = page.locator('[data-caret-id="building_1806"]')
+    await expect(fortifiedChurchElement).toBeVisible()
+    
+    // Verify 0 cost
+    await expect(page.getByText(/Points Spent: 0/i)).toBeVisible()
+  });
 });
