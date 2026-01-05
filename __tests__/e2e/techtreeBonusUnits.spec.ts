@@ -110,11 +110,11 @@ test.describe('TechTree Bonus-Granted Units', () => {
     await houfniceCheckbox.check();
     await page.waitForTimeout(500);
     
-    // Verify points increased (should be 14 points total: Chemistry (6) + Bombard Cannon (8))
-    // Houfnice itself is free
+    // Verify points increased (should be 8 points total: Bombard Cannon (8))
+    // Houfnice itself is free, Chemistry no longer required as prerequisite
     const pointsText = await page.getByText(/Points Spent: \d+/i).textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
-    expect(points).toBe(14);
+    expect(points).toBe(8);
   });
 
   test('should remove bonus unit when bonus is deselected', async ({ page }) => {
