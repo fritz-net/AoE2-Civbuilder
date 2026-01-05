@@ -952,7 +952,6 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
     monasterylane.rows.castle_1.push(building(MONASTERY))
   }
   monasterylane.rows.castle_2.push(unit(MONK))
-  if (isBonusSelected(BONUS_ID_WARRIOR_PRIEST)) monasterylane.rows.castle_2.push(unit(WARRIOR_PRIEST)) // Bonus unit: Can recruit Warrior Priests
   monasterylane.rows.castle_2.push(tech(REDEMPTION))
   monasterylane.rows.castle_2.push(tech(DEVOTION))
   monasterylane.rows.castle_2.push(tech(ATONEMENT))
@@ -960,6 +959,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   monasterylane.rows.castle_2.push(tech(HERESY))
   monasterylane.rows.castle_2.push(tech(SANCTITY))
   monasterylane.rows.castle_2.push(tech(FERVOR))
+  if (isBonusSelected(BONUS_ID_WARRIOR_PRIEST)) monasterylane.rows.castle_2.push(unit(WARRIOR_PRIEST)) // Bonus unit: Can recruit Warrior Priests
+  // TODO add missionaries from boni "missionaries can be trained in monasteries"
   monasterylane.rows.imperial_1.push(tech(ILLUMINATION))
   monasterylane.rows.imperial_1.push(tech(BLOCK_PRINTING))
   monasterylane.rows.imperial_1.push(tech(FAITH))
