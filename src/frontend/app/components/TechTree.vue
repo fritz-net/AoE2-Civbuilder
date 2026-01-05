@@ -465,6 +465,32 @@ const allCarets = computed(() => {
   return carets
 })
 
+// Computed list of unclickable carets - includes base unclickable carets plus bonus-granted entities
+const effectiveUnclickableCarets = computed(() => {
+  const unclickable = [...unclickableCarets]
+  
+  // Add all bonus-granted entities (free units/techs/buildings) - these cannot be disabled
+  for (const unitId of grantedEntities.value.free.units) {
+    unclickable.push(`unit_${unitId}`)
+  }
+  for (const techId of grantedEntities.value.free.techs) {
+    unclickable.push(`tech_${techId}`)
+  }
+  for (const buildingId of grantedEntities.value.free.buildings) {
+    unclickable.push(`building_${buildingId}`)
+  }
+  
+  // Add all prerequisites of bonus-granted entities - these also cannot be disabled
+  for (const unitId of grantedEntities.value.prerequisites.units) {
+    unclickable.push(`unit_${unitId}`)
+  }
+  for (const techId of grantedEntities.value.prerequisites.techs) {
+    unclickable.push(`tech_${techId}`)
+  }
+  
+  return unclickable
+})
+
 const iconHeight = computed(() => Math.min(tree.value.height / 4 / 2, 112))
 
 const ageIcons = computed(() => {
@@ -494,7 +520,7 @@ const doneButtonText = computed(() => 'Done')
 // Tooltip texts for Fill and Reset buttons
 const fillButtonTooltip = computed(() => {
   if (!data.value) return 'Fill all available techs and units'
-  const totalTechs = allCarets.value.filter(c => !unclickableCarets.includes(c.id) && !isEnabled(c.id)).length
+  const totalTechs = allCarets.value.filter(c => !effectiveUnclickableCarets.value.includes(c.id) && !isEnabled(c.id)).length
   return `Fill all empty tech slots (${totalTechs} remaining techs)`
 })
 
@@ -930,7 +956,7 @@ function getHelpText(caret: Caret): string {
 
 function handleCaretClick(caret: Caret) {
   if (!props.editable) return
-  if (unclickableCarets.includes(caret.id)) return
+  if (effectiveUnclickableCarets.value.includes(caret.id)) return
   
   toggleCaret(caret.id)
 }
@@ -1121,6 +1147,9 @@ function enableCaret(caretId: string, fromUserClick: boolean = false) {
 function disableCaret(caretId: string) {
   if (caretId === 'tech_408') return // Spies/Treason is always enabled
   
+  // Prevent disabling bonus-granted units/techs and their prerequisites
+  if (effectiveUnclickableCarets.value.includes(caretId)) return
+  
   const type = idType(caretId)
   const id = idID(caretId)
   
@@ -1199,7 +1228,7 @@ function handleFill() {
   
   for (const caret of allCarets.value) {
     // Skip unclickable and already enabled carets
-    if (unclickableCarets.includes(caret.id)) continue
+    if (effectiveUnclickableCarets.value.includes(caret.id)) continue
     if (isEnabled(caret.id)) continue
     
     const cost = getCaretCost(caret.id)

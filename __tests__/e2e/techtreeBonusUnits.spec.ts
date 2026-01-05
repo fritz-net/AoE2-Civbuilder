@@ -104,17 +104,17 @@ test.describe('TechTree Bonus-Granted Units', () => {
     expect(points).toBe(9);
   });
 
-  test('should auto-enable Bombard Cannon prerequisite for Houfnice', async ({ page }) => {
+  test('should auto-enable Bombard Cannon and Chemistry prerequisites for Houfnice', async ({ page }) => {
     // Select "Can upgrade to Houfnice" bonus
     const houfniceCheckbox = page.getByRole('checkbox', { name: /Can upgrade to Houfnice \(ID 286\)/i });
     await houfniceCheckbox.check();
     await page.waitForTimeout(500);
     
-    // Verify points increased (should be 8 points total: Bombard Cannon (8))
-    // Houfnice itself is free, Chemistry no longer required as prerequisite
+    // Verify points increased (should be 14 points total: Chemistry (6) + Bombard Cannon (8))
+    // Houfnice itself is free
     const pointsText = await page.getByText(/Points Spent: \d+/i).textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
-    expect(points).toBe(8);
+    expect(points).toBe(14);
   });
 
   test('should remove bonus unit when bonus is deselected', async ({ page }) => {
