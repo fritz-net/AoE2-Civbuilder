@@ -161,6 +161,8 @@ const testBonusesGrouped = [
     bonuses: [
       { id: 53, name: 'Can upgrade to Imperial Camel Riders' },
       { id: 286, name: 'Can upgrade to Houfnice' },
+      { id: 309, name: 'Can upgrade to Royal Battle Elephants' },
+      { id: 310, name: 'Can upgrade to Royal Lancers' },
     ]
   },
   {
