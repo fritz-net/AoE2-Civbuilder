@@ -181,7 +181,6 @@ test.describe('TechTree Bonus-Granted Units', () => {
   });
 
   test('should preserve bonus units after reset', async ({ page }) => {
-    await page.goto('/v2/demo/techtree')
     await page.waitForTimeout(1000)
     
     // Select Slinger bonus
@@ -208,7 +207,6 @@ test.describe('TechTree Bonus-Granted Units', () => {
   });
 
   test('should replace Hussar with Winged Hussar when bonus is selected', async ({ page }) => {
-    await page.goto('/v2/demo/techtree')
     await page.waitForSelector('.techtree-container')
     
     // Select Winged Hussar) - replaces Hussar
@@ -225,10 +223,8 @@ test.describe('TechTree Bonus-Granted Units', () => {
   });
 
   test('should lock prerequisites when bonus unit is enabled', async ({ page }) => {
-    await page.goto('/v2/demo/techtree')
     
     // Wait for page to load
-    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
     
     // Select Houfnice bonus (ID 286) which requires Chemistry + Bombard Cannon
     const houfniceCheckbox = page.getByRole('checkbox', { name: /Houfnice/i })
@@ -253,8 +249,6 @@ test.describe('TechTree Bonus-Granted Units', () => {
   });
 
   test('should properly replace Hussar with Winged Hussar', async ({ page }) => {
-    await page.goto('/v2/demo/techtree')
-    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
     
     // Verify Hussar is initially visible
     const hussarElement = page.locator('[data-caret-id="unit_441"]')
@@ -277,8 +271,6 @@ test.describe('TechTree Bonus-Granted Units', () => {
   });
 
   test('should properly replace Paladin with Savar', async ({ page }) => {
-    await page.goto('/v2/demo/techtree')
-    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
     
     // Verify Paladin is initially visible
     const paladinElement = page.locator('[data-caret-id="unit_569"]')
@@ -301,8 +293,6 @@ test.describe('TechTree Bonus-Granted Units', () => {
   });
 
   test('should properly replace Two-Handed Swordsman and Champion with Legionary', async ({ page }) => {
-    await page.goto('/v2/demo/techtree')
-    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
     
     // Verify Two-Handed Swordsman and Champion are initially visible
     const twoHandedSwordsmanElement = page.locator('[data-caret-id="unit_473"]')
@@ -328,8 +318,6 @@ test.describe('TechTree Bonus-Granted Units', () => {
   });
 
   test('should properly replace Mill with Folwark', async ({ page }) => {
-    await page.goto('/v2/demo/techtree')
-    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
     
     // Verify Mill is initially visible
     const millElement = page.locator('[data-caret-id="building_68"]')
@@ -352,8 +340,6 @@ test.describe('TechTree Bonus-Granted Units', () => {
   });
 
   test('should properly replace Monastery with Fortified Church', async ({ page }) => {
-    await page.goto('/v2/demo/techtree')
-    await expect(page.getByText(/Tech Tree Demo/i)).toBeVisible()
     
     // Verify Monastery is initially visible
     const monasteryElement = page.locator('[data-caret-id="building_104"]')
