@@ -28,6 +28,39 @@
       <!-- Single Player Instructions -->
       <div class="instructions-section faq-section">
         <h2>Single Player / Local Mod Installation</h2>
+        
+        <h3 style="color: hsl(52, 100%, 50%); margin-top: 1.5rem;">Option 1: Auto-Install (Recommended) 🚀</h3>
+        <p>The easiest way to install your mod! Available in Chromium-based browsers (Chrome, Edge, Opera, Brave, etc.).</p>
+        <ol class="instructions-list">
+          <li>Click "Create Mod" and wait for it to be generated</li>
+          <li>When the dialog appears, select <strong>"Auto-Install to Steam"</strong></li>
+          <li>A folder picker will appear - navigate to and select your Age of Empires II directory:
+            <ul>
+              <li><strong>Windows (Steam):</strong> <code>C:\Users\[YourUsername]\Games\Age of Empires 2 DE</code></li>
+              <li><strong>Windows (MS Store):</strong> Navigate to your user data folder in WindowsApps</li>
+              <li><strong>Note:</strong> You may need to show hidden files/folders in your file explorer</li>
+            </ul>
+          </li>
+          <li>If you have multiple Steam profiles, a dialog will ask you to select which one to install to</li>
+          <li>Click "Allow" to grant the necessary permissions</li>
+          <li>The mod will be automatically extracted and placed in the <code>mods/local</code> folder!</li>
+          <li>Launch Age of Empires II: Definitive Edition</li>
+          <li>Your mod should be automatically enabled</li>
+          <li>On game start, select the data mod to use</li>
+        </ol>
+        
+        <div class="tip-box">
+          <strong>💡 Tips for Auto-Install:</strong>
+          <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+            <li>The browser will remember your selection for future installations</li>
+            <li>You can revoke permissions in your browser settings if needed</li>
+            <li>If you get a permission error, try running your browser as administrator</li>
+            <li>Make sure Age of Empires II is not running during installation</li>
+          </ul>
+        </div>
+        
+        <h3 style="color: hsl(52, 100%, 50%); margin-top: 2rem;">Option 2: Manual Installation 📁</h3>
+        <p>For browsers that don't support auto-install, or if you prefer manual control.</p>
         <ol class="instructions-list">
           <li>Locate the downloaded .zip file</li>
           <li>Extract the contents to your Age of Empires II mods folder:
@@ -254,6 +287,18 @@ function handleDownloadVanilla() {
   border-left: 4px solid hsl(52, 100%, 50%);
   border-radius: 4px;
   margin-top: 1.5rem;
+}
+
+.tip-box {
+  padding: 1rem;
+  background: rgba(30, 80, 120, 0.3);
+  border-left: 4px solid hsl(52, 100%, 50%);
+  border-radius: 4px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  color: hsla(52, 100%, 50%, 0.9);
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 .download-button-wrapper {
