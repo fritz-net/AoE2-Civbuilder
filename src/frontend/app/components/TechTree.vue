@@ -478,6 +478,8 @@ const confirmDialogMessage = computed(() => {
 
 const confirmDialogWarning = computed(() => {
   if (!props.editable) return ''
+  // In build mode, don't show warning about points since there's no limit
+  if (props.mode === 'build') return ''
   if (techtreePoints.value > 0) {
     const pointsText = techtreePoints.value === 1 ? 'point' : 'points'
     return `You have ${techtreePoints.value} ${pointsText} remaining! You can spend these ${pointsText} on more techs, units, or buildings.`

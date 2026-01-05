@@ -148,7 +148,7 @@ function handleImageError(e: Event) {
 
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   padding: 0.5rem;
 }
@@ -233,7 +233,7 @@ function handleImageError(e: Event) {
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .image-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
   }
   
@@ -252,7 +252,7 @@ function handleImageError(e: Event) {
 
 @media (max-width: 480px) {
   .image-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
   }
   
