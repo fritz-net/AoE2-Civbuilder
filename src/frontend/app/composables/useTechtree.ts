@@ -765,6 +765,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_RAM))
   if (isBonusSelected(BONUS_ID_HOUFNICE)) siegeworkshoplane.rows.imperial_2.push(unit(HOUFNICE)) // Bonus unit: Can upgrade to Houfnice (after Bombard Cannon)
   if (isBonusSelected(BONUS_ID_MOUNTED_TREBUCHET)) siegeworkshoplane.rows.imperial_2.push(unit(MOUNTED_TREBUCHET)) // Bonus unit: Can train Mounted Trebuchets
+  siegeworkshoplane.rows.imperial_2.push(unit(TRACTION_TREBUCHET)) // Standard unit - different from Mounted Trebuchet
   siegeworkshoplane.rows.imperial_2.push(unit(SIEGE_ONAGER))
   tree.lanes.push(siegeworkshoplane)
 
