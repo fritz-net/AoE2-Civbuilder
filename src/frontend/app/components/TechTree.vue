@@ -653,14 +653,17 @@ watch(() => props.selectedBonuses, () => {
     enableGrantedEntities()
     
     // Restore scroll position on next tick (after DOM update)
+    // Use requestAnimationFrame for more reliable timing after Vue's DOM updates
     nextTick(() => {
-      if (techtreeRef.value) {
-        techtreeRef.value.scrollLeft = currentScrollLeft
-        techtreeRef.value.scrollTop = currentScrollTop
-      }
+      requestAnimationFrame(() => {
+        if (techtreeRef.value) {
+          techtreeRef.value.scrollLeft = currentScrollLeft
+          techtreeRef.value.scrollTop = currentScrollTop
+        }
+      })
     })
   }
-}, { deep: true })
+}, { deep: true, flush: 'post' })
 
 // Helper function to enable entities granted by bonuses
 function enableGrantedEntities() {
