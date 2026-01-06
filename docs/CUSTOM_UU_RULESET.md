@@ -178,7 +178,7 @@ Each unit has a "power budget" based on its statistics. Higher stats require hig
 
 **Base Points by Type:**
 - Infantry: 50 points
-- Cavalry: 80 points (+30 bonus budget, similar to hero mode)
+- Cavalry: 35 points (-30 bonus budget, similar to hero mode: lower base = more budget to spend)
 - Archers: 45 points
 - Siege: 70 points
 
@@ -214,14 +214,14 @@ Base Infantry (50 points)
 Recommended cost: 72 * 1.2 = ~86 resources
 Distribution: 55 food + 31 gold
 
-Base Cavalry (80 points)
+Base Cavalry (35 points - lower base gives +30 budget bonus)
 + 20 HP (4 points)
 + 2 Attack (6 points)
 + 1 Melee Armor (4 points)
-= 94 total points
+= 49 total points
 
-Recommended cost: 94 * 1.2 * 1.3 = ~146 resources
-Distribution: 58 food + 88 gold
+Recommended cost: 49 * 1.2 * 1.3 = ~76 resources
+Distribution: 30 food + 46 gold
 ```
 
 **Note on Resource Costs:**
@@ -257,11 +257,11 @@ When **Hero Mode** is enabled (see implementation in `src/frontend/app/composabl
 
 **Hero Mode Example:**
 ```
-Normal Cavalry Unit (80 points): 78 food + 117 gold = 195 total (with 1.3x cavalry multiplier)
-Hero Cavalry Unit (80 - 30 = 50 base, but can spend up to 110):
-  - At max points (110 spent): ~200 power
-  - Cost: 200 * 1.2 * 1.3 * 3.0 = 936 total (before distribution)
-  - Distribution: ~374F + 562G (or enforced minimum 300F + 300G)
+Normal Cavalry Unit (35 base points, +30 budget bonus): 42F + 63G = 105 total (with 1.3x cavalry multiplier)
+Hero Cavalry Unit (35 - 30 = 5 base, can spend up to 65 points):
+  - At max points (65 spent): ~65 power
+  - Cost: 65 * 1.2 * 1.3 * 3.0 = 304 total (before distribution)
+  - Distribution: ~122F + 182G (or enforced minimum 300F + 300G)
 ```
 
 ## Optic/Sprite Selection

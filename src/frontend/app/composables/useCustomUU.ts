@@ -422,7 +422,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
   const calculatePowerBudget = (unit: CustomUUData): number => {
     const basePoints: Record<string, number> = {
       infantry: 50,
-      cavalry: 80, // Increased from 65 to give cavalry +30 budget (like hero mode bonus)
+      cavalry: 35, // Reduced from 65 to give cavalry +30 budget bonus (like hero mode: lower base = more budget)
       archer: 45,
       siege: 70
     };
