@@ -274,35 +274,11 @@ test.describe('Draft Flow - Download Phase', () => {
 
 test.describe('Draft Flow - TechTree Phase', () => {
   test('should display tech tree points correctly (not 0)', async ({ page }) => {
-    // This test verifies the TechTree receives the correct points from the draft preset
-    const { hostLink } = await createDraft(page, 1);
-    await joinAsHost(page, hostLink, 'TechTree Tester');
+    // Verify the draft creation uses correct default tech tree points
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
-    // Start draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    if (await startButton.isVisible()) {
-      await startButton.click();
-      await page.waitForTimeout(3000);
-    }
-    
-    // Complete Phase 1 (setup)
-    const setupPhase = page.locator('.setup-phase');
-    if (await setupPhase.isVisible().catch(() => false)) {
-      const civNameInput = page.locator('#civName');
-      await civNameInput.fill('TechTree Test Civ');
-      
-      const nextButton = page.getByRole('button', { name: /Next/i });
-      await nextButton.click();
-      await page.waitForTimeout(3000);
-    }
-    
-    // Try to complete some card selections to get to Phase 3
-    // The test expects 200 points by default (set in draft creation form)
     const expectedPoints = 200;
-    
-    // Note: Getting to Phase 3 requires completing all draft rounds
-    // For this test, we verify the draft creation used correct default points
-    await page.goto('/v2/draft/create');
     const techPointsInput = page.locator('#techTreePoints');
     const defaultPoints = await techPointsInput.inputValue();
     expect(defaultPoints).toBe(expectedPoints.toString());
@@ -311,53 +287,59 @@ test.describe('Draft Flow - TechTree Phase', () => {
 
 test.describe('Draft Flow - Flag Rendering', () => {
   test('should display FlagCreator canvas in Phase 1 setup', async ({ page }) => {
-    const { hostLink } = await createDraft(page, 1);
-    await joinAsHost(page, hostLink, 'Flag Tester');
-    await startDraft(page);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    const { hostLink } = await draftCreatePage.createDraft({ numPlayers: 1 });
+    
+    const playerPage = new DraftPlayerPage(page);
+    await playerPage.navigate(hostLink);
+    await playerPage.joinDraft('Flag Tester');
+    await playerPage.startDraft();
     
     // Verify Phase 1 has flag creator
-    const setupPhase = page.locator('.setup-phase');
-    if (await setupPhase.isVisible().catch(() => false)) {
-      // Look for flag canvas in FlagCreator component
-      const flagCanvas = page.locator('.flag-canvas');
-      const flagCreator = page.locator('.flag-creator');
-      
-      // Either the canvas or the component should be visible
-      const isFlagVisible = await flagCanvas.isVisible().catch(() => false) ||
-                           await flagCreator.isVisible().catch(() => false);
-      
-      expect(isFlagVisible).toBe(true);
-    }
+    const flagCanvas = page.locator('.flag-canvas');
+    const flagCreator = page.locator('.flag-creator');
+    
+    // Either the canvas or the component should be visible
+    const canvasVisible = await flagCanvas.isVisible().catch(() => false);
+    const creatorVisible = await flagCreator.isVisible().catch(() => false);
+    expect(canvasVisible || creatorVisible).toBe(true);
   });
 
   test('should have flag controls in Phase 1 setup', async ({ page }) => {
-    const { hostLink } = await createDraft(page, 1);
-    await joinAsHost(page, hostLink, 'Flag Controls Tester');
-    await startDraft(page);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    const { hostLink } = await draftCreatePage.createDraft({ numPlayers: 1 });
     
-    // Verify Phase 1 has flag controls
-    const setupPhase = page.locator('.setup-phase');
-    if (await setupPhase.isVisible().catch(() => false)) {
-      // Look for flag control buttons (< and > for cycling colors)
-      const navButtons = page.locator('.nav-btn, .flag-control-row button');
-      const buttonCount = await navButtons.count();
-      
-      // Should have navigation buttons for flag customization
-      expect(buttonCount).toBeGreaterThan(0);
-    }
+    const playerPage = new DraftPlayerPage(page);
+    await playerPage.navigate(hostLink);
+    await playerPage.joinDraft('Flag Controls Tester');
+    await playerPage.startDraft();
+    
+    // Look for flag control buttons
+    const navButtons = page.locator('.nav-btn, .flag-control-row button');
+    const buttonCount = await navButtons.count();
+    
+    // Should have navigation buttons for flag customization
+    expect(buttonCount).toBeGreaterThan(0);
   });
 
   test('should display player flags in Phase 2 card selection', async ({ page }) => {
-    const { hostLink } = await createDraft(page, 1);
-    await joinAsHost(page, hostLink, 'Flag Phase2 Tester');
-    await startDraft(page);
-    await completeSetupPhase(page, 'Flag Test Civ');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    const { hostLink } = await draftCreatePage.createDraft({ numPlayers: 1 });
+    
+    const playerPage = new DraftPlayerPage(page);
+    await playerPage.navigate(hostLink);
+    await playerPage.joinDraft('Flag Phase2 Tester');
+    await playerPage.startDraft();
+    await playerPage.completeSetupPhase('Flag Test Civ');
     
     // Wait for Phase 2 (card drafting)
-    const draftBoard = page.locator('.draft-board');
-    if (await draftBoard.isVisible({ timeout: 10000 }).catch(() => false)) {
-      // Look for flag canvases in the players sidebar
-      const flagCanvases = page.locator('.flag-canvas');
+    await expect(page.locator('.draft-board')).toBeVisible();
+    
+    // Look for flag canvases in the players sidebar
+    const flagCanvases = page.locator('.flag-canvas');
       const canvasCount = await flagCanvases.count();
       
       // Should have at least one flag canvas (for the player)
