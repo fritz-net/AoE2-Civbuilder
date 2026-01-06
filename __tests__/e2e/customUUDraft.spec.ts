@@ -17,11 +17,7 @@ test.describe('Custom UU Draft - Creation', () => {
 
     await draftCreatePage.setNumPlayers(2);
     await draftCreatePage.expandAdvancedSettings();
-
-    // Enable custom UU mode
-    const customUUCheckbox = page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i });
-    await customUUCheckbox.check();
-    await expect(customUUCheckbox).toBeChecked();
+    await draftCreatePage.enableCustomUUMode();
 
     await draftCreatePage.clickStartDraft();
     const { hostLink, draftId } = await draftCreatePage.getDraftLinks();
@@ -52,10 +48,7 @@ test.describe('Custom UU Draft - Flow (Single Player)', () => {
 
     await draftCreatePage.setNumPlayers(1);
     await draftCreatePage.expandAdvancedSettings();
-
-    const customUUCheckbox = page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i });
-    await customUUCheckbox.check();
-    await expect(customUUCheckbox).toBeChecked();
+    await draftCreatePage.enableCustomUUMode();
 
     await draftCreatePage.clickStartDraft();
     const { hostLink } = await draftCreatePage.getDraftLinks();
@@ -92,9 +85,7 @@ test.describe('Custom UU Draft - Custom UU Phase', () => {
 
     // Enable custom UU mode
     await draftCreatePage.expandAdvancedSettings();
-    const customUUCheckbox = page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i });
-    await customUUCheckbox.check();
-    await expect(customUUCheckbox).toBeChecked();
+    await draftCreatePage.enableCustomUUMode();
 
     // Start draft
     await draftCreatePage.clickStartDraft();
@@ -126,8 +117,7 @@ test.describe('Custom UU Draft - Custom UU Phase', () => {
 
     // Enable custom UU mode
     await draftCreatePage.expandAdvancedSettings();
-    const customUUCheckbox = page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i });
-    await customUUCheckbox.check();
+    await draftCreatePage.enableCustomUUMode();
 
     // Start draft
     await draftCreatePage.clickStartDraft();
@@ -169,8 +159,7 @@ test.describe('Custom UU Draft - Backend Integration', () => {
 
     // Enable custom UU mode
     await draftCreatePage.expandAdvancedSettings();
-    const customUUCheckbox = page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i });
-    await customUUCheckbox.check();
+    await draftCreatePage.enableCustomUUMode();
 
     // Start draft
     await draftCreatePage.clickStartDraft();
@@ -198,8 +187,7 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     await playerPage.selectCards(3);
 
     // Should reach tech tree phase
-    const techTreeContainer = page.locator('.techtree-container');
-    await expect(techTreeContainer).toBeVisible();
+    await playerPage.assertInTechTreePhase();
 
     // Complete tech tree
     await playerPage.completeTechTree();
@@ -220,9 +208,7 @@ test.describe('Custom UU Draft - Error Handling', () => {
     await draftCreatePage.setNumPlayers(1);
     await draftCreatePage.setBonusesPerPlayer(1);
     await draftCreatePage.expandAdvancedSettings();
-
-    const customUUCheckbox = page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i });
-    await customUUCheckbox.check();
+    await draftCreatePage.enableCustomUUMode();
 
     await draftCreatePage.clickStartDraft();
     const { hostLink } = await draftCreatePage.getDraftLinks();
@@ -249,9 +235,7 @@ test.describe('Custom UU Draft - Error Handling', () => {
     await draftCreatePage.setNumPlayers(1);
     await draftCreatePage.setBonusesPerPlayer(1);
     await draftCreatePage.expandAdvancedSettings();
-
-    const customUUCheckbox = page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i });
-    await customUUCheckbox.check();
+    await draftCreatePage.enableCustomUUMode();
 
     await draftCreatePage.clickStartDraft();
     const { hostLink } = await draftCreatePage.getDraftLinks();

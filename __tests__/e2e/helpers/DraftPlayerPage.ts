@@ -138,4 +138,36 @@ export class DraftPlayerPage extends BasePage {
       await expect(this.page.getByText(text, { exact: false }).first()).toBeVisible();
     }
   }
+
+  /**
+   * Check if currently in tech tree phase
+   */
+  async isInTechTreePhase(): Promise<boolean> {
+    const techTreeContainer = this.page.locator(this.selectors.techTreeContainer);
+    return await techTreeContainer.isVisible();
+  }
+
+  /**
+   * Assert currently in tech tree phase
+   */
+  async assertInTechTreePhase(): Promise<void> {
+    const techTreeContainer = this.page.locator(this.selectors.techTreeContainer);
+    await expect(techTreeContainer).toBeVisible();
+  }
+
+  /**
+   * Check if currently in download phase
+   */
+  async isInDownloadPhase(): Promise<boolean> {
+    const downloadPhase = this.page.locator(this.selectors.downloadPhase);
+    return await downloadPhase.isVisible();
+  }
+
+  /**
+   * Assert currently in download phase
+   */
+  async assertInDownloadPhase(): Promise<void> {
+    const downloadPhase = this.page.locator(this.selectors.downloadPhase);
+    await expect(downloadPhase).toBeVisible();
+  }
 }
