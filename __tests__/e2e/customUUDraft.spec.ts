@@ -264,9 +264,6 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     // 3. Transitions to tech tree phase correctly
     // 4. Mod generation handles custom UU objects (no "[object Object]" errors)
     // 5. Zip file is generated successfully
-    // Note: This test can take 2-3 minutes due to C++ mod generation
-    test.setTimeout(180000); // 3 minutes timeout for this test
-    // 5. Zip file is generated successfully
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     await draftCreatePage.assertPageLoaded();
@@ -337,22 +334,17 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     
     // Complete the tech tree and wait for mod generation
     // Use defensive approach like draftFlow.spec.ts
-    // First ensure the tree is fully loaded
-    await page.waitForTimeout(3000);
-    
     const finishButton = page.getByRole('button', { name: /Done/i });
     await expect(finishButton).toBeVisible({ timeout: 10000 });
     await expect(finishButton).toBeEnabled({ timeout: 5000 });
     await finishButton.click();
     
-    // Wait longer after clicking to allow server processing to start
-    console.log('Clicked Done button, waiting for mod generation to begin...');
-    await page.waitForTimeout(10000);
+    // Wait after clicking to allow server processing to start (same as draftFlow)
+    await page.waitForTimeout(2000);
     
     // Wait for transition to download phase (phase 6)
-    // This may take 60-90 seconds for the C++ mod builder to process the custom UU
     const downloadPhase = page.locator('.download-phase');
-    const isDownloadVisible = await downloadPhase.isVisible({ timeout: 120000 }).catch(() => false);
+    const isDownloadVisible = await downloadPhase.isVisible({ timeout: 30000 }).catch(() => false);
     
     if (isDownloadVisible) {
       // Verify the "Download Mod" button is visible
