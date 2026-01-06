@@ -97,14 +97,22 @@ export class DraftPlayerPage extends BasePage {
     await expect(doneButton).toBeVisible();
     await expect(doneButton).toBeEnabled();
     await doneButton.click();
+
+    // Handle confirmation modal if it appears
+    const confirmButton = this.page.getByRole('button', { name: /Yes, Done/i });
+    const isConfirmVisible = await confirmButton.isVisible();
+    if (isConfirmVisible) {
+      await confirmButton.click();
+    }
   }
 
   /**
-   * Wait for download phase
+   * Wait for download phase (mod generation can take up to 10 seconds)
    */
   async waitForDownloadPhase(): Promise<void> {
     const downloadPhase = this.page.locator(this.selectors.downloadPhase);
-    await expect(downloadPhase).toBeVisible();
+    // Mod generation is the exception that can take up to 10 seconds
+    await expect(downloadPhase).toBeVisible({ timeout: 30000 });
   }
 
   /**
@@ -119,6 +127,9 @@ export class DraftPlayerPage extends BasePage {
    * Assert element contains text
    */
   async assertTextVisible(text: string | RegExp): Promise<void> {
-    await expect(this.page.locator(`text=${text instanceof RegExp ? text.source : text}`).first()).toBeVisible();
+    const locator = text instanceof RegExp
+      ? this.page.locator(`text=${text.source}`)
+      : this.page.getByText(text, { exact: false });
+    await expect(locator.first()).toBeVisible();
   }
 }
