@@ -155,7 +155,7 @@ const ARMOR_CLASS_NAMES: Record<number, string> = {
   30: 'Camels',
   //31: 'Leitis Attack',
   32: 'Condottiero',
-  34: 'Fishing Ships',s
+  34: 'Fishing Ships',
   35: 'Mamelukes',
   36: 'Heros'
 };
