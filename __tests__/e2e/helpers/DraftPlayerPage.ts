@@ -98,8 +98,8 @@ export class DraftPlayerPage extends BasePage {
     await expect(doneButton).toBeEnabled();
     await doneButton.click();
 
-    // Handle confirmation modal if it appears
-    // Some configurations show "Finalize Tech Tree?" modal
+    // Handle optional confirmation modal
+    // Modal appears when finishing tech tree with unspent points or in certain draft configurations
     const confirmButton = this.page.getByRole('button', { name: /Yes, Done/i });
     try {
       await expect(confirmButton).toBeVisible({ timeout: 2000 });

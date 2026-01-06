@@ -69,22 +69,6 @@ export class CustomUUEditorPage extends BasePage {
   }
 
   /**
-   * Check if submit button is enabled
-   */
-  async isSubmitEnabled(): Promise<boolean> {
-    const submitButton = this.page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
-    return await submitButton.isEnabled();
-  }
-
-  /**
-   * Check if submit button is disabled
-   */
-  async isSubmitDisabled(): Promise<boolean> {
-    const submitButton = this.page.getByRole('button', { name: /Submit Custom Unit|Submit/i });
-    return await submitButton.isDisabled();
-  }
-
-  /**
    * Assert submit button is enabled
    */
   async assertSubmitEnabled(): Promise<void> {
