@@ -99,10 +99,13 @@ export class DraftPlayerPage extends BasePage {
     await doneButton.click();
 
     // Handle confirmation modal if it appears
+    // Some configurations show "Finalize Tech Tree?" modal
     const confirmButton = this.page.getByRole('button', { name: /Yes, Done/i });
-    const isConfirmVisible = await confirmButton.isVisible();
-    if (isConfirmVisible) {
+    try {
+      await expect(confirmButton).toBeVisible({ timeout: 2000 });
       await confirmButton.click();
+    } catch {
+      // No confirmation modal appeared - this is fine
     }
   }
 
@@ -127,9 +130,12 @@ export class DraftPlayerPage extends BasePage {
    * Assert element contains text
    */
   async assertTextVisible(text: string | RegExp): Promise<void> {
-    const locator = text instanceof RegExp
-      ? this.page.locator(`text=${text.source}`)
-      : this.page.getByText(text, { exact: false });
-    await expect(locator.first()).toBeVisible();
+    if (text instanceof RegExp) {
+      // For RegExp, use getByText which handles regex properly
+      await expect(this.page.getByText(text).first()).toBeVisible();
+    } else {
+      // For string, use getByText with partial matching
+      await expect(this.page.getByText(text, { exact: false }).first()).toBeVisible();
+    }
   }
 }

@@ -34,14 +34,6 @@ export class CustomUUEditorPage extends BasePage {
    * Select unit type
    */
   async selectUnitType(type: 'Infantry' | 'Archer' | 'Cavalry' | 'Siege' | 'Naval'): Promise<void> {
-    const buttonMap = {
-      Infantry: this.selectors.infantryButton,
-      Archer: this.selectors.archerButton,
-      Cavalry: this.selectors.cavalryButton,
-      Siege: this.selectors.siegeButton,
-      Naval: this.selectors.navalButton,
-    };
-
     const button = this.page.getByRole('button', { name: new RegExp(type, 'i') });
     await expect(button).toBeVisible();
     await button.click();
