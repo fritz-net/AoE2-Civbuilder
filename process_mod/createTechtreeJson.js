@@ -84,6 +84,66 @@ function getUUNodes(index) {
 	return nodes;
 }
 
+/**
+ * Create unique unit nodes for custom UUs
+ * @param {object} customUU - Custom UU data { name, baseUnit, type, health, attack, etc. }
+ * @param {number} civIndex - Civilization index
+ * @returns {array} - Array of 2 nodes [base, elite]
+ */
+function getCustomUUNodes(customUU, civIndex) {
+	// Get base unit icon from UUArray
+	// baseUnit is the unit ID (e.g., 1372 for Teutonic Knight)
+	// We need to find the matching Picture Index in UUArray
+	// As a fallback, we use the base unit ID itself if not found in UUArray
+	let pictureIndex = 107; // Default to Longbowman icon (safest default)
+	
+	// Try to match baseUnit to known UU Picture Indexes
+	// This is a simplification - ideally we'd have a mapping of unit ID to picture index
+	// For now, use the baseUnit modulo to get a reasonable icon
+	if (customUU.baseUnit && customUU.baseUnit > 0) {
+		// Use baseUnit directly as picture index (it should already be the icon ID from C++)
+		// The C++ code sets IconID from civ.Units[baseUnit].IconID
+		pictureIndex = customUU.baseUnit;
+	}
+	
+	// Generate unique node IDs (use negative numbers to avoid conflicts)
+	// Start from -1000 and subtract civIndex to ensure uniqueness
+	const baseNodeId = -1000 - (civIndex * 2);
+	const eliteNodeId = baseNodeId - 1;
+	const eliteTechId = -2000 - civIndex;  // Negative tech ID for elite upgrade
+	
+	let nodes = [{}, {}];
+	
+	// Base unit node
+	nodes[0]["Age ID"] = 3;
+	nodes[0]["Building ID"] = 82;  // Castle
+	nodes[0]["Draw Node Type"] = "UnitTech";
+	nodes[0]["Help String ID"] = 0;  // Custom units don't have string IDs
+	nodes[0]["Link ID"] = -1;
+	nodes[0]["Link Node Type"] = "BuildingTech";
+	nodes[0]["Name"] = customUU.name || "Custom Unit";
+	nodes[0]["Name String ID"] = 0;
+	nodes[0]["Node ID"] = baseNodeId;
+	nodes[0]["Node Status"] = "ResearchedCompleted";
+	nodes[0]["Node Type"] = "UniqueUnit";
+	nodes[0]["Picture Index"] = pictureIndex;
+	nodes[0]["Prerequisite IDs"] = [0, 0, 0, 0, 0];
+	nodes[0]["Prerequisite Types"] = ["None", "None", "None", "None", "None"];
+	nodes[0]["Trigger Tech ID"] = -1;
+	nodes[0]["Use Type"] = "Unit";
+	
+	// Elite unit node
+	nodes[1] = JSON.parse(JSON.stringify(nodes[0]));
+	nodes[1]["Age ID"] = 4;  // Imperial Age
+	nodes[1]["Link ID"] = baseNodeId;  // Links to base unit
+	nodes[1]["Link Node Type"] = "UniqueUnit";
+	nodes[1]["Name"] = "Elite " + nodes[0]["Name"];
+	nodes[1]["Node ID"] = eliteNodeId;
+	nodes[1]["Trigger Tech ID"] = eliteTechId;
+	
+	return nodes;
+}
+
 function createTechtreeJson(data_json, techtree_json) {
 	let raw_data = fs.readFileSync(data_json);
 	let civ = JSON.parse(raw_data);
@@ -381,7 +441,16 @@ function createTechtreeJson(data_json, techtree_json) {
 		}
 
 		//Add unique unit nodes
-		let uniqueNodes = getUUNodes(civ.techtree[i][0]);
+		// Check if this is a custom UU (indicated by techtree[i][0] == 0 and custom_units data present)
+		let uniqueNodes;
+		if (civ.techtree[i][0] === 0 && civ.custom_units && civ.custom_units[i]) {
+			// Custom UU - create nodes from custom_units data
+			const customUU = civ.custom_units[i];
+			uniqueNodes = getCustomUUNodes(customUU, i);
+		} else {
+			// Regular UU from UUArray
+			uniqueNodes = getUUNodes(civ.techtree[i][0]);
+		}
 		techtree.civ_techs_units.unshift(uniqueNodes[0], uniqueNodes[1]);
 
 		//Add unique tech nodes

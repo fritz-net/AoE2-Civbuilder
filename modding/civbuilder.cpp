@@ -942,10 +942,18 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
         civ.Units[uuID].Name = name;
         civ.Units[eID].Name = "Elite " + name;
         
+        // Get IconID from base unit (e.g., Teutonic Knight has IconID 45)
+        // This is used for display in game buildings when training units
+        int16_t baseUnitIconID = -1;
+        if (baseUnit > 0 && baseUnit < civ.Units.size()) {
+            baseUnitIconID = civ.Units[baseUnit].IconID;
+        }
+        
         // Base unit stats
         civ.Units[uuID].HitPoints = health;
         civ.Units[uuID].Speed = speed;
         civ.Units[uuID].LineOfSight = lineOfSight;
+        civ.Units[uuID].IconID = baseUnitIconID;  // Set IconID from base unit
         setTrainTime(civ.Units[uuID].Creatable, trainTime);
         civ.Units[uuID].Creatable.HeroMode = heroMode ? 1 : 0;
         
@@ -953,6 +961,7 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
         civ.Units[eID].HitPoints = health + (health / 4);
         civ.Units[eID].Speed = speed;
         civ.Units[eID].LineOfSight = lineOfSight + 2;
+        civ.Units[eID].IconID = baseUnitIconID;  // Set IconID from base unit
         setTrainTime(civ.Units[eID].Creatable, trainTime);
         civ.Units[eID].Creatable.HeroMode = heroMode ? 1 : 0;
         
