@@ -882,21 +882,31 @@ void Civbuilder::createUU(int civbuilderID, int baseID, string name, vector<int>
 
 // Create a custom unique unit from JSON data
 void Civbuilder::createCustomUU(int civIndex, Value customData) {
-    // Extract custom UU properties from JSON
+    // Extract custom UU properties from JSON with defensive checks
+    if (!customData.isMember("name") || !customData.isMember("baseUnit")) {
+        cerr << "[C++]: ERROR - Custom UU missing required fields (name, baseUnit) for civ " << civIndex << endl;
+        return;
+    }
+    
     string name = customData["name"].asString();
     int baseUnit = customData["baseUnit"].asInt();
-    int health = customData["health"].asInt();
-    int attack = customData["attack"].asInt();
-    int meleeArmor = customData["meleeArmor"].asInt();
-    int pierceArmor = customData["pierceArmor"].asInt();
-    double speed = customData["speed"].asDouble();
-    int trainTime = customData["trainTime"].asInt();
     
-    // Cost extraction
-    int foodCost = customData["cost"]["food"].asInt();
-    int woodCost = customData["cost"]["wood"].asInt();
-    int stoneCost = customData["cost"]["stone"].asInt();
-    int goldCost = customData["cost"]["gold"].asInt();
+    // Use get() with defaults for all fields to avoid crashes
+    int health = customData.get("health", 100).asInt();
+    int attack = customData.get("attack", 10).asInt();
+    int meleeArmor = customData.get("meleeArmor", 0).asInt();
+    int pierceArmor = customData.get("pierceArmor", 0).asInt();
+    double speed = customData.get("speed", 1.0).asDouble();
+    int trainTime = customData.get("trainTime", 30).asInt();
+    
+    // Cost extraction with defensive checks
+    int foodCost = 0, woodCost = 0, stoneCost = 0, goldCost = 0;
+    if (customData.isMember("cost") && customData["cost"].isObject()) {
+        foodCost = customData["cost"].get("food", 0).asInt();
+        woodCost = customData["cost"].get("wood", 0).asInt();
+        stoneCost = customData["cost"].get("stone", 0).asInt();
+        goldCost = customData["cost"].get("gold", 0).asInt();
+    }
     
     // Optional fields with defaults
     double attackSpeed = customData.get("attackSpeed", 2.0).asDouble();
@@ -932,6 +942,11 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
         civ.Units[uuID].Name = name;
         civ.Units[eID].Name = "Elite " + name;
         
+        // Set tech tree icon to show base unit picture
+        // This makes the unit appear correctly in the tech tree
+        civ.Units[uuID].IconID = baseUnit;
+        civ.Units[eID].IconID = baseUnit;
+        
         // Base unit stats
         civ.Units[uuID].HitPoints = health;
         civ.Units[uuID].Speed = speed;
@@ -946,6 +961,12 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
         setTrainTime(civ.Units[eID].Creatable, trainTime);
         civ.Units[eID].Creatable.HeroMode = heroMode ? 1 : 0;
         
+        // Hero mode: Unit can only be built once
+        // This is controlled via civ.Resources[29]
+        if (heroMode) {
+            civ.Resources[29] = 1;  // Enables hero mode for this civ
+        }
+        
         // Set attack and armor for base unit
         if (civ.Units[uuID].Type50.Attacks.size() > 0) {
             civ.Units[uuID].Type50.Attacks[0].Amount = attack;
@@ -956,12 +977,13 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
             civ.Units[uuID].Type50.DisplayedMeleeArmour = meleeArmor;
             civ.Units[uuID].Creatable.DisplayedPierceArmour = pierceArmor;
             // Find and set armor classes properly
+            // According to https://ageofempires.fandom.com/wiki/Armor_class_(Age_of_Empires_II)
             for (auto &armor : civ.Units[uuID].Type50.Armours) {
                 if (armor.Class == 3) {
                     armor.Amount = pierceArmor; // Class 3 is pierce armor
                 }
                 if (armor.Class == 4) {
-                    armor.Amount = pierceArmor; // Class 4 is also pierce armor
+                    armor.Amount = meleeArmor; // Class 4 is melee armor
                 }
             }
         }
@@ -980,7 +1002,7 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
                     armor.Amount = pierceArmor + 1; // Class 3 is pierce armor
                 }
                 if (armor.Class == 4) {
-                    armor.Amount = pierceArmor + 1; // Class 4 is also pierce armor
+                    armor.Amount = meleeArmor + 1; // Class 4 is melee armor
                 }
             }
         }
