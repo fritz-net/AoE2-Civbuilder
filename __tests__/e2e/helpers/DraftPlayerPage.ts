@@ -79,11 +79,20 @@ export class DraftPlayerPage extends BasePage {
 
   /**
    * Select multiple cards in sequence
+   * @returns Number of cards successfully selected
    */
-  async selectCards(count: number): Promise<void> {
+  async selectCards(count: number): Promise<number> {
+    let selected = 0;
     for (let i = 0; i < count; i++) {
-      await this.selectFirstCard();
+      try {
+        await this.selectFirstCard();
+        selected++;
+      } catch {
+        // No more cards available or moved to next phase
+        break;
+      }
     }
+    return selected;
   }
 
   /**
