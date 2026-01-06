@@ -45,8 +45,9 @@ export function getDefaultSteamPaths(): string[] {
 
 /**
  * Extract mod files from a ZIP blob and install to directory
+ * Handles nested ZIPs (e.g., {modname}-data.zip and {modname}-ui.zip)
  * @param modBlob The ZIP file blob
- * @param targetDirHandle The target directory handle
+ * @param targetDirHandle The target directory handle (mods/local)
  * @param modName The name of the mod (without extension)
  */
 export async function installModToDirectory(
@@ -58,37 +59,93 @@ export async function installModToDirectory(
   const JSZipModule = await import('jszip')
   const JSZip = JSZipModule.default
   
-  // Load the ZIP file
-  const zip = await JSZip.loadAsync(modBlob)
+  // Load the outer ZIP file
+  const outerZip = await JSZip.loadAsync(modBlob)
   
-  // Extract all files
-  const promises: Promise<void>[] = []
+  // Find nested ZIP files (e.g., {modname}-data.zip, {modname}-ui.zip)
+  const nestedZips: { name: string; content: any }[] = []
   
-  zip.forEach((relativePath, file) => {
-    if (!file.dir) {
-      promises.push(
-        (async () => {
-          const content = await file.async('uint8array')
-          const pathParts = relativePath.split('/')
-          
-          // Create nested directories if needed
-          let currentDir = targetDirHandle
-          for (let i = 0; i < pathParts.length - 1; i++) {
-            currentDir = await currentDir.getDirectoryHandle(pathParts[i], { create: true })
-          }
-          
-          // Write the file
-          const fileName = pathParts[pathParts.length - 1]
-          const fileHandle = await currentDir.getFileHandle(fileName, { create: true })
-          const writable = await fileHandle.createWritable()
-          await writable.write(content)
-          await writable.close()
-        })()
-      )
+  outerZip.forEach((relativePath, file) => {
+    if (!file.dir && relativePath.toLowerCase().endsWith('.zip')) {
+      nestedZips.push({ name: relativePath, content: file })
     }
   })
   
-  await Promise.all(promises)
+  // If there are nested ZIPs, extract them
+  if (nestedZips.length > 0) {
+    // Extract each nested ZIP to its own folder
+    const extractPromises = nestedZips.map(async ({ name, content }) => {
+      // Get the ZIP content as blob
+      const zipBlob = await content.async('blob')
+      const innerZip = await JSZip.loadAsync(zipBlob)
+      
+      // Extract folder name from ZIP file name (remove .zip extension)
+      const folderName = name.replace(/\.zip$/i, '')
+      
+      // Create the folder in the target directory
+      const modFolderHandle = await targetDirHandle.getDirectoryHandle(folderName, { create: true })
+      
+      // Extract all files from the nested ZIP into the folder
+      const filePromises: Promise<void>[] = []
+      
+      innerZip.forEach((innerPath, innerFile) => {
+        if (!innerFile.dir) {
+          filePromises.push(
+            (async () => {
+              const content = await innerFile.async('uint8array')
+              const pathParts = innerPath.split('/')
+              
+              // Create nested directories if needed
+              let currentDir = modFolderHandle
+              for (let i = 0; i < pathParts.length - 1; i++) {
+                currentDir = await currentDir.getDirectoryHandle(pathParts[i], { create: true })
+              }
+              
+              // Write the file
+              const fileName = pathParts[pathParts.length - 1]
+              const fileHandle = await currentDir.getFileHandle(fileName, { create: true })
+              const writable = await fileHandle.createWritable()
+              await writable.write(content)
+              await writable.close()
+            })()
+          )
+        }
+      })
+      
+      await Promise.all(filePromises)
+    })
+    
+    await Promise.all(extractPromises)
+  } else {
+    // No nested ZIPs found - extract outer ZIP directly (fallback for unexpected structure)
+    const promises: Promise<void>[] = []
+    
+    outerZip.forEach((relativePath, file) => {
+      if (!file.dir) {
+        promises.push(
+          (async () => {
+            const content = await file.async('uint8array')
+            const pathParts = relativePath.split('/')
+            
+            // Create nested directories if needed
+            let currentDir = targetDirHandle
+            for (let i = 0; i < pathParts.length - 1; i++) {
+              currentDir = await currentDir.getDirectoryHandle(pathParts[i], { create: true })
+            }
+            
+            // Write the file
+            const fileName = pathParts[pathParts.length - 1]
+            const fileHandle = await currentDir.getFileHandle(fileName, { create: true })
+            const writable = await fileHandle.createWritable()
+            await writable.write(content)
+            await writable.close()
+          })()
+        )
+      }
+    })
+    
+    await Promise.all(promises)
+  }
 }
 
 /**
