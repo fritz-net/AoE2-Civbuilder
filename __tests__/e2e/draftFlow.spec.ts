@@ -491,6 +491,8 @@ test.describe('Draft Flow - Download Phase', () => {
     const { hostLink } = await createDraft(page, 1);
     await joinAsHost(page, hostLink, 'Download Tester');
     
+    // TODO finish this test
+
     // The download phase (Phase 6) would show:
     // - "Mod Created!" title
     // - Download button

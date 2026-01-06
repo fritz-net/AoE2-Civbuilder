@@ -55,8 +55,9 @@ The project has two parallel frontends:
 **E2E Tests for Vue/Nuxt UI**
 - agents AND CI, use playwright and locally installed chromium -> u have all the tools to run the tests
 - location: likely `src/frontend/tests/` or `__tests__/e2e/`
-- u are NOT allowed to increase timeouts. If we run into a timeout in nearly all cases selectors are wrong, the flow changed, something is really broken.
+- u are NOT allowed to increase timeouts. If we run into a timeout in nearly all cases selectors are wrong, the flow changed, something is really broken. also do not add new timeouts/waits
 - use Page Object Model for e2e tests
+- always at last create 1 happy path test doing the full flow of a feature till the end (eg. download mod)
 
 ### Tools and Utilities
 
