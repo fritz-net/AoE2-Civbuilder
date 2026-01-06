@@ -942,11 +942,6 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
         civ.Units[uuID].Name = name;
         civ.Units[eID].Name = "Elite " + name;
         
-        // Set tech tree icon to show base unit picture
-        // This makes the unit appear correctly in the tech tree
-        civ.Units[uuID].IconID = baseUnit;
-        civ.Units[eID].IconID = baseUnit;
-        
         // Base unit stats
         civ.Units[uuID].HitPoints = health;
         civ.Units[uuID].Speed = speed;
