@@ -149,7 +149,7 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
   infantry: [
     // simple units
     { id: 1699, name: 'Flemish Militia', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 1699 },
-    { id: 1697, name: 'Flemish Militia Female', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 1697 },
+    { id: 1697, name: 'Flemish Militia Female', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 1699 }, // we need to use the male icon since the female one is missing
 
     { id: 74, name: 'Militia Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 74 },
     { id: 75, name: 'Man-at-Arms', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 75 },
@@ -182,9 +182,9 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 692, name: 'Berserk', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 692 }, // elite=694
 
     // ranged melee uu based units
+    // TODO add allowed maxRange properties and adopt rule to directly use those in validation
     { id: 281, name: 'Throwing Axeman', type: 'infantry', isRanged: true, isMelee: true, range: 3, minRange: 0, uuGraphicId: 281 }, // Hybrid ranged+melee; elite=531
     { id: 1013, name: 'Gbeto', type: 'infantry', isRanged: true, isMelee: true, range: 5, minRange: 0, uuGraphicId: 1013 }, // Hybrid ranged+melee; elite=1015
-    
     { id: 879, name: 'Kamayuk', type: 'infantry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 879 }, // Hybrid ranged+melee (1 range); elit=881
 
     // cheat based units
@@ -633,16 +633,26 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     return undefined;
   };
 
-  const getUnitIconUrl = (option: BaseUnitOption): string => {
-    if (option.uuGraphicId !== null) {
-      // Use UU graphics for unique units
-      return `/v2/img/unitgraphics/uu_${option.uuGraphicId}.jpg`;
-    } else if (option.techtreeIconId !== undefined) {
-      // Use techtree graphics for standard units
-      return `/v2/img/unitgraphics/${option.techtreeIconId}.jpg`;
+  // Accept either a BaseUnitOption or a numeric id (tests sometimes pass a number)
+  const getUnitIconUrl = (option: BaseUnitOption | number): string => {
+    let id: number | undefined;
+    if (typeof option === 'number') {
+      id = option;
+    } else {
+      if (option.uuGraphicId !== null && option.uuGraphicId !== undefined) {
+        id = option.uuGraphicId as number;
+      } else if (option.techtreeIconId !== undefined) {
+        id = option.techtreeIconId;
+      }
     }
-    // Fallback to generic icon
-    return `/v2/img/unitgraphics/uu_39.jpg`;
+
+    // Serve images from the techtree assets (public/aoe2techtree/img/Units)
+    if (id !== undefined && id !== null) {
+      return `/aoe2techtree/img/Units/${id}.jpg`;
+    }
+
+    // Fallback to a generic unit icon available in the techtree assets
+    return `/aoe2techtree/img/Units/unique_unit.jpg`;
   };
 
   const calculateEliteStats = (unit: CustomUUData): EliteStats => {

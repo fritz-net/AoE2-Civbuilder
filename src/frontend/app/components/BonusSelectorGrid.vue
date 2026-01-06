@@ -695,7 +695,7 @@ function getStatIconUrl(iconName: string): string {
  * Get URL for unit graphic
  */
 function getUnitGraphicUrl(unitId: number): string {
-  return `/v2/img/unitgraphics/uu_${unitId}.jpg`
+  return `/aoe2techtree/img/Units/${unitId}.jpg`
 }
 
 /**
