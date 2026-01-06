@@ -546,20 +546,38 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     // Calculate base total from points
     let totalCost = Math.round(points * 1.2);
     
-    // Cavalry has lower base points (35 vs 50 for infantry) giving +30 budget bonus
-    // Apply cost multiplier to compensate (only for non-hero cavalry)
-    if (unit.unitType === 'cavalry' && !unit.heroMode) {
-      totalCost = Math.round(totalCost * 1.3); // 30% increase to compensate for +30 budget
-    }
-    
     // Hero units should be significantly more expensive (see CUSTOM_UU_RULESET.md)
     // Multipliers ensure that max-point heroes reach appropriate cost levels (400-600 range)
     if (unit.heroMode) {
       // Cavalry heroes get an extra multiplier to reach ~500-600 cost at max points
-      if (unit.unitType === 'cavalry') {
-        totalCost = Math.round(totalCost * 3.0); // Increased from 2.2x to 3.0x for proper scaling
-      } else {
-        totalCost = Math.round(totalCost * 2.5); // Increased from 1.8x to 2.5x
+      switch (unit.unitType) {
+        case 'infantry':
+          totalCost = Math.round(totalCost * 2.4);
+          break;
+        case 'cavalry':
+          totalCost = Math.round(totalCost * 3.0);
+          break;
+        case 'archer':
+          totalCost = Math.round(totalCost * 2.5);
+          break;
+        case 'siege':
+          totalCost = Math.round(totalCost * 4.0);
+          break;
+      }
+    } else {
+      switch (unit.unitType) {
+        case 'infantry':
+          totalCost = Math.round(totalCost * 1.2);
+          break;
+        case 'cavalry':
+          totalCost = Math.round(totalCost * 1.5);
+          break;
+        case 'archer':
+          totalCost = Math.round(totalCost * 1.25);
+          break;
+        case 'siege':
+          totalCost = Math.round(totalCost * 2.0);
+          break;
       }
     }
 
@@ -584,8 +602,10 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
 
     if (dist.resource === 'wood') {
       return { food: 0, wood: primaryCost, stone: 0, gold: secondaryCost };
-    } else {
+    } else if (dist.resource === 'food') {
       return { food: primaryCost, wood: 0, stone: 0, gold: secondaryCost };
+    } else {
+      throw new Error('Invalid resource distribution');
     }
   };
 
