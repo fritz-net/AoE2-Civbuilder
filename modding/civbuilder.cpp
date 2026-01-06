@@ -964,7 +964,8 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
         // Hero mode: Unit can only be built once
         // This is controlled via civ.Resources[29]
         if (heroMode) {
-            civ.Resources[29] = 1;  // Enables hero mode for this civ
+            // 19 = Total Units owned
+            civ.Resources[19] = 1;  // Enables hero mode for this civ
         }
         
         // Set attack and armor for base unit
