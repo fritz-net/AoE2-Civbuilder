@@ -315,13 +315,15 @@ Key settings:
    - Use Playwright's built-in waiting mechanisms (e.g., `toBeVisible()`, `toBeEnabled()`)
    - Avoid arbitrary `waitForTimeout` calls - use element state checks instead
    - Maximum timeout for most operations: 2 seconds
-   - Exception: Mod generation can take up to 10 seconds
+   - Exception: Mod generation download phase can take up to 30 seconds in CI environments
 
 6. **Never use `.catch(() => false)` or similar patterns**
    - Do not swallow errors to create conditional test logic
    - Tests should fail clearly when elements are not found
    - Avoid code branches that exit real testing based on element existence
    - Use proper assertions that will fail the test if conditions aren't met
+   - **Exception**: Try-catch is acceptable for truly optional UI elements (e.g., confirmation modals that only appear in certain configurations)
+   - When using try-catch for optional elements, include a comment explaining why the element is optional
    - Example of what NOT to do:
      ```typescript
      // ❌ BAD - exits real testing if element not found
@@ -334,6 +336,14 @@ Key settings:
      
      // ✅ GOOD - test fails if element not found
      await expect(element).toBeVisible();
+     
+     // ✅ ACCEPTABLE - for truly optional UI elements
+     try {
+       await expect(optionalModal).toBeVisible({ timeout: 2000 });
+       await optionalModal.click();
+     } catch {
+       // Modal didn't appear - this is expected in some configurations
+     }
      ```
 
 ## Benefits of This Architecture
