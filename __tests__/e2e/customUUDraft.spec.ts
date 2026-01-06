@@ -332,17 +332,21 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     const customUUInSidebar = page.locator('text=/Elite Guard/i');
     await expect(customUUInSidebar).toBeVisible({ timeout: 5000 });
     
-    // Complete the tech tree and wait for mod generation (zip download)
+    // Complete the tech tree and wait for mod generation
     const finishButton = page.getByRole('button', { name: /Finish|Complete|Done|Submit Tree/i });
     await expect(finishButton).toBeVisible({ timeout: 5000 });
     await finishButton.click();
     
-    // Wait for mod generation to complete and download link to appear
+    // Wait for transition to download phase (phase 6)
     // This may take 30-60 seconds for the C++ mod builder to process the custom UU
-    const downloadLink = page.locator('a[href*=".zip"], button:has-text("Download"), a:has-text("Download")').first();
-    await expect(downloadLink).toBeVisible({ timeout: 90000 });
+    const downloadPhase = page.locator('.download-phase');
+    await expect(downloadPhase).toBeVisible({ timeout: 90000 });
     
-    console.log('Custom UU draft completed successfully with zip download!');
+    // Verify the "Download Mod" button is visible
+    const downloadButton = page.getByRole('button', { name: /Download Mod/i });
+    await expect(downloadButton).toBeVisible({ timeout: 5000 });
+    
+    console.log('Custom UU draft completed successfully - download phase reached!');
   });
 });
 
