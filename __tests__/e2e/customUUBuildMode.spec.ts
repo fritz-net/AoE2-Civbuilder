@@ -145,62 +145,91 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
   });
 
   test('should persist custom unit data on page reload', async ({ page }) => {
+    // Start fresh
     await page.goto('/v2/build');
     
-    // Wait for restore period to complete (1100ms)
-    await page.waitForTimeout(1200);
+    // Wait for initial page load and restore period
+    await page.waitForTimeout(1500);
     
-    // Navigate and create a custom unit
-    await page.getByPlaceholder(/Enter civilization name/i).fill('TestCiv');
+    // Fill in basic civ info
+    await page.getByPlaceholder(/Enter civilization name/i).fill('PersistTestCiv');
+    
+    // Navigate to Unique Unit step
     await page.getByRole('button', { name: /Next →/i }).click();
+    await page.waitForTimeout(300);
     await page.getByRole('button', { name: /Next →/i }).click();
-    await page.getByRole('checkbox', { name: /Use Custom Unique Unit Designer/i }).check();
-    await page.getByTestId('type-button-infantry').click();
     await page.waitForTimeout(500);
     
-    // Customize the unit
-    await page.getByLabel(/Unit Name/i).fill('Elite Warrior');
+    // Enable custom UU mode
+    const customUUCheckbox = page.getByRole('checkbox', { name: /Use Custom Unique Unit Designer/i });
+    await expect(customUUCheckbox).toBeVisible({ timeout: 10000 });
+    await customUUCheckbox.check();
+    await page.waitForTimeout(300);
     
-    // Wait for autosave (1000ms debounce + safety margin)
-    await page.waitForTimeout(1500);
+    // Select infantry type
+    await page.getByTestId('type-button-infantry').click();
+    await page.waitForTimeout(800);
+    
+    // Wait for the unit name input to be visible
+    const unitNameInput = page.locator('#unit-name');
+    await expect(unitNameInput).toBeVisible({ timeout: 10000 });
+    
+    // Change the unit name
+    await unitNameInput.fill('PersistWarrior');
+    await expect(unitNameInput).toHaveValue('PersistWarrior');
+    
+    // Wait for autosave to complete (1000ms debounce + buffer)
+    await page.waitForTimeout(2000);
+    
+    // Verify autosave happened by checking the status
+    const autosaveStatus = page.locator('.autosave-status');
+    await expect(autosaveStatus).toBeVisible({ timeout: 5000 });
     
     // Reload the page
     await page.reload();
     
-    // Wait for restore to complete after reload (1100ms restore + extra buffer for rendering)
-    await page.waitForTimeout(3000);
+    // Wait for page to fully reload and restore (longer wait for safety)
+    await page.waitForTimeout(3500);
     
-    // After reload, verify custom UU checkbox is still checked
-    const customUUCheckbox = page.getByRole('checkbox', { name: /Use Custom Unique Unit Designer/i });
-    await expect(customUUCheckbox).toBeChecked({ timeout: 10000 });
+    // Check that we're back on the Unique Unit step and custom UU mode is active
+    await expect(customUUCheckbox).toBeVisible({ timeout: 15000 });
+    await expect(customUUCheckbox).toBeChecked({ timeout: 5000 });
     
-    // Verify custom UU editor is shown
+    // Verify the custom UU editor is visible
     await expect(page.getByRole('heading', { name: /Design Your Custom Unique Unit/i })).toBeVisible({ timeout: 10000 });
     
-    // Verify unit name is restored
-    await expect(page.getByLabel(/Unit Name/i)).toHaveValue('Elite Warrior', { timeout: 10000 });
+    // Verify unit name field is present and has the saved value
+    await expect(unitNameInput).toBeVisible({ timeout: 10000 });
+    await expect(unitNameInput).toHaveValue('PersistWarrior', { timeout: 5000 });
   });
 
   test('should show autosave indicator when changes are made', async ({ page }) => {
+    // Start fresh
     await page.goto('/v2/build');
     
-    // Wait for restore period to complete (1100ms)
-    await page.waitForTimeout(1200);
+    // Wait for initial page load and restore period
+    await page.waitForTimeout(1500);
     
     // Verify autosave checkbox is enabled by default
     const autosaveCheckbox = page.getByRole('checkbox', { name: /💾 Autosave to browser/i });
-    await expect(autosaveCheckbox).toBeChecked({ timeout: 10000 });
+    await expect(autosaveCheckbox).toBeVisible({ timeout: 10000 });
+    await expect(autosaveCheckbox).toBeChecked({ timeout: 5000 });
     
-    // Fill in civ name
-    await page.getByPlaceholder(/Enter civilization name/i).fill('TestCiv');
+    // Make a change - fill in civ name
+    const civNameInput = page.getByPlaceholder(/Enter civilization name/i);
+    await expect(civNameInput).toBeVisible({ timeout: 10000 });
+    await civNameInput.fill('AutosaveTestCiv');
     
     // Wait for autosave to trigger (1000ms debounce + safety margin)
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(2000);
     
-    // Verify autosave status is shown (text contains "Last saved:")
+    // Verify autosave status element appears
     const autosaveStatus = page.locator('.autosave-status');
     await expect(autosaveStatus).toBeVisible({ timeout: 10000 });
-    await expect(autosaveStatus).toContainText(/Last saved:/i, { timeout: 10000 });
+    
+    // Verify it contains the expected text
+    const statusText = await autosaveStatus.textContent();
+    expect(statusText).toMatch(/Last saved:/i);
   });
 });
 
