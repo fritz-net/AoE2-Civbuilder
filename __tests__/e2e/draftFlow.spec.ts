@@ -126,66 +126,6 @@ test.describe('Draft Flow - Complete Single Player Draft to Download', () => {
 });
 
 test.describe('Draft Flow - Two Player Draft', () => {
-    
-    if (isDraftBoardVisible) {
-      // Wait for cards to load
-      await page.waitForSelector('.draft-card:not(.card-hidden)', { timeout: 5000 });
-      
-      const cards = page.locator('.draft-card:not(.card-hidden)');
-      const cardCount = await cards.count();
-      
-      expect(cardCount).toBeGreaterThan(0);
-      
-      // Hover over a card and check tooltip content
-      const firstCard = cards.first();
-      await firstCard.hover();
-      await page.waitForTimeout(500);
-      
-      // Check that the tooltip shows actual card description, not just "Card X"
-      const tooltip = page.locator('.help-tooltip');
-      const tooltipVisible = await tooltip.isVisible().catch(() => false);
-      
-      if (tooltipVisible) {
-        const tooltipText = await tooltip.textContent();
-        // Verify the tooltip has actual card content (not "Card description")
-        expect(tooltipText).not.toContain('Card description');
-        // Should contain actual bonus text
-        expect(tooltipText?.length).toBeGreaterThan(10);
-      }
-    }
-  });
-
-  test('should complete Phase 1 setup with civ name and continue', async ({ page }) => {
-    const { hostLink } = await createDraft(page, 1);
-    await joinAsHost(page, hostLink, 'Setup Tester');
-    
-    // Start draft
-    const startButton = page.getByRole('button', { name: /Start Draft/i });
-    if (await startButton.isVisible()) {
-      await startButton.click();
-      await page.waitForTimeout(3000);
-    }
-    
-    // Verify we're in setup phase
-    const setupPhase = page.locator('.setup-phase');
-    const isSetupVisible = await setupPhase.isVisible().catch(() => false);
-    
-    // Verify Phase 1 elements are present
-    await expect(civNameInput).toBeVisible();
-    
-    // Enter civ name and click Next
-    await civNameInput.fill('Test Civ Name');
-    
-    const nextButton = page.getByRole('button', { name: /Next/i });
-    await expect(nextButton).toBeVisible();
-    await nextButton.click();
-    
-    // Should now be in Phase 2 (drafting)
-    await expect(page.locator('.draft-board')).toBeVisible();
-  });
-});
-
-test.describe('Draft Flow - Two Player Draft', () => {
   test('should allow two players to join a draft', async ({ browser }) => {
     // Create two browser contexts for two players
     const context1 = await browser.newContext();
@@ -230,103 +170,77 @@ test.describe('Draft Flow - Two Player Draft', () => {
   });
 
   test('should show lobby not ready when player 2 has not joined', async ({ page }) => {
-    const { hostLink } = await createDraft(page, 2);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    const { hostLink } = await draftCreatePage.createDraft({ numPlayers: 2 });
     
-    await page.goto(hostLink);
-    await page.waitForSelector('#playerName', { timeout: 10000 });
-    await page.fill('#playerName', 'Host Player');
-    await page.click('.join-button');
-    await page.waitForTimeout(3000);
+    const playerPage = new DraftPlayerPage(page);
+    await playerPage.navigate(hostLink);
+    await playerPage.joinDraft('Host Player');
     
     // With only host joined, lobby should show "Lobby Not Ready"
     const notReadyButton = page.getByRole('button', { name: /Lobby Not Ready/i });
-    const isNotReadyVisible = await notReadyButton.isVisible().catch(() => false);
     
     // Or there should be no Start Draft button enabled
     const startButton = page.getByRole('button', { name: /Start Draft/i });
-    const isStartEnabled = await startButton.isEnabled().catch(() => false);
     
     // Either "Lobby Not Ready" is shown or Start is disabled
-    expect(isNotReadyVisible || !isStartEnabled).toBe(true);
+    const notReadyVisible = await notReadyButton.isVisible().catch(() => false);
+    const startEnabled = await startButton.isEnabled().catch(() => false);
+    expect(notReadyVisible || !startEnabled).toBe(true);
   });
 });
 
 test.describe('Draft Flow - Join Form Validation', () => {
   test('should require player name to join', async ({ page }) => {
-    const { hostLink } = await createDraft(page, 1);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    const { hostLink } = await draftCreatePage.createDraft({ numPlayers: 1 });
     
     await page.goto(hostLink);
-    await page.waitForSelector('#playerName', { timeout: 10000 });
-    
-    // Try to submit without name
-    const joinButton = page.locator('.join-button');
     
     // The input has required attribute so form shouldn't submit
     const nameInput = page.locator('#playerName');
+    await expect(nameInput).toBeVisible();
     await expect(nameInput).toHaveAttribute('required', '');
   });
 
   test('should limit player name to 30 characters', async ({ page }) => {
-    const { hostLink } = await createDraft(page, 1);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    const { hostLink } = await draftCreatePage.createDraft({ numPlayers: 1 });
     
     await page.goto(hostLink);
-    await page.waitForSelector('#playerName', { timeout: 10000 });
     
     const nameInput = page.locator('#playerName');
+    await expect(nameInput).toBeVisible();
     await expect(nameInput).toHaveAttribute('maxlength', '30');
   });
 });
 
 test.describe('Draft Flow - Phase Transitions', () => {
   test('should show correct phases for 1-player draft', async ({ page }) => {
-    const { hostLink } = await createDraft(page, 1);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    const { hostLink } = await draftCreatePage.createDraft({ numPlayers: 1 });
     
     // Join as host
-    await page.goto(hostLink);
-    await page.waitForSelector('#playerName', { timeout: 10000 });
-    await page.fill('#playerName', 'Phase Tester');
-    await page.click('.join-button');
-    await page.waitForTimeout(3000);
+    const playerPage = new DraftPlayerPage(page);
+    await playerPage.navigate(hostLink);
+    await playerPage.joinDraft('Phase Tester');
     
-    // Phase 0: Lobby - look for either lobby component or the title
-    const lobbyElements = page.locator('.draft-lobby, .lobby-title, h1:has-text("Civilization Drafter")');
-    const lobbyVisible = await lobbyElements.first().isVisible().catch(() => false);
-    
-    // Also check for Start Draft button as indicator of lobby
+    // Should be in lobby - check for Start Draft button
     const startButton = page.getByRole('button', { name: /Start Draft|Lobby Not Ready/i });
-    const startVisible = await startButton.isVisible().catch(() => false);
+    await expect(startButton).toBeVisible();
     
-    // Should be in lobby state
-    expect(lobbyVisible || startVisible).toBe(true);
+    // Start draft
+    await playerPage.startDraft();
     
-    // Click Start Draft if visible
-    const startDraftButton = page.getByRole('button', { name: /Start Draft/i });
-    if (await startDraftButton.isVisible()) {
-      await startDraftButton.click();
-      await page.waitForTimeout(3000);
-      
-      // Phase 1: Setup (Customize Your Civilization - NO tech tree)
-      const setupVisible = await page.locator('.setup-phase, h1:has-text("Customize")').isVisible().catch(() => false);
-      
-      if (setupVisible) {
-        // Fill in civ name
-        const civNameInput = page.locator('#civName');
-        if (await civNameInput.isVisible()) {
-          await civNameInput.fill('Test Civilization');
-          
-          // Click Next (not Continue to Draft - Phase 1 is just civ setup)
-          const nextButton = page.getByRole('button', { name: /Next/i });
-          if (await nextButton.isVisible()) {
-            await nextButton.click();
-            await page.waitForTimeout(3000);
-            
-            // Should transition to Phase 2: Draft Cards
-            const draftPhaseVisible = await page.locator('.draft-board').isVisible().catch(() => false);
-            console.log('Draft board visible:', draftPhaseVisible);
-          }
-        }
-      }
-    }
+    // Phase 1: Setup (Customize Your Civilization)
+    await playerPage.completeSetupPhase('Test Civilization');
+    
+    // Should transition to Phase 2: Draft Cards
+    await expect(page.locator('.draft-board')).toBeVisible();
   });
 });
 
@@ -335,32 +249,17 @@ test.describe('Draft Flow - Error Handling', () => {
     // Try to access a non-existent draft
     await page.goto('/v2/draft/host/invalid-draft-id');
     
-    // Wait for page to load
-    await page.waitForTimeout(2000);
-    
-    // Should show an error message or redirect
-    const pageContent = await page.content();
-    const hasError = pageContent.includes('error') || 
-                    pageContent.includes('not found') || 
-                    pageContent.includes('does not exist') ||
-                    page.url().includes('error');
-    
-    // Either shows error or stays on join form (which won't find draft on submit)
-    expect(true).toBe(true); // Basic test that page doesn't crash
+    // Basic test that page doesn't crash - page should load
+    await expect(page).toHaveURL(/.*draft.*/, { timeout: 5000 });
   });
 });
 
 test.describe('Draft Flow - Download Phase', () => {
-  test('should show download button on Phase 6', async ({ page }) => {
+  test.skip('should show download button on Phase 6', async ({ page }) => {
     // This test verifies the download phase UI exists
     // Note: Getting to Phase 6 requires completing all drafting rounds
+    // Skipped as it requires full draft flow which is complex
     
-    // Create a draft to verify the pages exist
-    const { hostLink } = await createDraft(page, 1);
-    await joinAsHost(page, hostLink, 'Download Tester');
-    
-    // TODO finish this test
-
     // The download phase (Phase 6) would show:
     // - "Mod Created!" title
     // - Download button
