@@ -185,6 +185,13 @@ const showProfileSelector = ref(false)
 const steamProfiles = ref<SteamProfile[]>([])
 const installDialogRef = ref<any>(null)
 
+// Store handlers for profile selection to avoid window object pollution
+interface ProfileHandlers {
+  selectHandler: (profile: SteamProfile) => void
+  cancelHandler: () => void
+}
+const profileSelectHandlers = ref<ProfileHandlers | null>(null)
+
 // Store the mod result for installation
 const currentModResult = ref<ModCreationResult | null>(null)
 const currentCivNames = ref('')
@@ -576,15 +583,17 @@ async function handleAutoInstall() {
   if (!currentModResult.value) return
   
   try {
-    // Profile selector callback
-    const onProfileSelect = async (profiles: SteamProfile[]): Promise<SteamProfile> => {
+    // Profile selector callback using a cleaner promise approach
+    const onProfileSelect = (profiles: SteamProfile[]): Promise<SteamProfile> => {
       return new Promise((resolve, reject) => {
         steamProfiles.value = profiles
         showProfileSelector.value = true
         
-        // Store resolve/reject for later use
-        ;(window as any).__profileSelectResolve = resolve
-        ;(window as any).__profileSelectReject = reject
+        // Store handlers in component state instead of window
+        profileSelectHandlers.value = {
+          selectHandler: resolve,
+          cancelHandler: () => reject(new Error('User cancelled profile selection'))
+        }
       })
     }
     
@@ -657,22 +666,20 @@ function handleDialogCancel() {
 function handleProfileSelect(profile: SteamProfile) {
   showProfileSelector.value = false
   
-  // Resolve the promise
-  if ((window as any).__profileSelectResolve) {
-    ;(window as any).__profileSelectResolve(profile)
-    delete (window as any).__profileSelectResolve
-    delete (window as any).__profileSelectReject
+  // Resolve the promise using stored handler
+  if (profileSelectHandlers.value?.selectHandler) {
+    profileSelectHandlers.value.selectHandler(profile)
+    profileSelectHandlers.value = null
   }
 }
 
 function handleProfileCancel() {
   showProfileSelector.value = false
   
-  // Reject the promise
-  if ((window as any).__profileSelectReject) {
-    ;(window as any).__profileSelectReject(new Error('User cancelled profile selection'))
-    delete (window as any).__profileSelectResolve
-    delete (window as any).__profileSelectReject
+  // Reject the promise using stored handler
+  if (profileSelectHandlers.value?.cancelHandler) {
+    profileSelectHandlers.value.cancelHandler()
+    profileSelectHandlers.value = null
   }
   
   // Reset install dialog

@@ -55,7 +55,8 @@ export async function installModToDirectory(
   modName: string
 ): Promise<void> {
   // Import JSZip dynamically
-  const JSZip = await import('jszip')
+  const JSZipModule = await import('jszip')
+  const JSZip = JSZipModule.default
   
   // Load the ZIP file
   const zip = await JSZip.loadAsync(modBlob)
@@ -101,8 +102,10 @@ export async function detectSteamProfiles(
   
   try {
     // Look for numeric directories (Steam user IDs)
-    // @ts-ignore - values() method exists on FileSystemDirectoryHandle
-    for await (const entry of dirHandle.values()) {
+    // Note: FileSystemDirectoryHandle.values() is part of the File System Access API spec
+    // TypeScript types may not be fully up-to-date with the latest spec
+    const entries = (dirHandle as any).values() as AsyncIterableIterator<FileSystemHandle>
+    for await (const entry of entries) {
       if (entry.kind === 'directory') {
         const name = entry.name
         // Check if it's a numeric directory (Steam user ID)
