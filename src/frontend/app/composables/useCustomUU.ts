@@ -68,6 +68,8 @@ export interface BaseUnitOption {
   techtreeIconId?: number; // Unit ID for techtree icon
   range?: number; // Override default range for this base unit
   minRange?: number; // Override default min range for this base unit
+
+  // TODO use base cost, same base units need to incur cost because of passive effects
 }
 
 interface UnitTypeDefaults {
@@ -126,18 +128,36 @@ const UNIT_TYPE_DEFAULTS: Record<string, UnitTypeDefaults> = {
 
 const ARMOR_CLASS_NAMES: Record<number, string> = {
   1: 'Infantry',
-  3: 'Archers',
+  // 2 - Turtle ships
+  3: 'Base Pierce',
   4: 'Base Melee',
-  5: 'Cavalry',
-  8: 'Cavalry Archers',
-  11: 'Buildings',
-  13: 'Stone Buildings',
+  5: 'War Elephants',
+  8: 'Cavalry',
+
+  11: 'Buildings', // All Buildings (except Port)
+  13: 'Stone Buildings', // walls, gates, towers (not castles?)
+  //14: 'Predator Animals',
   15: 'Archers',
-  16: 'Ships',
-  19: 'Unique Units',
+  // 16 ships and saboteur
+  //17: 'Rams & Trebuchet & Siege Towers',
+  // 18 Trees
+  19: 'Unique Units', // except turtle shit
   20: 'Siege Weapons',
-  21: 'Buildings',
-  30: 'War Elephants'
+  21: 'Buildings', // 'Standard Buildings',
+  22: 'Walls & Gates',
+  23: 'Gunpowder Units',
+  //24: 'Hunted Predator Animals',
+  25: 'Monks',
+  26: 'Castle',
+  27: 'Spearman',
+  28: 'Cavalry Archers',
+  29: 'Eagle Warriors',
+  30: 'Camels',
+  //31: 'Leitis Attack',
+  32: 'Condottiero',
+  34: 'Fishing Ships',s
+  35: 'Mamelukes',
+  36: 'Heros'
 };
 
 // Base unit options for each type with UU graphic IDs
@@ -187,8 +207,10 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 1013, name: 'Gbeto', type: 'infantry', isRanged: true, isMelee: true, range: 5, minRange: 0, uuGraphicId: 1013 }, // Hybrid ranged+melee; elite=1015
     { id: 879, name: 'Kamayuk', type: 'infantry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 879 }, // Hybrid ranged+melee (1 range); elit=881
 
-    // cheat based units
+    // cheat, campaign and scenario based units
     // 1145 ninja
+    // swiss pikeman
+    // flamethrower
   ],
   cavalry: [
     { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 6 },
