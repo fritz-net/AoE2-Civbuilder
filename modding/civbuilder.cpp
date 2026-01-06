@@ -880,6 +880,181 @@ void Civbuilder::createUU(int civbuilderID, int baseID, string name, vector<int>
     this->unitClasses["unique"].push_back(eID);
 }
 
+// Create a custom unique unit from JSON data
+void Civbuilder::createCustomUU(int civIndex, Value customData) {
+    // Extract custom UU properties from JSON
+    string name = customData["name"].asString();
+    int baseUnit = customData["baseUnit"].asInt();
+    int health = customData["health"].asInt();
+    int attack = customData["attack"].asInt();
+    int meleeArmor = customData["meleeArmor"].asInt();
+    int pierceArmor = customData["pierceArmor"].asInt();
+    double speed = customData["speed"].asDouble();
+    int trainTime = customData["trainTime"].asInt();
+    
+    // Cost extraction
+    int foodCost = customData["cost"]["food"].asInt();
+    int woodCost = customData["cost"]["wood"].asInt();
+    int stoneCost = customData["cost"]["stone"].asInt();
+    int goldCost = customData["cost"]["gold"].asInt();
+    
+    // Optional fields with defaults
+    double attackSpeed = customData.get("attackSpeed", 2.0).asDouble();
+    int range = customData.get("range", 0).asInt();
+    int lineOfSight = customData.get("lineOfSight", 5).asInt();
+    bool heroMode = customData.get("heroMode", false).asBool();
+    
+    cout << "[C++]: Creating custom UU '" << name << "' for civ " << civIndex 
+         << " (base unit: " << baseUnit << ")" << endl;
+    
+    // Use negative civbuilderIDs for custom units to avoid conflicts with predefined UUs
+    // Start from -1000 and subtract civIndex
+    int customUUID = -1000 - civIndex;
+    
+    // Default elite upgrade costs (can be customized later)
+    vector<int> eliteCosts = {800, 0, 0, 800}; // Food, Wood, Stone, Gold
+    int eliteResearchTime = 60;
+    int langDLL = 7700 + civIndex; // Use unique DLL range for custom units
+    
+    // Create the basic UU structure using existing createUU function
+    // This creates both base and elite versions
+    createUU(customUUID, baseUnit, name, eliteCosts, eliteResearchTime, langDLL);
+    
+    // Get the IDs of the newly created units
+    int uuID = (int)(this->df->Civs[0].Units.size() - 2);
+    int eID = (int)(this->df->Civs[0].Units.size() - 1);
+    
+    cout << "[C++]: Custom UU created with IDs: base=" << uuID << ", elite=" << eID << endl;
+    
+    // Now customize the stats for all civs
+    for (Civ &civ : this->df->Civs) {
+        // Set unit names
+        civ.Units[uuID].Name = name;
+        civ.Units[eID].Name = "Elite " + name;
+        
+        // Base unit stats
+        civ.Units[uuID].HitPoints = health;
+        civ.Units[uuID].Speed = speed;
+        civ.Units[uuID].LineOfSight = lineOfSight;
+        setTrainTime(civ.Units[uuID].Creatable, trainTime);
+        civ.Units[uuID].Creatable.HeroMode = heroMode ? 1 : 0;
+        
+        // Elite unit stats (typically ~25% better)
+        civ.Units[eID].HitPoints = health + (health / 4);
+        civ.Units[eID].Speed = speed;
+        civ.Units[eID].LineOfSight = lineOfSight + 2;
+        setTrainTime(civ.Units[eID].Creatable, trainTime);
+        civ.Units[eID].Creatable.HeroMode = heroMode ? 1 : 0;
+        
+        // Set attack and armor for base unit
+        if (civ.Units[uuID].Type50.Attacks.size() > 0) {
+            civ.Units[uuID].Type50.Attacks[0].Amount = attack;
+            civ.Units[uuID].Type50.DisplayedAttack = attack;
+        }
+        if (civ.Units[uuID].Type50.Armours.size() > 2) {
+            civ.Units[uuID].Type50.Armours[0].Amount = meleeArmor;
+            civ.Units[uuID].Type50.DisplayedMeleeArmour = meleeArmor;
+            civ.Units[uuID].Creatable.DisplayedPierceArmour = pierceArmor;
+            // Find and set pierce armor (class 3)
+            for (auto &armor : civ.Units[uuID].Type50.Armours) {
+                if (armor.Class == 3) {
+                    armor.Amount = meleeArmor;
+                }
+                if (armor.Class == 4) {
+                    armor.Amount = pierceArmor;
+                }
+            }
+        }
+        
+        // Set attack and armor for elite unit (+25% attack, +1 armor)
+        if (civ.Units[eID].Type50.Attacks.size() > 0) {
+            civ.Units[eID].Type50.Attacks[0].Amount = attack + (attack / 4);
+            civ.Units[eID].Type50.DisplayedAttack = attack + (attack / 4);
+        }
+        if (civ.Units[eID].Type50.Armours.size() > 2) {
+            civ.Units[eID].Type50.Armours[0].Amount = meleeArmor + 1;
+            civ.Units[eID].Type50.DisplayedMeleeArmour = meleeArmor + 1;
+            civ.Units[eID].Creatable.DisplayedPierceArmour = pierceArmor + 1;
+            for (auto &armor : civ.Units[eID].Type50.Armours) {
+                if (armor.Class == 3) {
+                    armor.Amount = meleeArmor + 1;
+                }
+                if (armor.Class == 4) {
+                    armor.Amount = pierceArmor + 1;
+                }
+            }
+        }
+        
+        // Set attack speed if available
+        if (attackSpeed > 0) {
+            civ.Units[uuID].Type50.ReloadTime = attackSpeed;
+            civ.Units[uuID].Type50.DisplayedReloadTime = attackSpeed;
+            civ.Units[eID].Type50.ReloadTime = attackSpeed;
+            civ.Units[eID].Type50.DisplayedReloadTime = attackSpeed;
+        }
+        
+        // Set range for ranged units
+        if (range > 0) {
+            civ.Units[uuID].Type50.MaxRange = range;
+            civ.Units[uuID].Type50.DisplayedRange = range;
+            civ.Units[eID].Type50.MaxRange = range;
+            civ.Units[eID].Type50.DisplayedRange = range;
+        }
+        
+        // Set resource costs for base unit
+        if (civ.Units[uuID].Creatable.ResourceCosts.size() >= 3) {
+            civ.Units[uuID].Creatable.ResourceCosts[0].Type = 0; // Food
+            civ.Units[uuID].Creatable.ResourceCosts[0].Amount = foodCost;
+            civ.Units[uuID].Creatable.ResourceCosts[0].Flag = foodCost > 0 ? 1 : 0;
+            
+            civ.Units[uuID].Creatable.ResourceCosts[1].Type = 1; // Wood
+            civ.Units[uuID].Creatable.ResourceCosts[1].Amount = woodCost;
+            civ.Units[uuID].Creatable.ResourceCosts[1].Flag = woodCost > 0 ? 1 : 0;
+            
+            civ.Units[uuID].Creatable.ResourceCosts[2].Type = 3; // Gold
+            civ.Units[uuID].Creatable.ResourceCosts[2].Amount = goldCost;
+            civ.Units[uuID].Creatable.ResourceCosts[2].Flag = goldCost > 0 ? 1 : 0;
+        }
+        
+        // Set resource costs for elite unit (same as base)
+        if (civ.Units[eID].Creatable.ResourceCosts.size() >= 3) {
+            civ.Units[eID].Creatable.ResourceCosts[0].Type = 0;
+            civ.Units[eID].Creatable.ResourceCosts[0].Amount = foodCost;
+            civ.Units[eID].Creatable.ResourceCosts[0].Flag = foodCost > 0 ? 1 : 0;
+            
+            civ.Units[eID].Creatable.ResourceCosts[1].Type = 1;
+            civ.Units[eID].Creatable.ResourceCosts[1].Amount = woodCost;
+            civ.Units[eID].Creatable.ResourceCosts[1].Flag = woodCost > 0 ? 1 : 0;
+            
+            civ.Units[eID].Creatable.ResourceCosts[2].Type = 3;
+            civ.Units[eID].Creatable.ResourceCosts[2].Amount = goldCost;
+            civ.Units[eID].Creatable.ResourceCosts[2].Flag = goldCost > 0 ? 1 : 0;
+        }
+        
+        // Handle attack bonuses if provided
+        if (customData.isMember("attackBonuses") && customData["attackBonuses"].isArray()) {
+            for (unsigned int i = 0; i < customData["attackBonuses"].size(); i++) {
+                int bonusClass = customData["attackBonuses"][i]["class"].asInt();
+                int bonusAmount = customData["attackBonuses"][i]["amount"].asInt();
+                
+                // Add attack bonus to base unit
+                unit::AttackOrArmor bonus;
+                bonus.Class = bonusClass;
+                bonus.Amount = bonusAmount;
+                civ.Units[uuID].Type50.Attacks.push_back(bonus);
+                
+                // Add enhanced attack bonus to elite unit
+                unit::AttackOrArmor eliteBonus;
+                eliteBonus.Class = bonusClass;
+                eliteBonus.Amount = bonusAmount + (bonusAmount / 2); // +50% for elite
+                civ.Units[eID].Type50.Attacks.push_back(eliteBonus);
+            }
+        }
+    }
+    
+    cout << "[C++]: Custom UU '" << name << "' configured successfully" << endl;
+}
+
 void Civbuilder::setupData() {
     // Deactivate all civ bonuses tied to techs
     for (Tech &tech : this->df->Techs) {
@@ -6429,11 +6604,42 @@ void Civbuilder::cleanup() {
 
 void Civbuilder::assignUniqueUnits() {
     for (int i = 0; i < this->config["techtree"].size(); i++) {
-        int uniqueUnit = this->config["techtree"][i][0].asInt();
-        // Make unique unit available
-        allocateTech(this->df, this->uuTechIDs[uniqueUnit].first, i + 1);
-        // Give them elite upgrade
-        allocateTech(this->df, this->uuTechIDs[uniqueUnit].second, i + 1);
+        // Check if there's a custom unit for this civ
+        bool hasCustomUU = false;
+        if (this->config.isMember("custom_units") && 
+            this->config["custom_units"].isArray() &&
+            i < (int)this->config["custom_units"].size() &&
+            !this->config["custom_units"][i].isNull()) {
+            
+            // This civ has a custom UU - create it
+            cout << "[C++]: Processing custom UU for civ " << i << endl;
+            createCustomUU(i, this->config["custom_units"][i]);
+            hasCustomUU = true;
+            
+            // Get the tech IDs that were just created for this custom unit
+            // The custom UUID is -1000 - i
+            int customUUID = -1000 - i;
+            if (this->uuTechIDs.find(customUUID) != this->uuTechIDs.end()) {
+                // Make unique unit available for this civ
+                allocateTech(this->df, this->uuTechIDs[customUUID].first, i + 1);
+                // Give them elite upgrade
+                allocateTech(this->df, this->uuTechIDs[customUUID].second, i + 1);
+                cout << "[C++]: Custom UU techs allocated for civ " << i << endl;
+            } else {
+                cerr << "[C++]: ERROR - Custom UU tech IDs not found for civ " << i << endl;
+            }
+        }
+        
+        // If no custom UU, use regular UU from techtree
+        if (!hasCustomUU) {
+            int uniqueUnit = this->config["techtree"][i][0].asInt();
+            if (uniqueUnit > 0) {
+                // Make unique unit available
+                allocateTech(this->df, this->uuTechIDs[uniqueUnit].first, i + 1);
+                // Give them elite upgrade
+                allocateTech(this->df, this->uuTechIDs[uniqueUnit].second, i + 1);
+            }
+        }
     }
 }
 

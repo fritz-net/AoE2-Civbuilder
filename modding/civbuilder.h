@@ -75,6 +75,7 @@ class Civbuilder {
     void createCivBonus(int civbuilderID, Effect e, string name, vector<int> requirements);
     void createTeamBonus(int civbuilderID, Effect e, string name);
     void createUU(int civbuilderID, int baseID, string name, vector<int> techCosts, int techTime, int techDLL);
+    void createCustomUU(int civIndex, Value customData);
     void setupData();
     void createData();
     void assignData();
