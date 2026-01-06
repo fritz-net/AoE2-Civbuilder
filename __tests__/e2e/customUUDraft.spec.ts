@@ -264,6 +264,9 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     // 3. Transitions to tech tree phase correctly
     // 4. Mod generation handles custom UU objects (no "[object Object]" errors)
     // 5. Zip file is generated successfully
+    // Note: This test can take 2-3 minutes due to C++ mod generation
+    test.setTimeout(180000); // 3 minutes timeout for this test
+    // 5. Zip file is generated successfully
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     await draftCreatePage.assertPageLoaded();
@@ -334,19 +337,22 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     
     // Complete the tech tree and wait for mod generation
     // Use defensive approach like draftFlow.spec.ts
+    // First ensure the tree is fully loaded
+    await page.waitForTimeout(3000);
+    
     const finishButton = page.getByRole('button', { name: /Done/i });
-    const isFinishVisible = await finishButton.isVisible().catch(() => false);
-    if (isFinishVisible) {
-      await finishButton.click();
-      await page.waitForTimeout(2000);
-    }
+    await expect(finishButton).toBeVisible({ timeout: 10000 });
+    await expect(finishButton).toBeEnabled({ timeout: 5000 });
+    await finishButton.click();
+    
+    // Wait longer after clicking to allow server processing to start
+    console.log('Clicked Done button, waiting for mod generation to begin...');
+    await page.waitForTimeout(10000);
     
     // Wait for transition to download phase (phase 6)
-    // This may take 30-60 seconds for the C++ mod builder to process the custom UU
-    // Use long timeout with defensive check
-    await page.waitForTimeout(5000);
+    // This may take 60-90 seconds for the C++ mod builder to process the custom UU
     const downloadPhase = page.locator('.download-phase');
-    const isDownloadVisible = await downloadPhase.isVisible({ timeout: 90000 }).catch(() => false);
+    const isDownloadVisible = await downloadPhase.isVisible({ timeout: 120000 }).catch(() => false);
     
     if (isDownloadVisible) {
       // Verify the "Download Mod" button is visible
@@ -354,9 +360,17 @@ test.describe('Custom UU Draft - Backend Integration', () => {
       await expect(downloadButton).toBeVisible({ timeout: 5000 });
       console.log('Custom UU draft completed successfully - download phase reached!');
     } else {
-      // If download phase not visible, check if we're still processing
-      console.log('Waiting for mod generation to complete...');
-      await expect(downloadPhase).toBeVisible({ timeout: 30000 });
+      // Log failure context for debugging
+      console.log('ERROR: Download phase never appeared after clicking Done');
+      const currentUrl = page.url();
+      console.log('Current URL:', currentUrl);
+      
+      // Check if we're still in tech tree phase or moved somewhere else
+      const stillInTechTree = await page.locator('.techtree-container').isVisible().catch(() => false);
+      console.log('Still in tech tree phase:', stillInTechTree);
+      
+      // This might mean mod generation failed or is taking too long
+      throw new Error('Download phase not reached after 2+ minutes - mod generation may have failed');
     }
   });
 });
