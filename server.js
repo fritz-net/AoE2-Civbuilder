@@ -118,6 +118,10 @@ const staticOptions = {
 	setHeaders: (res, path) => {
 		if (path.endsWith(".png") || path.endsWith(".jpg")) {
 			res.set("Cache-Control", "public, must-revalidate, max-age=31536000");
+		} else if (path.endsWith(".wem")) {
+			// .wem files are actually RIFF WAVE audio files
+			res.set("Content-Type", "audio/wav");
+			res.set("Cache-Control", "public, max-age=31536000");
 		} else {
 			res.set("Cache-Control", "no-cache, must-revalidate");
 		}
