@@ -955,13 +955,13 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
             civ.Units[uuID].Type50.Armours[0].Amount = meleeArmor;
             civ.Units[uuID].Type50.DisplayedMeleeArmour = meleeArmor;
             civ.Units[uuID].Creatable.DisplayedPierceArmour = pierceArmor;
-            // Find and set pierce armor (class 3)
+            // Find and set armor classes properly
             for (auto &armor : civ.Units[uuID].Type50.Armours) {
                 if (armor.Class == 3) {
-                    armor.Amount = meleeArmor;
+                    armor.Amount = pierceArmor; // Class 3 is pierce armor
                 }
                 if (armor.Class == 4) {
-                    armor.Amount = pierceArmor;
+                    armor.Amount = pierceArmor; // Class 4 is also pierce armor
                 }
             }
         }
@@ -977,10 +977,10 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
             civ.Units[eID].Creatable.DisplayedPierceArmour = pierceArmor + 1;
             for (auto &armor : civ.Units[eID].Type50.Armours) {
                 if (armor.Class == 3) {
-                    armor.Amount = meleeArmor + 1;
+                    armor.Amount = pierceArmor + 1; // Class 3 is pierce armor
                 }
                 if (armor.Class == 4) {
-                    armor.Amount = pierceArmor + 1;
+                    armor.Amount = pierceArmor + 1; // Class 4 is also pierce armor
                 }
             }
         }
@@ -1002,7 +1002,8 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
         }
         
         // Set resource costs for base unit
-        if (civ.Units[uuID].Creatable.ResourceCosts.size() >= 3) {
+        // AoE2 uses resource types: 0=Food, 1=Wood, 2=Stone, 3=Gold
+        if (civ.Units[uuID].Creatable.ResourceCosts.size() >= 4) {
             civ.Units[uuID].Creatable.ResourceCosts[0].Type = 0; // Food
             civ.Units[uuID].Creatable.ResourceCosts[0].Amount = foodCost;
             civ.Units[uuID].Creatable.ResourceCosts[0].Flag = foodCost > 0 ? 1 : 0;
@@ -1011,24 +1012,32 @@ void Civbuilder::createCustomUU(int civIndex, Value customData) {
             civ.Units[uuID].Creatable.ResourceCosts[1].Amount = woodCost;
             civ.Units[uuID].Creatable.ResourceCosts[1].Flag = woodCost > 0 ? 1 : 0;
             
-            civ.Units[uuID].Creatable.ResourceCosts[2].Type = 3; // Gold
-            civ.Units[uuID].Creatable.ResourceCosts[2].Amount = goldCost;
-            civ.Units[uuID].Creatable.ResourceCosts[2].Flag = goldCost > 0 ? 1 : 0;
+            civ.Units[uuID].Creatable.ResourceCosts[2].Type = 2; // Stone
+            civ.Units[uuID].Creatable.ResourceCosts[2].Amount = stoneCost;
+            civ.Units[uuID].Creatable.ResourceCosts[2].Flag = stoneCost > 0 ? 1 : 0;
+            
+            civ.Units[uuID].Creatable.ResourceCosts[3].Type = 3; // Gold
+            civ.Units[uuID].Creatable.ResourceCosts[3].Amount = goldCost;
+            civ.Units[uuID].Creatable.ResourceCosts[3].Flag = goldCost > 0 ? 1 : 0;
         }
         
         // Set resource costs for elite unit (same as base)
-        if (civ.Units[eID].Creatable.ResourceCosts.size() >= 3) {
-            civ.Units[eID].Creatable.ResourceCosts[0].Type = 0;
+        if (civ.Units[eID].Creatable.ResourceCosts.size() >= 4) {
+            civ.Units[eID].Creatable.ResourceCosts[0].Type = 0; // Food
             civ.Units[eID].Creatable.ResourceCosts[0].Amount = foodCost;
             civ.Units[eID].Creatable.ResourceCosts[0].Flag = foodCost > 0 ? 1 : 0;
             
-            civ.Units[eID].Creatable.ResourceCosts[1].Type = 1;
+            civ.Units[eID].Creatable.ResourceCosts[1].Type = 1; // Wood
             civ.Units[eID].Creatable.ResourceCosts[1].Amount = woodCost;
             civ.Units[eID].Creatable.ResourceCosts[1].Flag = woodCost > 0 ? 1 : 0;
             
-            civ.Units[eID].Creatable.ResourceCosts[2].Type = 3;
-            civ.Units[eID].Creatable.ResourceCosts[2].Amount = goldCost;
-            civ.Units[eID].Creatable.ResourceCosts[2].Flag = goldCost > 0 ? 1 : 0;
+            civ.Units[eID].Creatable.ResourceCosts[2].Type = 2; // Stone
+            civ.Units[eID].Creatable.ResourceCosts[2].Amount = stoneCost;
+            civ.Units[eID].Creatable.ResourceCosts[2].Flag = stoneCost > 0 ? 1 : 0;
+            
+            civ.Units[eID].Creatable.ResourceCosts[3].Type = 3; // Gold
+            civ.Units[eID].Creatable.ResourceCosts[3].Amount = goldCost;
+            civ.Units[eID].Creatable.ResourceCosts[3].Flag = goldCost > 0 ? 1 : 0;
         }
         
         // Handle attack bonuses if provided
