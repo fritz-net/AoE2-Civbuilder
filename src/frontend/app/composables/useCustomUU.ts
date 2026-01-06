@@ -511,8 +511,8 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     // Calculate base total from points
     let totalCost = Math.round(points * 1.2);
     
-    // Cavalry has higher base budget (+30 points) so should have proportionally higher base costs
-    // to maintain balance across unit types
+    // Cavalry has lower base points (35 vs 50 for infantry) giving +30 budget bonus
+    // Apply cost multiplier to compensate (only for non-hero cavalry)
     if (unit.unitType === 'cavalry' && !unit.heroMode) {
       totalCost = Math.round(totalCost * 1.3); // 30% increase to compensate for +30 budget
     }

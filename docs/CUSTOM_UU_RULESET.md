@@ -257,11 +257,15 @@ When **Hero Mode** is enabled (see implementation in `src/frontend/app/composabl
 
 **Hero Mode Example:**
 ```
-Normal Cavalry Unit (35 base points, +30 budget bonus): 42F + 63G = 105 total (with 1.3x cavalry multiplier)
+Normal Cavalry Unit (35 base points, +30 budget bonus): 
+  - Default stats cost: 35 points
+  - Cost: 35 * 1.2 * 1.3 = 55 total
+  - Distribution: ~22F + 33G
+
 Hero Cavalry Unit (35 - 30 = 5 base, can spend up to 65 points):
   - At max points (65 spent): ~65 power
-  - Cost: 65 * 1.2 * 1.3 * 3.0 = 304 total (before distribution)
-  - Distribution: ~122F + 182G (or enforced minimum 300F + 300G)
+  - Cost: 65 * 1.2 * 3.0 = 234 total (hero mode uses 3.0x, not 1.3x)
+  - Distribution: ~94F + 140G (or enforced minimum 300F + 300G if needed)
 ```
 
 ## Optic/Sprite Selection
