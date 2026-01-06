@@ -178,9 +178,15 @@ Each unit has a "power budget" based on its statistics. Higher stats require hig
 
 **Base Points by Type:**
 - Infantry: 50 points
-- Cavalry: 65 points
+- Cavalry: 35 points (-30 bonus budget, similar to hero mode: lower base = more budget to spend)
 - Archers: 45 points
 - Siege: 70 points
+
+**Cost Multipliers by Type:**
+- Infantry: 1.0x (base cost = points * 1.2)
+- Cavalry: 1.3x (higher costs to compensate for +30 budget bonus)
+- Archers: 1.0x (base cost = points * 1.2)
+- Siege: 1.0x (base cost = points * 1.2)
 
 **Points Required for Stats:**
 
@@ -207,7 +213,21 @@ Base Infantry (50 points)
 
 Recommended cost: 72 * 1.2 = ~86 resources
 Distribution: 55 food + 31 gold
+
+Base Cavalry (35 points - lower base gives +30 budget bonus)
++ 20 HP (4 points)
++ 2 Attack (6 points)
++ 1 Melee Armor (4 points)
+= 49 total points
+
+Recommended cost: 49 * 1.2 * 1.3 = ~76 resources
+Distribution: 30 food + 46 gold
 ```
+
+**Note on Resource Costs:**
+- Resource costs do NOT affect the power budget calculation
+- Costs are recommended based on unit power, but can be customized
+- Making a unit cheaper or more expensive does not change its point budget
 
 ### Resource Distribution Guidelines
 
@@ -237,11 +257,15 @@ When **Hero Mode** is enabled (see implementation in `src/frontend/app/composabl
 
 **Hero Mode Example:**
 ```
-Normal Cavalry Unit (65 points): 60 food + 85 gold = 145 total
-Hero Cavalry Unit (65 - 30 = 35 base, but can spend up to 95):
-  - At max points (95 spent): ~180 power
-  - Cost: 180 * 1.2 * 3.0 = 648 total
-  - Distribution: ~259F + 389G (or enforced minimum 300F + 300G)
+Normal Cavalry Unit (35 base points, +30 budget bonus): 
+  - Default stats cost: 35 points
+  - Cost: 35 * 1.2 * 1.3 = 55 total
+  - Distribution: ~22F + 33G
+
+Hero Cavalry Unit (35 - 30 = 5 base, can spend up to 65 points):
+  - At max points (65 spent): ~65 power
+  - Cost: 65 * 1.2 * 3.0 = 234 total (hero mode uses 3.0x, not 1.3x)
+  - Distribution: ~94F + 140G (or enforced minimum 300F + 300G if needed)
 ```
 
 ## Optic/Sprite Selection

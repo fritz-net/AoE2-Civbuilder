@@ -457,7 +457,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
   const calculatePowerBudget = (unit: CustomUUData): number => {
     const basePoints: Record<string, number> = {
       infantry: 50,
-      cavalry: 65,
+      cavalry: 35, // Reduced from 65 to give cavalry +30 budget bonus (like hero mode: lower base = more budget)
       archer: 45,
       siege: 70
     };
@@ -536,14 +536,6 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     unit.attackBonuses.forEach(bonus => {
       points += (bonus.amount / 5) * 8;
     });
-    
-    // Cost adjustments: expensive units get points, cheap units cost points
-    const totalCost = unit.cost.food + unit.cost.wood + unit.cost.stone + unit.cost.gold;
-    const defaultCost = defaults.cost.food + defaults.cost.wood + defaults.cost.stone + defaults.cost.gold;
-    const costDiff = totalCost - defaultCost;
-    
-    // For every 10 resources above/below default, give/take 2 points
-    points += (costDiff / 10) * 2;
 
     return Math.round(points);
   };
@@ -553,6 +545,12 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     
     // Calculate base total from points
     let totalCost = Math.round(points * 1.2);
+    
+    // Cavalry has lower base points (35 vs 50 for infantry) giving +30 budget bonus
+    // Apply cost multiplier to compensate (only for non-hero cavalry)
+    if (unit.unitType === 'cavalry' && !unit.heroMode) {
+      totalCost = Math.round(totalCost * 1.3); // 30% increase to compensate for +30 budget
+    }
     
     // Hero units should be significantly more expensive (see CUSTOM_UU_RULESET.md)
     // Multipliers ensure that max-point heroes reach appropriate cost levels (400-600 range)
