@@ -181,10 +181,17 @@ export class DraftCreatePage extends BasePage {
   }
 
   /**
-   * Enable custom UU mode (requires advanced settings to be expanded first)
+   * Enable custom UU mode (automatically expands advanced settings if needed)
    */
   async enableCustomUUMode(): Promise<void> {
     const customUUCheckbox = this.page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i });
+    
+    // Check if advanced settings need to be expanded
+    const isVisible = await customUUCheckbox.isVisible();
+    if (!isVisible) {
+      await this.expandAdvancedSettings();
+    }
+    
     await expect(customUUCheckbox).toBeVisible();
     await customUUCheckbox.check();
     await expect(customUUCheckbox).toBeChecked();

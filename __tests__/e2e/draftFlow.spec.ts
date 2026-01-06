@@ -26,7 +26,7 @@ test.describe('Draft Flow - Single Player Happy Path', () => {
     await expect(startButton).toBeVisible();
   });
 
-  test('should navigate to setup phase after starting 1-player draft', async ({ page }) => {
+  test('should navigate to setup phase and complete it', async ({ page }) => {
     // Step 1: Create a draft
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
@@ -40,9 +40,11 @@ test.describe('Draft Flow - Single Player Happy Path', () => {
     // Step 3: Start draft
     await playerPage.startDraft();
     
-    // Step 4: Verify setup phase (customize civilization)
-    const civNameInput = page.locator('#civName');
-    await expect(civNameInput).toBeVisible();
+    // Step 4: Complete setup phase and verify transition to draft board
+    await playerPage.completeSetupPhase('Test Civ Name');
+    
+    // Should now be in Phase 2 (drafting)
+    await expect(page.locator('.draft-board')).toBeVisible();
   });
 
   test('should show join form with player name input', async ({ page }) => {
@@ -120,34 +122,6 @@ test.describe('Draft Flow - Complete Single Player Draft to Download', () => {
       // Should contain actual bonus text
       expect(tooltipText?.length).toBeGreaterThan(10);
     }
-  });
-
-  test('should complete Phase 1 setup with civ name and continue', async ({ page }) => {
-    const draftCreatePage = new DraftCreatePage(page);
-    await draftCreatePage.navigate();
-    const { hostLink } = await draftCreatePage.createDraft({ numPlayers: 1 });
-    
-    const playerPage = new DraftPlayerPage(page);
-    await playerPage.navigate(hostLink);
-    await playerPage.joinDraft('Setup Tester');
-    await playerPage.startDraft();
-    
-    // Verify we're in setup phase
-    const civNameInput = page.locator('#civName');
-    await expect(civNameInput).toBeVisible();
-    
-    // Verify Phase 1 elements are present
-    await expect(civNameInput).toBeVisible();
-    
-    // Enter civ name and click Next
-    await civNameInput.fill('Test Civ Name');
-    
-    const nextButton = page.getByRole('button', { name: /Next/i });
-    await expect(nextButton).toBeVisible();
-    await nextButton.click();
-    
-    // Should now be in Phase 2 (drafting)
-    await expect(page.locator('.draft-board')).toBeVisible();
   });
 });
 

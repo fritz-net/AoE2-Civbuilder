@@ -16,7 +16,6 @@ test.describe('Custom UU Draft - Creation', () => {
     await draftCreatePage.assertPageLoaded();
 
     await draftCreatePage.setNumPlayers(2);
-    await draftCreatePage.expandAdvancedSettings();
     await draftCreatePage.enableCustomUUMode();
 
     await draftCreatePage.clickStartDraft();
@@ -47,7 +46,6 @@ test.describe('Custom UU Draft - Flow (Single Player)', () => {
     await draftCreatePage.assertPageLoaded();
 
     await draftCreatePage.setNumPlayers(1);
-    await draftCreatePage.expandAdvancedSettings();
     await draftCreatePage.enableCustomUUMode();
 
     await draftCreatePage.clickStartDraft();
@@ -84,7 +82,6 @@ test.describe('Custom UU Draft - Custom UU Phase', () => {
     await draftCreatePage.setBonusesPerPlayer(1);
 
     // Enable custom UU mode
-    await draftCreatePage.expandAdvancedSettings();
     await draftCreatePage.enableCustomUUMode();
 
     // Start draft
@@ -116,7 +113,6 @@ test.describe('Custom UU Draft - Custom UU Phase', () => {
     await draftCreatePage.setBonusesPerPlayer(1);
 
     // Enable custom UU mode
-    await draftCreatePage.expandAdvancedSettings();
     await draftCreatePage.enableCustomUUMode();
 
     // Start draft
@@ -156,9 +152,6 @@ test.describe('Custom UU Draft - Backend Integration', () => {
     // Set 1 player and 1 bonus for quick test
     await draftCreatePage.setNumPlayers(1);
     await draftCreatePage.setBonusesPerPlayer(1);
-
-    // Enable custom UU mode
-    await draftCreatePage.expandAdvancedSettings();
     await draftCreatePage.enableCustomUUMode();
 
     // Start draft
@@ -207,7 +200,6 @@ test.describe('Custom UU Draft - Error Handling', () => {
     await draftCreatePage.navigate();
     await draftCreatePage.setNumPlayers(1);
     await draftCreatePage.setBonusesPerPlayer(1);
-    await draftCreatePage.expandAdvancedSettings();
     await draftCreatePage.enableCustomUUMode();
 
     await draftCreatePage.clickStartDraft();
@@ -234,7 +226,6 @@ test.describe('Custom UU Draft - Error Handling', () => {
     await draftCreatePage.navigate();
     await draftCreatePage.setNumPlayers(1);
     await draftCreatePage.setBonusesPerPlayer(1);
-    await draftCreatePage.expandAdvancedSettings();
     await draftCreatePage.enableCustomUUMode();
 
     await draftCreatePage.clickStartDraft();
