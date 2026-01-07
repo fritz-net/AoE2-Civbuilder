@@ -118,13 +118,11 @@ test.describe('Draft Mode - Bonuses Per Page Setting', () => {
     // Check if modal appeared (draft created successfully)
     const modal = page.locator('.modal-overlay');
     
-    // Use try-catch for optional server availability check
+    // Optional modal - only appears if server is available
     try {
-      await expect(modal).toBeVisible({ timeout: 5000 });
+      await expect(modal).toBeVisible();
       await expect(page.getByRole('heading', { name: /Draft Created/i })).toBeVisible();
-      // Draft was created - the fact that it created successfully means the value was sent
     } catch {
-      // Server not available - that's okay for this test
       console.log('Server not available - skipping draft creation verification');
     }
   });
@@ -153,8 +151,7 @@ test.describe('Draft Mode - Bonuses Per Page Backend Integration', () => {
     // We can't directly verify the number of cards yet, but the page should load
     const joinForm = page.locator('#playerName');
     
-    // Wait for join form to be visible (indicates draft loaded successfully)
-    await expect(joinForm).toBeVisible({ timeout: 10000 });
+    await expect(joinForm).toBeVisible();
   });
 });
 
