@@ -490,30 +490,8 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await playerPage.startDraft();
     await playerPage.completeSetupPhase('Test Civilization');
     
-    // Select cards: 4 bonuses (including pasture as first), 1 UU, 2 techs, 1 additional bonus
-    // Round 1: Select first bonus (pasture - required)
-    await playerPage.selectCards(1);
-    
-    // Round 2: Select second bonus
-    await playerPage.selectCards(1);
-    
-    // Round 3: Select third bonus
-    await playerPage.selectCards(1);
-    
-    // Round 4: Select fourth bonus
-    await playerPage.selectCards(1);
-    
-    // Round 5: Select unique unit
-    await playerPage.selectCards(1);
-    
-    // Round 6: Select first tech
-    await playerPage.selectCards(1);
-    
-    // Round 7: Select second tech
-    await playerPage.selectCards(1);
-    
-    // Round 8: Select final bonus
-    await playerPage.selectCards(1);
+    // Select cards across all 8 rounds: 4 bonuses (including pasture as first), 1 UU, 2 techs, 1 team bonus
+    await playerPage.selectCards(8);
     
     // Wait for tech tree phase to appear
     await playerPage.assertInTechTreePhase();
