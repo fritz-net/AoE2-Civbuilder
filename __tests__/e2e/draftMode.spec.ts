@@ -495,6 +495,9 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     const rounds = await playerPage.selectCards(4);
     expect(rounds).toBeGreaterThanOrEqual(1);
     
+    // Wait for tech tree phase to appear
+    await playerPage.assertInTechTreePhase();
+    
     // Complete tech tree selection
     await playerPage.completeTechTree();
     
