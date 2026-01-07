@@ -62,6 +62,8 @@ The new frontend will be available at http://localhost:4000/v2
 
 ## Development Workflow
 
+**Note**: All npm scripts are cross-platform and work on Windows, macOS, and Linux.
+
 ### Option 1: Full Hot Reload (Nuxt + server.js + C++ in Docker)
 ```bash
 # Install dependencies (first time only)

@@ -8,6 +8,8 @@ This guide helps you get started with the new hot reload development workflow.
 - Docker installed (optional, for Docker mode)
 - Git with submodules initialized
 
+**Note for Windows users**: All npm scripts are cross-platform compatible using `cross-env`. They work in PowerShell, Command Prompt, and Git Bash.
+
 ## Quick Setup
 
 ### 1. Clone and Install

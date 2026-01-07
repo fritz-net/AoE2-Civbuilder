@@ -41,6 +41,8 @@ The Docker integration allows the C++ backend to run inside a container while ke
 
 ## Development Workflows
 
+**Cross-Platform Support**: All npm scripts use `cross-env` for compatibility across Windows, macOS, and Linux. They work in PowerShell, Command Prompt, Git Bash, and Unix terminals.
+
 ### Workflow 1: Full Hot Reload (Recommended)
 
 **Use case**: Active frontend and backend development
