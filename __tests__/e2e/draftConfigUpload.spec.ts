@@ -338,25 +338,14 @@ test.describe('Draft Mode - Config File Upload Integration', () => {
     fs.writeFileSync(tempFilePath, configJson);
     
     try {
-      // Upload file
       await draftCreatePage.uploadConfigFile(tempFilePath);
       
-      // Verify values were populated
       await expect(page.locator('#numPlayers')).toHaveValue('1');
       
-      // Create draft
       await draftCreatePage.clickStartDraft();
       
       const modal = page.locator('.modal-overlay');
-      
-      // Optional modal - only appears if server is available
-      try {
-        await expect(modal).toBeVisible();
-      } catch {
-        console.log('Server not available - skipping draft creation verification');
-          console.log('Unexpected state - neither success nor error');
-        }
-      }
+      await expect(modal).toBeVisible();
     } finally {
       if (fs.existsSync(tempFilePath)) {
         fs.unlinkSync(tempFilePath);

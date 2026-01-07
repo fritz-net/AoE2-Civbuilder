@@ -177,29 +177,20 @@ test.describe('Draft Mode - Draft Creation', () => {
     const techTreeInput = page.locator('#techTreePoints');
     await techTreeInput.fill('250');
     
-    // Click start draft button
     await draftCreatePage.clickStartDraft();
     
-    // Check if error message appeared (server not available) or modal
-    const errorMessage = page.locator('.error-message');
     const modal = page.locator('.modal-overlay');
+    await expect(modal).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Draft Created/i })).toBeVisible();
+    await expect(page.locator('#hostLink')).toBeVisible();
+    await expect(page.locator('#playerLink')).toBeVisible();
+    await expect(page.locator('#spectatorLink')).toBeVisible();
     
-    // Optional modal - only appears if server is available
-    try {
-      await expect(modal).toBeVisible();
-      await expect(page.getByRole('heading', { name: /Draft Created/i })).toBeVisible();
-      await expect(page.locator('#hostLink')).toBeVisible();
-      await expect(page.locator('#playerLink')).toBeVisible();
-      await expect(page.locator('#spectatorLink')).toBeVisible();
-      
-      const copyButtons = page.locator('.copy-button');
-      await expect(copyButtons).toHaveCount(3);
-      
-      await expect(page.getByRole('link', { name: /Go to Host Page/i })).toBeVisible();
-      await expect(page.getByRole('button', { name: /Close/i })).toBeVisible();
-    } catch {
-      console.log('Draft creation failed - server may not be fully configured');
-    }
+    const copyButtons = page.locator('.copy-button');
+    await expect(copyButtons).toHaveCount(3);
+    
+    await expect(page.getByRole('link', { name: /Go to Host Page/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Close/i })).toBeVisible();
   });
 
   test('should show creating state while request is in progress', async ({ page }) => {
@@ -514,16 +505,10 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     
-    // Create draft with 1 player
     const result = await draftCreatePage.createDraft({
       numPlayers: 1,
       bonuses: 4
-    }).catch(() => null);
-    
-    if (!result) {
-      console.log('Server not available - skipping integration test');
-      return;
-    }
+    });
     
     const { DraftPlayerPage } = await import('./helpers/DraftPlayerPage');
     const playerPage = new DraftPlayerPage(page);
@@ -533,23 +518,17 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await playerPage.startDraft();
     await playerPage.completeSetupPhase('Test Civilization');
     
-    // Wait for draft board with cards
     await page.waitForSelector('.draft-card:not(.card-hidden)');
     
-    // Try to find and select pasture bonus if available
     const pastureCard = page.locator('.draft-card').filter({ hasText: /pasture/i }).first();
-    const isPastureAvailable = await pastureCard.isVisible().catch(() => false);
     
-    if (isPastureAvailable) {
+    if (await pastureCard.isVisible()) {
       await pastureCard.click();
       
-      // Complete remaining rounds by selecting first available card
       await playerPage.selectCards(3);
       
-      // Navigate to tech tree phase
       await playerPage.completeTechTree();
       
-      // Verify pasture building appears in tech tree
       const pastureBuilding = page.locator('.tech-tree-item').filter({ hasText: /pasture/i });
       await expect(pastureBuilding).toBeVisible();
     } else {
