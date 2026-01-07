@@ -262,6 +262,7 @@ import {
   idType,
   idID,
   caretType,
+  imagePrefix,
   cost,
 } from '~/composables/useTechtree'
 import { getAllGrantedEntities } from '~/composables/useBonusTechMapping'
