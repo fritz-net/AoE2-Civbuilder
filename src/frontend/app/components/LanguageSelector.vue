@@ -5,7 +5,7 @@
       <button 
         class="mute-btn" 
         @click="toggleMute"
-        :title="isMuted ? 'Unmute' : 'Mute'"
+        :title="isMuted ? 'Unmute (Note: Audio files may not play in all browsers due to codec limitations)' : 'Mute voice playback'"
         :aria-label="isMuted ? 'Unmute' : 'Mute'"
       >
         <span v-if="isMuted">🔇</span>
@@ -57,7 +57,7 @@ const config = useRuntimeConfig()
 const baseURL = config.app.baseURL || '/v2/'
 
 const selectedLanguage = ref(props.modelValue)
-const isMuted = ref(false)
+const isMuted = ref(true) // Default to muted due to browser codec limitations
 const audioElement = ref<HTMLAudioElement | null>(null)
 const voiceFilesMap = ref<Record<string, string[]> | null>(null)
 
