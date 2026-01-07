@@ -47,27 +47,27 @@ export default defineNuxtConfig({
   vite: {
     server: {
       port: 3000,
-      proxy: {
+      proxy: { // https://vite.dev/config/server-options#server-proxy
         // Proxy API requests to the backend server during development.
         // We proxy both root paths and `/v2`-prefixed paths. For `/v2/*`
         // we rewrite the path so the backend receives the expected route.
-        '/create': {
+        '^/create': {
           target: 'http://localhost:4000',
           changeOrigin: true
         },
 
         // Backend endpoints used by legacy forms — forward to backend
-        '/join': {
+        '^/join': {
           target: 'http://localhost:4000',
           changeOrigin: true
         },
-        '/setCookie': {
+        '^/setCookie': {
           target: 'http://localhost:4000',
           changeOrigin: true
         },
         // `/v2/download` intentionally left unproxied so SPA can handle
         // client-side navigation; use runtimeConfig `apiBase` for API calls.
-        '/download': {
+        '^/download': {
           target: 'http://localhost:4000',
           changeOrigin: true
         },
@@ -75,16 +75,23 @@ export default defineNuxtConfig({
         // Only proxy static assets under `/v2` below.
         // do not proxy `/v2/draft` — it's a Nuxt page route that must
         // be served by the dev server on reload.
-        '/draft': {
+        '^/draft': {
           target: 'http://localhost:4000',
           changeOrigin: true,
-          ws: true
         },
         // TODO investigate! draft with ID is not working `http://localhost:4000/draft/103240973857385` because if i add a glob like `/draft/*` it also forwards v2 which makes no sense
-
+        '^/draft/.*': {
+          target: 'http://localhost:4000',
+          changeOrigin: true,
+        },
+        '^/api/draft/.*': {
+          target: 'http://localhost:4000',
+          changeOrigin: true,
+        },
+        
 
         // socket.io proxied at root `/socket.io` only; avoid `/v2/socket.io`.
-        '/socket.io': {
+        '^/socket.io/.*': {
           target: 'http://localhost:4000',
           changeOrigin: true,
           ws: true
@@ -103,19 +110,19 @@ export default defineNuxtConfig({
         //   changeOrigin: true
         // },
         // UI v2 requests this path
-        '/v2/CHANGELOG.md': {
+        '^/v2/CHANGELOG.md': {
           target: 'http://localhost:4000',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/v2/, '')
         },
         
-        '/v2/vanillaFiles': {
+        '^/v2/vanillaFiles': {
           target: 'http://localhost:4000',
           changeOrigin: true
         },
 
         // Techtree static assets used by legacy pages. Proxy both `/aoe2techtree` and `/v2/aoe2techtree`.
-        '/aoe2techtree': {
+        '^/aoe2techtree': {
           target: 'http://localhost:4000',
           changeOrigin: true
         },
