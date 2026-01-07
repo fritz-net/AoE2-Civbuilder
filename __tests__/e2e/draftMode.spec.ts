@@ -542,11 +542,4 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     // 6. Verifying tech tree shows pasture building and techs
     // This functionality is better tested in isolation rather than full e2e flow
   });
-        }
-      }
-    }
-    
-    // Verify we selected the pasture bonus
-    expect(pastureSelected).toBe(true);
-  });
 });
