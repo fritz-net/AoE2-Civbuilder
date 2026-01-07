@@ -37,3 +37,7 @@ src/frontend/dist
 test-results/
 playwright-report/
 *.o
+
+# Environment variables (user-specific)
+.env
+
