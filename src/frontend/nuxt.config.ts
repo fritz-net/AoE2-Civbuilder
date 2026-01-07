@@ -48,28 +48,70 @@ export default defineNuxtConfig({
     server: {
       port: 3000,
       proxy: {
-        // Proxy API requests to the backend server during development
+        // Proxy API requests to the backend server during development.
+        // We proxy both root paths and `/v2`-prefixed paths. For `/v2/*`
+        // we rewrite the path so the backend receives the expected route.
         '/create': {
           target: 'http://localhost:4000',
           changeOrigin: true
         },
+
+        // Backend endpoints used by legacy forms — forward to backend
+        '/join': {
+          target: 'http://localhost:4000',
+          changeOrigin: true
+        },
+        '/setCookie': {
+          target: 'http://localhost:4000',
+          changeOrigin: true
+        },
+        // Note: do NOT proxy frontend SPA routes like `/v2/draft/create`.
+        // Only proxy static assets under `/v2` below.
         '/download': {
           target: 'http://localhost:4000',
           changeOrigin: true
         },
+        // `/v2/download` intentionally left unproxied so SPA can handle
+        // client-side navigation; use runtimeConfig `apiBase` for API calls.
         '/draft': {
           target: 'http://localhost:4000',
           changeOrigin: true,
-          ws: true // Enable WebSocket proxying for socket.io
+          ws: true
         },
+        // do not proxy `/v2/draft` — it's a Nuxt page route that must
+        // be served by the dev server on reload.
         '/socket.io': {
           target: 'http://localhost:4000',
           changeOrigin: true,
           ws: true
         },
+        // Also proxy socket.io under `/v2` app base so pages using `/v2/socket.io` work.
+        //'/v2/socket.io': {
+        //  target: 'http://localhost:4000',
+        //  changeOrigin: true,
+        //  ws: true,
+        //  rewrite: (path) => path.replace(/^\/v2/, '')
+        //},
+        // socket.io proxied at root `/socket.io` only; avoid `/v2/socket.io`.
+        // CHANGELOG may be requested at `/CHANGELOG.md` or under the app base `/v2/CHANGELOG.md`.
         '/CHANGELOG.md': {
           target: 'http://localhost:4000',
           changeOrigin: true
+        },
+        '/v2/CHANGELOG.md': {
+          target: 'http://localhost:4000',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/v2/, '')
+        },
+        // Techtree static assets used by legacy pages. Proxy both `/aoe2techtree` and `/v2/aoe2techtree`.
+        '/aoe2techtree': {
+          target: 'http://localhost:4000',
+          changeOrigin: true
+        },
+        '/v2/aoe2techtree': {
+          target: 'http://localhost:4000',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/v2/, '')
         }
       }
     }
