@@ -198,7 +198,7 @@ test.describe('Draft Mode - Draft Creation', () => {
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     
-    // Add network latency to slow down the request and make creating state visible
+    // Add network latency to slow down the request
     const client = await page.context().newCDPSession(page);
     await client.send('Network.emulateNetworkConditions', {
       offline: false,
@@ -207,17 +207,21 @@ test.describe('Draft Mode - Draft Creation', () => {
       latency: 1000 // 1 second latency
     });
     
-    // Click the Start Draft button
+    // Verify button exists and click it
     const startButton = page.locator('button:has-text("Start Draft")');
-    await startButton.click();
+    await expect(startButton).toBeVisible();
     
-    // With throttled network, check for loading/creating state
+    // Click and immediately check for disabled state (loading state is visible during network delay)
+    const clickPromise = startButton.click();
+    
+    // Wait a bit for the click to register and check if button is disabled
+    await page.waitForTimeout(100);
     const isDisabled = await startButton.isDisabled();
-    const hasLoadingClass = await startButton.getAttribute('class');
-    const isLoading = isDisabled || hasLoadingClass?.includes('loading') || hasLoadingClass?.includes('disabled');
-    expect(isLoading).toBeTruthy();
+    expect(isDisabled).toBeTruthy();
     
-    // Wait for modal to appear after creating state
+    await clickPromise;
+    
+    // Wait for modal to appear after request completes
     const modal = page.locator('.modal-overlay');
     await expect(modal).toBeVisible();
   });
@@ -509,6 +513,7 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       bonuses: 4
     });
     
+    const { DraftPlayerPage } = await import('../../page-objects/DraftPlayerPage');
     const playerPage = new DraftPlayerPage(page);
     
     await playerPage.navigate(result.hostLink);
