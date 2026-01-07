@@ -7,9 +7,6 @@ import * as path from 'path';
  * and can be used to create a mod.
  */
 
-// Skip download tests locally (C++ backend not built), but run in CI
-const shouldSkipDownloadTests = !process.env.CI;
-
 test.describe('Imperial Paladin Bonus', () => {
   test.beforeEach(async ({ page }) => {
     // Set a longer timeout for these tests
@@ -24,13 +21,13 @@ test.describe('Imperial Paladin Bonus', () => {
     await page.waitForTimeout(1000);
     
     // Look for the Imperial Paladin bonus checkbox
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Imperial Paladin replaces Cavalier/i });
+    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
     
     // Verify the bonus exists in the list
     await expect(bonusCheckbox).toBeVisible();
   });
 
-  test('should replace Cavalier with Imperial Paladin in techtree when bonus is selected', async ({ page }) => {
+  test('should add Imperial Paladin after Paladin in techtree when bonus is selected', async ({ page }) => {
     await page.goto('/v2/demo/techtree');
     
     // Wait for tech tree to load
@@ -42,24 +39,23 @@ test.describe('Imperial Paladin Bonus', () => {
     const initialCount = parseInt(initialText?.match(/\d+/)?.[0] || '0');
     
     // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Imperial Paladin replaces Cavalier/i });
+    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
     await bonusCheckbox.check();
     await page.waitForTimeout(500); // Allow tree to rebuild
     
-    // Verify tech count increased (Knight and Cavalier are prerequisites)
+    // Verify tech count increased (Knight, Cavalier, and Paladin are prerequisites)
     const finalText = await page.getByText(/Techs Enabled: \d+/i).textContent();
     const finalCount = parseInt(finalText?.match(/\d+/)?.[0] || '0');
     expect(finalCount).toBeGreaterThan(initialCount);
     
-    // Verify points increased (Knight = 3pts, Cavalier = 6pts = 9pts total for prerequisites)
+    // Verify points increased (Knight = 3pts, Cavalier = 6pts, Paladin = 8pts = 17pts total for prerequisites)
     const pointsText = await page.locator('text=/Points Spent: \\d+/').textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
-    expect(points).toBe(9);
+    expect(points).toBe(17);
     
-    // Verify Cavalier is replaced (not visible)
-    // Cavalier has unit ID 283
+    // Verify Cavalier is still visible (not replaced)
     const cavalierElement = page.locator('[data-caret-id="unit_283"]');
-    await expect(cavalierElement).not.toBeVisible();
+    await expect(cavalierElement).toBeVisible();
   });
 
   test('should enable Imperial Paladin with prerequisites when bonus is selected', async ({ page }) => {
@@ -73,15 +69,15 @@ test.describe('Imperial Paladin Bonus', () => {
     await expect(page.getByText('Points Spent: 0')).toBeVisible();
     
     // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Imperial Paladin replaces Cavalier/i });
+    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
     await bonusCheckbox.check();
     await page.waitForTimeout(500);
     
-    // Verify points = 9 (prerequisites: Knight 3pts + Cavalier 6pts)
+    // Verify points = 17 (prerequisites: Knight 3pts + Cavalier 6pts + Paladin 8pts)
     // Imperial Paladin itself is free as a bonus unit
     const pointsText = await page.locator('text=/Points Spent: \\d+/').textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
-    expect(points).toBe(9);
+    expect(points).toBe(17);
     
     // Verify tech count increased appropriately
     const techsEnabledText = await page.locator('text=/Techs Enabled: \\d+/').textContent();
@@ -97,7 +93,7 @@ test.describe('Imperial Paladin Bonus', () => {
     await page.waitForTimeout(1000);
     
     // Select bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Imperial Paladin replaces Cavalier/i });
+    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
     await bonusCheckbox.check();
     await page.waitForTimeout(500);
     
@@ -129,7 +125,7 @@ test.describe('Imperial Paladin Bonus', () => {
     await expect(page.getByText(/Selected Bonuses: 0/i)).toBeVisible();
     
     // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Imperial Paladin replaces Cavalier/i });
+    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
     await bonusCheckbox.check();
     await page.waitForTimeout(300);
     
@@ -155,7 +151,7 @@ test.describe('Imperial Paladin Bonus', () => {
     await civNameInput.fill('Test Imperial Paladin Civ');
     
     // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Imperial Paladin replaces Cavalier/i });
+    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
     await bonusCheckbox.check();
     await page.waitForTimeout(500);
     
@@ -192,7 +188,7 @@ test.describe('Imperial Paladin Bonus', () => {
     await page.waitForTimeout(1000);
     
     // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Imperial Paladin replaces Cavalier/i });
+    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
     await bonusCheckbox.check();
     await page.waitForTimeout(1000);
     
@@ -212,7 +208,7 @@ test.describe('Imperial Paladin Bonus', () => {
     await page.waitForTimeout(1000);
     
     // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Imperial Paladin replaces Cavalier/i });
+    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
     await bonusCheckbox.check();
     await page.waitForTimeout(500);
     
@@ -230,9 +226,9 @@ test.describe('Imperial Paladin Bonus', () => {
     const afterResetCount = parseInt(afterResetText?.match(/\d+/)?.[0] || '0');
     expect(afterResetCount).toBe(beforeResetCount);
     
-    // Points should still be 9 (prerequisites)
+    // Points should still be 17 (prerequisites: Knight 3pts + Cavalier 6pts + Paladin 8pts)
     const pointsText = await page.locator('text=/Points Spent: \\d+/').textContent();
     const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
-    expect(points).toBe(9);
+    expect(points).toBe(17);
   });
 });

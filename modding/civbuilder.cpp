@@ -4969,11 +4969,8 @@ void Civbuilder::createCivBonuses() {
     // Mounted Trebuchets
     this->civBonuses[CIV_BONUS_361_CAN_TRAIN_MOUNTED_TREBUCHETS] = {TECH_MOUNTED_TREBUCHET_MAKE_AVAIL};
 
-    // Imperial Paladin (replaces Cavalier)
-    this->civBonuses[CIV_BONUS_363_IMPERIAL_PALADIN_REPLACES_CAVALIER] = {
-        TECH_IMPERIAL_PALADIN,
-        TECH_FTT_DISABLE_CAVALIER
-    };
+    // Imperial Paladin (upgrade after Paladin)
+    this->civBonuses[CIV_BONUS_363_CAN_UPGRADE_PALADIN_TO_IMPERIAL_PALADIN] = {TECH_IMPERIAL_PALADIN};
 
     // Make all the trickle bonuses work with each other
     // Stone to gold + roman villagers

@@ -197,18 +197,15 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     units: [1923],  // Mounted Trebuchet - NOT Traction Trebuchet (1942 is a different unit)
   },
   
-  // CIV_BONUS_363: "Imperial Paladin replaces Cavalier"
+  // CIV_BONUS_363: "Can upgrade Paladin to Imperial Paladin"
   {
     bonusId: 363,
     bonusType: 'civ',
     units: [2540],  // Imperial Paladin
     prerequisites: {
-      units: [38, 283],  // Knight, Cavalier
+      units: [38, 283, 569],  // Knight, Cavalier, Paladin
     },
     requiresPrerequisites: true,
-    replaces: {
-      units: [283],  // Cavalier
-    },
   },
   
   // CIV_BONUS_142: "Missionaries can be trained in monasteries"

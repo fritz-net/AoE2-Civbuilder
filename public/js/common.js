@@ -765,7 +765,7 @@ const card_descriptions = [
 		["Cavalry +2 attack vs. siege weapons", 2, -51, 0],
 		["Gunpowder units +2 LOS", 0, -52, 0],
 		["Infantry +2 attack vs. Ranged Soldiers", 1, -53, 0],
-		["Imperial Paladin replaces Cavalier", 2, 1, 0],
+		["Can upgrade Paladin to Imperial Paladin", 2, 1, 0],
 	],
 ];
 

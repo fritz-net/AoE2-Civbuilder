@@ -335,7 +335,7 @@ enum CivBonusIndex {
     CIV_BONUS_360_HEAVY_CAVALRY_ARCHER_UPGRADE_AVAILABLE_IN_CASTLE = 360, // Heavy Cavalry Archer upgrade available in Castle Age and costs -50%
     CIV_BONUS_361_CAN_TRAIN_MOUNTED_TREBUCHETS = 361, // Can train Mounted Trebuchets
     CIV_BONUS_362_BONUS_362 = 362, // BONUS_362
-    CIV_BONUS_363_IMPERIAL_PALADIN_REPLACES_CAVALIER = 363 // Imperial Paladin replaces Cavalier
+    CIV_BONUS_363_CAN_UPGRADE_PALADIN_TO_IMPERIAL_PALADIN = 363 // Can upgrade Paladin to Imperial Paladin
 };
 
 #endif // CIV_BONUS_ENUM_H

@@ -284,26 +284,22 @@ test('should create downloadable mod with Imperial Paladin', async ({ page }) =>
 
 ## Example: Imperial Paladin Implementation
 
-This is a complete example of adding "Imperial Paladin replaces Cavalier" bonus:
+This is a complete example of adding "Can upgrade Paladin to Imperial Paladin" bonus (similar to Imperial Camel):
 
 ### C++ Changes
 
 ```cpp
 // modding/enums/unit_ids.h
-UNIT_IMPERIAL_PALADIN = 2500, // IMPALADN
+UNIT_IMPERIAL_PALADIN = 2540, // IMPALADN
 
 // modding/enums/tech_ids.h  
-TECH_IMPERIAL_PALADIN = 1100,
-TECH_FTT_DISABLE_CAVALIER = 1101,
+TECH_IMPERIAL_PALADIN = 1510,
 
 // modding/CivBonusEnum.h
-CIV_BONUS_363_IMPERIAL_PALADIN_REPLACES_CAVALIER = 363, // Imperial Paladin replaces Cavalier
+CIV_BONUS_363_CAN_UPGRADE_PALADIN_TO_IMPERIAL_PALADIN = 363, // Can upgrade Paladin to Imperial Paladin
 
 // modding/civbuilder.cpp (in initialize())
-this->civBonuses[CIV_BONUS_363_IMPERIAL_PALADIN_REPLACES_CAVALIER] = {
-    TECH_IMPERIAL_PALADIN,
-    TECH_FTT_DISABLE_CAVALIER
-};
+this->civBonuses[CIV_BONUS_363_CAN_UPGRADE_PALADIN_TO_IMPERIAL_PALADIN] = {TECH_IMPERIAL_PALADIN};
 
 this->unitClasses["stable"] = {
     // ... existing units ...
@@ -316,24 +312,32 @@ this->unitClasses["stable"] = {
 
 ```javascript
 // public/js/common.js
-["Imperial Paladin replaces Cavalier", 2, -8, 0],  // Index 363
+["Can upgrade Paladin to Imperial Paladin", 2, 1, 0],  // Index 363
 
 // src/frontend/app/composables/useBonusData.ts
-["Imperial Paladin replaces Cavalier", 2, -8, 0],
+["Can upgrade Paladin to Imperial Paladin", 2, 1, 0],
 
 // src/frontend/app/composables/useBonusTechMapping.ts
-CIV_BONUS_363: "Imperial Paladin replaces Cavalier"
+{
+  bonusId: 363,
+  bonusType: 'civ',
+  units: [2540],  // Imperial Paladin
+  prerequisites: {
+    units: [38, 283, 569],  // Knight, Cavalier, Paladin
+  },
+  requiresPrerequisites: true,
+}
 
 // src/frontend/app/composables/useTechtree.ts
-export const IMPERIAL_PALADIN = 2500;
+export const IMPERIAL_PALADIN = 2540;
 
-// In buildTree():
-if (selectedBonuses.has(363)) {
-  stablelane.rows.imperial_1.push(unit(IMPERIAL_PALADIN));
-  replacedIds.add(u(CAVALIER));
-} else {
-  stablelane.rows.imperial_1.push(unit(CAVALIER));
+// In buildTree() - add to imperial_2 row (after Paladin):
+if (isBonusSelected(BONUS_ID_IMPERIAL_PALADIN)) {
+  stablelane.rows.imperial_2.push(unit(IMPERIAL_PALADIN));
 }
+
+// Add connection from Paladin to Imperial Paladin:
+[u(PALADIN), u(IMPERIAL_PALADIN)],
 ```
 
 ## Troubleshooting

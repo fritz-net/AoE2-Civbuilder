@@ -475,7 +475,7 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [u(KNIGHT), u(CAVALIER)],
     [u(CAVALIER), u(PALADIN)],
     [u(CAVALIER), u(SAVAR)], // Replacement: Savar replaces Paladin
-    [u(KNIGHT), u(IMPERIAL_PALADIN)], // Replacement: Imperial Paladin replaces Cavalier
+    [u(PALADIN), u(IMPERIAL_PALADIN)], // Bonus: Imperial Paladin upgrades from Paladin
     [b(DOCK), u(FISHING_SHIP)],
     [b(DOCK), u(TRANSPORT_SHIP)],
     [b(DOCK), u(DROMON)],
@@ -699,9 +699,6 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
   if (isBonusSelected(BONUS_ID_SAVAR)) {
     replacedIds.add(u(PALADIN))  // Paladin replaced by Savar
   }
-  if (isBonusSelected(BONUS_ID_IMPERIAL_PALADIN)) {
-    replacedIds.add(u(CAVALIER))  // Cavalier replaced by Imperial Paladin
-  }
   if (isBonusSelected(BONUS_ID_FOLWARK)) {
     replacedIds.add(b(MILL))  // Mill replaced by Folwark
   }
@@ -844,13 +841,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
     stablelane.rows.imperial_1.push(unit(HUSSAR))
   }
   
-  // Cavalier or Imperial Paladin (replacement bonus 363)
-  if (isBonusSelected(BONUS_ID_IMPERIAL_PALADIN)) {
-    stablelane.rows.imperial_1.push(unit(IMPERIAL_PALADIN)) // Imperial Paladin replaces Cavalier
-  } else {
-    stablelane.rows.imperial_1.push(unit(CAVALIER))
-  }
-  
+  stablelane.rows.imperial_1.push(unit(CAVALIER))
   stablelane.rows.imperial_1.push(unit(HEAVY_CAMEL_RIDER))
   stablelane.rows.imperial_1.push(unit(ELITE_BATTLE_ELEPHANT))
   stablelane.rows.imperial_1.push(unit(ELITE_STEPPE_LANCER))
@@ -863,6 +854,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
     stablelane.rows.imperial_2.push(unit(PALADIN))
   }
   if (isBonusSelected(BONUS_ID_IMPERIAL_CAMEL)) stablelane.rows.imperial_2.push(unit(IMPERIAL_CAMEL_RIDER)) // Bonus unit: Can upgrade to Imperial Camel Rider (after Heavy Camel)
+  if (isBonusSelected(BONUS_ID_IMPERIAL_PALADIN)) stablelane.rows.imperial_2.push(unit(IMPERIAL_PALADIN)) // Bonus unit: Can upgrade Paladin to Imperial Paladin
   tree.lanes.push(stablelane)
 
   const siegeworkshoplane = createLane()
