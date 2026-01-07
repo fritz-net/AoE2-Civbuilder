@@ -3,20 +3,13 @@ FROM node:20-bullseye AS cpp-build
 
 # Install build tools for C++ compilation
 RUN apt-get update && \
-    apt-get install -y build-essential cmake git liblz4-dev libboost-iostreams-dev libjsoncpp-dev dos2unix && \
+    apt-get install -y build-essential cmake liblz4-dev libboost-iostreams-dev libjsoncpp-dev dos2unix && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy git configuration and submodule references
-COPY .git .git
-COPY .gitmodules .gitmodules
-
-# Copy modding directory
+# Copy modding directory (git submodules should be initialized by CI before docker build)
 COPY modding/ modding/
-
-# Initialize and update git submodules
-RUN git submodule update --init --recursive
 
 # Ensure Unix line endings for build.sh to avoid cross-platform issues
 RUN dos2unix modding/scripts/build.sh && chmod +x modding/scripts/build.sh
@@ -33,26 +26,32 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Copy just package.json and package-lock.json
+# Copy package files and install backend dependencies
 COPY package*.json ./
-
-# Install Node.js dependencies
 RUN npm ci --omit=dev
 
-
-# Copy all source code
-COPY . .
+# Copy backend source code (excluding frontend for better caching)
+COPY public/ ./public/
+COPY process_mod/ ./process_mod/
+COPY lib/ ./lib/
+COPY nuxt-integration.js ./
+COPY server.js ./
 
 # Copy built C++ build directory from cpp-build stage
 COPY --from=cpp-build /app/modding/build /app/modding/build
+COPY modding/scripts/ ./modding/scripts/
 
-# Ensure Unix line endings for build.sh to avoid cross-platform issues
+# Ensure Unix line endings for shell scripts
 RUN find ./process_mod -name "*.sh" -exec dos2unix {} \; && \
     find ./modding/scripts -name "*.sh" -exec dos2unix {} \;
 
-# Build Nuxt frontend
-RUN cd src/frontend && npm ci && npm run generate
+# Copy frontend package files and install dependencies
+COPY src/frontend/package*.json src/frontend/
+RUN cd src/frontend && npm ci
 
+# Copy frontend source and build
+COPY src/frontend/ src/frontend/
+RUN cd src/frontend && npm run generate
 
 ENV NODE_ENV=production
 

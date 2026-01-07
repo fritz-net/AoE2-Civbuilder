@@ -87,3 +87,27 @@ docker run --rm -e CIVBUILDER_HOSTNAME=http://localhost:4000 -p 4000:4000 ghcr.i
 ```
 
 Both frontends (old and new Vue3) are included in the Docker image.
+
+## E2E Testing with Docker
+
+Run E2E tests locally in Docker (requires Docker and initialized git submodules):
+
+```bash
+# Build the E2E testing image
+docker build -f Dockerfile.e2e -t aoe2-civbuilder:e2e .
+
+# Run E2E tests in the container
+docker run --rm aoe2-civbuilder:e2e
+
+# Or run interactively to debug
+docker run --rm -it aoe2-civbuilder:e2e /bin/bash
+```
+
+The E2E Docker image includes:
+- Node.js 20
+- Playwright with Chromium pre-installed
+- All project dependencies
+- Built C++ components
+- Built frontend
+
+This provides a consistent testing environment matching CI.

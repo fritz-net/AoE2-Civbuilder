@@ -1,17 +1,22 @@
-# Node modules
+# Node modules (reinstalled in Docker)
 node_modules
 src/frontend/node_modules
+
+# Frontend build artifacts (built in Docker)
 src/frontend/.nuxt
 src/frontend/.output
+src/frontend/dist
 
-# Build artifacts
+# C++ build artifacts (built in Docker)
 modding/build
 *.o
 *.a
 *.so
 
-# Git (keep .git for submodule initialization in Dockerfile)
+# Git (submodules should be initialized by CI before docker build)
+.git
 .gitignore
+.gitmodules
 
 # Logs
 logs.txt
@@ -30,7 +35,16 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Misc
-drafts
+# Test and development files
 __tests__
 .github
+drafts
+playwright-report
+test-results
+
+# Documentation
+docs
+README.md
+README.docker.md
+CHANGELOG.md
+AGENTS.MD
