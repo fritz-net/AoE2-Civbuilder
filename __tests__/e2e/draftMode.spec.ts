@@ -492,7 +492,10 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     // Select the 1 bonus card
     await playerPage.selectFirstCard();
     
-    // Should reach tech tree phase after selecting bonus
+    // Select unique unit (Round 2)
+    await playerPage.selectFirstCard();
+    
+    // Should reach tech tree phase after all card selections
     await playerPage.assertInTechTreePhase();
     
     // Complete tech tree and reach download
