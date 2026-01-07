@@ -147,19 +147,48 @@ const ARMOR_CLASS_NAMES: Record<number, string> = {
 // 6=Cataphract, 7=Chu Ko Nu, 8=Mameluke, 9=Janissary, 10=War Wagon, 11=Mangudai, etc.
 const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
   infantry: [
-    { id: 1067, name: 'Jaguar Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 14 },
-    { id: 1723, name: 'Teutonic Knight', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 3 },
-    { id: 1570, name: 'Woad Raider', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 12 },
-    { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 2 },
-    { id: 1306, name: 'Samurai', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 4 },
-    { id: 1317, name: 'Berserk', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 13 },
-    { id: 1645, name: 'Throwing Axeman', type: 'infantry', isRanged: true, isMelee: true, range: 3, minRange: 0, uuGraphicId: 16 }, // Hybrid ranged+melee
-    { id: 1009, name: 'Gbeto', type: 'infantry', isRanged: true, isMelee: true, range: 5, minRange: 0, uuGraphicId: 53 }, // Hybrid ranged+melee
-    { id: 1800, name: 'Kamayuk', type: 'infantry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 55 }, // Hybrid ranged+melee (1 range)
-    { id: 75, name: 'Militia Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 75 },
+    // simple units
+    { id: 1699, name: 'Flemish Militia', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 1699 },
+    { id: 1697, name: 'Flemish Militia Female', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 1697 },
+
+    { id: 74, name: 'Militia Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 74 },
+    { id: 75, name: 'Man-at-Arms', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 75 },
+    { id: 77, name: 'Longswordman', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 77 },
+    { id: 473, name: 'Two-Handed Swordsman', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 473 },
+    { id: 567, name: 'Champion', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 567 },
+    
     { id: 93, name: 'Spearman Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 93 },
-    { id: 473, name: 'Champion', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 473 },
-    { id: 555, name: 'Halberdier', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 555 },
+    { id: 358, name: 'Pikeman', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 358 },
+    { id: 359, name: 'Halberdier', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 359 },
+
+    { id: 751, name: 'Eagle Scout', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 751 },
+    { id: 753, name: 'Eagle Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 753 },
+    { id: 752, name: 'Elite Eagle Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 752 },
+
+    // uu based units
+    { id: 725, name: 'Jaguar Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 725 }, // elite is 725 in web techtree; 1067=Itzcoat
+    { id: 232, name: 'Woad Raider', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 534 }, // elite=534
+    { id: 41, name: 'Huskarl', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 41 }, // elite=555
+    { id: 291, name: 'Samurai', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 291 }, // elite=560
+    { id: 1735, name: 'Urumi Swordsman', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1735 }, // elite=1737
+    { id: 1016, name: 'Shotel Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1016 }, // elite=1018
+    { id: 1747, name: 'Ghulam', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1747 }, // elite=1749
+    { id: 1920, name: 'Liao Dao', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1920 }, // elite=1922
+    { id: 1123, name: 'Karambit', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1123 }, // elite=1125
+    { id: 1701, name: 'Obuch', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1701 }, // elite=1703
+    { id: 1959, name: 'White Feather Guard', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1959 }, // elite=1961
+    { id: 1658, name: 'Serjeant', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1658 }, // elite=1659
+    { id: 25, name: 'Teutonic Knight', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 25 }, // elite = 554
+    { id: 692, name: 'Berserk', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 692 }, // elite=694
+
+    // ranged melee uu based units
+    { id: 281, name: 'Throwing Axeman', type: 'infantry', isRanged: true, isMelee: true, range: 3, minRange: 0, uuGraphicId: 281 }, // Hybrid ranged+melee; elite=531
+    { id: 1013, name: 'Gbeto', type: 'infantry', isRanged: true, isMelee: true, range: 5, minRange: 0, uuGraphicId: 1013 }, // Hybrid ranged+melee; elite=1015
+    
+    { id: 879, name: 'Kamayuk', type: 'infantry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 879 }, // Hybrid ranged+melee (1 range); elit=881
+
+    // cheat based units
+    // 1145 ninja
   ],
   cavalry: [
     { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 6 },
@@ -172,6 +201,10 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 207, name: 'Camel Line', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 207 },
     { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 546 },
     { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 441 },
+
+    // 1723 crusader knight
+    // 1570 xolotl Warrior
+
   ],
   archer: [
     { id: 873, name: 'Longbowman', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 0 },
@@ -182,9 +215,11 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 5, name: 'Archer Line', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 5 },
     { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 24 },
     { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 943 },
+
+    // 1800=Composite Bowman
   ],
   siege: [
-    { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, isMelee: false, range: 6, minRange: 1, uuGraphicId: 10 },
+    { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, isMelee: false, range: 6, minRange: 1, uuGraphicId: 10 }, // currently shows berserk, in game its felmish militia
     { id: 280, name: 'Mangonel Line', type: 'siege', isRanged: true, isMelee: false, range: 7, minRange: 3, uuGraphicId: null, techtreeIconId: 280 },
     { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, isMelee: false, range: 5, minRange: 1, uuGraphicId: null, techtreeIconId: 279 },
     { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, isMelee: false, range: 12, minRange: 5, uuGraphicId: null, techtreeIconId: 36 },
