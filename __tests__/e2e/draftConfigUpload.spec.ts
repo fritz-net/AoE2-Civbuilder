@@ -291,11 +291,8 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
       const successMessage = draftCreatePage.getSuccessMessage();
       await expect(successMessage).toBeVisible();
       
-      // Wait for it to disappear (3 seconds + buffer)
-      await page.waitForTimeout(3500);
-      
-      // Success message should be gone
-      await expect(successMessage).not.toBeVisible();
+      // Wait for it to disappear (success messages auto-hide after 3 seconds)
+      await expect(successMessage).not.toBeVisible({ timeout: 5000 });
     } finally {
       if (fs.existsSync(tempFilePath)) {
         fs.unlinkSync(tempFilePath);
@@ -351,22 +348,23 @@ test.describe('Draft Mode - Config File Upload Integration', () => {
       // Create draft
       await draftCreatePage.clickStartDraft();
       
-      // Wait for response
-      await page.waitForTimeout(2000);
-      
       // Check if modal appeared or error
       const modal = page.locator('.modal-overlay');
       const errorMessage = page.locator('.error-message');
       
-      const isModalVisible = await modal.isVisible().catch(() => false);
-      const isErrorVisible = await errorMessage.isVisible().catch(() => false);
-      
-      if (isModalVisible) {
+      // Use try-catch for optional server availability check
+      try {
+        await expect(modal).toBeVisible({ timeout: 5000 });
         // Draft created successfully
-        await expect(modal).toBeVisible();
-      } else if (isErrorVisible) {
-        // Server not available - that's okay for this test
-        console.log('Server not available - draft creation expected to fail');
+      } catch {
+        // Check if error message is visible (server not available)
+        try {
+          await expect(errorMessage).toBeVisible({ timeout: 2000 });
+          console.log('Server not available - draft creation expected to fail');
+        } catch {
+          // Neither modal nor error - unexpected state but acceptable for this test
+          console.log('Unexpected state - neither success nor error');
+        }
       }
     } finally {
       if (fs.existsSync(tempFilePath)) {
