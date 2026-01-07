@@ -336,14 +336,6 @@ Key settings:
      
      // ✅ GOOD - test fails if element not found
      await expect(element).toBeVisible();
-     
-     // ✅ ACCEPTABLE - for truly optional UI elements
-     try {
-       await expect(optionalModal).toBeVisible({ timeout: 2000 });
-       await optionalModal.click();
-     } catch {
-       // Modal didn't appear - this is expected in some configurations
-     }
      ```
 
 ## Benefits of This Architecture
