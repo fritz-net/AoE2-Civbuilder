@@ -493,8 +493,9 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     // Select cards across all 8 rounds: 4 bonuses (including pasture as first), 1 UU, 2 techs, 1 team bonus
     await playerPage.selectCards(8);
     
-    // Wait for tech tree phase to appear
-    await playerPage.assertInTechTreePhase();
+    // Wait for tech tree container to be visible (completeTechTree handles the wait)
+    const techTreeContainer = page.locator('.techtree-container');
+    await expect(techTreeContainer).toBeVisible();
     
     // Verify pasture building is visible in tech tree
     const pastureNode = page.locator('.node__overlay[data-caret-id="building_1889"]');
