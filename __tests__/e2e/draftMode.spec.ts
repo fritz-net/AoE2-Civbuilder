@@ -198,10 +198,6 @@ test.describe('Draft Mode - Draft Creation', () => {
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     
-    // Click the Start Draft button
-    await draftCreatePage.clickStartDraft();
-    
-    // Verify that modal appears (indicates request completed successfully)
     // Add network latency to slow down the request and make creating state visible
     const client = await page.context().newCDPSession(page);
     await client.send('Network.emulateNetworkConditions', {
@@ -211,6 +207,8 @@ test.describe('Draft Mode - Draft Creation', () => {
       latency: 1000 // 1 second latency
     });
     
+    // Click the Start Draft button
+    const startButton = page.locator('button:has-text("Start Draft")');
     await startButton.click();
     
     // With throttled network, check for loading/creating state
@@ -511,8 +509,7 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       bonuses: 4
     });
     
-    const { DraftPlayerPage: PlayerPage } = await import('./helpers/DraftPlayerPage');
-    const playerPage = new PlayerPage(page);
+    const playerPage = new DraftPlayerPage(page);
     
     await playerPage.navigate(result.hostLink);
     await playerPage.joinDraft('Test Player');

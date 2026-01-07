@@ -117,9 +117,8 @@ test.describe('Draft Flow - Complete Single Player Draft to Download', () => {
     expect(hasContent?.length).toBeGreaterThan(5); // Should have at least some text
     
     // Verify rarity is displayed (test named includes "and rarity")
-    const rarityElement = firstCard.locator('[class*="rarity"], [data-rarity]');
-    const rarityCount = await rarityElement.count();
-    expect(rarityCount).toBeGreaterThan(0); // Card should have rarity indicator
+    const rarityElement = firstCard.locator('.card-rarity');
+    await expect(rarityElement).toBeVisible();
   });
 });
 
@@ -412,14 +411,24 @@ test.describe('Draft Flow - Card Images', () => {
     if (await rerollButton.isVisible()) {
       await rerollButton.click();
       
-      // After reroll, verify that cards after the first 3 are not highlighted
-      // (first 3 are highlighted depending on draft settings)
+      // Verify first 3 cards are highlighted and at least 1 is not clickable
       const allCards = page.locator('.draft-card:not(.card-hidden)');
       const totalCards = await allCards.count();
+      
+      // Check first 3 cards are highlighted
+      for (let i = 0; i < Math.min(3, totalCards); i++) {
+        const card = allCards.nth(i);
+        const isHighlighted = await card.locator('.highlighted, [class*="highlight"]').count();
+        expect(isHighlighted).toBeGreaterThan(0);
+      }
+      
+      // Check at least 1 card is not clickable
       if (totalCards > 3) {
         const fourthCard = allCards.nth(3);
-        const isHighlighted = await fourthCard.locator('.highlighted, [class*="highlight"]').count();
-        expect(isHighlighted).toBe(0); // Fourth card and beyond should not be highlighted
+        const isDisabled = await fourthCard.getAttribute('disabled');
+        const hasDisabledClass = await fourthCard.getAttribute('class');
+        const notClickable = isDisabled !== null || hasDisabledClass?.includes('disabled');
+        expect(notClickable).toBeTruthy();
       }
     }
     
