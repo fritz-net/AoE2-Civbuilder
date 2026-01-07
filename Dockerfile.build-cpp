@@ -45,6 +45,9 @@ COPY modding/scripts/ ./modding/scripts/
 RUN find ./process_mod -name "*.sh" -exec dos2unix {} \; && \
     find ./modding/scripts -name "*.sh" -exec dos2unix {} \;
 
+# Copy shared directory (needed by frontend imports)
+COPY src/shared/ src/shared/
+
 # Copy frontend package files and install dependencies
 COPY src/frontend/package*.json src/frontend/
 RUN cd src/frontend && npm ci
