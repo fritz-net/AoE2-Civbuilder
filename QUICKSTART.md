@@ -133,20 +133,31 @@ CPP_IN_DOCKER=0
 
 ## Troubleshooting
 
-### "Canvas module not found" on Windows
+### "Canvas module not found" or "Cannot find native binding" on Windows
 
-**Error**: `Error: Cannot find module '../build/Release/canvas.node'`
+**Errors**: 
+- `Error: Cannot find module '../build/Release/canvas.node'`
+- `Cannot find native binding` (oxc-parser, etc.)
 
-**Solution**: The `canvas` package needs to build native binaries. Make sure you:
-1. Run `npm install` (not `npm ci`) in the root directory first
-2. Do NOT use `--ignore-scripts` flag when installing root dependencies
-3. The `.npmrc` files are configured to only ignore scripts in the frontend directory
+**Solution**: Native modules need to build during installation. Make sure you:
+1. Run `npm install` (not `npm ci`) 
+2. Do NOT use `--ignore-scripts` flag when installing
+3. Allow scripts to run so native binaries can be built
 
-If the error persists:
+**For the frontend:**
 ```bash
-# Remove node_modules and rebuild
+cd src/frontend
+rm -rf node_modules package-lock.json
+npm install
+npm run dev
+```
+
+**For the backend:**
+```bash
+# From root directory
 rm -rf node_modules
 npm install
+npm run dev
 ```
 
 ### "Docker not available"

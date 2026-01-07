@@ -74,7 +74,7 @@ npm install
 npm run dev
 ```
 
-**Important for Windows users**: The root `npm install` must run without `--ignore-scripts` to build the `canvas` native module. The frontend's `.npmrc` file automatically ignores scripts only where needed.
+**Important for Windows users**: Run `npm install` without `--ignore-scripts` to allow native modules (canvas, oxc-parser, etc.) to build their binaries correctly.
 
 This command:
 - Starts Nuxt dev server with hot module replacement
