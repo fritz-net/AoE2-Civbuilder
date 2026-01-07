@@ -459,8 +459,9 @@ test.describe('Draft Mode - Draft Host Page', () => {
       page.locator('.loading-overlay').waitFor({ state: 'visible', timeout: 10000 }),
       page.getByRole('button', { name: /Start Draft|Lobby Not Ready/i }).waitFor({ state: 'visible', timeout: 10000 }),
     ]).catch((err) => {
-      // Log timeout error to aid debugging if none of the elements appear
+      // Log timeout error to aid debugging, then fail the test
       console.error('Timeout waiting for expected UI elements after joining:', err.message);
+      throw err;
     });
     
     // Check for lobby content (phase 0) or other valid UI state
