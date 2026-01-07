@@ -25,10 +25,10 @@
   "dependencies": {
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
-    "canvas": "^2.11.2",
     "cookie-parser": "^1.4.6",
     "express": "^4.17.1",
     "express-easy-zip": "^1.1.5",
+    "pngjs": "^7.0.0",
     "pug": "^3.0.2",
     "socket.io": "^4.0.1"
   },
