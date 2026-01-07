@@ -137,9 +137,9 @@ test.describe('Imperial Paladin Bonus', () => {
     await expect(page.getByText(/Selected Bonuses: 1/i)).toBeVisible();
   });
 
-  test.skip('should create downloadable mod with Imperial Paladin', async ({ page }) => {
+  test('should create downloadable mod with Imperial Paladin', async ({ page }) => {
     // Only run in CI environment
-    if (!shouldSkipDownloadTests) {
+    if (shouldSkipDownloadTests) {
       test.skip();
       return;
     }
