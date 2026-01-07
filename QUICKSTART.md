@@ -22,11 +22,13 @@ cd AoE2-Civbuilder
 # Initialize submodules (for C++ source)
 git submodule update --init --recursive
 
-# Install dependencies
+# Install backend dependencies
 npm install
 
-# Build Nuxt frontend (one-time)
-npm run build:nuxt
+# Install frontend dependencies
+cd src/frontend
+npm install
+cd ../..
 ```
 
 ### 2. Choose Your Development Mode
@@ -42,6 +44,7 @@ npm run dev
 **What you get**:
 - ✅ Nuxt dev server with hot module replacement (port 3000)
 - ✅ Server.js auto-restart on changes (port 4000)
+- ✅ Nuxt proxies API requests to backend automatically
 - ✅ C++ execution in Docker (no local C++ build needed)
 
 **Access**:

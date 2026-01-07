@@ -46,7 +46,32 @@ export default defineNuxtConfig({
   // Vite configuration
   vite: {
     server: {
-      port: 3000
+      port: 3000,
+      proxy: {
+        // Proxy API requests to the backend server during development
+        '/create': {
+          target: 'http://localhost:4000',
+          changeOrigin: true
+        },
+        '/download': {
+          target: 'http://localhost:4000',
+          changeOrigin: true
+        },
+        '/draft': {
+          target: 'http://localhost:4000',
+          changeOrigin: true,
+          ws: true // Enable WebSocket proxying for socket.io
+        },
+        '/socket.io': {
+          target: 'http://localhost:4000',
+          changeOrigin: true,
+          ws: true
+        },
+        '/CHANGELOG.md': {
+          target: 'http://localhost:4000',
+          changeOrigin: true
+        }
+      }
     }
   }
 })

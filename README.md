@@ -67,20 +67,23 @@ The new frontend will be available at http://localhost:4000/v2
 ### Option 1: Full Hot Reload (Nuxt + server.js + C++ in Docker)
 ```bash
 # Install dependencies (first time only)
-# Use npm install (not npm ci) to ensure native modules build correctly
 npm install
+cd src/frontend
+npm install
+cd ../..
 
 # Run everything with hot reload
 npm run dev
 ```
 
-**Important for Windows users**: Run `npm install` without `--ignore-scripts` to allow native modules (canvas, oxc-parser, etc.) to build their binaries correctly.
-
-This command:
-- Starts Nuxt dev server with hot module replacement
-- Starts server.js with nodemon for auto-restart
+**How it works:**
+- Starts Nuxt dev server with hot module replacement (port 3000)
+- Starts server.js with nodemon for auto-restart (port 4000)
+- Nuxt proxies API requests to the backend server
 - Runs C++ binaries inside Docker container
-- Available at: http://localhost:4000 (legacy) and http://localhost:3000 (Nuxt dev)
+- Available at: http://localhost:3000/v2 (Nuxt dev) and http://localhost:4000 (legacy)
+
+**Important for Windows users**: Run `npm install` without `--ignore-scripts` to allow native modules (canvas, oxc-parser, etc.) to build their binaries correctly.
 
 ### Option 2: Nuxt Hot Reload Only
 ```bash
