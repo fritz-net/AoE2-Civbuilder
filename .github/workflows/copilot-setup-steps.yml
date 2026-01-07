@@ -48,10 +48,10 @@ jobs:
 
      - name: Install JavaScript dependencies
        run: |
-         npm ci
+         npm ci --ignore-scripts
          if [ -d src/frontend ]; then
            cd src/frontend
-           npm ci
+           npm ci --ignore-scripts
          fi
 
      - name: Install Playwright dependency
