@@ -133,6 +133,22 @@ CPP_IN_DOCKER=0
 
 ## Troubleshooting
 
+### "Canvas module not found" on Windows
+
+**Error**: `Error: Cannot find module '../build/Release/canvas.node'`
+
+**Solution**: The `canvas` package needs to build native binaries. Make sure you:
+1. Run `npm install` (not `npm ci`) in the root directory first
+2. Do NOT use `--ignore-scripts` flag when installing root dependencies
+3. The `.npmrc` files are configured to only ignore scripts in the frontend directory
+
+If the error persists:
+```bash
+# Remove node_modules and rebuild
+rm -rf node_modules
+npm install
+```
+
 ### "Docker not available"
 
 **Solution**: Either install Docker or use local C++ mode:
