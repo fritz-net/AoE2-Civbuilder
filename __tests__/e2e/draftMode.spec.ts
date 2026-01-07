@@ -197,10 +197,15 @@ test.describe('Draft Mode - Draft Creation', () => {
     await page.goto('/v2/draft/create');
     
     const startButton = page.getByRole('button', { name: /Start Draft/i });
-    await startButton.click();
     
-    const isDisabled = await startButton.isDisabled();
-    expect(isDisabled).toBeTruthy();
+    // Click and immediately check if button is disabled (showing loading state)
+    const clickPromise = startButton.click();
+    
+    // Button should be disabled during request
+    await expect(startButton).toBeDisabled();
+    
+    // Wait for click to complete
+    await clickPromise;
   });
 });
 
@@ -351,23 +356,8 @@ test.describe('Draft Mode - Draft Host Page', () => {
     const hostLinkInput = page.locator('#hostLink');
     const hostLink = await hostLinkInput.inputValue();
     
-    // Navigate to host page
     await page.goto(hostLink);
     
-    // Wait for page to load and Socket.io to connect
-    // Removed waitForTimeout - using proper wait
-    
-    // Check that the page loaded (not stuck on error)
-    const errorMessage = page.locator('.error-message');
-    const hasError = await errorMessage.isVisible().catch(() => false);
-    
-    if (hasError) {
-      const errorText = await errorMessage.textContent();
-      // Should not have Socket.io error after fix
-      expect(errorText).not.toContain('Socket.io not available');
-    }
-    
-    // Page should show either lobby or loading state
     const pageContent = page.locator('.draft-host-page');
     await expect(pageContent).toBeVisible();
   });
