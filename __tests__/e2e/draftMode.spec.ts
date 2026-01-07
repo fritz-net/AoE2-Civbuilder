@@ -521,18 +521,13 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await page.waitForSelector('.draft-card:not(.card-hidden)');
     
     const pastureCard = page.locator('.draft-card').filter({ hasText: /pasture/i }).first();
+    await pastureCard.click();
     
-    if (await pastureCard.isVisible()) {
-      await pastureCard.click();
-      
-      await playerPage.selectCards(3);
-      
-      await playerPage.completeTechTree();
-      
-      const pastureBuilding = page.locator('.tech-tree-item').filter({ hasText: /pasture/i });
-      await expect(pastureBuilding).toBeVisible();
-    } else {
-      console.log('Pasture bonus not available in current draft - skipping specific verification');
-    }
+    await playerPage.selectCards(3);
+    
+    await playerPage.completeTechTree();
+    
+    const pastureBuilding = page.locator('.tech-tree-item').filter({ hasText: /pasture/i });
+    await expect(pastureBuilding).toBeVisible();
   });
 });
