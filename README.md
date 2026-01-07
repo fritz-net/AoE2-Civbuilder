@@ -62,61 +62,22 @@ The new frontend will be available at http://localhost:4000/v2
 
 ## Development Workflow
 
-**Note**: All npm scripts are cross-platform and work on Windows, macOS, and Linux.
-
-### Option 1: Full Hot Reload (Nuxt + server.js + C++ in Docker)
 ```bash
-# Install dependencies (first time only)
+# Install and run with hot reload
 npm install
-cd src/frontend
-npm install
-cd ../..
-
-# Run everything with hot reload
+cd src/frontend && npm install && cd ../..
 npm run dev
 ```
 
-**How it works:**
-- Starts Nuxt dev server with hot module replacement (port 3000)
-- Starts server.js with nodemon for auto-restart (port 4000)
-- Nuxt proxies API requests to the backend server
-- Runs C++ binaries inside Docker container
-- Available at: http://localhost:3000/v2 (Nuxt dev) and http://localhost:4000 (legacy)
+Access: http://localhost:3000/v2 (Nuxt) and http://localhost:4000 (API)
 
-**Important for Windows users**: Run `npm install` without `--ignore-scripts` to allow native modules (canvas, oxc-parser, etc.) to build their binaries correctly.
+**Available scripts:**
+- `npm run dev` - Full hot reload (Nuxt + server.js + C++ in Docker)
+- `npm run dev:server` - Server auto-restart with C++ in Docker
+- `npm run dev:server:local` - Server auto-restart with local C++ binaries
+- `npm run dev:nuxt` - Nuxt dev server only
 
-### Option 2: Nuxt Hot Reload Only
-```bash
-# In terminal 1: Start Nuxt dev server
-npm run dev:nuxt
-
-# In terminal 2: Start server.js (with C++ in Docker)
-npm run dev:cpp-docker
-```
-
-### Option 3: Local Development (No Docker)
-```bash
-# Build C++ binaries locally first (one time)
-cd modding && ./scripts/build.sh
-
-# In terminal 1: Start Nuxt dev server
-npm run dev:nuxt
-
-# In terminal 2: Start server.js with auto-restart
-npm run dev:server:local
-```
-
-## Environment Variables
-
-Create a `.env` file in the project root (see `.env.example`):
-
-```bash
-# Hostname for link generation
-CIVBUILDER_HOSTNAME=http://localhost:4000
-
-# Enable C++ execution in Docker (1=enabled, 0=disabled)
-CPP_IN_DOCKER=0
-```
+See `QUICKSTART.md` for details.
 
 ## Run with Docker
 ```bash
