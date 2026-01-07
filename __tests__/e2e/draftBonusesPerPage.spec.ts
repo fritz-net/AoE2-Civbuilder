@@ -112,19 +112,11 @@ test.describe('Draft Mode - Bonuses Per Page Setting', () => {
     // Set custom bonuses per page value
     await draftCreatePage.setBonusesPerPage(50);
     
-    // Create draft
     await draftCreatePage.clickStartDraft();
     
-    // Check if modal appeared (draft created successfully)
     const modal = page.locator('.modal-overlay');
-    
-    // Optional modal - only appears if server is available
-    try {
-      await expect(modal).toBeVisible();
-      await expect(page.getByRole('heading', { name: /Draft Created/i })).toBeVisible();
-    } catch {
-      console.log('Server not available - skipping draft creation verification');
-    }
+    await expect(modal).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Draft Created/i })).toBeVisible();
   });
 });
 
