@@ -490,12 +490,14 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await playerPage.startDraft();
     await playerPage.completeSetupPhase('Test Civilization');
     
-    // Select cards across all 4 bonus rounds (including pasture as first required bonus)
-    await playerPage.selectCards(4);
+    // Select cards one by one across 4 bonus rounds (including pasture as first required bonus)
+    await playerPage.selectFirstCard(); // Round 1: pasture (required)
+    await playerPage.selectFirstCard(); // Round 2
+    await playerPage.selectFirstCard(); // Round 3
+    await playerPage.selectFirstCard(); // Round 4
     
-    // Wait for tech tree container to be visible (completeTechTree handles the wait)
-    const techTreeContainer = page.locator('.techtree-container');
-    await expect(techTreeContainer).toBeVisible();
+    // Wait for tech tree phase to appear
+    await playerPage.assertInTechTreePhase();
     
     // Verify pasture building is visible in tech tree
     const pastureNode = page.locator('.node__overlay[data-caret-id="building_1889"]');
