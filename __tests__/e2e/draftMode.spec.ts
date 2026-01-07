@@ -520,7 +520,6 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       bonuses: 4
     });
     
-    const { DraftPlayerPage } = await import('../../page-objects/DraftPlayerPage');
     const playerPage = new DraftPlayerPage(page);
     
     await playerPage.navigate(result.hostLink);
