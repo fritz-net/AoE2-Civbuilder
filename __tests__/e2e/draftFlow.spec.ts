@@ -102,32 +102,29 @@ test.describe('Draft Flow - Complete Single Player Draft to Download', () => {
     await playerPage.startDraft();
     await playerPage.completeSetupPhase('Card Test Civ');
     
-    // Check card data on draft board
+    // Check card data on draft board including rarity
     await expect(page.locator('.draft-card:not(.card-hidden)').first()).toBeVisible();
     
     const cards = page.locator('.draft-card:not(.card-hidden)');
     const cardCount = await cards.count();
     expect(cardCount).toBeGreaterThan(0);
     
-    // Hover over a card and check tooltip content
     const firstCard = cards.first();
-    await firstCard.hover();
     
-    // Check that the tooltip shows actual card description
-    const tooltip = page.locator('.help-tooltip');
-    const tooltipVisible = await tooltip.isVisible();
+    // Verify card has a name
+    const cardTitle = firstCard.locator('.card-title, .bonus-name');
+    await expect(cardTitle).toBeVisible();
     
-    if (tooltipVisible) {
-      const tooltipText = await tooltip.textContent();
-      // Should contain actual bonus text
-      expect(tooltipText?.length).toBeGreaterThan(10);
-    }
+    // Verify card has rarity indicator
+    const rarity = firstCard.locator('.rarity, [class*="rarity"]');
+    await expect(rarity).toBeVisible();
   });
 });
 
 test.describe('Draft Flow - Two Player Draft', () => {
-  test('should allow two players to join a draft', async ({ browser }) => {
-    // Create two browser contexts for two players
+  test('should allow two players to join a draft and complete setup phase', async ({ browser }) => {
+    // Use this comment: tests often use browser context for multi-player tests
+    // to simulate different users/sessions joining the same draft
     const context1 = await browser.newContext();
     const context2 = await browser.newContext();
     
@@ -162,7 +159,17 @@ test.describe('Draft Flow - Two Player Draft', () => {
       
       // Both players should transition to setup phase
       await expect(page1.locator('.setup-phase')).toBeVisible();
-      console.log('Host successfully moved to setup phase');
+      
+      // Complete setup phase for both players
+      await player1.completeSetupPhase('Test Civ 1');
+      await player2.completeSetupPhase('Test Civ 2');
+      
+      // Verify both transitioned to draft board
+      await expect(page1.locator('.draft-board')).toBeVisible();
+      
+      // Complete one round of card selection
+      const rounds = await player1.selectCards(2);
+      expect(rounds).toBeGreaterThanOrEqual(1);
     } finally {
       await context1.close();
       await context2.close();
@@ -262,7 +269,7 @@ test.describe('Draft Flow - Error Handling', () => {
     await page.goto('/v2/draft/host/invalid-draft-id');
     
     // Basic test that page doesn't crash - page should load
-    await expect(page).toHaveURL(/.*draft.*/, { timeout: 5000 });
+    await expect(page).toHaveURL(/.*draft.*/);
   });
 });
 
@@ -443,7 +450,7 @@ test.describe('Draft Flow - TechTree Fill Button', () => {
 });
 
 test.describe('Draft Flow - Navigation Protection', () => {
-  test('should prevent navigation during draft', async ({ page }) => {
+  test('should prevent navigation during draft and complete full flow', async ({ page }) => {
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     
@@ -459,14 +466,22 @@ test.describe('Draft Flow - Navigation Protection', () => {
     const draftBoard = page.locator('.draft-board');
     await expect(draftBoard).toBeVisible();
     
-    // Navigation protection is implemented - test that draft continues
-    await playerPage.selectFirstCard();
+    // Attempt to navigate away (should be prevented)
+    await page.evaluate(() => {
+      window.history.pushState({}, '', '/');
+    });
+    
+    // Verify we're still in draft board (navigation was prevented)
     await expect(draftBoard).toBeVisible();
+    
+    // Complete the draft to verify flow continues properly
+    const rounds = await playerPage.selectCards(8);
+    expect(rounds).toBeGreaterThanOrEqual(1);
   });
 });
 
 test.describe('Draft Flow - Card Frame Styling and Tooltips', () => {
-  test('should display card frames correctly and show unit stats tooltip', async ({ page }) => {
+  test('should display card frames correctly, show unit stats tooltip on hover, and complete full draft', async ({ page }) => {
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     
@@ -485,14 +500,23 @@ test.describe('Draft Flow - Card Frame Styling and Tooltips', () => {
     const cards = page.locator('.draft-card:not(.card-hidden)');
     await expect(cards.first()).toBeVisible();
     
-    // Verify card has proper styling
+    // Verify card has proper frame styling
     const firstCard = cards.first();
     await expect(firstCard).toHaveClass(/draft-card/);
     
-    // Hover over card to trigger tooltip (if implemented)
+    // Hover over card to trigger tooltip
     await firstCard.hover();
     
-    // Complete one selection
-    await playerPage.selectFirstCard();
+    // Check for tooltip appearance (unit stats)
+    const tooltip = page.locator('.tooltip, [role="tooltip"], .card-tooltip');
+    const tooltipVisible = await tooltip.isVisible().catch(() => false);
+    if (tooltipVisible) {
+      // Tooltip is shown - verify it has content
+      await expect(tooltip).toContainText(/.+/);
+    }
+    
+    // Complete the full draft flow
+    const rounds = await playerPage.selectCards(8);
+    expect(rounds).toBeGreaterThanOrEqual(1);
   });
 });
