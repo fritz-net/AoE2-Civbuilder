@@ -262,7 +262,7 @@ import {
   idType,
   idID,
   caretType,
-  imagePrefix,
+  fixImagePrefix,
   cost,
 } from '~/composables/useTechtree'
 import { getAllGrantedEntities } from '~/composables/useBonusTechMapping'
@@ -805,7 +805,7 @@ function getAgePath(image: string): string {
 }
 
 function getImagePath(id: string): string {
-  return `${props.relativePath}/img/${imagePrefix(id)}.jpg`
+  return `${props.relativePath}/img/${fixImagePrefix(id)}.jpg`
 }
 
 function getCrossPath(): string {

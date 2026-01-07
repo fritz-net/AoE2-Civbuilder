@@ -29,7 +29,10 @@ export default defineNuxtConfig({
   nitro: {
     output: {
       dir: '../../.output-nuxt'
-    }
+    },
+    devProxy: { // https://github.com/nuxt/nuxt/issues/23832 <- fix for `Restarting Nuxt due to error: Error: read ECONNRESET` ; https://github.com/nuxt/nuxt/issues/32669
+      host: 'localhost',
+    },
   },
   
   // Runtime config for API endpoints
@@ -91,7 +94,7 @@ export default defineNuxtConfig({
         
 
         // socket.io proxied at root `/socket.io` only; avoid `/v2/socket.io`.
-        '^/socket.io/.*': {
+        '^/socket.io.*': {
           target: 'http://localhost:4000',
           changeOrigin: true,
           ws: true

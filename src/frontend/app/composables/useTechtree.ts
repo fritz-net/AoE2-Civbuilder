@@ -1143,7 +1143,7 @@ export function caretType(caretId: string): 'units' | 'buildings' | 'techs' {
   return (type + 's') as 'units' | 'buildings' | 'techs'
 }
 
-export function imagePrefix(name: string): string {
+export function fixImagePrefix(name: string): string {
   return name
     .replace('_copy', '')
     .replace('building_', 'Buildings/')
