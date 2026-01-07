@@ -69,15 +69,17 @@ cd src/frontend && npm install && cd ../..
 npm run dev
 ```
 
-Access: http://localhost:3000/v2 (Nuxt) and http://localhost:4000 (API)
+**Access:**
+- Frontend (Nuxt dev server): http://localhost:3000/v2
+- Backend API: http://localhost:4000
+
+**Note:** During development, the Nuxt dev server on port 3000 proxies API requests to the backend server on port 4000.
 
 **Available scripts:**
 - `npm run dev` - Full hot reload (Nuxt + server.js + C++ in Docker)
 - `npm run dev:server` - Server auto-restart with C++ in Docker
 - `npm run dev:server:local` - Server auto-restart with local C++ binaries
 - `npm run dev:nuxt` - Nuxt dev server only
-
-See `QUICKSTART.md` for details.
 
 ## Run with Docker
 ```bash
