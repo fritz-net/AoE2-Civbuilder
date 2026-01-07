@@ -65,21 +65,25 @@ export default defineNuxtConfig({
           target: 'http://localhost:4000',
           changeOrigin: true
         },
-        // Note: do NOT proxy frontend SPA routes like `/v2/draft/create`.
-        // Only proxy static assets under `/v2` below.
+        // `/v2/download` intentionally left unproxied so SPA can handle
+        // client-side navigation; use runtimeConfig `apiBase` for API calls.
         '/download': {
           target: 'http://localhost:4000',
           changeOrigin: true
         },
-        // `/v2/download` intentionally left unproxied so SPA can handle
-        // client-side navigation; use runtimeConfig `apiBase` for API calls.
+        // Note: do NOT proxy frontend SPA routes like `/v2/draft/create`.
+        // Only proxy static assets under `/v2` below.
+        // do not proxy `/v2/draft` — it's a Nuxt page route that must
+        // be served by the dev server on reload.
         '/draft': {
           target: 'http://localhost:4000',
           changeOrigin: true,
           ws: true
         },
-        // do not proxy `/v2/draft` — it's a Nuxt page route that must
-        // be served by the dev server on reload.
+        // TODO investigate! draft with ID is not working `http://localhost:4000/draft/103240973857385` because if i add a glob like `/draft/*` it also forwards v2 which makes no sense
+
+
+        // socket.io proxied at root `/socket.io` only; avoid `/v2/socket.io`.
         '/socket.io': {
           target: 'http://localhost:4000',
           changeOrigin: true,
@@ -92,27 +96,35 @@ export default defineNuxtConfig({
         //  ws: true,
         //  rewrite: (path) => path.replace(/^\/v2/, '')
         //},
-        // socket.io proxied at root `/socket.io` only; avoid `/v2/socket.io`.
+
         // CHANGELOG may be requested at `/CHANGELOG.md` or under the app base `/v2/CHANGELOG.md`.
-        '/CHANGELOG.md': {
-          target: 'http://localhost:4000',
-          changeOrigin: true
-        },
+        // '/CHANGELOG.md': {
+        //   target: 'http://localhost:4000',
+        //   changeOrigin: true
+        // },
+        // UI v2 requests this path
         '/v2/CHANGELOG.md': {
           target: 'http://localhost:4000',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/v2/, '')
         },
+        
+        '/v2/vanillaFiles': {
+          target: 'http://localhost:4000',
+          changeOrigin: true
+        },
+
         // Techtree static assets used by legacy pages. Proxy both `/aoe2techtree` and `/v2/aoe2techtree`.
         '/aoe2techtree': {
           target: 'http://localhost:4000',
           changeOrigin: true
         },
-        '/v2/aoe2techtree': {
-          target: 'http://localhost:4000',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/v2/, '')
-        }
+        // mostly it uses shared root
+        //'/v2/aoe2techtree': {
+        //  target: 'http://localhost:4000',
+        //  changeOrigin: true,
+        //  rewrite: (path) => path.replace(/^\/v2/, '')
+        //}
       }
     }
   }
