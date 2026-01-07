@@ -1,0 +1,36 @@
+# Node modules
+node_modules
+src/frontend/node_modules
+src/frontend/.nuxt
+src/frontend/.output
+
+# Build artifacts
+modding/build
+*.o
+*.a
+*.so
+
+# Git (keep .git for submodule initialization in Dockerfile)
+.gitignore
+
+# Logs
+logs.txt
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+drafts
+__tests__
+.github
