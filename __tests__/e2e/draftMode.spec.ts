@@ -214,12 +214,7 @@ test.describe('Draft Mode - Modal Interactions', () => {
     await page.getByRole('button', { name: /Start Draft/i }).click();
     
     const modal = page.locator('.modal-overlay');
-    const isModalVisible = await modal.isVisible().catch(() => false);
-    
-    if (!isModalVisible) {
-      console.log('Modal not visible - skipping close test');
-      return;
-    }
+    await expect(modal).toBeVisible();
     
     // Click close button
     await page.getByRole('button', { name: /Close/i }).click();
@@ -454,10 +449,6 @@ test.describe('Draft Mode - Draft Player Page', () => {
     // Navigate to player page
     await page.goto(playerLink);
     
-    // Wait for page to load
-    await page.waitForTimeout(3000);
-    
-    // Check that the page loaded
     const pageContent = page.locator('.draft-player-page');
     await expect(pageContent).toBeVisible();
   });
@@ -477,12 +468,7 @@ test.describe('Draft Mode - Draft Spectator Page', () => {
     // Removed waitForTimeout - using proper wait
     
     const modal = page.locator('.modal-overlay');
-    const isModalVisible = await modal.isVisible().catch(() => false);
-    
-    if (!isModalVisible) {
-      console.log('Modal not visible - server may not be running');
-      return;
-    }
+    await expect(modal).toBeVisible();
     
     // Get spectator link
     const spectatorLinkInput = page.locator('#spectatorLink');
@@ -491,10 +477,6 @@ test.describe('Draft Mode - Draft Spectator Page', () => {
     // Navigate to spectator page
     await page.goto(spectatorLink);
     
-    // Wait for page to load
-    await page.waitForTimeout(3000);
-    
-    // Check that the page loaded
     const pageContent = page.locator('.draft-spectator-page');
     await expect(pageContent).toBeVisible();
   });
