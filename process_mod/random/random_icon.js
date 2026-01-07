@@ -2,6 +2,11 @@
 const fs = require("fs");
 const { PNG } = require("pngjs");
 
+// Constants
+const CANVAS_WIDTH = 256;
+const CANVAS_HEIGHT = 256;
+const SEMICIRCLE_ANGLE_STEP = 0.1;
+
 // Helper class to simulate canvas operations using pngjs
 class PNGCanvas {
   constructor(width, height) {
@@ -21,6 +26,10 @@ class PNGCanvas {
         b: parseInt(match[3]),
         a: 255,
       };
+    } else {
+      // Fallback to black for unrecognized formats
+      console.warn(`Unrecognized color format: ${color}, using black`);
+      this.fillStyle = { r: 0, g: 0, b: 0, a: 255 };
     }
   }
 
@@ -277,8 +286,8 @@ async function drawFlag(seed, symbol, output_paths, input_path) {
   var overlay_colour = "rgb(" + colour_palette[3][0] + ", " + colour_palette[3][1] + ", " + colour_palette[3][2] + ")";
   var image_path = input_path + "/symbol_" + symbol + ".png";
 
-  const width = 256;
-  const height = 256;
+  const width = CANVAS_WIDTH;
+  const height = CANVAS_HEIGHT;
   const canvas = new PNGCanvas(width, height);
   canvas.setFillStyle("rgb(0, 0, 0)");
   canvas.fillRect(0, 0, width, height);
@@ -525,7 +534,7 @@ async function drawFlag(seed, symbol, output_paths, input_path) {
     case 7:
       // Semicircle on left edge - approximate with polygon
       const points7 = [];
-      for (let angle = -Math.PI / 2; angle <= Math.PI / 2; angle += 0.1) {
+      for (let angle = -Math.PI / 2; angle <= Math.PI / 2; angle += SEMICIRCLE_ANGLE_STEP) {
         points7.push({
           x: 0 + 128 * Math.cos(angle),
           y: 128 + 128 * Math.sin(angle),
@@ -594,8 +603,8 @@ async function drawFlag(seed, symbol, output_paths, input_path) {
         if (symbolData[srcIdx + 3] > 0) {
           const destX = symbol_position_x + x;
           const destY = symbol_position_y + y;
-          if (destX >= 0 && destX < 256 && destY >= 0 && destY < 256) {
-            const destIdx = (destY * 256 + destX) << 2;
+          if (destX >= 0 && destX < CANVAS_WIDTH && destY >= 0 && destY < CANVAS_HEIGHT) {
+            const destIdx = (destY * CANVAS_WIDTH + destX) << 2;
             canvas2.png.data[destIdx] = symbolData[srcIdx];
             canvas2.png.data[destIdx + 1] = symbolData[srcIdx + 1];
             canvas2.png.data[destIdx + 2] = symbolData[srcIdx + 2];
