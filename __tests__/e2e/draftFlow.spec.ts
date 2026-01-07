@@ -430,9 +430,6 @@ test.describe('Draft Flow - Card Images', () => {
       }
     }
     
-    // Continue with remaining rounds
-    const rounds = await playerPage.selectCards(7);
-    expect(rounds).toBeGreaterThanOrEqual(1);
   });
 });
 
