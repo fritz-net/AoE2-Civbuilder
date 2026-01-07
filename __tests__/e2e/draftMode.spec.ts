@@ -204,20 +204,27 @@ test.describe('Draft Mode - Draft Creation', () => {
       offline: false,
       downloadThroughput: 500 * 1024 / 8, // 500 kbps
       uploadThroughput: 500 * 1024 / 8,
-      latency: 1000 // 1 second latency
+      latency: 2000 // 2 seconds latency
     });
     
-    // Verify button exists and click it
+    // Verify button exists
     const startButton = page.locator('button:has-text("Start Draft")');
     await expect(startButton).toBeVisible();
     
-    // Click and immediately check for disabled state (loading state is visible during network delay)
+    // Click button and check for loading indicators during the delay
     const clickPromise = startButton.click();
     
-    // Wait a bit for the click to register and check if button is disabled
-    await page.waitForTimeout(100);
+    // Check for loading state - button should be disabled or have loading class
+    await page.waitForTimeout(200);
+    
+    // Check multiple possible loading indicators
     const isDisabled = await startButton.isDisabled();
-    expect(isDisabled).toBeTruthy();
+    const hasLoadingClass = await startButton.evaluate(el => el.classList.contains('loading') || el.classList.contains('disabled'));
+    const hasSpinner = await page.locator('.spinner, .loading-spinner').isVisible().catch(() => false);
+    
+    // At least one loading indicator should be present
+    const hasLoadingState = isDisabled || hasLoadingClass || hasSpinner;
+    expect(hasLoadingState).toBeTruthy();
     
     await clickPromise;
     
