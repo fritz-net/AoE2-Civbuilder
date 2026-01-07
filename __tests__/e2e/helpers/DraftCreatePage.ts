@@ -181,6 +181,23 @@ export class DraftCreatePage extends BasePage {
   }
 
   /**
+   * Enable custom UU mode (automatically expands advanced settings if needed)
+   */
+  async enableCustomUUMode(): Promise<void> {
+    const customUUCheckbox = this.page.getByRole('checkbox', { name: /Enable Custom UU Designer Mode/i });
+    
+    // Check if advanced settings need to be expanded
+    const isVisible = await customUUCheckbox.isVisible();
+    if (!isVisible) {
+      await this.expandAdvancedSettings();
+    }
+    
+    await expect(customUUCheckbox).toBeVisible();
+    await customUUCheckbox.check();
+    await expect(customUUCheckbox).toBeChecked();
+  }
+
+  /**
    * Set required first roll bonus (for testing)
    */
   async setRequiredFirstRoll(bonusId: string): Promise<void> {
@@ -223,6 +240,7 @@ export class DraftCreatePage extends BasePage {
     timerEnabled?: boolean;
     timerDuration?: number;
     requiredFirstRoll?: string;
+    customUUMode?: boolean;
   } = {}): Promise<{ hostLink: string; playerLink: string; spectatorLink: string; draftId: string | null }> {
     // Set configuration with defaults
     if (config.numPlayers !== undefined) {
@@ -236,13 +254,16 @@ export class DraftCreatePage extends BasePage {
     }
     
     // Advanced settings
-    if (config.timerEnabled || config.bonusesPerPage !== undefined) {
+    if (config.timerEnabled || config.bonusesPerPage !== undefined || config.customUUMode) {
       await this.expandAdvancedSettings();
       if (config.timerEnabled) {
         await this.enableTimer(config.timerDuration);
       }
       if (config.bonusesPerPage !== undefined) {
         await this.setBonusesPerPage(config.bonusesPerPage);
+      }
+      if (config.customUUMode) {
+        await this.enableCustomUUMode();
       }
     }
     

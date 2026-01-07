@@ -1,17 +1,17 @@
 import { test, expect } from '@playwright/test';
-import { expandAdvancedSettings } from './helpers/draftHelpers';
+import { DraftCreatePage } from './helpers/DraftCreatePage';
 
 /**
  * E2E tests for Draft Mode Timer functionality
  * Tests the timer feature in draft mode
+ * Refactored to use Page Object Model pattern
  */
 
 test.describe('Draft Mode - Timer Feature', () => {
   test('should show timer settings in draft creation page', async ({ page }) => {
-    await page.goto('/v2/draft/create');
-    
-    // Expand Advanced Settings to see timer checkbox
-    await expandAdvancedSettings(page);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    await draftCreatePage.expandAdvancedSettings();
     
     // Check that timer checkbox is visible
     await expect(page.getByLabel(/Enable Timer for Picking Phase/i)).toBeVisible();
@@ -22,10 +22,9 @@ test.describe('Draft Mode - Timer Feature', () => {
   });
 
   test('should show timer duration input when timer is enabled', async ({ page }) => {
-    await page.goto('/v2/draft/create');
-    
-    // Expand Advanced Settings
-    await expandAdvancedSettings(page);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    await draftCreatePage.expandAdvancedSettings();
     
     // Enable timer
     const timerCheckbox = page.locator('#timerEnabled');
@@ -41,10 +40,9 @@ test.describe('Draft Mode - Timer Feature', () => {
   });
 
   test('should hide timer duration input when timer is disabled', async ({ page }) => {
-    await page.goto('/v2/draft/create');
-    
-    // Expand Advanced Settings
-    await expandAdvancedSettings(page);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    await draftCreatePage.expandAdvancedSettings();
     
     // Enable timer first
     const timerCheckbox = page.locator('#timerEnabled');
@@ -62,10 +60,9 @@ test.describe('Draft Mode - Timer Feature', () => {
   });
 
   test('should allow changing timer duration', async ({ page }) => {
-    await page.goto('/v2/draft/create');
-    
-    // Expand Advanced Settings
-    await expandAdvancedSettings(page);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    await draftCreatePage.expandAdvancedSettings();
     
     // Enable timer
     await page.locator('#timerEnabled').check();
@@ -86,10 +83,9 @@ test.describe('Draft Mode - Timer Feature', () => {
   });
 
   test('should show help text for timer feature', async ({ page }) => {
-    await page.goto('/v2/draft/create');
-    
-    // Expand Advanced Settings
-    await expandAdvancedSettings(page);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    await draftCreatePage.expandAdvancedSettings();
     
     // Enable timer
     await page.locator('#timerEnabled').check();
@@ -99,32 +95,32 @@ test.describe('Draft Mode - Timer Feature', () => {
   });
 
   test('should submit draft with timer enabled', async ({ page }) => {
-    await page.goto('/v2/draft/create');
-    
-    // Expand Advanced Settings
-    await expandAdvancedSettings(page);
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
+    await draftCreatePage.expandAdvancedSettings();
     
     // Enable timer
     await page.locator('#timerEnabled').check();
     await page.locator('#timerDuration').fill('30');
     
     // Click submit
-    await page.getByRole('button', { name: /Start Draft/i }).click();
+    await draftCreatePage.clickStartDraft();
     
     // Should show modal with draft links
-    await expect(page.getByText(/Draft Created!/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Draft Created!/i)).toBeVisible();
   });
 
   test('should submit draft with timer disabled (default)', async ({ page }) => {
-    await page.goto('/v2/draft/create');
+    const draftCreatePage = new DraftCreatePage(page);
+    await draftCreatePage.navigate();
     
     // Don't enable timer (default is disabled)
     
     // Click submit
-    await page.getByRole('button', { name: /Start Draft/i }).click();
+    await draftCreatePage.clickStartDraft();
     
     // Should show modal with draft links
-    await expect(page.getByText(/Draft Created!/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Draft Created!/i)).toBeVisible();
   });
 });
 

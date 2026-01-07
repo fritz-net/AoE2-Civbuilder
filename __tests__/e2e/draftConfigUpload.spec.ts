@@ -291,10 +291,6 @@ test.describe('Draft Mode - Config File Upload Functionality', () => {
       const successMessage = draftCreatePage.getSuccessMessage();
       await expect(successMessage).toBeVisible();
       
-      // Wait for it to disappear (3 seconds + buffer)
-      await page.waitForTimeout(3500);
-      
-      // Success message should be gone
       await expect(successMessage).not.toBeVisible();
     } finally {
       if (fs.existsSync(tempFilePath)) {
@@ -342,32 +338,14 @@ test.describe('Draft Mode - Config File Upload Integration', () => {
     fs.writeFileSync(tempFilePath, configJson);
     
     try {
-      // Upload file
       await draftCreatePage.uploadConfigFile(tempFilePath);
       
-      // Verify values were populated
       await expect(page.locator('#numPlayers')).toHaveValue('1');
       
-      // Create draft
       await draftCreatePage.clickStartDraft();
       
-      // Wait for response
-      await page.waitForTimeout(2000);
-      
-      // Check if modal appeared or error
       const modal = page.locator('.modal-overlay');
-      const errorMessage = page.locator('.error-message');
-      
-      const isModalVisible = await modal.isVisible().catch(() => false);
-      const isErrorVisible = await errorMessage.isVisible().catch(() => false);
-      
-      if (isModalVisible) {
-        // Draft created successfully
-        await expect(modal).toBeVisible();
-      } else if (isErrorVisible) {
-        // Server not available - that's okay for this test
-        console.log('Server not available - draft creation expected to fail');
-      }
+      await expect(modal).toBeVisible();
     } finally {
       if (fs.existsSync(tempFilePath)) {
         fs.unlinkSync(tempFilePath);

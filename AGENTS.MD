@@ -38,7 +38,7 @@ The project has two parallel frontends:
 - `public/aoe2techtree/` - Modified version of https://github.com/SiegeEngineers/aoe2techtree
 - Used for displaying and editing tech trees in both UIs
 
-### Testing
+### Testing (javascript/TypeScript)
 - use full cpp backend (needs to be compiled first) not only node server
 
 **Unit Tests** (`__tests__/`)
@@ -52,12 +52,18 @@ The project has two parallel frontends:
 - Test fixtures: `__tests__/fixtures/`
 - Test helpers: `__tests__/helpers/`
 
-**E2E Tests for Vue/Nuxt UI**
+
+#### E2E Tests for Vue/Nuxt UI
 - agents AND CI, use playwright and locally installed chromium -> u have all the tools to run the tests
 - location: likely `src/frontend/tests/` or `__tests__/e2e/`
-- u are NOT allowed to increase timeouts. If we run into a timeout in nearly all cases selectors are wrong, the flow changed, something is really broken. also do not add new timeouts/waits
-- use Page Object Model for e2e tests
+- use Page Object Model and Component Object Model for e2e tests
 - always at last create 1 happy path test doing the full flow of a feature till the end (eg. download mod)
+- additional infos see ./__tests__/e2e/README.md
+
+- u are NOT allowed to increase timeouts. If we run into a timeout in nearly all cases selectors are wrong, the flow changed, something is really broken. also do not add new timeouts/waits
+- no explicit timeouts/waits this is usually a smell, timeouts are set globally
+- tests should do meaningful actions, checking if things are loaded are not really meaningful since other tests can or already do cover that
+- Avoid code branches that exit real testing (eg. catch all into log; branching of because the server could not be there, which should fail test anyway since server is required for e2e tests)
 
 ### Tools and Utilities
 
