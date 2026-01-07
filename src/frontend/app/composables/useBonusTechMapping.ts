@@ -24,6 +24,7 @@ export const BONUS_ID_XIANBEI_RAIDER = 348
 export const BONUS_ID_GRENADIER = 355
 export const BONUS_ID_PASTURES = 356
 export const BONUS_ID_MOUNTED_TREBUCHET = 361
+export const BONUS_ID_IMPERIAL_PALADIN = 363
 export const BONUS_ID_FOLWARK = 280
 export const BONUS_ID_WINGED_HUSSAR = 282
 export const BONUS_ID_LEGIONARY = 307
@@ -194,6 +195,20 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 361,
     bonusType: 'civ',
     units: [1923],  // Mounted Trebuchet - NOT Traction Trebuchet (1942 is a different unit)
+  },
+  
+  // CIV_BONUS_363: "Imperial Paladin replaces Cavalier"
+  {
+    bonusId: 363,
+    bonusType: 'civ',
+    units: [2540],  // Imperial Paladin
+    prerequisites: {
+      units: [38, 283],  // Knight, Cavalier
+    },
+    requiresPrerequisites: true,
+    replaces: {
+      units: [283],  // Cavalier
+    },
   },
   
   // CIV_BONUS_142: "Missionaries can be trained in monasteries"

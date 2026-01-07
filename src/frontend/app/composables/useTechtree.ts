@@ -92,6 +92,7 @@ import {
   PALADIN,
   WINGED_HUSSAR,
   SAVAR,
+  IMPERIAL_PALADIN,
   LEGIONARY,
   // Can-build bonus buildings/units
   FEITORIA,
@@ -244,6 +245,7 @@ import {
   BONUS_ID_WINGED_HUSSAR,
   BONUS_ID_LEGIONARY,
   BONUS_ID_SAVAR,
+  BONUS_ID_IMPERIAL_PALADIN,
   BONUS_ID_FEITORIA,
   BONUS_ID_CARAVEL,
   BONUS_ID_KREPOST,
@@ -473,6 +475,7 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [u(KNIGHT), u(CAVALIER)],
     [u(CAVALIER), u(PALADIN)],
     [u(CAVALIER), u(SAVAR)], // Replacement: Savar replaces Paladin
+    [u(KNIGHT), u(IMPERIAL_PALADIN)], // Replacement: Imperial Paladin replaces Cavalier
     [b(DOCK), u(FISHING_SHIP)],
     [b(DOCK), u(TRANSPORT_SHIP)],
     [b(DOCK), u(DROMON)],
@@ -696,6 +699,9 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
   if (isBonusSelected(BONUS_ID_SAVAR)) {
     replacedIds.add(u(PALADIN))  // Paladin replaced by Savar
   }
+  if (isBonusSelected(BONUS_ID_IMPERIAL_PALADIN)) {
+    replacedIds.add(u(CAVALIER))  // Cavalier replaced by Imperial Paladin
+  }
   if (isBonusSelected(BONUS_ID_FOLWARK)) {
     replacedIds.add(b(MILL))  // Mill replaced by Folwark
   }
@@ -837,7 +843,14 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   } else {
     stablelane.rows.imperial_1.push(unit(HUSSAR))
   }
-  stablelane.rows.imperial_1.push(unit(CAVALIER))
+  
+  // Cavalier or Imperial Paladin (replacement bonus 363)
+  if (isBonusSelected(BONUS_ID_IMPERIAL_PALADIN)) {
+    stablelane.rows.imperial_1.push(unit(IMPERIAL_PALADIN)) // Imperial Paladin replaces Cavalier
+  } else {
+    stablelane.rows.imperial_1.push(unit(CAVALIER))
+  }
+  
   stablelane.rows.imperial_1.push(unit(HEAVY_CAMEL_RIDER))
   stablelane.rows.imperial_1.push(unit(ELITE_BATTLE_ELEPHANT))
   stablelane.rows.imperial_1.push(unit(ELITE_STEPPE_LANCER))
