@@ -193,9 +193,6 @@ test.describe('Draft Mode - Draft Creation', () => {
     await expect(page.getByRole('link', { name: /Go to Host Page/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /Close/i })).toBeVisible();
   });
-
-  // Removed flaky "creating state" test - loading states complete too quickly to reliably test
-  // Loading behavior is already covered by comprehensive draft flow tests
 });
 
 test.describe('Draft Mode - Modal Interactions', () => {
@@ -479,9 +476,11 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     
+    // Create draft with pasture as required first bonus (ID: 1889 for pasture)
     const result = await draftCreatePage.createDraft({
       numPlayers: 1,
-      bonuses: 4
+      bonuses: 4,
+      requiredFirstRoll: '1889'
     });
     
     const playerPage = new DraftPlayerPage(page);
@@ -491,20 +490,42 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await playerPage.startDraft();
     await playerPage.completeSetupPhase('Test Civilization');
     
-    // Complete all draft rounds (4 bonuses as configured)
-    const rounds = await playerPage.selectCards(4);
-    expect(rounds).toBeGreaterThanOrEqual(1);
+    // Select cards: 4 bonuses (including pasture as first), 1 UU, 2 techs, 1 additional bonus
+    // Round 1: Select first bonus (pasture - required)
+    await playerPage.selectCards(1);
+    
+    // Round 2: Select second bonus
+    await playerPage.selectCards(1);
+    
+    // Round 3: Select third bonus
+    await playerPage.selectCards(1);
+    
+    // Round 4: Select fourth bonus
+    await playerPage.selectCards(1);
+    
+    // Round 5: Select unique unit
+    await playerPage.selectCards(1);
+    
+    // Round 6: Select first tech
+    await playerPage.selectCards(1);
+    
+    // Round 7: Select second tech
+    await playerPage.selectCards(1);
+    
+    // Round 8: Select final bonus
+    await playerPage.selectCards(1);
     
     // Wait for tech tree phase to appear
     await playerPage.assertInTechTreePhase();
+    
+    // Verify pasture building is visible in tech tree
+    const pastureNode = page.locator('.node__overlay[data-caret-id="building_1889"]');
+    await expect(pastureNode).toBeVisible();
     
     // Complete tech tree selection
     await playerPage.completeTechTree();
     
     // Should reach download phase after completing tech tree
     await playerPage.waitForDownloadPhase();
-    
-    // Test passes if we reach download phase successfully
-    // (Pasture bonus detection would require specific bonus selection which is randomized)
   });
 });
