@@ -442,9 +442,25 @@ test.describe('Draft Mode - Draft Host Page', () => {
     if (joinFormVisible) {
       // Fill in join form
       await page.fill('#playerName', 'Lobby Test Player');
+      
+      // Click join button - this triggers a page reload
       await page.click('.join-button');
-      await page.waitForTimeout(5000);
+      
+      // Wait for navigation to complete after reload
+      await page.waitForLoadState('networkidle');
     }
+    
+    // Wait for one of the expected UI states to appear after joining
+    // This uses Playwright's race condition approach - whichever appears first
+    await Promise.race([
+      page.locator('.draft-lobby').waitFor({ state: 'visible', timeout: 10000 }),
+      page.locator('.lobby-title').waitFor({ state: 'visible', timeout: 10000 }),
+      page.locator('h1:has-text("Civilization Drafter")').waitFor({ state: 'visible', timeout: 10000 }),
+      page.locator('.loading-overlay').waitFor({ state: 'visible', timeout: 10000 }),
+      page.getByRole('button', { name: /Start Draft|Lobby Not Ready/i }).waitFor({ state: 'visible', timeout: 10000 }),
+    ]).catch(() => {
+      // If none appear within timeout, test will fail below
+    });
     
     // Check for lobby content (phase 0) or other valid UI state
     const lobbyVisible = await page.locator('.draft-lobby, .lobby-title, h1:has-text("Civilization Drafter")').isVisible().catch(() => false);
