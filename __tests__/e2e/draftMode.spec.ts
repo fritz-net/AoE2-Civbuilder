@@ -491,11 +491,12 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await playerPage.startDraft();
     await playerPage.completeSetupPhase('Test Civilization');
 
-    // make sure first card is pasture `<img data-v-b621e3ee="" src="/img/compressedcards/bonus_329_v0.jpg" alt="Farmers don't require Mills/Town Centers to drop off food" class="card-image">`
+    // make sure first card is pasture
+    // `<img data-v-b621e3ee="" class="card-image" src="/img/compressedcards/bonus_356_v0.jpg" alt="Pastures replace Farms and Mill upgrades"/>`
     const firstCard = page.locator('.draft-card').first();
     await expect(firstCard).toBeVisible();
-    const firstCardImgSrc = await firstCard.locator('img').getAttribute('src');
-    expect(firstCardImgSrc).toContain('bonus_356_'); // pasture bonus ID is 356
+    const firstCardImgSrc = await firstCard.locator('img.card-image').getAttribute('src');
+    expect(firstCardImgSrc).toContain('bonus_356'); // pasture bonus ID is 356
 
     // select first card (which is pasture)
     await playerPage.selectCards(1);
