@@ -202,11 +202,26 @@ test.describe('Draft Mode - Draft Creation', () => {
     await draftCreatePage.clickStartDraft();
     
     // Verify that modal appears (indicates request completed successfully)
+    // Add network latency to slow down the request and make creating state visible
+    const client = await page.context().newCDPSession(page);
+    await client.send('Network.emulateNetworkConditions', {
+      offline: false,
+      downloadThroughput: 500 * 1024 / 8, // 500 kbps
+      uploadThroughput: 500 * 1024 / 8,
+      latency: 1000 // 1 second latency
+    });
+    
+    await startButton.click();
+    
+    // With throttled network, check for loading/creating state
+    const isDisabled = await startButton.isDisabled();
+    const hasLoadingClass = await startButton.getAttribute('class');
+    const isLoading = isDisabled || hasLoadingClass?.includes('loading') || hasLoadingClass?.includes('disabled');
+    expect(isLoading).toBeTruthy();
+    
+    // Wait for modal to appear after creating state
     const modal = page.locator('.modal-overlay');
     await expect(modal).toBeVisible();
-    
-    // The fact that modal appeared means the button worked and draft was created
-    // (the creating state may be too fast to catch in tests)
   });
 });
 
@@ -496,7 +511,8 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
       bonuses: 4
     });
     
-    const playerPage = new DraftPlayerPage(page);
+    const { DraftPlayerPage: PlayerPage } = await import('./helpers/DraftPlayerPage');
+    const playerPage = new PlayerPage(page);
     
     await playerPage.navigate(result.hostLink);
     await playerPage.joinDraft('Test Player');
@@ -507,7 +523,13 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     const rounds = await playerPage.selectCards(10);
     expect(rounds).toBeGreaterThanOrEqual(1);
     
-    // Test completes successfully - pasture bonus detection would be visible
-    // in tech tree if pasture card was selected, but this verifies the draft flow works
+    // Wait for tech tree to appear
+    await playerPage.assertInTechTreePhase();
+    
+    // Check for pasture building/tech using class selector (better than name)
+    // Pasture tech has data-caret-id="building_1889" 
+    const pastureNode = page.locator('.node__overlay[data-caret-id="building_1889"]');
+    const pastureExists = await pastureNode.count();
+    expect(pastureExists).toBeGreaterThan(0); // Pasture tech should be visible in tech tree
   });
 });

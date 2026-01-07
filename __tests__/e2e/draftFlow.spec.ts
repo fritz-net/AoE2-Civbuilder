@@ -115,6 +115,11 @@ test.describe('Draft Flow - Complete Single Player Draft to Download', () => {
     const hasContent = await firstCard.textContent();
     expect(hasContent).toBeTruthy();
     expect(hasContent?.length).toBeGreaterThan(5); // Should have at least some text
+    
+    // Verify rarity is displayed (test named includes "and rarity")
+    const rarityElement = firstCard.locator('[class*="rarity"], [data-rarity]');
+    const rarityCount = await rarityElement.count();
+    expect(rarityCount).toBeGreaterThan(0); // Card should have rarity indicator
   });
 });
 
@@ -399,8 +404,27 @@ test.describe('Draft Flow - Card Images', () => {
     const cardCount = await cards.count();
     expect(cardCount).toBeGreaterThan(0);
     
-    // Complete the full draft flow using selectCards which handles card selection properly
-    const rounds = await playerPage.selectCards(8);
+    // Complete first round
+    await playerPage.selectCards(1);
+    
+    // After first round, test reroll functionality and non-highlighted cards
+    const rerollButton = page.locator('button:has-text("Reroll")');
+    if (await rerollButton.isVisible()) {
+      await rerollButton.click();
+      
+      // After reroll, verify that cards after the first 3 are not highlighted
+      // (first 3 are highlighted depending on draft settings)
+      const allCards = page.locator('.draft-card:not(.card-hidden)');
+      const totalCards = await allCards.count();
+      if (totalCards > 3) {
+        const fourthCard = allCards.nth(3);
+        const isHighlighted = await fourthCard.locator('.highlighted, [class*="highlight"]').count();
+        expect(isHighlighted).toBe(0); // Fourth card and beyond should not be highlighted
+      }
+    }
+    
+    // Continue with remaining rounds
+    const rounds = await playerPage.selectCards(7);
     expect(rounds).toBeGreaterThanOrEqual(1);
   });
 });
@@ -451,7 +475,7 @@ test.describe('Draft Flow - TechTree Fill Button', () => {
 });
 
 test.describe('Draft Flow - Navigation Protection', () => {
-  test('should prevent navigation during draft and complete full flow', async ({ page }) => {
+  test('should prevent navigation during draft and continue flow', async ({ page }) => {
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     
