@@ -63,6 +63,7 @@ The project has two parallel frontends:
 - u are NOT allowed to increase timeouts. If we run into a timeout in nearly all cases selectors are wrong, the flow changed, something is really broken. also do not add new timeouts/waits
 - no explicit timeouts/waits this is usually a smell, timeouts are set globally
 - tests should do meaningful actions, checking if things are loaded are not really meaningful since other tests can or already do cover that
+- Avoid code branches that exit real testing (eg. catch all into log; branching of because the server could not be there, which should fail test anyway since server is required for e2e tests)
 
 ### Tools and Utilities
 
