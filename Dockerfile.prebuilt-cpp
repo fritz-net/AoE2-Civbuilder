@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y dos2unix libjsoncpp24 zip && \
 COPY ./modding/create-data-mod ./modding/build/create-data-mod
 
 # Install Node.js dependencies for main app
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm ci --omit=dev
 
 # Build Nuxt app
 RUN cd src/frontend && npm ci && npm run generate

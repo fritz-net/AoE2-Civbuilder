@@ -31,7 +31,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install Node.js dependencies
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm ci --omit=dev
 
 
 # Copy all source code
