@@ -1,0 +1,21 @@
+{
+  "watch": [
+    "server.js",
+    "lib/**/*.js",
+    "process_mod/**/*.js",
+    "nuxt-integration.js"
+  ],
+  "ignore": [
+    "modding/requested_mods/**",
+    "node_modules/**",
+    "src/frontend/**",
+    "public/**",
+    "__tests__/**",
+    "*.test.js"
+  ],
+  "ext": "js,json",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": 1000
+}

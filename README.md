@@ -60,10 +60,54 @@ npm start
 
 The new frontend will be available at http://localhost:4000/v2
 
-## Development - New Frontend
+## Development Workflow
+
+### Option 1: Full Hot Reload (Nuxt + server.js + C++ in Docker)
 ```bash
-# Run Nuxt in dev mode (hot reload)
+# Install dependencies (first time only)
+npm install
+
+# Run everything with hot reload
+npm run dev
+```
+
+This command:
+- Starts Nuxt dev server with hot module replacement
+- Starts server.js with nodemon for auto-restart
+- Runs C++ binaries inside Docker container
+- Available at: http://localhost:4000 (legacy) and http://localhost:3000 (Nuxt dev)
+
+### Option 2: Nuxt Hot Reload Only
+```bash
+# In terminal 1: Start Nuxt dev server
 npm run dev:nuxt
+
+# In terminal 2: Start server.js (with C++ in Docker)
+npm run dev:cpp-docker
+```
+
+### Option 3: Local Development (No Docker)
+```bash
+# Build C++ binaries locally first (one time)
+cd modding && ./scripts/build.sh
+
+# In terminal 1: Start Nuxt dev server
+npm run dev:nuxt
+
+# In terminal 2: Start server.js with auto-restart
+npm run dev:server:local
+```
+
+## Environment Variables
+
+Create a `.env` file in the project root (see `.env.example`):
+
+```bash
+# Hostname for link generation
+CIVBUILDER_HOSTNAME=http://localhost:4000
+
+# Enable C++ execution in Docker (1=enabled, 0=disabled)
+CPP_IN_DOCKER=0
 ```
 
 ## Run with Docker
