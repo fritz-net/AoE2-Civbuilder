@@ -1143,14 +1143,13 @@ export function caretType(caretId: string): 'units' | 'buildings' | 'techs' {
   return (type + 's') as 'units' | 'buildings' | 'techs'
 }
 
-// unused? TODO remove
-//export function imagePrefix(name: string): string {
-//  return name
-//    .replace('_copy', '')
-//    .replace('building_', 'Buildings/')
-//    .replace('unit_', 'Units/')
-//    .replace('tech_', 'Techs/')
-//}
+export function imagePrefix(name: string): string {
+  return name
+    .replace('_copy', '')
+    .replace('building_', 'Buildings/')
+    .replace('unit_', 'Units/')
+    .replace('tech_', 'Techs/')
+}
 
 export function cost(cost_object: Record<string, number>): string {
   let value = ''
