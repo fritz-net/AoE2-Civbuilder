@@ -489,11 +489,9 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await playerPage.startDraft();
     await playerPage.completeSetupPhase('Test Civilization');
     
-    // Select the 1 bonus card
-    await playerPage.selectFirstCard();
-    
-    // Select unique unit (Round 2)
-    await playerPage.selectFirstCard();
+    // Select cards for all draft rounds (bonus, UU, castle tech, imperial tech, team bonus)
+    // selectCards will stop when no more cards available or tech tree phase reached
+    await playerPage.selectCards(10);
     
     // Should reach tech tree phase after all card selections
     await playerPage.assertInTechTreePhase();
