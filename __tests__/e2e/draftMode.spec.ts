@@ -479,7 +479,9 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     // Create simple 1-player draft with 1 bonus (matches working customUUDraft pattern)
     const result = await draftCreatePage.createDraft({
       numPlayers: 1,
-      bonuses: 1
+      bonuses: 1,
+      // make sure pasture is included
+      requiredFirstRoll: '356', // 356 is ID of pasture bonus
     });
     
     const playerPage = new DraftPlayerPage(page);
@@ -488,13 +490,26 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     await playerPage.joinDraft('Test Player');
     await playerPage.startDraft();
     await playerPage.completeSetupPhase('Test Civilization');
+
+    // make sure first card is pasture `<img data-v-b621e3ee="" src="/img/compressedcards/bonus_329_v0.jpg" alt="Farmers don't require Mills/Town Centers to drop off food" class="card-image">`
+    const firstCard = page.locator('.draft-card').first();
+    await expect(firstCard).toBeVisible();
+    const firstCardImgSrc = await firstCard.locator('img').getAttribute('src');
+    expect(firstCardImgSrc).toContain('bonus_356_'); // pasture bonus ID is 356
+
+    // select first card (which is pasture)
+    await playerPage.selectCards(1);
     
     // Select cards for all draft rounds (bonus, UU, castle tech, imperial tech, team bonus)
     // selectCards will stop when no more cards available or tech tree phase reached
-    await playerPage.selectCards(10);
+    await playerPage.selectCards(7);
     
     // Should reach tech tree phase after all card selections
     await playerPage.assertInTechTreePhase();
+
+    // check for pasture building to be shown (id: 1889) `<rect data-v-3458c1c3="" x="9780.833333333334" y="173.125" width="102.08333333333333" height="102.08333333333333" class="node__overlay" data-caret-id="building_1889"></rect>`
+    const pastureBuilding = page.locator('rect[data-caret-id="building_1889"]');
+    await expect(pastureBuilding).toBeVisible();
     
     // Complete tech tree and reach download
     await playerPage.completeTechTree();
