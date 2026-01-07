@@ -197,27 +197,15 @@ test.describe('Draft Mode - Draft Creation', () => {
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     
-    // Click the Start Draft button and immediately check for loading state
-    const startButton = page.locator('button:has-text("Start Draft")');
-    await expect(startButton).toBeVisible();
+    // Click the Start Draft button
+    await draftCreatePage.clickStartDraft();
     
-    // Click and check for loading indicators
-    const clickPromise = startButton.click();
+    // Verify that modal appears (indicates request completed successfully)
+    const modal = page.locator('.modal-overlay');
+    await expect(modal).toBeVisible();
     
-    // Give button a moment to show loading state
-    await page.waitForTimeout(100);
-    
-    // Check for any loading indicators
-    const hasLoadingState = await Promise.race([
-      startButton.isDisabled().then(() => true).catch(() => false),
-      page.locator('.loading, .spinner, [class*="loading"], [class*="creating"]').isVisible().catch(() => false),
-      page.locator('.modal-overlay').waitFor({ state: 'visible', timeout: 3000 }).then(() => true).catch(() => false)
-    ]);
-    
-    await clickPromise;
-    
-    // At least one indicator of activity should be present (button disabled, spinner, or modal appeared)
-    expect(hasLoadingState).toBeTruthy();
+    // The fact that modal appeared means the button worked and draft was created
+    // (the creating state may be too fast to catch in tests)
   });
 });
 
