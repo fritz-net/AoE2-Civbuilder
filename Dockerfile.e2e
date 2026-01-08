@@ -1,7 +1,7 @@
 # Dockerfile for E2E testing with Playwright
 # This extends the Node.js image with Playwright and Chromium pre-installed
 
-FROM mcr.microsoft.com/playwright:v1.41.0-focal
+FROM mcr.microsoft.com/playwright:v1.57.0-jammy
 
 WORKDIR /app
 
@@ -22,7 +22,7 @@ COPY src/frontend/ src/frontend/
 # This works around npm's optional dependency bug with native modules
 RUN cd src/frontend && npm install --ignore-scripts
 
-# Now copy the rest of the source code
+# Now copy the rest of the source code (including __tests__)
 COPY . .
 
 # Build C++ components (submodules should be initialized before docker build)
