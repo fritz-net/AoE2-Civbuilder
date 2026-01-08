@@ -42,4 +42,4 @@ jobs:
 
       - name: Run E2E smoke test
         run: |
-          docker run --rm aoe2-civbuilder:e2e npm run test:e2e -- __tests__/e2e/draftFlow.spec.ts -t "should complete a 1-player draft"
+          docker run --rm -e npm_config_ignore_scripts=true aoe2-civbuilder:e2e npx playwright test __tests__/e2e/draftFlow.spec.ts -g "should complete a 1-player draft"

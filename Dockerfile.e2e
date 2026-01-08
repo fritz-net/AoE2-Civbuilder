@@ -8,7 +8,7 @@ WORKDIR /app
 # Fix nodesource repository issue and install system dependencies for C++ build
 RUN rm -f /etc/apt/sources.list.d/nodesource.list && \
     apt-get update && \
-    apt-get install -y build-essential cmake liblz4-dev libboost-iostreams-dev libjsoncpp-dev dos2unix ca-certificates && \
+    apt-get install -y build-essential cmake liblz4-dev libboost-iostreams-dev libjsoncpp-dev dos2unix ca-certificates zlib1g-dev && \
     update-ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
@@ -16,9 +16,11 @@ RUN rm -f /etc/apt/sources.list.d/nodesource.list && \
 COPY package*.json ./
 RUN npm config set strict-ssl false && npm ci
 
-# Copy entire frontend directory structure (needed for nuxt prepare to work)
+# Copy entire frontend directory structure (needed for E2E tests)
 COPY src/frontend/ src/frontend/
-RUN cd src/frontend && npm ci
+# Install frontend dependencies without running postinstall (nuxt prepare not needed for E2E tests)
+# This works around npm's optional dependency bug with native modules
+RUN cd src/frontend && npm install --ignore-scripts
 
 # Now copy the rest of the source code
 COPY . .
@@ -26,14 +28,15 @@ COPY . .
 # Build C++ components (submodules should be initialized before docker build)
 RUN cd modding && dos2unix scripts/build.sh && chmod +x scripts/build.sh && ./scripts/build.sh
 
-# Build Nuxt frontend
-RUN cd src/frontend && npm run build
+# Note: Nuxt build is not required for E2E tests as they run against the dev server
 
 # Set environment variables
 ENV NODE_ENV=test
+# Skip postinstall scripts when running npm commands
+ENV npm_config_ignore_scripts=true
 
 # Expose server port
 EXPOSE 4000
 
-# Default command runs E2E tests
-CMD ["npm", "run", "test:e2e"]
+# Default command runs E2E tests directly via Playwright
+CMD ["npx", "playwright", "test", "__tests__/e2e/"]
