@@ -202,4 +202,62 @@ export class TechTreeDemoPage extends BasePage {
       techCount: await this.getTechCount(),
     };
   }
+
+  /**
+   * Get bonus checkbox by name (using role and regex)
+   */
+  getBonusCheckbox(bonusName: RegExp): Locator {
+    return this.page.getByRole('checkbox', { name: bonusName });
+  }
+
+  /**
+   * Select a bonus by name
+   */
+  async selectBonus(bonusName: RegExp): Promise<void> {
+    const checkbox = this.getBonusCheckbox(bonusName);
+    // Scroll into view before checking
+    await checkbox.scrollIntoViewIfNeeded();
+    await checkbox.check();
+    await this.wait(500);
+  }
+
+  /**
+   * Unselect a bonus by name
+   */
+  async unselectBonus(bonusName: RegExp): Promise<void> {
+    const checkbox = this.getBonusCheckbox(bonusName);
+    await checkbox.uncheck();
+    await this.wait(500);
+  }
+
+  /**
+   * Get selected bonuses count
+   */
+  async getSelectedBonusesCount(): Promise<number> {
+    const bonusText = await this.page.getByText(/Selected Bonuses: \d+/i).textContent();
+    const match = bonusText?.match(/\d+/);
+    return match ? parseInt(match[0]) : 0;
+  }
+
+  /**
+   * Assert selected bonuses count
+   */
+  async assertSelectedBonusesCount(expectedCount: number): Promise<void> {
+    const count = await this.getSelectedBonusesCount();
+    expect(count).toBe(expectedCount);
+  }
+
+  /**
+   * Assert that a caret is visible
+   */
+  async assertCaretVisible(caretId: string): Promise<void> {
+    await expect(this.getCaretLocator(caretId)).toBeVisible();
+  }
+
+  /**
+   * Assert that a caret is not visible
+   */
+  async assertCaretNotVisible(caretId: string): Promise<void> {
+    await expect(this.getCaretLocator(caretId)).not.toBeVisible();
+  }
 }
