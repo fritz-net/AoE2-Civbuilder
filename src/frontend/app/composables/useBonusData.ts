@@ -21,7 +21,7 @@ export const editionNames = ['Base Edition', 'First Edition'] as const
 
 // Number of cards per bonus type
 export const numCards = {
-  civ: 363,
+  civ: 364,
   uu: 88,
   castle: 60,
   imp: 59,
