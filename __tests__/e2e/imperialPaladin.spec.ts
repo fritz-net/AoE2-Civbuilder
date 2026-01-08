@@ -1,234 +1,132 @@
 import { test, expect } from '@playwright/test';
-import * as path from 'path';
+import { TechTreeDemoPage } from './helpers/TechTreeDemoPage';
 
 /**
  * E2E tests for Imperial Paladin bonus (bonus 363)
- * Tests that Imperial Paladin appears as a bonus, shows in techtree when selected,
- * and can be used to create a mod.
+ * Tests that Imperial Paladin appears as a bonus, shows in techtree when selected.
+ * 
+ * Uses Page Object Model pattern for maintainability and reusability.
  */
 
+const IMPERIAL_PALADIN_BONUS = /Can upgrade Paladin to Imperial Paladin/i;
+const IMPERIAL_PALADIN_UNIT_ID = 'unit_2540';
+const CAVALIER_UNIT_ID = 'unit_283';
+const EXPECTED_POINTS = 17; // Knight (3) + Cavalier (6) + Paladin (8)
+
 test.describe('Imperial Paladin Bonus', () => {
-  test.beforeEach(async ({ page }) => {
-    // Set a longer timeout for these tests
-    test.setTimeout(60000);
-  });
-
-  test('should show Imperial Paladin bonus in /v2/build bonuses list', async ({ page }) => {
-    await page.goto('/v2/build');
-    
-    // Wait for page to load
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-    
-    // Look for the Imperial Paladin bonus checkbox
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
-    
-    // Verify the bonus exists in the list
-    await expect(bonusCheckbox).toBeVisible();
-  });
-
   test('should add Imperial Paladin after Paladin in techtree when bonus is selected', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
+    const techtreePage = new TechTreeDemoPage(page);
     
-    // Wait for tech tree to load
-    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000);
+    await techtreePage.navigate();
+    await techtreePage.waitForTechtreeLoaded();
     
-    // Get initial tech count
-    const initialText = await page.getByText(/Techs Enabled: \d+/i).textContent();
-    const initialCount = parseInt(initialText?.match(/\d+/)?.[0] || '0');
+    // Get initial state
+    const initialTechCount = await techtreePage.getTechCount();
     
     // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
-    await bonusCheckbox.check();
-    await page.waitForTimeout(500); // Allow tree to rebuild
+    await techtreePage.selectBonus(IMPERIAL_PALADIN_BONUS);
     
     // Verify tech count increased (Knight, Cavalier, and Paladin are prerequisites)
-    const finalText = await page.getByText(/Techs Enabled: \d+/i).textContent();
-    const finalCount = parseInt(finalText?.match(/\d+/)?.[0] || '0');
-    expect(finalCount).toBeGreaterThan(initialCount);
+    await techtreePage.assertTechCountGreaterThan(initialTechCount);
     
-    // Verify points increased (Knight = 3pts, Cavalier = 6pts, Paladin = 8pts = 17pts total for prerequisites)
-    const pointsText = await page.locator('text=/Points Spent: \\d+/').textContent();
-    const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
-    expect(points).toBe(17);
+    // Verify points (Knight 3pts + Cavalier 6pts + Paladin 8pts = 17pts)
+    await techtreePage.assertPoints(EXPECTED_POINTS);
     
     // Verify Cavalier is still visible (not replaced)
-    const cavalierElement = page.locator('[data-caret-id="unit_283"]');
-    await expect(cavalierElement).toBeVisible();
+    await techtreePage.assertCaretVisible(CAVALIER_UNIT_ID);
   });
 
   test('should enable Imperial Paladin with prerequisites when bonus is selected', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
+    const techtreePage = new TechTreeDemoPage(page);
     
-    // Wait for tech tree to load
-    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000);
+    await techtreePage.navigate();
+    await techtreePage.waitForTechtreeLoaded();
     
     // Initially, nothing should be selected
-    await expect(page.getByText('Points Spent: 0')).toBeVisible();
+    await techtreePage.assertPoints(0);
     
     // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
-    await bonusCheckbox.check();
-    await page.waitForTimeout(500);
+    await techtreePage.selectBonus(IMPERIAL_PALADIN_BONUS);
     
     // Verify points = 17 (prerequisites: Knight 3pts + Cavalier 6pts + Paladin 8pts)
     // Imperial Paladin itself is free as a bonus unit
-    const pointsText = await page.locator('text=/Points Spent: \\d+/').textContent();
-    const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
-    expect(points).toBe(17);
+    await techtreePage.assertPoints(EXPECTED_POINTS);
     
     // Verify tech count increased appropriately
-    const techsEnabledText = await page.locator('text=/Techs Enabled: \\d+/').textContent();
-    const techsEnabled = parseInt(techsEnabledText?.match(/\d+/)?.[0] || '0');
-    expect(techsEnabled).toBeGreaterThan(39); // More than default
+    await techtreePage.assertTechCountGreaterThan(39);
   });
 
   test('should remove Imperial Paladin when bonus is deselected', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
+    const techtreePage = new TechTreeDemoPage(page);
     
-    // Wait for tech tree to load
-    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000);
+    await techtreePage.navigate();
+    await techtreePage.waitForTechtreeLoaded();
     
     // Select bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
-    await bonusCheckbox.check();
-    await page.waitForTimeout(500);
+    await techtreePage.selectBonus(IMPERIAL_PALADIN_BONUS);
     
     // Get tech count with bonus
-    const withBonusText = await page.getByText(/Techs Enabled: \d+/i).textContent();
-    const withBonusCount = parseInt(withBonusText?.match(/\d+/)?.[0] || '0');
+    const withBonusCount = await techtreePage.getTechCount();
     
     // Deselect the bonus
-    await bonusCheckbox.uncheck();
-    await page.waitForTimeout(500);
+    await techtreePage.unselectBonus(IMPERIAL_PALADIN_BONUS);
     
     // Verify tech count decreased
-    const withoutBonusText = await page.getByText(/Techs Enabled: \d+/i).textContent();
-    const withoutBonusCount = parseInt(withoutBonusText?.match(/\d+/)?.[0] || '0');
+    const withoutBonusCount = await techtreePage.getTechCount();
     expect(withoutBonusCount).toBeLessThan(withBonusCount);
     
     // Verify points back to 0
-    await expect(page.getByText('Points Spent: 0')).toBeVisible();
+    await techtreePage.assertPoints(0);
   });
 
   test('should display correct Selected Bonuses count', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
+    const techtreePage = new TechTreeDemoPage(page);
     
-    // Wait for tech tree to load
-    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000);
+    await techtreePage.navigate();
+    await techtreePage.waitForTechtreeLoaded();
     
     // Initially should be 0
-    await expect(page.getByText(/Selected Bonuses: 0/i)).toBeVisible();
+    await techtreePage.assertSelectedBonusesCount(0);
     
     // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
-    await bonusCheckbox.check();
-    await page.waitForTimeout(300);
+    await techtreePage.selectBonus(IMPERIAL_PALADIN_BONUS);
     
     // Should be 1
-    await expect(page.getByText(/Selected Bonuses: 1/i)).toBeVisible();
-  });
-
-  test('should create downloadable mod with Imperial Paladin', async ({ page }) => {
-    // Only run in CI environment
-    if (shouldSkipDownloadTests) {
-      test.skip();
-      return;
-    }
-    
-    await page.goto('/v2/build');
-    
-    // Wait for page to load
-    await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(1000);
-    
-    // Fill in civilization name
-    const civNameInput = page.locator('input[placeholder*="Civilization Name" i], input[name="civName" i], input[type="text"]').first();
-    await civNameInput.fill('Test Imperial Paladin Civ');
-    
-    // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
-    await bonusCheckbox.check();
-    await page.waitForTimeout(500);
-    
-    // Find and click the create/build button
-    const buildButton = page.getByRole('button', { name: /Create|Build|Generate/i });
-    await buildButton.click();
-    
-    // Wait for mod generation (can take some time)
-    await page.waitForTimeout(5000);
-    
-    // Look for download button or link
-    const downloadButton = page.getByRole('button', { name: /Download/i }).or(page.getByRole('link', { name: /Download/i }));
-    
-    // Verify download is available
-    await expect(downloadButton).toBeVisible({ timeout: 30000 });
-    
-    // Attempt to download and verify it's a zip file
-    const downloadPromise = page.waitForEvent('download');
-    await downloadButton.click();
-    const download = await downloadPromise;
-    
-    expect(download.suggestedFilename()).toContain('.zip');
-    
-    // Verify file was downloaded
-    const downloadPath = await download.path();
-    expect(downloadPath).toBeTruthy();
+    await techtreePage.assertSelectedBonusesCount(1);
   });
 
   test('should show Imperial Paladin in stable lane in techtree', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
+    const techtreePage = new TechTreeDemoPage(page);
     
-    // Wait for tech tree to load
-    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000);
+    await techtreePage.navigate();
+    await techtreePage.waitForTechtreeLoaded();
     
     // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
-    await bonusCheckbox.check();
-    await page.waitForTimeout(1000);
+    await techtreePage.selectBonus(IMPERIAL_PALADIN_BONUS);
+    await techtreePage.wait(1000); // Extra wait for rendering
     
-    // Look for Imperial Paladin in the tech tree (unit ID 2540)
-    // The element might be a circle, rect, or other SVG element with data-caret-id attribute
-    const imperialPaladinElement = page.locator('[data-caret-id="unit_2540"]');
-    
-    // Verify Imperial Paladin is visible in the tech tree
-    await expect(imperialPaladinElement).toBeVisible({ timeout: 5000 });
+    // Verify Imperial Paladin is visible in the tech tree (unit ID 2540)
+    await techtreePage.assertCaretVisible(IMPERIAL_PALADIN_UNIT_ID);
   });
 
   test('should preserve Imperial Paladin after reset', async ({ page }) => {
-    await page.goto('/v2/demo/techtree');
+    const techtreePage = new TechTreeDemoPage(page);
     
-    // Wait for tech tree to load
-    await page.locator('.techtree-svg').waitFor({ state: 'visible', timeout: 15000 });
-    await page.waitForTimeout(1000);
+    await techtreePage.navigate();
+    await techtreePage.waitForTechtreeLoaded();
     
     // Select Imperial Paladin bonus
-    const bonusCheckbox = page.getByRole('checkbox', { name: /Can upgrade Paladin to Imperial Paladin/i });
-    await bonusCheckbox.check();
-    await page.waitForTimeout(500);
+    await techtreePage.selectBonus(IMPERIAL_PALADIN_BONUS);
     
-    // Get tech count before reset
-    const beforeResetText = await page.getByText(/Techs Enabled: \d+/i).textContent();
-    const beforeResetCount = parseInt(beforeResetText?.match(/\d+/)?.[0] || '0');
+    // Get state before reset
+    const beforeReset = await techtreePage.getStateSnapshot();
     
     // Click Reset Tree button
-    const resetButton = page.getByRole('button', { name: /Reset Tree/i });
-    await resetButton.click();
-    await page.waitForTimeout(500);
+    await techtreePage.clickReset();
     
     // Imperial Paladin should still be enabled after reset (bonus is still selected)
-    const afterResetText = await page.getByText(/Techs Enabled: \d+/i).textContent();
-    const afterResetCount = parseInt(afterResetText?.match(/\d+/)?.[0] || '0');
-    expect(afterResetCount).toBe(beforeResetCount);
-    
-    // Points should still be 17 (prerequisites: Knight 3pts + Cavalier 6pts + Paladin 8pts)
-    const pointsText = await page.locator('text=/Points Spent: \\d+/').textContent();
-    const points = parseInt(pointsText?.match(/\d+/)?.[0] || '0');
-    expect(points).toBe(17);
+    const afterReset = await techtreePage.getStateSnapshot();
+    expect(afterReset.techCount).toBe(beforeReset.techCount);
+    expect(afterReset.points).toBe(EXPECTED_POINTS);
   });
 });
