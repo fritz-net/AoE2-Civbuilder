@@ -2,10 +2,15 @@ name: Build and test E2E Docker image
 
 on:
   pull_request:
+    paths:
+      - 'Dockerfile.e2e'
+      - '.github/workflows/e2e-docker-build.yml'
+      - '__tests__/e2e/**'
+      - 'src/**'
+      - 'package*.json'
   push:
     branches:
       - main
-      - 'copilot/**'
 
 permissions:
   contents: read

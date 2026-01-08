@@ -5,21 +5,23 @@ FROM mcr.microsoft.com/playwright:v1.41.0-focal
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-COPY src/frontend/package*.json src/frontend/
+# Fix nodesource repository issue and install system dependencies for C++ build
+RUN rm -f /etc/apt/sources.list.d/nodesource.list && \
+    apt-get update && \
+    apt-get install -y build-essential cmake liblz4-dev libboost-iostreams-dev libjsoncpp-dev dos2unix ca-certificates && \
+    update-ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-RUN npm ci
+# Copy package files first for better layer caching
+COPY package*.json ./
+RUN npm config set strict-ssl false && npm ci
+
+# Copy entire frontend directory structure (needed for nuxt prepare to work)
+COPY src/frontend/ src/frontend/
 RUN cd src/frontend && npm ci
 
-# Copy source code
+# Now copy the rest of the source code
 COPY . .
-
-# Install system dependencies for C++ build
-RUN apt-get update && \
-    apt-get install -y build-essential cmake liblz4-dev libboost-iostreams-dev libjsoncpp-dev dos2unix && \
-    rm -rf /var/lib/apt/lists/*
 
 # Build C++ components (submodules should be initialized before docker build)
 RUN cd modding && dos2unix scripts/build.sh && chmod +x scripts/build.sh && ./scripts/build.sh
