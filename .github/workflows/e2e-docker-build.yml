@@ -1,0 +1,40 @@
+name: Build and test E2E Docker image
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'copilot/**'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build E2E Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.e2e
+          platforms: linux/amd64
+          push: false
+          tags: aoe2-civbuilder:e2e
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          load: true
+
+      - name: Run E2E smoke test
+        run: |
+          docker run --rm aoe2-civbuilder:e2e npm run test:e2e -- __tests__/e2e/draftFlow.spec.ts -t "should complete a 1-player draft"
