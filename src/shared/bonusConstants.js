@@ -5,7 +5,7 @@
  */
 
 // Bonus type indices
-const BONUS_INDEX = {
+export const BONUS_INDEX = {
   CIV: 0,           // Civilization bonuses
   UNIQUE_UNIT: 1,   // Unique units (stored as plain number, not tuple)
   CASTLE_TECH: 2,   // Castle Age unique technologies
@@ -13,10 +13,5 @@ const BONUS_INDEX = {
   TEAM: 4           // Team bonuses
 };
 
-// Export for CommonJS (Node.js)
-module.exports = { BONUS_INDEX };
-
-// Also support ES6 imports for frontend
-if (typeof exports !== 'undefined') {
-  exports.BONUS_INDEX = BONUS_INDEX;
-}
+// Also export as default for flexibility
+export default { BONUS_INDEX };

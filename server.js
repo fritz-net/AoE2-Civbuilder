@@ -22,7 +22,14 @@ const { createCivilizationsJson } = require("./process_mod/createCivilizationsJs
 const { normalizeDescription } = require("./process_mod/civDataUtils.js");
 const commonJs = require("./public/js/common.js");
 const { integrateNuxt } = require("./nuxt-integration.js");
-const { BONUS_INDEX } = require("./src/shared/bonusConstants.js");
+// Bonus index constants (inlined to avoid ES6/CommonJS module conflicts)
+const BONUS_INDEX = {
+  CIV: 0,
+  UNIQUE_UNIT: 1,
+  CASTLE_TECH: 2,
+  IMPERIAL_TECH: 3,
+  TEAM: 4
+};
 const { generateModFilename, generateModFilenameNoExt } = require("./process_mod/modFilename.js");
 const DockerHelper = require("./lib/docker-helper.js");
 
