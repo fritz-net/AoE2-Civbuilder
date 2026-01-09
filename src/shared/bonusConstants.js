@@ -13,7 +13,5 @@ export const BONUS_INDEX = {
   TEAM: 4           // Team bonuses
 };
 
-// For backwards compatibility with Node.js require()
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { BONUS_INDEX };
-}
+// Also export as default for flexibility
+export default { BONUS_INDEX };

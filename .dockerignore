@@ -35,8 +35,8 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Test and development files
-__tests__
+# Test and development files (keep __tests__ for E2E Docker image)
+# __tests__  # Commented out - needed for Dockerfile.e2e
 .github
 drafts
 playwright-report
