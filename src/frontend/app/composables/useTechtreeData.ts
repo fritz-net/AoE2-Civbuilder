@@ -39,6 +39,7 @@ export interface LaneRows {
   castle_2: Caret[]
   imperial_1: Caret[]
   imperial_2: Caret[]
+  imperial_3: Caret[]
 }
 
 export interface Lane {
@@ -58,6 +59,7 @@ export interface TreeOffsets {
   castle_2: number
   imperial_1: number
   imperial_2: number
+  imperial_3: number
 }
 
 export interface Tree {

@@ -191,7 +191,28 @@ if (selectedBonuses.has(CIV_BONUS_363_IMPERIAL_PALADIN_REPLACES_CAVALIER)) {
 }
 ```
 
-For **additive bonuses** (adds new unit):
+For **additive bonuses** (adds new unit after existing one):
+
+```typescript
+// In the appropriate lane and row
+// IMPORTANT: Keep units in the same column position as their predecessors to avoid crossing lines
+// Example: Imperial Paladin comes after Paladin, so it should be in the same column
+if (isBonusSelected(BONUS_ID_IMPERIAL_PALADIN)) {
+  stablelane.rows.imperial_3.push(unit(IMPERIAL_PALADIN)); // Same column as Paladin in imperial_2
+}
+```
+
+**Important Notes on Row Placement:**
+- Units that upgrade from each other should be placed in the same column position across different rows
+- This prevents visual crossing of connection lines in the tech tree
+- Example: Knight (castle_1) → Cavalier (imperial_1) → Paladin (imperial_2) → Imperial Paladin (imperial_3)
+- If adding a new unit line that requires a new row (e.g., imperial_3), you must:
+  1. Add the row to `LaneRows` interface in `useTechtreeData.ts`
+  2. Add the row to `TreeOffsets` interface in `useTechtreeData.ts`
+  3. Initialize the row in `createLane()` function in `useTechtree.ts`
+  4. Add offset calculation in `buildTree()` function in `useTechtree.ts`
+
+For **recruit/train bonuses** (adds unit at specific age):
 
 ```typescript
 // In the appropriate lane and row
@@ -200,7 +221,23 @@ if (selectedBonuses.has(CIV_BONUS_XXX_CAN_RECRUIT_UNIT)) {
 }
 ```
 
-### 3.3 Add to Bonus-Granted Logic
+### 3.3 Add Techtree Image
+
+**Directory:** `public/aoe2techtree/img/Units/`
+
+Add a unit image with the filename matching the unit ID:
+
+```bash
+# Copy from an existing unit (e.g., Paladin unit ID 569)
+cp public/aoe2techtree/img/Units/569.jpg public/aoe2techtree/img/Units/2540.jpg
+
+# Or add your own custom image (must be in .jpg format)
+# Image should be 50x50 pixels for optimal display
+```
+
+**Note:** The filename must exactly match the unit ID (e.g., `2540.jpg` for unit ID 2540).
+
+### 3.4 Add to Bonus-Granted Logic
 
 If the unit should be free and auto-enabled:
 

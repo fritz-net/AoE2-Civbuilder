@@ -337,6 +337,7 @@ function createLane(): Lane {
       castle_2: [],
       imperial_1: [],
       imperial_2: [],
+      imperial_3: [],
     },
     x: 0,
     y: 0,
@@ -753,6 +754,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
       castle_2: 0,
       imperial_1: 0,
       imperial_2: 0,
+      imperial_3: 0,
     },
     height: Math.max(windowHeight - 80, 100),
     width: 0,
@@ -774,6 +776,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   tree.offsets.castle_2 = tree.offsets.castle_1 + tree.element_height + element_offset
   tree.offsets.imperial_1 = tree.offsets.castle_2 + tree.element_height + element_offset
   tree.offsets.imperial_2 = tree.offsets.imperial_1 + tree.element_height + element_offset
+  tree.offsets.imperial_3 = tree.offsets.imperial_2 + tree.element_height + element_offset
 
   // Create lanes
   const archerylane = createLane()
@@ -854,7 +857,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
     stablelane.rows.imperial_2.push(unit(PALADIN))
   }
   if (isBonusSelected(BONUS_ID_IMPERIAL_CAMEL)) stablelane.rows.imperial_2.push(unit(IMPERIAL_CAMEL_RIDER)) // Bonus unit: Can upgrade to Imperial Camel Rider (after Heavy Camel)
-  if (isBonusSelected(BONUS_ID_IMPERIAL_PALADIN)) stablelane.rows.imperial_2.push(unit(IMPERIAL_PALADIN)) // Bonus unit: Can upgrade Paladin to Imperial Paladin
+  // Imperial Paladin comes after Paladin in imperial_3 row (keeping same column position to avoid crossing lines)
+  if (isBonusSelected(BONUS_ID_IMPERIAL_PALADIN)) stablelane.rows.imperial_3.push(unit(IMPERIAL_PALADIN)) // Bonus unit: Can upgrade Paladin to Imperial Paladin
   tree.lanes.push(stablelane)
 
   const siegeworkshoplane = createLane()
