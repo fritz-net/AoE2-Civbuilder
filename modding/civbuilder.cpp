@@ -2657,7 +2657,7 @@ void Civbuilder::createNewUnits() {
         civ.Units[UNIT_IMPERIAL_PALADIN].HitPoints = 180;  // Paladin has 160
         civ.Units[UNIT_IMPERIAL_PALADIN].Type50.DisplayedAttack = 16;  // Paladin has 14
         civ.Units[UNIT_IMPERIAL_PALADIN].Type50.Attacks[0].Amount = 16;
-        civ.Units[UNIT_IMPERIAL_PALADIN].Creatable.DisplayedMeleeArmour = 3;  // Paladin has 2
+        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.DisplayedMeleeArmour = 3;  // Paladin has 2
         civ.Units[UNIT_IMPERIAL_PALADIN].Type50.Armours[0].Amount = 3;
         civ.Units[UNIT_IMPERIAL_PALADIN].Creatable.DisplayedPierceArmour = 4;  // Paladin has 3
         civ.Units[UNIT_IMPERIAL_PALADIN].Type50.Armours[1].Amount = 4;
