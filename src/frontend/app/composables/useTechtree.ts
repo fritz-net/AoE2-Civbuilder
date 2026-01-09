@@ -764,8 +764,9 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
     offset_x: 150,
   }
 
-  // Update offsets
-  tree.element_height = tree.height / 4 / 3
+  // Update offsets - calculate element height based on number of rows (9 rows now with imperial_3)
+  const numRows = 9
+  tree.element_height = (tree.height - (tree.padding * 2)) / (numRows + (numRows - 1) * 0.5)
   const element_offset = tree.element_height / 2
 
   tree.offsets.dark_1 = tree.padding
