@@ -70,18 +70,94 @@ CIV_BONUS_363_IMPERIAL_PALADIN_REPLACES_CAVALIER = 363, // Imperial Paladin repl
 - Description after `//` should match the player-facing text
 - Increment from the last bonus number
 
-### 1.4 Implement Bonus Logic
+### 1.4 Create the Unit (if adding a new unit)
 
 **File:** `modding/civbuilder.cpp`
 
-Add the bonus implementation in the `initialize()` method:
+If you're adding a new unit (not just enabling an existing one), create it in the `initialize()` method around line 2600. Base it on an existing similar unit:
 
 ```cpp
-// Imperial Paladin (replacement bonus)
-this->civBonuses[CIV_BONUS_363_IMPERIAL_PALADIN_REPLACES_CAVALIER] = {
-    TECH_IMPERIAL_PALADIN,          // Enable the new unit
-    TECH_FTT_DISABLE_CAVALIER       // Disable replaced unit
-};
+// Create Imperial Paladin (upgrade from Paladin, uses Crusader Knight graphics)
+for (Civ &civ : this->df->Civs) {
+    civ.Units[UNIT_IMPERIAL_PALADIN] = civ.Units[UNIT_PALADIN]; // Base on Paladin
+    civ.Units[UNIT_IMPERIAL_PALADIN].Name = "IMPALADN";
+    civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLName = 5243;
+    civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLCreation = 6243;
+    civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLHelp = 26243;
+    // Use graphics from another unit (e.g., Crusader Knight 1723)
+    civ.Units[UNIT_IMPERIAL_PALADIN].StandingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].StandingGraphic;
+    civ.Units[UNIT_IMPERIAL_PALADIN].Type50.AttackGraphic = civ.Units[UNIT_CRUSADERKNIGHT].Type50.AttackGraphic;
+    civ.Units[UNIT_IMPERIAL_PALADIN].DyingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DyingGraphic;
+    civ.Units[UNIT_IMPERIAL_PALADIN].DeadFish.WalkingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DeadFish.WalkingGraphic;
+    // Enhanced stats
+    civ.Units[UNIT_IMPERIAL_PALADIN].HitPoints = 180;
+    civ.Units[UNIT_IMPERIAL_PALADIN].Type50.DisplayedAttack = 16;
+    civ.Units[UNIT_IMPERIAL_PALADIN].Type50.Attacks[0].Amount = 16;
+}
+```
+
+**Key points:**
+- Copy stats from a similar unit as a base
+- Set unique Name (internal game name, max 8 chars)
+- Set LanguageDLL IDs for displayed name, creation message, and help text
+- Copy graphics from an existing unit or set custom graphics
+- Adjust stats (HP, attack, armor) as needed
+
+### 1.5 Create Research Tech and Effect
+
+**File:** `modding/civbuilder.cpp`
+
+Create the effect and tech that enables the unit (around line 3065):
+
+```cpp
+// Imperial Paladin (upgrade from Paladin)
+e.EffectCommands.clear();
+e.Name = "Imperial Paladin";
+e.EffectCommands.push_back(createEC(3, UNIT_PALADIN, UNIT_IMPERIAL_PALADIN, -1, 0));
+this->df->Effects.push_back(e);
+
+t = Tech();
+t.Name = "Imperial Paladin";
+t.LanguageDLLName = 7603;
+t.LanguageDLLDescription = 8603;
+t.LanguageDLLHelp = 28603;
+t.LanguageDLLTechTree = 7603;
+t.RequiredTechs.push_back(716);  // Requires Paladin tech
+t.RequiredTechCount = 1;
+t.ResourceCosts[0].Type = 0;  // Food
+t.ResourceCosts[0].Amount = 1300;
+t.ResourceCosts[0].Flag = 1;
+t.ResourceCosts[1].Type = 3;  // Gold
+t.ResourceCosts[1].Amount = 750;
+t.ResourceCosts[1].Flag = 1;
+t.Civ = 99;  // Available to all civs
+setResearchLocation(t, 101, 150, 10);  // Stable (101), 150s, button 10
+t.EffectID = (this->df->Effects.size() - 1);
+this->df->Techs.push_back(t);
+this->civBonuses[CIV_BONUS_363_CAN_UPGRADE_PALADIN_TO_IMPERIAL_PALADIN] = {(int)(this->df->Techs.size() - 1)};
+```
+
+**Effect command types:**
+- Type 3: Upgrade unit (transforms unit A to unit B)
+- Type 101: Enable tech
+- Type 102: Disable tech
+- Other types available in game engine documentation
+
+**Research location IDs:**
+- 101: Stable
+- 82: Barracks
+- 87: Archery Range
+- 68: Town Center
+
+### 1.6 Implement Bonus Logic
+
+**File:** `modding/civbuilder.cpp`
+
+If not already done in step 1.5, map the bonus to its tech:
+
+```cpp
+// This is usually done in the tech creation above
+this->civBonuses[CIV_BONUS_363_CAN_UPGRADE_PALADIN_TO_IMPERIAL_PALADIN] = {imperialPaladinTech};
 ```
 
 **For replacement bonuses:**
@@ -90,11 +166,8 @@ this->civBonuses[CIV_BONUS_363_IMPERIAL_PALADIN_REPLACES_CAVALIER] = {
 
 **For additive bonuses (like "Can recruit X"):**
 - Only need one tech to enable the unit
-```cpp
-this->civBonuses[CIV_BONUS_XXX_CAN_RECRUIT_UNIT] = {TECH_ENABLE_UNIT};
-```
 
-### 1.5 Add Unit to Unit Classes (if applicable)
+### 1.7 Add Unit to Unit Classes (if applicable)
 
 If the unit belongs to a unit class (barracks, stable, archery, etc.), add it:
 

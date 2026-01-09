@@ -2641,6 +2641,28 @@ void Civbuilder::createNewUnits() {
     this->unitClasses["elephant"].push_back(UNIT_ROYAL_ELEPHANT);
     this->unitClasses["stable"].push_back(UNIT_ROYAL_ELEPHANT);
 
+    // Create Imperial Paladin (upgrade from Paladin, uses Crusader Knight graphics)
+    for (Civ &civ : this->df->Civs) {
+        civ.Units[UNIT_IMPERIAL_PALADIN] = civ.Units[UNIT_PALADIN]; // Base on Paladin
+        civ.Units[UNIT_IMPERIAL_PALADIN].Name = "IMPALADN";
+        civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLName = 5243;
+        civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLCreation = 6243;
+        civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLHelp = 26243;
+        // Use graphics from Crusader Knight (1723 / Ritterbruder)
+        civ.Units[UNIT_IMPERIAL_PALADIN].StandingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].StandingGraphic;
+        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.AttackGraphic = civ.Units[UNIT_CRUSADERKNIGHT].Type50.AttackGraphic;
+        civ.Units[UNIT_IMPERIAL_PALADIN].DyingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DyingGraphic;
+        civ.Units[UNIT_IMPERIAL_PALADIN].DeadFish.WalkingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DeadFish.WalkingGraphic;
+        // Enhanced stats compared to Paladin
+        civ.Units[UNIT_IMPERIAL_PALADIN].HitPoints = 180;  // Paladin has 160
+        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.DisplayedAttack = 16;  // Paladin has 14
+        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.Attacks[0].Amount = 16;
+        civ.Units[UNIT_IMPERIAL_PALADIN].Creatable.DisplayedMeleeArmour = 3;  // Paladin has 2
+        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.Armours[0].Amount = 3;
+        civ.Units[UNIT_IMPERIAL_PALADIN].Creatable.DisplayedPierceArmour = 4;  // Paladin has 3
+        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.Armours[1].Amount = 4;
+    }
+
     // Create Imperial Scorpion
     for (Civ &civ : this->df->Civs) {
         civ.Units[UNIT_IMP_SCORPION] = civ.Units[542];
@@ -3040,6 +3062,34 @@ void Civbuilder::createCivBonuses() {
     this->df->Techs.push_back(t);
     this->civBonuses[CIV_BONUS_310_CAN_UPGRADE_ELITE_STEPPE_LANCERS_TO_ROYAL_LANCERS] = {(int)(this->df->Techs.size() - 1)};
     int royalLancerTech = (int)(this->df->Techs.size() - 1);
+
+    // Imperial Paladin (upgrade from Paladin)
+    e.EffectCommands.clear();
+    e.Name = "Imperial Paladin";
+    e.EffectCommands.push_back(createEC(3, UNIT_PALADIN, UNIT_IMPERIAL_PALADIN, -1, 0));
+    this->df->Effects.push_back(e);
+
+    t = Tech();
+    t.Name = "Imperial Paladin";
+    t.LanguageDLLName = 7603;
+    t.LanguageDLLDescription = 8603;
+    t.LanguageDLLHelp = 28603;
+    t.LanguageDLLTechTree = 7603;
+    t.RequiredTechs.push_back(716);  // Requires Paladin tech
+    t.RequiredTechCount = 1;
+    t.ResourceCosts[0].Type = 0;  // Food
+    t.ResourceCosts[0].Amount = 1300;
+    t.ResourceCosts[0].Flag = 1;
+    t.ResourceCosts[1].Type = 3;  // Gold
+    t.ResourceCosts[1].Amount = 750;
+    t.ResourceCosts[1].Flag = 1;
+    t.Civ = 99;  // Available to all civs (when bonus is selected)
+    t.IconID = 124;  // Icon ID (adjust as needed)
+    setResearchLocation(t, 101, 150, 10);  // Research at Stable (101), 150 seconds, button 10
+    t.EffectID = (this->df->Effects.size() - 1);
+    this->df->Techs.push_back(t);
+    this->civBonuses[CIV_BONUS_363_CAN_UPGRADE_PALADIN_TO_IMPERIAL_PALADIN] = {(int)(this->df->Techs.size() - 1)};
+    int imperialPaladinTech = (int)(this->df->Techs.size() - 1);
 
     // Create civ bonuses that are just a list of free techs
     const vector<vector<int>> freeTechs = {
@@ -4968,9 +5018,6 @@ void Civbuilder::createCivBonuses() {
 
     // Mounted Trebuchets
     this->civBonuses[CIV_BONUS_361_CAN_TRAIN_MOUNTED_TREBUCHETS] = {TECH_MOUNTED_TREBUCHET_MAKE_AVAIL};
-
-    // Imperial Paladin (upgrade after Paladin)
-    this->civBonuses[CIV_BONUS_363_CAN_UPGRADE_PALADIN_TO_IMPERIAL_PALADIN] = {TECH_IMPERIAL_PALADIN};
 
     // Make all the trickle bonuses work with each other
     // Stone to gold + roman villagers
