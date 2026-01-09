@@ -756,7 +756,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
       imperial_2: 0,
       imperial_3: 0,
     },
-    height: Math.max(windowHeight - 80, 100),
+    height: Math.max(windowHeight - 80, 1300),
     width: 0,
     padding: 20,
     element_height: 0,
