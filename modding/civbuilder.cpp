@@ -77,6 +77,7 @@ int16_t Civbuilder::getResearchLocation(const Tech& tech) {
 // These correspond to: Archaemenids (47), Athenians (48), Spartans (49), Macedonians (55), Thracians (56), Puru (57)
 bool Civbuilder::isChronicleCiv(int civIndex) {
     // civIndex is 1-based (Civ[1] is first player civ)
+    // NOTE: These constants are also defined in configIndexToCivIndex() - keep them in sync!
     // First chronicle group: Archaemenids (47), Athenians (48), Spartans (49)
     static const int FIRST_CHRONICLE_START = 47;
     static const int FIRST_CHRONICLE_END = 49;
@@ -103,6 +104,7 @@ int Civbuilder::configIndexToCivIndex(int configIndex) {
         return 1; // Return first valid civ as fallback
     }
     
+    // NOTE: These constants must match those in isChronicleCiv() - keep them in sync!
     int civIndex = configIndex + 1; // Start at 1 (first player civ)
     
     // First chronicle group: Archaemenids (47), Athenians (48), Spartans (49)
@@ -542,7 +544,9 @@ void Civbuilder::assignWonders() {
     cout << "[C++]: Assigning wonders for " << numPlayerCivs << " civs" << endl;
     
     // Create wonder graphic dictionary with bounds checking
-    // Collect from all civs INCLUDING chronicle civs (they serve as source templates)
+    // NOTE: We collect from ALL civs INCLUDING chronicle civs (they serve as source templates)
+    // This loop intentionally uses i+1 instead of configIndexToCivIndex() because we want
+    // to gather all available wonder graphics, including those from chronicle civs
     for (int i = 0; i < numPlayerCivs; i++) {
         int civIndex = i + 1;
         if (civIndex >= df->Civs.size()) {
@@ -559,6 +563,7 @@ void Civbuilder::assignWonders() {
     }
 
     // Assign wonders to civs, SKIPPING chronicle civs
+    // This loop uses configIndexToCivIndex() to map config indices to dat civ indices
     for (int i = 0; i < this->config["wonder"].size(); i++) {
         int civIndex = configIndexToCivIndex(i);
         
@@ -584,7 +589,9 @@ void Civbuilder::assignCastles() {
     cout << "[C++]: Assigning castles for " << numPlayerCivs << " civs" << endl;
     
     // Create castle graphic dictionary with bounds checking
-    // Collect from all civs INCLUDING chronicle civs (they serve as source templates)
+    // NOTE: We collect from ALL civs INCLUDING chronicle civs (they serve as source templates)
+    // This loop intentionally uses i+1 instead of configIndexToCivIndex() because we want
+    // to gather all available castle graphics, including those from chronicle civs
     for (int i = 0; i < numPlayerCivs; i++) {
         int civIndex = i + 1;
         if (civIndex >= df->Civs.size()) {
@@ -601,6 +608,7 @@ void Civbuilder::assignCastles() {
     }
 
     // Assign castles to civs, SKIPPING chronicle civs
+    // This loop uses configIndexToCivIndex() to map config indices to dat civ indices
     for (int i = 0; i < this->config["castle"].size(); i++) {
         int civIndex = configIndexToCivIndex(i);
         
