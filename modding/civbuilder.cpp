@@ -77,24 +77,49 @@ int16_t Civbuilder::getResearchLocation(const Tech& tech) {
 // These correspond to: Archaemenids (47), Athenians (48), Spartans (49), Macedonians (55), Thracians (56), Puru (57)
 bool Civbuilder::isChronicleCiv(int civIndex) {
     // civIndex is 1-based (Civ[1] is first player civ)
-    return (civIndex >= 47 && civIndex <= 49) || (civIndex >= 55 && civIndex <= 57);
+    // First chronicle group: Archaemenids (47), Athenians (48), Spartans (49)
+    static const int FIRST_CHRONICLE_START = 47;
+    static const int FIRST_CHRONICLE_END = 49;
+    // Second chronicle group: Macedonians (55), Thracians (56), Puru (57)
+    static const int SECOND_CHRONICLE_START = 55;
+    static const int SECOND_CHRONICLE_END = 57;
+    
+    return (civIndex >= FIRST_CHRONICLE_START && civIndex <= FIRST_CHRONICLE_END) || 
+           (civIndex >= SECOND_CHRONICLE_START && civIndex <= SECOND_CHRONICLE_END);
 }
 
 // Helper method to map config index (0-based) to dat civ index (1-based), skipping chronicle civs
 // The config array doesn't include chronicle civs, so we need to account for them when accessing the dat file
-// Example: config[0] -> Civ[1], config[45] -> Civ[46], config[46] -> Civ[50] (skip 47-49), config[49] -> Civ[54] (skip 55-57)
+// Example mapping:
+//   config[0] -> Civ[1] (Britons)
+//   config[45] -> Civ[46] (Georgians, just before first chronicle group)
+//   config[46] -> Civ[50] (Shu, skip 47-49 chronicle civs)
+//   config[51] -> Civ[54] (Khitans, just before second chronicle group)
+//   config[52] -> Civ[58] (skip 55-57 chronicle civs)
 int Civbuilder::configIndexToCivIndex(int configIndex) {
-    int civIndex = configIndex + 1; // Start at 1 (first player civ)
-    
-    // If we're past the first chronicle group (46+), add 3 to skip them
-    if (civIndex >= 47) {
-        civIndex += 3; // Skip Archaemenids (47), Athenians (48), Spartans (49)
+    // Validate input
+    if (configIndex < 0) {
+        cerr << "[C++]: WARNING - Invalid negative config index: " << configIndex << endl;
+        return 1; // Return first valid civ as fallback
     }
     
-    // If we're past the second chronicle group (53+), add another 3 to skip them
-    // Note: 53 in config space becomes 56 after adding 3, so we check if >= 55 (which is 52 in config + 3)
-    if (civIndex >= 55) {
-        civIndex += 3; // Skip Macedonians (55), Thracians (56), Puru (57)
+    int civIndex = configIndex + 1; // Start at 1 (first player civ)
+    
+    // First chronicle group: Archaemenids (47), Athenians (48), Spartans (49)
+    static const int FIRST_CHRONICLE_START = 47;
+    static const int CHRONICLE_GROUP_SIZE = 3;
+    
+    // If we're at or past the first chronicle group, add 3 to skip them
+    if (civIndex >= FIRST_CHRONICLE_START) {
+        civIndex += CHRONICLE_GROUP_SIZE;
+    }
+    
+    // Second chronicle group: Macedonians (55), Thracians (56), Puru (57)
+    static const int SECOND_CHRONICLE_START = 55;
+    
+    // If we're at or past the second chronicle group, add another 3 to skip them
+    if (civIndex >= SECOND_CHRONICLE_START) {
+        civIndex += CHRONICLE_GROUP_SIZE;
     }
     
     return civIndex;
