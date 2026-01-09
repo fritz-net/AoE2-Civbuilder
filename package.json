@@ -8,6 +8,10 @@
     "test:e2e:ui": "playwright test --ui",
     "build:nuxt": "cd src/frontend && npm ci && npm run generate",
     "dev:nuxt": "cd src/frontend && npm run dev",
+    "dev": "cross-env CPP_IN_DOCKER=1 npm-run-all --parallel dev:server dev:nuxt",
+    "dev:server": "cross-env CPP_IN_DOCKER=1 nodemon server.js",
+    "dev:server:local": "nodemon server.js",
+    "dev:cpp-docker": "cross-env CPP_IN_DOCKER=1 node server.js",
     "start": "node server.js"
   },
   "jest": {
@@ -34,7 +38,10 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
+    "cross-env": "^7.0.3",
     "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "npm-run-all": "^4.1.5",
     "playwright": "^1.57.0"
   }
 }

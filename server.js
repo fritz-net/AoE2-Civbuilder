@@ -22,8 +22,16 @@ const { createCivilizationsJson } = require("./process_mod/createCivilizationsJs
 const { normalizeDescription } = require("./process_mod/civDataUtils.js");
 const commonJs = require("./public/js/common.js");
 const { integrateNuxt } = require("./nuxt-integration.js");
-const { BONUS_INDEX } = require("./src/shared/bonusConstants.js");
+// Bonus index constants (inlined to avoid ES6/CommonJS module conflicts)
+const BONUS_INDEX = {
+  CIV: 0,
+  UNIQUE_UNIT: 1,
+  CASTLE_TECH: 2,
+  IMPERIAL_TECH: 3,
+  TEAM: 4
+};
 const { generateModFilename, generateModFilenameNoExt } = require("./process_mod/modFilename.js");
+const DockerHelper = require("./lib/docker-helper.js");
 
 console.log("Starting server...");
 
@@ -36,9 +44,14 @@ const hostname = process.env.CIVBUILDER_HOSTNAME || "https://krakenmeister.com/c
 const routeSubdir = new URL(hostname).pathname.replace(/\/$/, "") || "/";
 const port = 4000;
 
+// Docker configuration
+const CPP_IN_DOCKER = process.env.CPP_IN_DOCKER === '1' || process.env.CPP_IN_DOCKER === 'true';
+const dockerHelper = CPP_IN_DOCKER ? new DockerHelper(__dirname) : null;
+
 console.log("running with hostname:", hostname);
 console.log("route subdir:", routeSubdir);
 console.log("temp directory:", tempdir);
+console.log("C++ in Docker:", CPP_IN_DOCKER);
 
 // create temp directory if it doesn't exist
 if (!fs.existsSync(tempdir)) {
@@ -161,25 +174,49 @@ integrateNuxt(app);
 
 function os_func() {
 	this.execCommand = function (cmd, callback, failure) {
-		// Always execute commands from the app directory to enable parallel execution
-		// This avoids using process.chdir() which is not safe for concurrent requests
-		exec(cmd, { cwd: __dirname }, (error, stdout, stderr) => {
-			if (error) {
-				console.log(`stdout: ${stdout}`);
-				console.error(`exec error: ${error}`);
-				console.error(`failed command: ${cmd}`);
-				if (typeof failure === 'function') {
-					failure();
-				} else {
-					// If no failure callback provided, log error and continue
-					console.error('Command failed but no failure callback provided');
+		// Check if we should execute C++ commands in Docker
+		const shouldUseDocker = CPP_IN_DOCKER && dockerHelper && cmd.includes('create-data-mod');
+		
+		if (shouldUseDocker) {
+			// Execute command inside Docker container
+			dockerHelper.execInContainer(cmd, (error, stdout, stderr) => {
+				if (error) {
+					console.log(`stdout: ${stdout}`);
+					console.error(`exec error: ${error}`);
+					console.error(`failed command: ${cmd}`);
+					if (typeof failure === 'function') {
+						failure();
+					} else {
+						console.error('Command failed but no failure callback provided');
+					}
 				}
-			}
-			if (stdout) {
-				console.log(stdout);
-			}
-			callback();
-		});
+				if (stdout) {
+					console.log(stdout);
+				}
+				callback();
+			});
+		} else {
+			// Execute command locally (default behavior)
+			// Always execute commands from the app directory to enable parallel execution
+			// This avoids using process.chdir() which is not safe for concurrent requests
+			exec(cmd, { cwd: __dirname }, (error, stdout, stderr) => {
+				if (error) {
+					console.log(`stdout: ${stdout}`);
+					console.error(`exec error: ${error}`);
+					console.error(`failed command: ${cmd}`);
+					if (typeof failure === 'function') {
+						failure();
+					} else {
+						// If no failure callback provided, log error and continue
+						console.error('Command failed but no failure callback provided');
+					}
+				}
+				if (stdout) {
+					console.log(stdout);
+				}
+				callback();
+			});
+		}
 	};
 }
 
@@ -2141,13 +2178,32 @@ module.exports = {
 	router: router,
 };
 
-server.listen(port, () => {
+server.listen(port, async () => {
 	console.log(`Server listening on port ${port}`);
+	
+	// Initialize Docker if CPP_IN_DOCKER is enabled
+	if (CPP_IN_DOCKER && dockerHelper) {
+		try {
+			console.log('Initializing Docker container for C++ execution...');
+			await dockerHelper.ensureReady();
+			console.log('Docker container ready for C++ execution');
+		} catch (error) {
+			console.error('Failed to initialize Docker container:', error.message);
+			console.error('Continuing with server startup, but C++ operations may fail');
+		}
+	}
 });
 
 // Graceful shutdown on Ctrl+C
 process.on('SIGINT', () => {
 	console.log('Received SIGINT, shutting down...');
+	
+	// Stop Docker container if it was running
+	if (CPP_IN_DOCKER && dockerHelper) {
+		console.log('Stopping Docker container...');
+		dockerHelper.stopContainer();
+	}
+	
 	server.close(() => {
 		console.log('HTTP server closed.');
 		process.exit(0);

@@ -1,0 +1,50 @@
+# Node modules (reinstalled in Docker)
+node_modules
+src/frontend/node_modules
+
+# Frontend build artifacts (built in Docker)
+src/frontend/.nuxt
+src/frontend/.output
+src/frontend/dist
+
+# C++ build artifacts (built in Docker)
+modding/build
+*.o
+*.a
+*.so
+
+# Git (submodules should be initialized by CI before docker build)
+.git
+.gitignore
+.gitmodules
+
+# Logs
+logs.txt
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test and development files (keep __tests__ for E2E Docker image)
+# __tests__  # Commented out - needed for Dockerfile.e2e
+.github
+drafts
+playwright-report
+test-results
+
+# Documentation
+docs
+README.md
+README.docker.md
+CHANGELOG.md
+AGENTS.MD

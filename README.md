@@ -60,11 +60,26 @@ npm start
 
 The new frontend will be available at http://localhost:4000/v2
 
-## Development - New Frontend
+## Development Workflow
+
 ```bash
-# Run Nuxt in dev mode (hot reload)
-npm run dev:nuxt
+# Install and run with hot reload
+npm install
+cd src/frontend && npm install && cd ../..
+npm run dev
 ```
+
+**Access:**
+- Frontend (Nuxt dev server): http://localhost:3000/v2
+- Backend API: http://localhost:4000
+
+**Note:** During development, the Nuxt dev server on port 3000 proxies API requests to the backend server on port 4000.
+
+**Available scripts:**
+- `npm run dev` - Full hot reload (Nuxt + server.js + C++ in Docker)
+- `npm run dev:server` - Server auto-restart with C++ in Docker
+- `npm run dev:server:local` - Server auto-restart with local C++ binaries
+- `npm run dev:nuxt` - Nuxt dev server only
 
 ## Run with Docker
 ```bash
@@ -72,3 +87,22 @@ docker run --rm -e CIVBUILDER_HOSTNAME=http://localhost:4000 -p 4000:4000 ghcr.i
 ```
 
 Both frontends (old and new Vue3) are included in the Docker image.
+
+## E2E Testing with Docker
+
+Run E2E tests locally in Docker (requires Docker and initialized git submodules):
+
+```bash
+# Build the E2E testing image
+docker build -f Dockerfile.e2e -t aoe2-civbuilder:e2e .
+
+# Run E2E tests in the container
+docker run --rm aoe2-civbuilder:e2e
+
+# all in one
+docker build -f Dockerfile.e2e -t aoe2-civbuilder:e2e . && docker run --rm aoe2-civbuilder:e2e
+
+# Or run interactively to debug
+docker run --rm -it aoe2-civbuilder:e2e /bin/bash
+```
+
