@@ -75,10 +75,10 @@ export class BuildPage extends BasePage {
   }
   
   /**
-   * Get bonus card by text content (searches in title and description)
+   * Get bonus card by text content (searches in title and description) - only in visible step
    */
   getBonusCardByText(text: string): Locator {
-    return this.bonusCards.filter({ hasText: text }).first()
+    return this.page.locator('.step-content:visible .bonus-card').filter({ hasText: text }).first()
   }
   
   /**
@@ -111,17 +111,17 @@ export class BuildPage extends BasePage {
   }
   
   /**
-   * Get the total number of bonus cards
+   * Get the total number of bonus cards (visible ones only in current step)
    */
   async getBonusCardCount(): Promise<number> {
-    return await this.bonusCards.count()
+    return await this.page.locator('.step-content:visible .bonus-card').count()
   }
   
   /**
-   * Get the number of selected bonuses
+   * Get the number of selected bonuses (visible ones only in current step)
    */
   async getSelectedBonusCount(): Promise<number> {
-    return await this.page.locator('.bonus-card.selected').count()
+    return await this.page.locator('.step-content:visible .bonus-card.bonus-selected').count()
   }
   
   /**
