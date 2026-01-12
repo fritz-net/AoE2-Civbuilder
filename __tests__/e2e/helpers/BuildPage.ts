@@ -2,7 +2,7 @@ import { type Page, type Locator } from '@playwright/test'
 import { BasePage } from './BasePage'
 
 export class BuildPage extends BasePage {
-  readonly url: string = '/build'
+  readonly url: string = '/v2/build'
   
   // Main components
   readonly pageTitle: Locator
@@ -47,15 +47,24 @@ export class BuildPage extends BasePage {
    */
   async goto() {
     await this.page.goto(this.url)
-    await this.page.waitForLoadState('networkidle')
+    // Wait for the main heading to ensure page is loaded
+    await this.page.getByRole('heading', { name: /Create Your Civilization/i }).waitFor({ state: 'visible', timeout: 15000 })
   }
   
   /**
-   * Navigate to the civ bonuses step
+   * Navigate to the civ bonuses step by filling basic info and clicking Next
    */
   async goToCivBonusesStep() {
-    await this.step2CivBonuses.click()
-    await this.page.waitForTimeout(500) // Wait for transition
+    // Fill in a civ name to enable the Next button
+    const civNameInput = this.page.getByPlaceholder(/Enter civilization name/i)
+    await civNameInput.fill('TestCiv')
+    
+    // Click Next to go to Civ Bonuses step
+    const nextButton = this.page.getByRole('button', { name: /Next →/i })
+    await nextButton.click()
+    
+    // Wait for the Civ Bonuses heading
+    await this.page.getByRole('heading', { name: /Civilization Bonuses/i }).waitFor({ state: 'visible', timeout: 10000 })
   }
   
   /**
@@ -119,7 +128,8 @@ export class BuildPage extends BasePage {
    * Search for a bonus
    */
   async searchBonus(query: string) {
-    const searchInput = this.page.locator('input[placeholder*="Search"]')
+    // Use the filter input that's currently visible (in the active step)
+    const searchInput = this.page.locator('.step-content:visible .filter-input')
     await searchInput.fill(query)
     await this.page.waitForTimeout(500) // Wait for search to filter
   }
@@ -128,7 +138,8 @@ export class BuildPage extends BasePage {
    * Clear search
    */
   async clearSearch() {
-    const searchInput = this.page.locator('input[placeholder*="Search"]')
+    // Use the filter input that's currently visible (in the active step)
+    const searchInput = this.page.locator('.step-content:visible .filter-input')
     await searchInput.clear()
     await this.page.waitForTimeout(500)
   }

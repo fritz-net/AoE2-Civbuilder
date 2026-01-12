@@ -10,12 +10,12 @@ test.describe('Build Page - Imperial Paladin Bonus', () => {
     await buildPage.goToCivBonusesStep()
   })
 
-  test('should display Imperial Paladin bonus card on /build', async () => {
+  test('should display Imperial Paladin bonus card on /v2/build', async () => {
     // Search for Imperial Paladin bonus
-    await buildPage.searchBonus('Imperial Paladin')
+    await buildPage.searchBonus('upgrade Paladin')
     
     // Verify the bonus card is visible
-    const imperialPaladinCard = buildPage.getBonusCardByText('Imperial Paladin')
+    const imperialPaladinCard = buildPage.getBonusCardByText('Can upgrade Paladin to Imperial Paladin')
     await expect(imperialPaladinCard).toBeVisible()
     
     // Verify the description is correct
@@ -31,26 +31,26 @@ test.describe('Build Page - Imperial Paladin Bonus', () => {
     expect(totalBonuses).toBe(364) // Should have 364 total bonuses including Imperial Paladin (bonus 363)
     
     // Search for Imperial Paladin
-    await buildPage.searchBonus('Imperial Paladin')
+    await buildPage.searchBonus('upgrade Paladin')
     
     // Should find at least one result
     const searchResults = await buildPage.getBonusCardCount()
     expect(searchResults).toBeGreaterThanOrEqual(1)
     
     // Verify the bonus is there
-    const imperialPaladinCard = buildPage.getBonusCardByText('Imperial Paladin')
+    const imperialPaladinCard = buildPage.getBonusCardByText('Can upgrade Paladin to Imperial Paladin')
     await expect(imperialPaladinCard).toBeVisible()
   })
 
   test('should be able to select Imperial Paladin bonus', async () => {
     // Search for Imperial Paladin
-    await buildPage.searchBonus('Imperial Paladin')
+    await buildPage.searchBonus('upgrade Paladin')
     
     // Select the bonus
-    await buildPage.selectBonusByText('Imperial Paladin')
+    await buildPage.selectBonusByText('Can upgrade Paladin to Imperial Paladin')
     
     // Verify it's selected
-    const imperialPaladinCard = buildPage.getBonusCardByText('Imperial Paladin')
+    const imperialPaladinCard = buildPage.getBonusCardByText('Can upgrade Paladin to Imperial Paladin')
     await expect(imperialPaladinCard).toHaveClass(/selected/)
     
     // Verify selected count increased
@@ -60,18 +60,18 @@ test.describe('Build Page - Imperial Paladin Bonus', () => {
 
   test('should be able to deselect Imperial Paladin bonus', async () => {
     // Search and select Imperial Paladin
-    await buildPage.searchBonus('Imperial Paladin')
-    await buildPage.selectBonusByText('Imperial Paladin')
+    await buildPage.searchBonus('upgrade Paladin')
+    await buildPage.selectBonusByText('Can upgrade Paladin to Imperial Paladin')
     
     // Verify it's selected
-    let imperialPaladinCard = buildPage.getBonusCardByText('Imperial Paladin')
+    let imperialPaladinCard = buildPage.getBonusCardByText('Can upgrade Paladin to Imperial Paladin')
     await expect(imperialPaladinCard).toHaveClass(/selected/)
     
     // Deselect it
-    await buildPage.selectBonusByText('Imperial Paladin')
+    await buildPage.selectBonusByText('Can upgrade Paladin to Imperial Paladin')
     
     // Verify it's no longer selected
-    imperialPaladinCard = buildPage.getBonusCardByText('Imperial Paladin')
+    imperialPaladinCard = buildPage.getBonusCardByText('Can upgrade Paladin to Imperial Paladin')
     await expect(imperialPaladinCard).not.toHaveClass(/selected/)
   })
 })
