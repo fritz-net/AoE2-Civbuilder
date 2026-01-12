@@ -10,7 +10,7 @@ test.describe('Build Page - Imperial Paladin Bonus', () => {
     await buildPage.goToCivBonusesStep()
   })
 
-  test('should display Imperial Paladin bonus card on /v2/build', async () => {
+  test('should display Imperial Paladin bonus card on /build', async () => {
     // Search for Imperial Paladin bonus
     await buildPage.searchBonus('Imperial Paladin')
     

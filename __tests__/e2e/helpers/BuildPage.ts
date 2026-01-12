@@ -2,7 +2,7 @@ import { type Page, type Locator } from '@playwright/test'
 import { BasePage } from './BasePage'
 
 export class BuildPage extends BasePage {
-  readonly url: string = '/v2/build'
+  readonly url: string = '/build'
   
   // Main components
   readonly pageTitle: Locator
