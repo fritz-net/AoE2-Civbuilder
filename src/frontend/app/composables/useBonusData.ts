@@ -466,6 +466,7 @@ const cardDescriptions: [string, number, number, number][][] = [
     ["Heavy Cavalry Archer upgrade available in Castle Age and costs -50%", 1, -53, 0],
     ["Can train Mounted Trebuchets", 2, -53, 0],
     ["Dragon Ships replace Fast Fire Ships", 2, -6, 0],
+    ["Can upgrade Paladin to Imperial Paladin", 2, 1, 0],
   ],
 
   // Unique Units (index 1 in original format)
@@ -769,7 +770,6 @@ const cardDescriptions: [string, number, number, number][][] = [
     ["Cavalry +2 attack vs. siege weapons", 2, -51, 0],
     ["Gunpowder units +2 LOS", 0, -52, 0],
     ["Infantry +2 attack vs. Ranged Soldiers", 1, -53, 0],
-    ["Can upgrade Paladin to Imperial Paladin", 2, 1, 0],
   ],
 ]
 
