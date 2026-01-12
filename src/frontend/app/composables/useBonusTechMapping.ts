@@ -201,7 +201,7 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
   {
     bonusId: 363,
     bonusType: 'civ',
-    units: [1178],  // Imperial Paladin
+    units: [2540],  // Imperial Paladin
     prerequisites: {
       units: [38, 283, 569],  // Knight, Cavalier, Paladin
     },

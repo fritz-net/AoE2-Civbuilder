@@ -2452,7 +2452,7 @@ enum UnitID {
     UNIT_SMALL_RICE_FARM_DROP = 1038,  // Alias for UNIT_HTRISTAN
     UNIT_FEUDAL_KNIGHT = 1262,    // Alias for UNIT_EKESHIK
     UNIT_CITY_WALL = 370,         // Alias for UNIT_CWAL
-    UNIT_IMPERIAL_PALADIN = 1178  // Alias for UNIT_HLELOI (Imperial Paladin - upgrades from Paladin)
+    UNIT_IMPERIAL_PALADIN = 2540  // Imperial Paladin (custom bonus unit, replaces Cavalier)
 };
 
 #endif // UNIT_IDS_H

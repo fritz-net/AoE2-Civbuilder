@@ -2648,15 +2648,11 @@ void Civbuilder::createNewUnits() {
         civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLName = 5243;
         civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLCreation = 6243;
         civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLHelp = 26243;
-        // Use graphics from Crusader Knight (1723 / Ritterbruder) if available
-        if (UNIT_CRUSADERKNIGHT < civ.Units.size()) {
-            civ.Units[UNIT_IMPERIAL_PALADIN].StandingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].StandingGraphic;
-            civ.Units[UNIT_IMPERIAL_PALADIN].Type50.AttackGraphic = civ.Units[UNIT_CRUSADERKNIGHT].Type50.AttackGraphic;
-            civ.Units[UNIT_IMPERIAL_PALADIN].DyingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DyingGraphic;
-            civ.Units[UNIT_IMPERIAL_PALADIN].DeadFish.WalkingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DeadFish.WalkingGraphic;
-        }
-        // If Crusader Knight not available, graphics default to Paladin (already copied above)
-        
+        // Use graphics from Crusader Knight (1723 / Ritterbruder)
+        civ.Units[UNIT_IMPERIAL_PALADIN].StandingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].StandingGraphic;
+        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.AttackGraphic = civ.Units[UNIT_CRUSADERKNIGHT].Type50.AttackGraphic;
+        civ.Units[UNIT_IMPERIAL_PALADIN].DyingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DyingGraphic;
+        civ.Units[UNIT_IMPERIAL_PALADIN].DeadFish.WalkingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DeadFish.WalkingGraphic;
         // Enhanced stats compared to Paladin
         civ.Units[UNIT_IMPERIAL_PALADIN].HitPoints = 180;  // Paladin has 160
         civ.Units[UNIT_IMPERIAL_PALADIN].Type50.DisplayedAttack = 16;  // Paladin has 14

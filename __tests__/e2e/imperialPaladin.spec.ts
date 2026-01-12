@@ -9,7 +9,7 @@ import { TechTreeDemoPage } from './helpers/TechTreeDemoPage';
  */
 
 const IMPERIAL_PALADIN_BONUS = /Can upgrade Paladin to Imperial Paladin/i;
-const IMPERIAL_PALADIN_UNIT_ID = 'unit_1178';
+const IMPERIAL_PALADIN_UNIT_ID = 'unit_2540';
 const CAVALIER_UNIT_ID = 'unit_283';
 const EXPECTED_POINTS = 17; // Knight (3) + Cavalier (6) + Paladin (8)
 
@@ -105,7 +105,7 @@ test.describe('Imperial Paladin Bonus', () => {
     await techtreePage.selectBonus(IMPERIAL_PALADIN_BONUS);
     await techtreePage.wait(1000); // Extra wait for rendering
     
-    // Verify Imperial Paladin is visible in the tech tree (unit ID 1178)
+    // Verify Imperial Paladin is visible in the tech tree (unit ID 2540)
     await techtreePage.assertCaretVisible(IMPERIAL_PALADIN_UNIT_ID);
   });
 
