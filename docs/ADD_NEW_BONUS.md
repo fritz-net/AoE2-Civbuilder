@@ -30,9 +30,37 @@ Adding a new bonus requires changes across multiple systems:
 
 ### 1.1 Add Unit ID (if creating a new unit)
 
-**File:** `modding/enums/unit_ids.h`
+**File:** `modding/enums/unit_ids.h` (for static IDs) OR dynamic allocation in `modding/civbuilder.cpp`
 
-Add your new unit ID to the enum. Follow the existing naming convention:
+**Option A: Dynamic Unit ID Allocation (Recommended for new units)**
+
+For units that need to be compatible with different dat file versions, use dynamic ID allocation:
+
+```cpp
+// In civbuilder.cpp, within CivBuilder::createNewData():
+
+// Dynamically allocate a new unit ID at the end of the units array
+this->imperialPaladinID = (int)(this->df->Civs[0].Units.size());
+cout << "[C++]: Allocating Imperial Paladin at unit ID " << this->imperialPaladinID << endl;
+
+for (Civ &civ : this->df->Civs) {
+    // Expand units array to accommodate new unit
+    civ.Units.resize(this->imperialPaladinID + 1);
+    
+    // Base on existing unit and customize
+    civ.Units[this->imperialPaladinID] = civ.Units[UNIT_PALADIN];
+    // ... set properties
+}
+```
+
+Also add a member variable to store the ID in `modding/civbuilder.h`:
+```cpp
+int imperialPaladinID = -1;  // Dynamically allocated unit ID
+```
+
+**Option B: Static Unit ID (For fixed IDs)**
+
+Add your unit ID to the enum in `modding/enums/unit_ids.h`:
 
 ```cpp
 // Find the appropriate location in the enum (maintain numerical order)
@@ -40,9 +68,12 @@ UNIT_IMPERIAL_PALADIN = 2500, // IMPALADN - Example ID
 ```
 
 **Notes:**
-- Use descriptive names with `UNIT_` prefix
+- **Dynamic allocation** is preferred for units to ensure compatibility across different dat file versions
+- Dynamic IDs prevent crashes when unit slots don't exist in older dat files  
+- Use descriptive names with `UNIT_` prefix for static IDs
 - Internal names (comments) should match game file conventions
 - Choose an unused ID number (check existing IDs)
+- For dynamic IDs, the frontend will need to export/discover the allocated ID
 
 ### 1.2 Add Tech IDs (if bonus requires enabling/disabling techs)
 
