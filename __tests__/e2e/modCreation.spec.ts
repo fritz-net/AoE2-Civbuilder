@@ -927,3 +927,229 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
     }
   });
 });
+
+test.describe('Build Page - Full Flow to Zip Download', () => {
+  // This test verifies the complete /v2/build flow including zip download and verification
+  // Similar to the draft mode full flow test but for the build page
+  (shouldSkipDownloadTests ? test.skip : test)('should complete full build flow, download zip, verify size > 1MB and check JSONs', async ({ page }) => {
+    test.setTimeout(90000); // Build flow + mod creation can take time
+    
+    const projectRoot = path.join(__dirname, '../..');
+    const modsDir = path.join(projectRoot, 'modding', 'requested_mods');
+    let modTimestamp: number | null = null;
+    const extractDir = path.join(modsDir, `extract-build-${Date.now()}`);
+    
+    try {
+      // Navigate to build page
+      await page.goto('/v2/build');
+      console.log('[Test] Navigated to /v2/build');
+      
+      // Step 1: Fill in civilization name
+      const civNameInput = page.getByPlaceholder(/Enter civilization name/i);
+      await expect(civNameInput).toBeVisible();
+      await civNameInput.fill('E2E Build Test Civ');
+      console.log('[Test] Filled civilization name');
+      
+      // Navigate through the stepper by clicking Next multiple times
+      // The stepper typically has these steps:
+      // 1. Basic Info (civ name) - current step
+      // 2. Civ Bonuses
+      // 3. Unique Unit
+      // 4. Castle Tech
+      // 5. Imperial Tech
+      // 6. Team Bonus
+      // 7. Tech Tree
+      
+      const nextButton = page.getByRole('button', { name: /Next/i });
+      
+      // Step 2: Civ Bonuses
+      await expect(nextButton).toBeEnabled();
+      await nextButton.click();
+      await page.waitForTimeout(500);
+      console.log('[Test] Advanced to Civ Bonuses step');
+      
+      // Step 3: Unique Unit
+      await nextButton.click();
+      await page.waitForTimeout(500);
+      console.log('[Test] Advanced to Unique Unit step');
+      
+      // Step 4: Castle Tech
+      await nextButton.click();
+      await page.waitForTimeout(500);
+      console.log('[Test] Advanced to Castle Tech step');
+      
+      // Step 5: Imperial Tech
+      await nextButton.click();
+      await page.waitForTimeout(500);
+      console.log('[Test] Advanced to Imperial Tech step');
+      
+      // Step 6: Team Bonus
+      await nextButton.click();
+      await page.waitForTimeout(500);
+      console.log('[Test] Advanced to Team Bonus step');
+      
+      // Step 7: Tech Tree - this is the final step before mod creation
+      await nextButton.click();
+      await page.waitForTimeout(1000);
+      console.log('[Test] Advanced to Tech Tree step');
+      
+      // Wait for tech tree to load
+      const techTreeContainer = page.locator('.techtree-container');
+      await expect(techTreeContainer).toBeVisible({ timeout: 10000 });
+      console.log('[Test] Tech tree loaded');
+      
+      // Complete the tech tree by clicking Done
+      const doneButton = page.getByRole('button', { name: /Done|Create Mod/i });
+      await expect(doneButton).toBeVisible({ timeout: 5000 });
+      await expect(doneButton).toBeEnabled();
+      console.log('[Test] Found Done/Create Mod button');
+      
+      // Record timestamp before clicking to identify the created mod
+      modTimestamp = Date.now();
+      
+      await doneButton.click();
+      console.log('[Test] Clicked Done/Create Mod button');
+      
+      // Handle optional confirmation modal (similar to draft flow)
+      const confirmButton = page.getByRole('button', { name: /Yes, Done|Confirm/i });
+      try {
+        await expect(confirmButton).toBeVisible({ timeout: 2000 });
+        await confirmButton.click();
+        console.log('[Test] Clicked confirmation button');
+      } catch {
+        // No confirmation modal - that's fine
+        console.log('[Test] No confirmation modal needed');
+      }
+      
+      // Wait for mod creation to complete
+      // The build flow might navigate to a success page or show download button
+      // Try multiple approaches to detect completion
+      
+      // Approach 1: Check for navigation to download-success page
+      try {
+        await page.waitForURL('**/v2/download-success*', { timeout: 30000 });
+        console.log('[Test] Navigated to download-success page');
+      } catch {
+        console.log('[Test] Did not navigate to download-success page, checking for download button...');
+        
+        // Approach 2: Check for download button/phase in current page
+        const downloadButton = page.locator('button:has-text("Download"), .download-button, button:has-text("Download Mod")');
+        await expect(downloadButton.first()).toBeVisible({ timeout: 30000 });
+        console.log('[Test] Download button visible');
+      }
+      
+      // Give server a moment to ensure file is fully written
+      await page.waitForTimeout(2000);
+      
+      // Now find the zip file created after modTimestamp
+      console.log(`[Test] Looking for zip file created after timestamp ${modTimestamp}`);
+      const modsFiles = fs.readdirSync(modsDir);
+      console.log(`[Test] Files in mods directory: ${modsFiles.length} files`);
+      
+      // Find the most recently created zip file after our timestamp
+      const zipFiles = modsFiles.filter(f => f.endsWith('.zip'));
+      const zipFilesWithStats = zipFiles.map(f => ({
+        name: f,
+        path: path.join(modsDir, f),
+        mtime: fs.statSync(path.join(modsDir, f)).mtime.getTime()
+      }));
+      
+      // Filter to only files created after we started (with 5 second buffer for clock skew)
+      const recentZips = zipFilesWithStats.filter(z => z.mtime >= (modTimestamp! - 5000));
+      recentZips.sort((a, b) => b.mtime - a.mtime);
+      
+      console.log(`[Test] Found ${recentZips.length} recent zip files`);
+      
+      if (recentZips.length === 0) {
+        throw new Error(`No zip file found created after ${modTimestamp}. All zips: ${zipFiles.join(', ')}`);
+      }
+      
+      const zipPath = recentZips[0].path;
+      const zipFile = recentZips[0].name;
+      console.log(`[Test] Using most recent zip file: ${zipFile}`);
+      
+      // Verify zip file exists
+      expect(fs.existsSync(zipPath)).toBeTruthy();
+      
+      // Verify zip file size is greater than 1MB
+      const stats = fs.statSync(zipPath);
+      const fileSizeInBytes = stats.size;
+      const fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+      console.log(`[Test] Zip file size: ${fileSizeInMB.toFixed(2)} MB (${fileSizeInBytes} bytes)`);
+      
+      expect(fileSizeInBytes).toBeGreaterThan(1024 * 1024); // > 1MB
+      console.log('[Test] ✓ Zip file size is greater than 1MB');
+      
+      // Extract the zip
+      console.log(`[Test] Extracting zip to: ${extractDir}`);
+      fs.mkdirSync(extractDir, { recursive: true });
+      execSync(`unzip -q "${zipPath}" -d "${extractDir}"`, {
+        cwd: projectRoot,
+        stdio: 'pipe'
+      });
+      console.log('[Test] Zip extracted successfully');
+      
+      // Verify data.json exists (main mod file)
+      const dataJsonPath = path.join(extractDir, 'data.json');
+      console.log(`[Test] Checking for data.json at: ${dataJsonPath}`);
+      expect(fs.existsSync(dataJsonPath)).toBeTruthy();
+      
+      const dataJson = JSON.parse(fs.readFileSync(dataJsonPath, 'utf8'));
+      console.log(`[Test] data.json loaded successfully`);
+      
+      // Verify the data.json has the expected structure
+      expect(dataJson).toHaveProperty('civs');
+      expect(Array.isArray(dataJson.civs)).toBeTruthy();
+      expect(dataJson.civs.length).toBeGreaterThan(0);
+      console.log(`[Test] ✓ data.json contains ${dataJson.civs.length} civilization(s)`);
+      
+      // Verify the civ has the name we entered
+      const ourCiv = dataJson.civs.find((c: any) => c.alias === 'E2E Build Test Civ');
+      expect(ourCiv).toBeTruthy();
+      console.log('[Test] ✓ Found our civilization in data.json');
+      
+      // Verify the civ has expected properties
+      expect(ourCiv).toHaveProperty('tree');
+      expect(Array.isArray(ourCiv.tree)).toBeTruthy();
+      expect(ourCiv).toHaveProperty('bonuses');
+      expect(Array.isArray(ourCiv.bonuses)).toBeTruthy();
+      console.log('[Test] ✓ Civilization has expected structure (tree, bonuses)');
+      
+      // Check for individual civ JSON file
+      const extractedFiles = fs.readdirSync(extractDir);
+      const civJsonFiles = extractedFiles.filter(f => f.endsWith('.json') && f !== 'data.json' && f !== 'draft-config.json');
+      console.log(`[Test] Found ${civJsonFiles.length} individual civ JSON files: ${civJsonFiles.join(', ')}`);
+      
+      // For build mode, there might be just the data.json or individual files
+      // Either way is valid, so we just verify data.json structure
+      
+      console.log('[Test] ✓ All verifications passed!');
+      
+    } finally {
+      // Clean up
+      if (modTimestamp) {
+        try {
+          const modsFiles = fs.readdirSync(modsDir);
+          modsFiles.forEach(file => {
+            if (file.endsWith('.zip')) {
+              const filePath = path.join(modsDir, file);
+              const stats = fs.statSync(filePath);
+              // Clean up zip files created during this test (with buffer)
+              if (stats.mtime.getTime() >= (modTimestamp! - 5000)) {
+                console.log(`[Test] Cleaning up zip file: ${file}`);
+                fs.unlinkSync(filePath);
+              }
+            }
+          });
+        } catch (err) {
+          console.error('Error cleaning up zip files:', err);
+        }
+      }
+      
+      if (fs.existsSync(extractDir)) {
+        fs.rmSync(extractDir, { recursive: true, force: true });
+        console.log('[Test] Cleaned up extract directory');
+      }
+    }
+  });
+});
