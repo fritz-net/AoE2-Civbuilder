@@ -930,7 +930,11 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
 
 test.describe('Build Page - Full Flow to Zip Download', () => {
   // This test verifies the complete /v2/build flow including zip download and verification
-  // Similar to the draft mode full flow test but for the build page
+  // Addresses the requirement: "is there an e2e test for full flow on /v2/build?"
+  // This test is similar to:
+  //   - draftMode.spec.ts:475 "Draft Mode - Pasture Bonus Detection › should complete single player draft with multiple bonuses"
+  //   - customUUDraft.spec.ts "should store custom UU in player bonuses array and complete full draft"
+  // But specifically for the /v2/build route with comprehensive zip verification
   (shouldSkipDownloadTests ? test.skip : test)('should complete full build flow, download zip, verify size > 1MB and check JSONs', async ({ page }) => {
     test.setTimeout(90000); // Build flow + mod creation can take time
     
