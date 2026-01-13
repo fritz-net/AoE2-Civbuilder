@@ -9,7 +9,7 @@ import { TechTreeDemoPage } from './helpers/TechTreeDemoPage';
  */
 
 const IMPERIAL_PALADIN_BONUS = /Can upgrade Paladin to Imperial Paladin/i;
-const IMPERIAL_PALADIN_UNIT_ID = 'unit_2540';
+const IMPERIAL_PALADIN_UNIT_ID = 'unit_2615'; // Dynamically allocated ID (standard dat file)
 const CAVALIER_UNIT_ID = 'unit_283';
 const EXPECTED_POINTS = 17; // Knight (3) + Cavalier (6) + Paladin (8)
 
