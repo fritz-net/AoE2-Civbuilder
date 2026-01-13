@@ -2642,30 +2642,52 @@ void Civbuilder::createNewUnits() {
     this->unitClasses["elephant"].push_back(UNIT_ROYAL_ELEPHANT);
     this->unitClasses["stable"].push_back(UNIT_ROYAL_ELEPHANT);
 
-    // Create Imperial Paladin (upgrade from Paladin, uses Crusader Knight graphics)
+    // Create Imperial Paladin (upgrade from Paladin, uses Crusader Knight graphics if available)
+    // Use dynamic unit ID allocation instead of hardcoded ID
+    cout << "[C++]: Creating Imperial Paladin unit..." << endl;
+    cout << "[C++]: Dat file has " << this->df->Civs[0].Units.size() << " units" << endl;
+    
+    // Dynamically allocate a new unit ID at the end of the units array
+    this->imperialPaladinID = (int)(this->df->Civs[0].Units.size());
+    cout << "[C++]: Allocating Imperial Paladin at unit ID " << this->imperialPaladinID << endl;
+    
     for (Civ &civ : this->df->Civs) {
-        civ.Units[UNIT_IMPERIAL_PALADIN] = civ.Units[UNIT_PALADIN];
-        civ.Units[UNIT_IMPERIAL_PALADIN].Name = "IMPALADN";
-        civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLName = 5243;
-        civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLCreation = 6243;
-        civ.Units[UNIT_IMPERIAL_PALADIN].LanguageDLLHelp = 26243;
+        // Expand units array to accommodate new unit
+        civ.Units.resize(this->imperialPaladinID + 1);
         
-        // Use graphics from Crusader Knight (1723 / Ritterbruder)
-        civ.Units[UNIT_IMPERIAL_PALADIN].StandingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].StandingGraphic;
-        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.AttackGraphic = civ.Units[UNIT_CRUSADERKNIGHT].Type50.AttackGraphic;
-        civ.Units[UNIT_IMPERIAL_PALADIN].DyingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DyingGraphic;
-        civ.Units[UNIT_IMPERIAL_PALADIN].DeadFish.WalkingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DeadFish.WalkingGraphic;
+        // Base on Paladin
+        civ.Units[this->imperialPaladinID] = civ.Units[UNIT_PALADIN];
+        civ.Units[this->imperialPaladinID].Name = "IMPALADN";
+        civ.Units[this->imperialPaladinID].LanguageDLLName = 5243;
+        civ.Units[this->imperialPaladinID].LanguageDLLCreation = 6243;
+        civ.Units[this->imperialPaladinID].LanguageDLLHelp = 26243;
+        
+        // Use graphics from Crusader Knight (1723 / Ritterbruder) if available, otherwise keep Paladin graphics
+        if (UNIT_CRUSADERKNIGHT < civ.Units.size()) {
+            cout << "[C++]: Using Crusader Knight graphics (unit " << UNIT_CRUSADERKNIGHT << " exists)" << endl;
+            civ.Units[this->imperialPaladinID].StandingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].StandingGraphic;
+            civ.Units[this->imperialPaladinID].Type50.AttackGraphic = civ.Units[UNIT_CRUSADERKNIGHT].Type50.AttackGraphic;
+            civ.Units[this->imperialPaladinID].DyingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DyingGraphic;
+            civ.Units[this->imperialPaladinID].DeadFish.WalkingGraphic = civ.Units[UNIT_CRUSADERKNIGHT].DeadFish.WalkingGraphic;
+        } else {
+            cout << "[C++]: Crusader Knight (unit " << UNIT_CRUSADERKNIGHT << ") not available, keeping Paladin graphics" << endl;
+        }
         
         // Enhanced stats compared to Paladin
-        civ.Units[UNIT_IMPERIAL_PALADIN].HitPoints = 180;  // Paladin has 160
-        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.DisplayedAttack = 16;  // Paladin has 14
-        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.Attacks[0].Amount = 16;
-        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.DisplayedMeleeArmour = 3;  // Paladin has 2
-        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.Armours[0].Amount = 3;
-        civ.Units[UNIT_IMPERIAL_PALADIN].Creatable.DisplayedPierceArmour = 4;  // Paladin has 3
-        civ.Units[UNIT_IMPERIAL_PALADIN].Type50.Armours[1].Amount = 4;
+        civ.Units[this->imperialPaladinID].HitPoints = 180;  // Paladin has 160
+        civ.Units[this->imperialPaladinID].Type50.DisplayedAttack = 16;  // Paladin has 14
+        civ.Units[this->imperialPaladinID].Type50.Attacks[0].Amount = 16;
+        civ.Units[this->imperialPaladinID].Type50.DisplayedMeleeArmour = 3;  // Paladin has 2
+        civ.Units[this->imperialPaladinID].Type50.Armours[0].Amount = 3;
+        civ.Units[this->imperialPaladinID].Creatable.DisplayedPierceArmour = 4;  // Paladin has 3
+        civ.Units[this->imperialPaladinID].Type50.Armours[1].Amount = 4;
     }
-    this->unitClasses["stable"].push_back(UNIT_IMPERIAL_PALADIN);
+    
+    cout << "[C++]: Imperial Paladin created successfully at ID " << this->imperialPaladinID << endl;
+    
+    // Add Imperial Paladin to stable unit class
+    this->unitClasses["stable"].push_back(this->imperialPaladinID);
+    cout << "[C++]: Added Imperial Paladin (ID " << this->imperialPaladinID << ") to stable unit class" << endl;
 
     // Create Imperial Scorpion
     for (Civ &civ : this->df->Civs) {
@@ -3070,7 +3092,8 @@ void Civbuilder::createCivBonuses() {
     // Imperial Paladin (upgrade from Paladin)
     e.EffectCommands.clear();
     e.Name = "Imperial Paladin";
-    e.EffectCommands.push_back(createEC(3, UNIT_PALADIN, UNIT_IMPERIAL_PALADIN, -1, 0));
+    cout << "[C++]: Creating Imperial Paladin research effect (upgrade from Paladin to unit " << this->imperialPaladinID << ")" << endl;
+    e.EffectCommands.push_back(createEC(3, UNIT_PALADIN, this->imperialPaladinID, -1, 0));
     this->df->Effects.push_back(e);
 
     t = Tech();
