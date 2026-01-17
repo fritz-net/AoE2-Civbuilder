@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { execSync } from 'child_process';
 import { completeFullDraft } from './helpers/draftHelpers';
+import { BuildPage } from './helpers/BuildPage';
 
 /**
  * E2E tests for Vue UI Mod Creation
@@ -944,103 +945,28 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
     const extractDir = path.join(modsDir, `extract-build-${Date.now()}`);
     
     try {
-      // Navigate to build page
-      await page.goto('/v2/build');
+      // Use BuildPage helper (Page Object Model)
+      const buildPage = new BuildPage(page);
+      await buildPage.navigate();
       console.log('[Test] Navigated to /v2/build');
       
       // Step 1: Fill in civilization name
-      const civNameInput = page.getByPlaceholder(/Enter civilization name/i);
-      await expect(civNameInput).toBeVisible();
-      await civNameInput.fill('E2E Build Test Civ');
+      await buildPage.fillCivName('E2E Build Test Civ');
       console.log('[Test] Filled civilization name');
       
-      // Navigate through the stepper by clicking Next multiple times
-      // The stepper typically has these steps:
-      // 1. Basic Info (civ name) - current step
-      // 2. Civ Bonuses
-      // 3. Unique Unit
-      // 4. Castle Tech
-      // 5. Imperial Tech
-      // 6. Team Bonus
-      // 7. Tech Tree
-      
-      const nextButton = page.getByRole('button', { name: /Next/i });
-      
-      // Step 2: Civ Bonuses
-      await expect(nextButton).toBeEnabled();
-      await nextButton.click();
-      await page.waitForTimeout(500);
-      console.log('[Test] Advanced to Civ Bonuses step');
-      
-      // Step 3: Unique Unit
-      await nextButton.click();
-      await page.waitForTimeout(500);
-      console.log('[Test] Advanced to Unique Unit step');
-      
-      // Step 4: Castle Tech
-      await nextButton.click();
-      await page.waitForTimeout(500);
-      console.log('[Test] Advanced to Castle Tech step');
-      
-      // Step 5: Imperial Tech
-      await nextButton.click();
-      await page.waitForTimeout(500);
-      console.log('[Test] Advanced to Imperial Tech step');
-      
-      // Step 6: Team Bonus
-      await nextButton.click();
-      await page.waitForTimeout(500);
-      console.log('[Test] Advanced to Team Bonus step');
-      
-      // Step 7: Tech Tree - this is the final step before mod creation
-      await nextButton.click();
-      await page.waitForTimeout(1000);
+      // Navigate through stepper to tech tree
+      await buildPage.navigateToTechTree();
       console.log('[Test] Advanced to Tech Tree step');
       
-      // Wait for tech tree to load
-      const techTreeContainer = page.locator('.techtree-container');
-      await expect(techTreeContainer).toBeVisible({ timeout: 10000 });
-      console.log('[Test] Tech tree loaded');
-      
-      // Complete the tech tree by clicking Done
-      const doneButton = page.getByRole('button', { name: /Done|Create Mod/i });
-      await expect(doneButton).toBeVisible({ timeout: 5000 });
-      await expect(doneButton).toBeEnabled();
-      console.log('[Test] Found Done/Create Mod button');
-      
-      // Record timestamp before clicking to identify the created mod
+      // Record timestamp before completing
       modTimestamp = Date.now();
       
-      await doneButton.click();
-      console.log('[Test] Clicked Done/Create Mod button');
+      // Complete tech tree and wait for mod creation
+      await buildPage.completeTechTree();
+      console.log('[Test] Submitted tech tree');
       
-      // Handle optional confirmation modal (similar to draft flow)
-      const confirmButton = page.getByRole('button', { name: /Yes, Done|Confirm/i });
-      try {
-        await expect(confirmButton).toBeVisible({ timeout: 2000 });
-        await confirmButton.click();
-        console.log('[Test] Clicked confirmation button');
-      } catch {
-        // No confirmation modal - that's fine
-        console.log('[Test] No confirmation modal needed');
-      }
-      
-      // Wait for mod creation to complete
-      // The build flow might navigate to a success page or show download button
-      // Try multiple approaches to detect completion
-      
-      // Approach 1: Check for navigation to download-success page
-      try {
-        await page.waitForURL('**/v2/download-success*', { timeout: 30000 });
-        console.log('[Test] Navigated to download-success page');
-      } catch {
-        console.log('[Test] Did not navigate to download-success page, checking for download button...');
-        
-        // Approach 2: Check for download button/phase in current page
-        const downloadButton = page.locator('button:has-text("Download"), .download-button, button:has-text("Download Mod")');
-        await expect(downloadButton.first()).toBeVisible({ timeout: 30000 });
-        console.log('[Test] Download button visible');
-      }
+      await buildPage.waitForModCreation();
+      console.log('[Test] Mod creation completed');
       
       // Give server a moment to ensure file is fully written
       await page.waitForTimeout(2000);
@@ -1100,32 +1026,28 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       
       const dataJson = JSON.parse(fs.readFileSync(dataJsonPath, 'utf8'));
       console.log(`[Test] data.json loaded successfully`);
+      console.log(`[Test] data.json structure: ${JSON.stringify(Object.keys(dataJson))}`);
       
-      // Verify the data.json has the expected structure
-      expect(dataJson).toHaveProperty('civs');
-      expect(Array.isArray(dataJson.civs)).toBeTruthy();
-      expect(dataJson.civs.length).toBeGreaterThan(0);
-      console.log(`[Test] ✓ data.json contains ${dataJson.civs.length} civilization(s)`);
+      // Verify the data.json has the expected structure for /v2/build
+      // The structure is different from draft mode - it has arrays for each property
+      expect(dataJson).toHaveProperty('name');
+      expect(Array.isArray(dataJson.name)).toBeTruthy();
+      expect(dataJson.name.length).toBeGreaterThan(0);
+      console.log(`[Test] ✓ data.json contains ${dataJson.name.length} civilization(s)`);
       
       // Verify the civ has the name we entered
-      const ourCiv = dataJson.civs.find((c: any) => c.alias === 'E2E Build Test Civ');
-      expect(ourCiv).toBeTruthy();
+      const civName = dataJson.name[0];
+      expect(civName).toBe('E2E Build Test Civ');
       console.log('[Test] ✓ Found our civilization in data.json');
       
-      // Verify the civ has expected properties
-      expect(ourCiv).toHaveProperty('tree');
-      expect(Array.isArray(ourCiv.tree)).toBeTruthy();
-      expect(ourCiv).toHaveProperty('bonuses');
-      expect(Array.isArray(ourCiv.bonuses)).toBeTruthy();
-      console.log('[Test] ✓ Civilization has expected structure (tree, bonuses)');
-      
-      // Check for individual civ JSON file
-      const extractedFiles = fs.readdirSync(extractDir);
-      const civJsonFiles = extractedFiles.filter(f => f.endsWith('.json') && f !== 'data.json' && f !== 'draft-config.json');
-      console.log(`[Test] Found ${civJsonFiles.length} individual civ JSON files: ${civJsonFiles.join(', ')}`);
-      
-      // For build mode, there might be just the data.json or individual files
-      // Either way is valid, so we just verify data.json structure
+      // Verify the data has expected properties (arrays)
+      expect(dataJson).toHaveProperty('techtree');
+      expect(Array.isArray(dataJson.techtree)).toBeTruthy();
+      expect(dataJson).toHaveProperty('civ_bonus');
+      expect(Array.isArray(dataJson.civ_bonus)).toBeTruthy();
+      expect(dataJson).toHaveProperty('architecture');
+      expect(Array.isArray(dataJson.architecture)).toBeTruthy();
+      console.log('[Test] ✓ data.json has expected structure (techtree, civ_bonus, architecture arrays)');
       
       console.log('[Test] ✓ All verifications passed!');
       
@@ -1153,6 +1075,144 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       if (fs.existsSync(extractDir)) {
         fs.rmSync(extractDir, { recursive: true, force: true });
         console.log('[Test] Cleaned up extract directory');
+      }
+    }
+  });
+
+  // Test with custom UU enabled
+  (shouldSkipDownloadTests ? test.skip : test)('should complete full build flow with custom UU, verify zip and JSONs', async ({ page }) => {
+    test.setTimeout(90000);
+    
+    const projectRoot = path.join(__dirname, '../..');
+    const modsDir = path.join(projectRoot, 'modding', 'requested_mods');
+    let modTimestamp: number | null = null;
+    const extractDir = path.join(modsDir, `extract-build-customuu-${Date.now()}`);
+    
+    try {
+      // Use BuildPage helper
+      const buildPage = new BuildPage(page);
+      await buildPage.navigate();
+      console.log('[Test] Navigated to /v2/build for custom UU test');
+      
+      // Step 1: Fill in civilization name
+      await buildPage.fillCivName('E2E Custom UU Civ');
+      console.log('[Test] Filled civilization name');
+      
+      // Navigate through bonuses step
+      await buildPage.clickNext();
+      console.log('[Test] Advanced to Civ Bonuses step');
+      
+      // Navigate to UU step
+      await buildPage.clickNext();
+      console.log('[Test] Advanced to Unique Unit step');
+      
+      // Check if custom UU option exists - if so, test it
+      const customUUButton = page.getByRole('button', { name: /Custom|Design/i });
+      const hasCustomUU = await customUUButton.isVisible().catch(() => false);
+      
+      if (hasCustomUU) {
+        console.log('[Test] Custom UU option found, clicking...');
+        await customUUButton.click();
+        await page.waitForTimeout(1000);
+        
+        // Fill in custom UU name if there's an input
+        const customUUNameInput = page.locator('input[placeholder*="unit name" i], input[id*="name" i]').first();
+        if (await customUUNameInput.isVisible().catch(() => false)) {
+          await customUUNameInput.fill('Test Warrior');
+          console.log('[Test] Filled custom UU name');
+        }
+        
+        // Submit custom UU if there's a submit button
+        const submitButton = page.getByRole('button', { name: /Submit|Create|Done/i });
+        if (await submitButton.isVisible().catch(() => false)) {
+          await submitButton.click();
+          await page.waitForTimeout(500);
+          console.log('[Test] Submitted custom UU');
+        }
+      } else {
+        console.log('[Test] No custom UU option found, continuing with standard flow');
+      }
+      
+      // Continue to tech tree (from step 3 to step 7 = 4 more steps)
+      await buildPage.navigateToStep(4);
+      console.log('[Test] Advanced to Tech Tree step');
+      
+      modTimestamp = Date.now();
+      
+      // Complete and wait for mod creation
+      await buildPage.completeTechTree();
+      await buildPage.waitForModCreation();
+      console.log('[Test] Mod creation completed');
+      
+      await page.waitForTimeout(2000);
+      
+      // Find and verify zip file
+      const modsFiles = fs.readdirSync(modsDir);
+      const zipFiles = modsFiles.filter(f => f.endsWith('.zip'));
+      const zipFilesWithStats = zipFiles.map(f => ({
+        name: f,
+        path: path.join(modsDir, f),
+        mtime: fs.statSync(path.join(modsDir, f)).mtime.getTime()
+      }));
+      
+      const recentZips = zipFilesWithStats.filter(z => z.mtime >= (modTimestamp! - 5000));
+      recentZips.sort((a, b) => b.mtime - a.mtime);
+      
+      if (recentZips.length === 0) {
+        throw new Error(`No zip file found for custom UU test`);
+      }
+      
+      const zipPath = recentZips[0].path;
+      console.log(`[Test] Found zip file: ${recentZips[0].name}`);
+      
+      // Verify zip size > 1MB
+      const stats = fs.statSync(zipPath);
+      expect(stats.size).toBeGreaterThan(1024 * 1024);
+      console.log(`[Test] ✓ Zip size: ${(stats.size / (1024 * 1024)).toFixed(2)} MB`);
+      
+      // Extract and verify
+      fs.mkdirSync(extractDir, { recursive: true });
+      execSync(`unzip -q "${zipPath}" -d "${extractDir}"`, {
+        cwd: projectRoot,
+        stdio: 'pipe'
+      });
+      
+      const dataJsonPath = path.join(extractDir, 'data.json');
+      expect(fs.existsSync(dataJsonPath)).toBeTruthy();
+      
+      const dataJson = JSON.parse(fs.readFileSync(dataJsonPath, 'utf8'));
+      expect(dataJson).toHaveProperty('name');
+      expect(dataJson.name[0]).toBe('E2E Custom UU Civ');
+      
+      // Check for custom_units property if custom UU was used
+      if (hasCustomUU) {
+        expect(dataJson).toHaveProperty('custom_units');
+        console.log('[Test] ✓ Custom UU data present in data.json');
+      }
+      
+      console.log('[Test] ✓ Custom UU test completed successfully!');
+      
+    } finally {
+      // Cleanup
+      if (modTimestamp) {
+        try {
+          const modsFiles = fs.readdirSync(modsDir);
+          modsFiles.forEach(file => {
+            if (file.endsWith('.zip')) {
+              const filePath = path.join(modsDir, file);
+              const stats = fs.statSync(filePath);
+              if (stats.mtime.getTime() >= (modTimestamp! - 5000)) {
+                fs.unlinkSync(filePath);
+              }
+            }
+          });
+        } catch (err) {
+          console.error('Error cleaning up:', err);
+        }
+      }
+      
+      if (fs.existsSync(extractDir)) {
+        fs.rmSync(extractDir, { recursive: true, force: true });
       }
     }
   });
