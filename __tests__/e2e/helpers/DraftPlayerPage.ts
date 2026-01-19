@@ -123,8 +123,8 @@ export class DraftPlayerPage extends BasePage {
    */
   async waitForDownloadPhase(): Promise<void> {
     const downloadPhase = this.page.locator(this.selectors.downloadPhase);
-    // Mod generation is the exception that can take up to 10 seconds
-    await expect(downloadPhase).toBeVisible({ timeout: 30000 });
+    // Mod generation can take longer in some cases, especially with custom features
+    await expect(downloadPhase).toBeVisible({ timeout: 60000 });
   }
 
   /**

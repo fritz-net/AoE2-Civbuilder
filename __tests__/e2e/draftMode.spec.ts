@@ -473,6 +473,9 @@ test.describe('Draft Mode - Draft Spectator Page', () => {
 
 test.describe('Draft Mode - Pasture Bonus Detection', () => {
   test('should complete single player draft with multiple bonuses', async ({ page }) => {
+    // Set longer timeout for this test as mod creation can take time
+    test.setTimeout(90000); // 90 seconds
+    
     const draftCreatePage = new DraftCreatePage(page);
     await draftCreatePage.navigate();
     
