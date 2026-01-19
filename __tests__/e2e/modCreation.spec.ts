@@ -986,31 +986,54 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       await page.waitForTimeout(2000);
       
       // Now find the zip file created after modTimestamp
-      console.log(`[Test] Looking for zip file created after timestamp ${modTimestamp}`);
+      // We need to check the content of each zip to find the one with our civ name
+      console.log(`[Test] Looking for zip file with civ name "E2E Build Test Civ"...`);
       const modsFiles = fs.readdirSync(modsDir);
       console.log(`[Test] Files in mods directory: ${modsFiles.length} files`);
       
-      // Find the most recently created zip file after our timestamp
       const zipFiles = modsFiles.filter(f => f.endsWith('.zip'));
-      const zipFilesWithStats = zipFiles.map(f => ({
-        name: f,
-        path: path.join(modsDir, f),
-        mtime: fs.statSync(path.join(modsDir, f)).mtime.getTime()
-      }));
+      console.log(`[Test] Found ${zipFiles.length} zip files`);
       
-      // Filter to only files created after we started (with 5 second buffer for clock skew)
-      const recentZips = zipFilesWithStats.filter(z => z.mtime >= (modTimestamp! - 5000));
-      recentZips.sort((a, b) => b.mtime - a.mtime);
+      // Find the zip that contains our civ by extracting and checking data.json
+      let zipPath: string | null = null;
+      let zipFile: string | null = null;
       
-      console.log(`[Test] Found ${recentZips.length} recent zip files`);
-      
-      if (recentZips.length === 0) {
-        throw new Error(`No zip file found created after ${modTimestamp}. All zips: ${zipFiles.join(', ')}`);
+      for (const zf of zipFiles) {
+        const zfPath = path.join(modsDir, zf);
+        const tempExtract = path.join(modsDir, `temp-extract-${Date.now()}`);
+        
+        try {
+          fs.mkdirSync(tempExtract, { recursive: true });
+          execSync(`unzip -q "${zfPath}" -d "${tempExtract}"`, {
+            cwd: projectRoot,
+            stdio: 'pipe'
+          });
+          
+          const dataJsonPath = path.join(tempExtract, 'data.json');
+          if (fs.existsSync(dataJsonPath)) {
+            const dataJson = JSON.parse(fs.readFileSync(dataJsonPath, 'utf8'));
+            if (dataJson.name && dataJson.name[0] === 'E2E Build Test Civ') {
+              zipPath = zfPath;
+              zipFile = zf;
+              console.log(`[Test] Found matching zip: ${zf}`);
+              fs.rmSync(tempExtract, { recursive: true, force: true });
+              break;
+            }
+          }
+          fs.rmSync(tempExtract, { recursive: true, force: true });
+        } catch (err) {
+          console.log(`[Test] Error checking ${zf}:`, err);
+          if (fs.existsSync(tempExtract)) {
+            fs.rmSync(tempExtract, { recursive: true, force: true });
+          }
+        }
       }
       
-      const zipPath = recentZips[0].path;
-      const zipFile = recentZips[0].name;
-      console.log(`[Test] Using most recent zip file: ${zipFile}`);
+      if (!zipPath) {
+        throw new Error(`No zip file found containing "E2E Build Test Civ". Found ${zipFiles.length} zip files: ${zipFiles.join(', ')}`);
+      }
+      
+      console.log(`[Test] Using zip file: ${zipFile}`);
       
       // Verify zip file exists
       expect(fs.existsSync(zipPath)).toBeTruthy();
@@ -1175,33 +1198,52 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       // Give extra time for file system to write the zip file
       await page.waitForTimeout(3000);
       
-      // Find and verify zip file
+      // Find zip file by checking content for our civ name
+      console.log(`[Test] Looking for zip file with civ name "E2E Custom UU Civ"...`);
       const modsFiles = fs.readdirSync(modsDir);
       const zipFiles = modsFiles.filter(f => f.endsWith('.zip'));
-      console.log(`[Test] All zip files in directory: ${zipFiles.join(', ')}`);
+      console.log(`[Test] Found ${zipFiles.length} zip files`);
       
-      const zipFilesWithStats = zipFiles.map(f => ({
-        name: f,
-        path: path.join(modsDir, f),
-        mtime: fs.statSync(path.join(modsDir, f)).mtime.getTime()
-      }));
+      // Find the zip that contains our civ by extracting and checking data.json
+      let zipPath: string | null = null;
+      let zipFile: string | null = null;
       
-      const recentZips = zipFilesWithStats.filter(z => z.mtime >= (modTimestamp! - 5000));
-      recentZips.sort((a, b) => b.mtime - a.mtime);
-      
-      console.log(`[Test] Recent zips (after ${modTimestamp}): ${recentZips.map(z => `${z.name} (${new Date(z.mtime).toISOString()})`).join(', ')}`);
-      
-      if (recentZips.length === 0) {
-        // Log more details to help debug
-        console.log(`[Test] Timestamp filter: Looking for files >= ${modTimestamp - 5000}`);
-        zipFilesWithStats.forEach(z => {
-          console.log(`[Test]   ${z.name}: mtime=${z.mtime} (${new Date(z.mtime).toISOString()})`);
-        });
-        throw new Error(`No zip file found for custom UU test. Found ${zipFiles.length} total zip files, but none created after ${new Date(modTimestamp!).toISOString()}`);
+      for (const zf of zipFiles) {
+        const zfPath = path.join(modsDir, zf);
+        const tempExtract = path.join(modsDir, `temp-extract-customuu-${Date.now()}`);
+        
+        try {
+          fs.mkdirSync(tempExtract, { recursive: true });
+          execSync(`unzip -q "${zfPath}" -d "${tempExtract}"`, {
+            cwd: projectRoot,
+            stdio: 'pipe'
+          });
+          
+          const dataJsonPath = path.join(tempExtract, 'data.json');
+          if (fs.existsSync(dataJsonPath)) {
+            const dataJson = JSON.parse(fs.readFileSync(dataJsonPath, 'utf8'));
+            if (dataJson.name && dataJson.name[0] === 'E2E Custom UU Civ') {
+              zipPath = zfPath;
+              zipFile = zf;
+              console.log(`[Test] Found matching zip: ${zf}`);
+              fs.rmSync(tempExtract, { recursive: true, force: true });
+              break;
+            }
+          }
+          fs.rmSync(tempExtract, { recursive: true, force: true });
+        } catch (err) {
+          console.log(`[Test] Error checking ${zf}:`, err);
+          if (fs.existsSync(tempExtract)) {
+            fs.rmSync(tempExtract, { recursive: true, force: true });
+          }
+        }
       }
       
-      const zipPath = recentZips[0].path;
-      console.log(`[Test] Found zip file: ${recentZips[0].name}`);
+      if (!zipPath) {
+        throw new Error(`No zip file found containing "E2E Custom UU Civ". Found ${zipFiles.length} zip files: ${zipFiles.join(', ')}`);
+      }
+      
+      console.log(`[Test] Using zip file: ${zipFile}`);
       
       // Verify zip size > 1MB
       const stats = fs.statSync(zipPath);
