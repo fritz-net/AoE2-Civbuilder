@@ -945,6 +945,20 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
     const extractDir = path.join(modsDir, `extract-build-${Date.now()}`);
     
     try {
+      // Clean up any existing zip files before starting to ensure clean state
+      console.log('[Test] Cleaning up existing zip files before test...');
+      const existingFiles = fs.readdirSync(modsDir);
+      const existingZips = existingFiles.filter(f => f.endsWith('.zip'));
+      existingZips.forEach(zipFile => {
+        const zipPath = path.join(modsDir, zipFile);
+        try {
+          fs.unlinkSync(zipPath);
+          console.log(`[Test] Removed pre-existing zip: ${zipFile}`);
+        } catch (err) {
+          console.log(`[Test] Could not remove ${zipFile}:`, err);
+        }
+      });
+      
       // Use BuildPage helper (Page Object Model)
       const buildPage = new BuildPage(page);
       await buildPage.navigate();
@@ -1089,6 +1103,20 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
     const extractDir = path.join(modsDir, `extract-build-customuu-${Date.now()}`);
     
     try {
+      // Clean up any existing zip files before starting to ensure clean state
+      console.log('[Test] Cleaning up existing zip files before custom UU test...');
+      const existingFiles = fs.readdirSync(modsDir);
+      const existingZips = existingFiles.filter(f => f.endsWith('.zip'));
+      existingZips.forEach(zipFile => {
+        const zipPath = path.join(modsDir, zipFile);
+        try {
+          fs.unlinkSync(zipPath);
+          console.log(`[Test] Removed pre-existing zip: ${zipFile}`);
+        } catch (err) {
+          console.log(`[Test] Could not remove ${zipFile}:`, err);
+        }
+      });
+      
       // Use BuildPage helper
       const buildPage = new BuildPage(page);
       await buildPage.navigate();
