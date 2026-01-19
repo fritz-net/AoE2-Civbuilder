@@ -1172,11 +1172,14 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       await buildPage.waitForModCreation();
       console.log('[Test] Mod creation completed');
       
-      await page.waitForTimeout(2000);
+      // Give extra time for file system to write the zip file
+      await page.waitForTimeout(3000);
       
       // Find and verify zip file
       const modsFiles = fs.readdirSync(modsDir);
       const zipFiles = modsFiles.filter(f => f.endsWith('.zip'));
+      console.log(`[Test] All zip files in directory: ${zipFiles.join(', ')}`);
+      
       const zipFilesWithStats = zipFiles.map(f => ({
         name: f,
         path: path.join(modsDir, f),
@@ -1186,8 +1189,15 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       const recentZips = zipFilesWithStats.filter(z => z.mtime >= (modTimestamp! - 5000));
       recentZips.sort((a, b) => b.mtime - a.mtime);
       
+      console.log(`[Test] Recent zips (after ${modTimestamp}): ${recentZips.map(z => `${z.name} (${new Date(z.mtime).toISOString()})`).join(', ')}`);
+      
       if (recentZips.length === 0) {
-        throw new Error(`No zip file found for custom UU test`);
+        // Log more details to help debug
+        console.log(`[Test] Timestamp filter: Looking for files >= ${modTimestamp - 5000}`);
+        zipFilesWithStats.forEach(z => {
+          console.log(`[Test]   ${z.name}: mtime=${z.mtime} (${new Date(z.mtime).toISOString()})`);
+        });
+        throw new Error(`No zip file found for custom UU test. Found ${zipFiles.length} total zip files, but none created after ${new Date(modTimestamp!).toISOString()}`);
       }
       
       const zipPath = recentZips[0].path;
