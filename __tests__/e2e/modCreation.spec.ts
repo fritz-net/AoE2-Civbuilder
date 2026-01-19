@@ -972,6 +972,28 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       await buildPage.navigateToTechTree();
       console.log('[Test] Advanced to Tech Tree step');
       
+      // Set up response listener to capture mod creation response
+      let modCreationResponse: any = null;
+      let modCreationError: any = null;
+      
+      page.on('response', async (response) => {
+        const url = response.url();
+        if (url.includes('/api/') && (url.includes('create') || url.includes('mod') || url.includes('build'))) {
+          console.log(`[Test] Intercepted response from ${url}: ${response.status()}`);
+          try {
+            const body = await response.text();
+            console.log(`[Test] Response body: ${body.substring(0, 200)}`);
+            if (response.status() >= 400) {
+              modCreationError = { status: response.status(), url, body };
+            } else {
+              modCreationResponse = { status: response.status(), url, body };
+            }
+          } catch (err) {
+            console.log(`[Test] Could not read response body: ${err}`);
+          }
+        }
+      });
+      
       // Record timestamp before completing - this is when mod creation will start
       modTimestamp = Date.now();
       console.log(`[Test] Set timestamp before mod creation: ${modTimestamp}`);
@@ -982,6 +1004,16 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       
       await buildPage.waitForModCreation();
       console.log('[Test] Mod creation completed');
+      
+      // Check if there was an error response
+      if (modCreationError) {
+        console.error(`[Test] ❌ Mod creation failed with error: ${JSON.stringify(modCreationError)}`);
+        throw new Error(`Mod creation failed: ${modCreationError.status} - ${modCreationError.body}`);
+      }
+      
+      if (modCreationResponse) {
+        console.log(`[Test] ✓ Mod creation response received: ${modCreationResponse.status}`);
+      }
       
       // Give server a moment to ensure file is fully written
       await page.waitForTimeout(2000);
@@ -1213,6 +1245,28 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       await buildPage.navigateToStep(4);
       console.log('[Test] Advanced to Tech Tree step');
       
+      // Set up response listener to capture mod creation response
+      let modCreationResponse: any = null;
+      let modCreationError: any = null;
+      
+      page.on('response', async (response) => {
+        const url = response.url();
+        if (url.includes('/api/') && (url.includes('create') || url.includes('mod') || url.includes('build'))) {
+          console.log(`[Test] Intercepted response from ${url}: ${response.status()}`);
+          try {
+            const body = await response.text();
+            console.log(`[Test] Response body: ${body.substring(0, 200)}`);
+            if (response.status() >= 400) {
+              modCreationError = { status: response.status(), url, body };
+            } else {
+              modCreationResponse = { status: response.status(), url, body };
+            }
+          } catch (err) {
+            console.log(`[Test] Could not read response body: ${err}`);
+          }
+        }
+      });
+      
       modTimestamp = Date.now();
       console.log(`[Test] Set timestamp before mod creation: ${modTimestamp}`);
       
@@ -1220,6 +1274,16 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       await buildPage.completeTechTree();
       await buildPage.waitForModCreation();
       console.log('[Test] Mod creation completed');
+      
+      // Check if there was an error response
+      if (modCreationError) {
+        console.error(`[Test] ❌ Mod creation failed with error: ${JSON.stringify(modCreationError)}`);
+        throw new Error(`Mod creation failed: ${modCreationError.status} - ${modCreationError.body}`);
+      }
+      
+      if (modCreationResponse) {
+        console.log(`[Test] ✓ Mod creation response received: ${modCreationResponse.status}`);
+      }
       
       // Give extra time for file system to write the zip file
       await page.waitForTimeout(3000);
