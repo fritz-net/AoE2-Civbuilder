@@ -83,17 +83,29 @@ export class BuildPage extends BasePage {
     
     // Click Done or Create Mod button
     const doneButton = this.page.getByRole('button', { name: /Done|Create Mod/i });
-    await expect(doneButton).toBeVisible({ timeout: 5000 });
-    await expect(doneButton).toBeEnabled();
-    await doneButton.click();
+    
+    try {
+      await expect(doneButton).toBeVisible({ timeout: 5000 });
+      await expect(doneButton).toBeEnabled();
+      console.log('[BuildPage] Found and clicking Done/Create Mod button');
+      await doneButton.click();
+      console.log('[BuildPage] Button clicked successfully');
+    } catch (error) {
+      console.error('[BuildPage] Failed to find or click Done/Create Mod button:', error);
+      // Take a screenshot for debugging
+      await this.page.screenshot({ path: `debug-button-not-found-${Date.now()}.png` });
+      throw new Error('Done/Create Mod button not found or not clickable');
+    }
 
     // Handle optional confirmation modal
     const confirmButton = this.page.getByRole('button', { name: /Yes, Done|Confirm/i });
     try {
       await expect(confirmButton).toBeVisible({ timeout: 2000 });
       await confirmButton.click();
+      console.log('[BuildPage] Clicked confirmation button');
     } catch {
       // No confirmation modal - that's fine
+      console.log('[BuildPage] No confirmation modal found (this is OK)');
     }
   }
 
