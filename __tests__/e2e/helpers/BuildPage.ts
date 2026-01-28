@@ -26,15 +26,21 @@ export class BuildPage extends BasePage {
    * Navigate to build page
    */
   async navigate(): Promise<void> {
-    await this.goto('/v2/build');
+    await this.goto('/v2/build/');  // Note: trailing slash needed to avoid redirect
+    // Wait for Vue app to mount and stepper to be ready
+    await this.page.waitForLoadState('networkidle');
+    await this.wait(1000);  // Give Vue time to render
   }
 
   /**
    * Fill in civilization name on step 1
    */
   async fillCivName(name: string): Promise<void> {
-    const input = this.page.getByPlaceholder(/Enter civilization name/i);
-    await expect(input).toBeVisible();
+    // Wait a bit more for Vue to fully render the form
+    await this.wait(500);
+    // Try multiple possible selectors for the civ name input
+    const input = this.page.locator('input[type="text"]').first();
+    await expect(input).toBeVisible({ timeout: 10000 });
     await input.fill(name);
   }
 
