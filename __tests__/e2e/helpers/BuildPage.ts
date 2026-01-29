@@ -70,6 +70,7 @@ export class BuildPage extends BasePage {
    */
   async navigateToTechTree(): Promise<void> {
     // Advance through 6 steps to reach tech tree (step 7)
+    // The stepper should advance even with default/empty values
     await this.navigateToStep(6);
   }
 
