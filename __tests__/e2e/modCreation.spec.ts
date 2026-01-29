@@ -972,17 +972,29 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       await buildPage.navigateToTechTree();
       console.log('[Test] Advanced to Tech Tree step');
       
+      // Set up console log listener to capture browser errors
+      page.on('console', msg => {
+        const type = msg.type();
+        const text = msg.text();
+        if (type === 'error' || type === 'warning') {
+          console.log(`[Browser ${type}] ${text}`);
+        } else if (text.includes('Creating mod') || text.includes('Error creating') || text.includes('config')) {
+          console.log(`[Browser log] ${text}`);
+        }
+      });
+
       // Set up response listener to capture mod creation response
       let modCreationResponse: any = null;
       let modCreationError: any = null;
       
       page.on('response', async (response) => {
         const url = response.url();
-        if (url.includes('/api/') && (url.includes('create') || url.includes('mod') || url.includes('build'))) {
+        // Check for /create endpoint (not /api/create since API is at root)
+        if (url.includes('/create') && !url.includes('draft') && !url.includes('_nuxt')) {
           console.log(`[Test] Intercepted response from ${url}: ${response.status()}`);
           try {
             const body = await response.text();
-            console.log(`[Test] Response body: ${body.substring(0, 200)}`);
+            console.log(`[Test] Response body (first 200 chars): ${body.substring(0, 200)}`);
             if (response.status() >= 400) {
               modCreationError = { status: response.status(), url, body };
             } else {
