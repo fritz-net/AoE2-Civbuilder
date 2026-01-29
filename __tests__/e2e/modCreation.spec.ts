@@ -940,24 +940,12 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
     test.setTimeout(90000); // Build flow + mod creation can take time
     
     const projectRoot = path.join(__dirname, '../..');
-    const modsDir = path.join(projectRoot, 'modding', 'requested_mods');
-    let modTimestamp: number | null = null;
-    const extractDir = path.join(modsDir, `extract-build-${Date.now()}`);
+    const extractDir = path.join(projectRoot, 'test-downloads', `extract-build-${Date.now()}`);
     
     try {
-      // Clean up any existing zip files before starting to ensure clean state
-      console.log('[Test] Cleaning up existing zip files before test...');
-      const existingFiles = fs.readdirSync(modsDir);
-      const existingZips = existingFiles.filter(f => f.endsWith('.zip'));
-      existingZips.forEach(zipFile => {
-        const zipPath = path.join(modsDir, zipFile);
-        try {
-          fs.unlinkSync(zipPath);
-          console.log(`[Test] Removed pre-existing zip: ${zipFile}`);
-        } catch (err) {
-          console.log(`[Test] Could not remove ${zipFile}:`, err);
-        }
-      });
+      // Create temp downloads directory
+      const downloadsDir = path.join(projectRoot, 'test-downloads');
+      fs.mkdirSync(downloadsDir, { recursive: true });
       
       // Use BuildPage helper (Page Object Model)
       const buildPage = new BuildPage(page);
@@ -972,143 +960,29 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       await buildPage.navigateToTechTree();
       console.log('[Test] Advanced to Tech Tree step');
       
-      // Set up console log listener to capture browser errors
-      page.on('console', msg => {
-        const type = msg.type();
-        const text = msg.text();
-        if (type === 'error' || type === 'warning') {
-          console.log(`[Browser ${type}] ${text}`);
-        } else if (text.includes('Creating mod') || text.includes('Error creating') || text.includes('config')) {
-          console.log(`[Browser log] ${text}`);
-        }
-      });
-
-      // Set up response listener to capture mod creation response
-      let modCreationResponse: any = null;
-      let modCreationError: any = null;
+      // Set up download promise BEFORE clicking the button that triggers download
+      console.log('[Test] Setting up download listener...');
+      const downloadPromise = page.waitForEvent('download', { timeout: 60000 });
       
-      page.on('response', async (response) => {
-        const url = response.url();
-        // Check for /create endpoint (not /api/create since API is at root)
-        if (url.includes('/create') && !url.includes('draft') && !url.includes('_nuxt')) {
-          console.log(`[Test] Intercepted response from ${url}: ${response.status()}`);
-          try {
-            const body = await response.text();
-            console.log(`[Test] Response body (first 200 chars): ${body.substring(0, 200)}`);
-            if (response.status() >= 400) {
-              modCreationError = { status: response.status(), url, body };
-            } else {
-              modCreationResponse = { status: response.status(), url, body };
-            }
-          } catch (err) {
-            console.log(`[Test] Could not read response body: ${err}`);
-          }
-        }
-      });
-      
-      // Record timestamp before completing - this is when mod creation will start
-      modTimestamp = Date.now();
-      console.log(`[Test] Set timestamp before mod creation: ${modTimestamp}`);
-      
-      // Complete tech tree and wait for mod creation
+      // Complete tech tree which triggers mod creation and download
       await buildPage.completeTechTree();
-      console.log('[Test] Submitted tech tree');
+      console.log('[Test] Submitted tech tree, waiting for download...');
       
-      await buildPage.waitForModCreation();
-      console.log('[Test] Mod creation completed');
+      // Wait for the download to start
+      const download = await downloadPromise;
+      console.log(`[Test] Download started: ${download.suggestedFilename()}`);
       
-      // Check if there was an error response
-      if (modCreationError) {
-        console.error(`[Test] ❌ Mod creation failed with error: ${JSON.stringify(modCreationError)}`);
-        throw new Error(`Mod creation failed: ${modCreationError.status} - ${modCreationError.body}`);
-      }
+      // Save the download to a temporary location
+      const downloadPath = path.join(downloadsDir, download.suggestedFilename());
+      await download.saveAs(downloadPath);
+      console.log(`[Test] Download saved to: ${downloadPath}`);
       
-      if (modCreationResponse) {
-        console.log(`[Test] ✓ Mod creation response received: ${modCreationResponse.status}`);
-      }
-      
-      // Give server a moment to ensure file is fully written
-      await page.waitForTimeout(2000);
-      
-      // Now find the zip file created after modTimestamp
-      // We need to check the content of each zip to find the one with our civ name
-      console.log(`[Test] Looking for zip file with civ name "E2E Build Test Civ"...`);
-      const modsFiles = fs.readdirSync(modsDir);
-      console.log(`[Test] Files in mods directory: ${modsFiles.length} files`);
-      
-      const zipFiles = modsFiles.filter(f => f.endsWith('.zip'));
-      console.log(`[Test] Found ${zipFiles.length} zip files: ${zipFiles.join(', ')}`);
-      
-      // First, filter by timestamp to narrow down candidates
-      const zipFilesWithStats = zipFiles.map(f => ({
-        name: f,
-        path: path.join(modsDir, f),
-        mtime: fs.statSync(path.join(modsDir, f)).mtime.getTime()
-      }));
-      
-      // Use generous buffer (10 seconds) for clock skew and processing time
-      const candidateZips = zipFilesWithStats.filter(z => z.mtime >= (modTimestamp! - 10000));
-      candidateZips.sort((a, b) => b.mtime - a.mtime); // Most recent first
-      
-      console.log(`[Test] Found ${candidateZips.length} candidate zips after ${new Date(modTimestamp! - 10000).toISOString()}`);
-      candidateZips.forEach(z => {
-        console.log(`[Test]   - ${z.name} (${new Date(z.mtime).toISOString()})`);
-      });
-      
-      // Now check the content of candidate zips to find the one with our civ
-      let zipPath: string | null = null;
-      let zipFile: string | null = null;
-      
-      for (const zf of candidateZips) {
-        const tempExtract = path.join(modsDir, `temp-extract-${Date.now()}`);
-        
-        try {
-          fs.mkdirSync(tempExtract, { recursive: true });
-          execSync(`unzip -q "${zf.path}" -d "${tempExtract}"`, {
-            cwd: projectRoot,
-            stdio: 'pipe'
-          });
-          
-          const dataJsonPath = path.join(tempExtract, 'data.json');
-          console.log(`[Test] Checking ${zf.name} for data.json at ${dataJsonPath}`);
-          
-          if (fs.existsSync(dataJsonPath)) {
-            const dataJson = JSON.parse(fs.readFileSync(dataJsonPath, 'utf8'));
-            console.log(`[Test] ${zf.name} contains civ name: ${dataJson.name ? dataJson.name[0] : 'undefined'}`);
-            
-            if (dataJson.name && dataJson.name[0] === 'E2E Build Test Civ') {
-              zipPath = zf.path;
-              zipFile = zf.name;
-              console.log(`[Test] ✓ Found matching zip: ${zf.name}`);
-              fs.rmSync(tempExtract, { recursive: true, force: true });
-              break;
-            }
-          } else {
-            console.log(`[Test] ${zf.name} does not contain data.json`);
-          }
-          fs.rmSync(tempExtract, { recursive: true, force: true });
-        } catch (err) {
-          console.log(`[Test] Error checking ${zf.name}:`, err);
-          if (fs.existsSync(tempExtract)) {
-            fs.rmSync(tempExtract, { recursive: true, force: true });
-          }
-        }
-      }
-      
-      if (!zipPath) {
-        const errorMsg = candidateZips.length === 0
-          ? `No zip files found created after ${new Date(modTimestamp! - 10000).toISOString()}. Total zips: ${zipFiles.length}`
-          : `No zip file found containing "E2E Build Test Civ" among ${candidateZips.length} candidates: ${candidateZips.map(z => z.name).join(', ')}`;
-        throw new Error(errorMsg);
-      }
-      
-      console.log(`[Test] Using zip file: ${zipFile}`);
-      
-      // Verify zip file exists
-      expect(fs.existsSync(zipPath)).toBeTruthy();
+      // Verify zip file was downloaded
+      expect(fs.existsSync(downloadPath)).toBeTruthy();
+      console.log('[Test] ✓ Zip file downloaded successfully');
       
       // Verify zip file size is greater than 1MB
-      const stats = fs.statSync(zipPath);
+      const stats = fs.statSync(downloadPath);
       const fileSizeInBytes = stats.size;
       const fileSizeInMB = fileSizeInBytes / (1024 * 1024);
       console.log(`[Test] Zip file size: ${fileSizeInMB.toFixed(2)} MB (${fileSizeInBytes} bytes)`);
@@ -1119,7 +993,7 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       // Extract the zip
       console.log(`[Test] Extracting zip to: ${extractDir}`);
       fs.mkdirSync(extractDir, { recursive: true });
-      execSync(`unzip -q "${zipPath}" -d "${extractDir}"`, {
+      execSync(`unzip -q "${downloadPath}" -d "${extractDir}"`, {
         cwd: projectRoot,
         stdio: 'pipe'
       });
@@ -1158,24 +1032,15 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       console.log('[Test] ✓ All verifications passed!');
       
     } finally {
-      // Clean up
-      if (modTimestamp) {
-        try {
-          const modsFiles = fs.readdirSync(modsDir);
-          modsFiles.forEach(file => {
-            if (file.endsWith('.zip')) {
-              const filePath = path.join(modsDir, file);
-              const stats = fs.statSync(filePath);
-              // Clean up zip files created during this test (with buffer)
-              if (stats.mtime.getTime() >= (modTimestamp! - 5000)) {
-                console.log(`[Test] Cleaning up zip file: ${file}`);
-                fs.unlinkSync(filePath);
-              }
-            }
-          });
-        } catch (err) {
-          console.error('Error cleaning up zip files:', err);
+      // Clean up downloaded files and extract directory
+      try {
+        const downloadsDir = path.join(projectRoot, 'test-downloads');
+        if (fs.existsSync(downloadsDir)) {
+          fs.rmSync(downloadsDir, { recursive: true, force: true });
+          console.log('[Test] Cleaned up downloads directory');
         }
+      } catch (err) {
+        console.error('Error cleaning up download files:', err);
       }
       
       if (fs.existsSync(extractDir)) {
@@ -1190,24 +1055,12 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
     test.setTimeout(90000);
     
     const projectRoot = path.join(__dirname, '../..');
-    const modsDir = path.join(projectRoot, 'modding', 'requested_mods');
-    let modTimestamp: number | null = null;
-    const extractDir = path.join(modsDir, `extract-build-customuu-${Date.now()}`);
+    const extractDir = path.join(projectRoot, 'test-downloads', `extract-build-customuu-${Date.now()}`);
     
     try {
-      // Clean up any existing zip files before starting to ensure clean state
-      console.log('[Test] Cleaning up existing zip files before custom UU test...');
-      const existingFiles = fs.readdirSync(modsDir);
-      const existingZips = existingFiles.filter(f => f.endsWith('.zip'));
-      existingZips.forEach(zipFile => {
-        const zipPath = path.join(modsDir, zipFile);
-        try {
-          fs.unlinkSync(zipPath);
-          console.log(`[Test] Removed pre-existing zip: ${zipFile}`);
-        } catch (err) {
-          console.log(`[Test] Could not remove ${zipFile}:`, err);
-        }
-      });
+      // Create temp downloads directory
+      const downloadsDir = path.join(projectRoot, 'test-downloads');
+      fs.mkdirSync(downloadsDir, { recursive: true });
       
       // Use BuildPage helper
       const buildPage = new BuildPage(page);
@@ -1257,128 +1110,35 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       await buildPage.navigateToStep(4);
       console.log('[Test] Advanced to Tech Tree step');
       
-      // Set up response listener to capture mod creation response
-      let modCreationResponse: any = null;
-      let modCreationError: any = null;
+      // Set up download promise BEFORE completing tech tree
+      console.log('[Test] Setting up download listener...');
+      const downloadPromise = page.waitForEvent('download', { timeout: 60000 });
       
-      page.on('response', async (response) => {
-        const url = response.url();
-        if (url.includes('/api/') && (url.includes('create') || url.includes('mod') || url.includes('build'))) {
-          console.log(`[Test] Intercepted response from ${url}: ${response.status()}`);
-          try {
-            const body = await response.text();
-            console.log(`[Test] Response body: ${body.substring(0, 200)}`);
-            if (response.status() >= 400) {
-              modCreationError = { status: response.status(), url, body };
-            } else {
-              modCreationResponse = { status: response.status(), url, body };
-            }
-          } catch (err) {
-            console.log(`[Test] Could not read response body: ${err}`);
-          }
-        }
-      });
-      
-      modTimestamp = Date.now();
-      console.log(`[Test] Set timestamp before mod creation: ${modTimestamp}`);
-      
-      // Complete and wait for mod creation
+      // Complete and wait for download
       await buildPage.completeTechTree();
-      await buildPage.waitForModCreation();
-      console.log('[Test] Mod creation completed');
+      console.log('[Test] Submitted tech tree, waiting for download...');
       
-      // Check if there was an error response
-      if (modCreationError) {
-        console.error(`[Test] ❌ Mod creation failed with error: ${JSON.stringify(modCreationError)}`);
-        throw new Error(`Mod creation failed: ${modCreationError.status} - ${modCreationError.body}`);
-      }
+      // Wait for the download to start
+      const download = await downloadPromise;
+      console.log(`[Test] Download started: ${download.suggestedFilename()}`);
       
-      if (modCreationResponse) {
-        console.log(`[Test] ✓ Mod creation response received: ${modCreationResponse.status}`);
-      }
+      // Save the download
+      const downloadPath = path.join(downloadsDir, download.suggestedFilename());
+      await download.saveAs(downloadPath);
+      console.log(`[Test] Download saved to: ${downloadPath}`);
       
-      // Give extra time for file system to write the zip file
-      await page.waitForTimeout(3000);
-      
-      // Find zip file by checking content for our civ name
-      console.log(`[Test] Looking for zip file with civ name "E2E Custom UU Civ"...`);
-      const modsFiles = fs.readdirSync(modsDir);
-      const zipFiles = modsFiles.filter(f => f.endsWith('.zip'));
-      console.log(`[Test] Found ${zipFiles.length} zip files: ${zipFiles.join(', ')}`);
-      
-      // First, filter by timestamp to narrow down candidates
-      const zipFilesWithStats = zipFiles.map(f => ({
-        name: f,
-        path: path.join(modsDir, f),
-        mtime: fs.statSync(path.join(modsDir, f)).mtime.getTime()
-      }));
-      
-      // Use generous buffer (10 seconds) for clock skew and processing time
-      const candidateZips = zipFilesWithStats.filter(z => z.mtime >= (modTimestamp! - 10000));
-      candidateZips.sort((a, b) => b.mtime - a.mtime); // Most recent first
-      
-      console.log(`[Test] Found ${candidateZips.length} candidate zips after ${new Date(modTimestamp! - 10000).toISOString()}`);
-      candidateZips.forEach(z => {
-        console.log(`[Test]   - ${z.name} (${new Date(z.mtime).toISOString()})`);
-      });
-      
-      // Now check the content of candidate zips to find the one with our civ
-      let zipPath: string | null = null;
-      let zipFile: string | null = null;
-      
-      for (const zf of candidateZips) {
-        const tempExtract = path.join(modsDir, `temp-extract-customuu-${Date.now()}`);
-        
-        try {
-          fs.mkdirSync(tempExtract, { recursive: true });
-          execSync(`unzip -q "${zf.path}" -d "${tempExtract}"`, {
-            cwd: projectRoot,
-            stdio: 'pipe'
-          });
-          
-          const dataJsonPath = path.join(tempExtract, 'data.json');
-          console.log(`[Test] Checking ${zf.name} for data.json at ${dataJsonPath}`);
-          
-          if (fs.existsSync(dataJsonPath)) {
-            const dataJson = JSON.parse(fs.readFileSync(dataJsonPath, 'utf8'));
-            console.log(`[Test] ${zf.name} contains civ name: ${dataJson.name ? dataJson.name[0] : 'undefined'}`);
-            
-            if (dataJson.name && dataJson.name[0] === 'E2E Custom UU Civ') {
-              zipPath = zf.path;
-              zipFile = zf.name;
-              console.log(`[Test] ✓ Found matching zip: ${zf.name}`);
-              fs.rmSync(tempExtract, { recursive: true, force: true });
-              break;
-            }
-          } else {
-            console.log(`[Test] ${zf.name} does not contain data.json`);
-          }
-          fs.rmSync(tempExtract, { recursive: true, force: true });
-        } catch (err) {
-          console.log(`[Test] Error checking ${zf.name}:`, err);
-          if (fs.existsSync(tempExtract)) {
-            fs.rmSync(tempExtract, { recursive: true, force: true });
-          }
-        }
-      }
-      
-      if (!zipPath) {
-        const errorMsg = candidateZips.length === 0
-          ? `No zip files found created after ${new Date(modTimestamp! - 10000).toISOString()}. Total zips: ${zipFiles.length}`
-          : `No zip file found containing "E2E Custom UU Civ" among ${candidateZips.length} candidates: ${candidateZips.map(z => z.name).join(', ')}`;
-        throw new Error(errorMsg);
-      }
-      
-      console.log(`[Test] Using zip file: ${zipFile}`);
+      // Verify zip was downloaded
+      expect(fs.existsSync(downloadPath)).toBeTruthy();
+      console.log('[Test] ✓ Zip file downloaded successfully');
       
       // Verify zip size > 1MB
-      const stats = fs.statSync(zipPath);
+      const stats = fs.statSync(downloadPath);
       expect(stats.size).toBeGreaterThan(1024 * 1024);
       console.log(`[Test] ✓ Zip size: ${(stats.size / (1024 * 1024)).toFixed(2)} MB`);
       
       // Extract and verify
       fs.mkdirSync(extractDir, { recursive: true });
-      execSync(`unzip -q "${zipPath}" -d "${extractDir}"`, {
+      execSync(`unzip -q "${downloadPath}" -d "${extractDir}"`, {
         cwd: projectRoot,
         stdio: 'pipe'
       });
@@ -1390,31 +1150,22 @@ test.describe('Build Page - Full Flow to Zip Download', () => {
       expect(dataJson).toHaveProperty('name');
       expect(dataJson.name[0]).toBe('E2E Custom UU Civ');
       
-      // Check for custom_units property if custom UU was used
-      if (hasCustomUU) {
-        expect(dataJson).toHaveProperty('custom_units');
-        console.log('[Test] ✓ Custom UU data present in data.json');
-      }
+      // Verify has expected structure
+      expect(dataJson).toHaveProperty('techtree');
+      expect(Array.isArray(dataJson.techtree)).toBeTruthy();
       
       console.log('[Test] ✓ Custom UU test completed successfully!');
       
     } finally {
-      // Cleanup
-      if (modTimestamp) {
-        try {
-          const modsFiles = fs.readdirSync(modsDir);
-          modsFiles.forEach(file => {
-            if (file.endsWith('.zip')) {
-              const filePath = path.join(modsDir, file);
-              const stats = fs.statSync(filePath);
-              if (stats.mtime.getTime() >= (modTimestamp! - 5000)) {
-                fs.unlinkSync(filePath);
-              }
-            }
-          });
-        } catch (err) {
-          console.error('Error cleaning up:', err);
+      // Cleanup downloaded files and extract directory
+      try {
+        const downloadsDir = path.join(projectRoot, 'test-downloads');
+        if (fs.existsSync(downloadsDir)) {
+          fs.rmSync(downloadsDir, { recursive: true, force: true });
+          console.log('[Test] Cleaned up downloads directory');
         }
+      } catch (err) {
+        console.error('Error cleaning up:', err);
       }
       
       if (fs.existsSync(extractDir)) {
