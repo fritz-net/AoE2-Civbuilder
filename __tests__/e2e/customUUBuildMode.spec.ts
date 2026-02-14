@@ -54,18 +54,17 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     await page.reload();
     await page.waitForTimeout(1000);
     
-    // Step 6: Verify Build Mode is still active
+    // Step 6: Verify Build Mode is still active (restored)
     await expect(buildModeButton).toBeVisible();
     
-    // Step 7: Verify Infantry type is still selected
-    await expect(infantryButton).toBeVisible();
-    
-    // Step 8: Wait for editor to load
-    await page.waitForTimeout(1000);
-    
-    // Step 9: Verify unit name field is present and has the saved value
+    // Step 7: Verify unit data is restored - the unit name field should be visible and populated
+    // After reload with restored data, we should be in the editor view (not type selection)
     await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await expect(unitNameInput).toHaveValue('PersistWarrior', { timeout: 5000 });
+    
+    // Step 8: Verify the unit type tabs are shown (not type selection buttons)
+    const infantryTab = page.locator('.type-tab').filter({ hasText: /Infantry/i });
+    await expect(infantryTab).toBeVisible();
   });
 
   test('should persist unit stats after reload', async ({ page }) => {

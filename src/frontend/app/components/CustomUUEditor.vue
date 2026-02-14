@@ -635,7 +635,17 @@ const emit = defineEmits<{
 
 // Local storage keys for persistence
 const STORAGE_KEY_PREFIX = 'aoe2-custom-uu';
+const ACTIVE_MODE_KEY = 'aoe2-custom-uu-active-mode';
 const getStorageKey = (mode: string) => `${STORAGE_KEY_PREFIX}-${mode}`;
+
+// Try to restore the active mode from localStorage before initialization
+let initialMode = props.initialMode;
+if (typeof window !== 'undefined' && props.showModeSelector) {
+  const savedMode = localStorage.getItem(ACTIVE_MODE_KEY);
+  if (savedMode === 'build' || savedMode === 'draft' || savedMode === 'demo') {
+    initialMode = savedMode as 'demo' | 'build' | 'draft';
+  }
+}
 
 const {
   customUnit,
@@ -654,10 +664,10 @@ const {
   setMode,
   getMaxStatValue,
   ARMOR_CLASS_NAMES
-} = useCustomUU(props.initialMode);
+} = useCustomUU(initialMode);
 
-// Set initial mode
-setMode(props.initialMode);
+// Set initial mode (this will be the restored mode if available)
+setMode(initialMode);
 
 const validationErrors = ref<any[]>([]);
 // Set compactMode to true by default for draft mode
@@ -871,6 +881,11 @@ const saveToLocalStorage = () => {
   };
   
   localStorage.setItem(getStorageKey(editorMode.value), JSON.stringify(saveData));
+  
+  // Also save which mode is currently active (only if mode selector is shown)
+  if (props.showModeSelector) {
+    localStorage.setItem(ACTIVE_MODE_KEY, editorMode.value);
+  }
 };
 
 const loadFromLocalStorage = () => {
@@ -937,6 +952,11 @@ watch(() => editorMode.value, (newMode, oldMode) => {
         timestamp: Date.now()
       };
       localStorage.setItem(getStorageKey(oldMode), JSON.stringify(saveData));
+    }
+    
+    // Save the new active mode
+    if (props.showModeSelector) {
+      localStorage.setItem(ACTIVE_MODE_KEY, newMode);
     }
     
     // Load data for new mode
