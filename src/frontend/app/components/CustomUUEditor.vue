@@ -638,14 +638,18 @@ const STORAGE_KEY_PREFIX = 'aoe2-custom-uu';
 const ACTIVE_MODE_KEY = 'aoe2-custom-uu-active-mode';
 const getStorageKey = (mode: string) => `${STORAGE_KEY_PREFIX}-${mode}`;
 
-// Try to restore the active mode from localStorage before initialization
-let initialMode = props.initialMode;
-if (typeof window !== 'undefined' && props.showModeSelector) {
-  const savedMode = localStorage.getItem(ACTIVE_MODE_KEY);
-  if (savedMode === 'build' || savedMode === 'draft' || savedMode === 'demo') {
-    initialMode = savedMode as 'demo' | 'build' | 'draft';
+// Helper function to get initial mode from localStorage or props
+const getInitialMode = (): 'demo' | 'build' | 'draft' => {
+  if (typeof window !== 'undefined' && props.showModeSelector) {
+    const savedMode = localStorage.getItem(ACTIVE_MODE_KEY);
+    if (savedMode === 'build' || savedMode === 'draft' || savedMode === 'demo') {
+      return savedMode;
+    }
   }
-}
+  return props.initialMode;
+};
+
+const initialMode = getInitialMode();
 
 const {
   customUnit,
@@ -673,6 +677,10 @@ const validationErrors = ref<any[]>([]);
 // Set compactMode to true by default for draft mode
 const compactMode = ref(props.initialMode === 'draft');
 const isRestoring = ref(true); // Prevent autosave during initial load
+
+// Timeout tracking for proper cleanup
+const autosaveTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+const restoreTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 
 const unitTypes = [
   {
@@ -919,12 +927,11 @@ const clearLocalStorage = (mode: string) => {
 };
 
 // Debounced autosave to prevent performance issues
-let autosaveTimeout: ReturnType<typeof setTimeout> | null = null;
 const debouncedSave = () => {
-  if (autosaveTimeout) {
-    clearTimeout(autosaveTimeout);
+  if (autosaveTimeout.value) {
+    clearTimeout(autosaveTimeout.value);
   }
-  autosaveTimeout = setTimeout(() => {
+  autosaveTimeout.value = setTimeout(() => {
     saveToLocalStorage();
   }, 500); // 500ms debounce
 };
@@ -945,6 +952,12 @@ watch(() => compactMode.value, () => {
 // Watch for mode changes
 watch(() => editorMode.value, (newMode, oldMode) => {
   if (oldMode && newMode !== oldMode) {
+    // Clear any pending restore timeout
+    if (restoreTimeout.value) {
+      clearTimeout(restoreTimeout.value);
+      restoreTimeout.value = null;
+    }
+    
     // Save current data before switching
     if (customUnit.value) {
       const saveData = {
@@ -964,8 +977,9 @@ watch(() => editorMode.value, (newMode, oldMode) => {
     // Load data for new mode
     isRestoring.value = true;
     loadFromLocalStorage();
-    setTimeout(() => {
+    restoreTimeout.value = setTimeout(() => {
       isRestoring.value = false;
+      restoreTimeout.value = null;
     }, RESTORE_DELAY_MS);
   }
 });
@@ -973,16 +987,21 @@ watch(() => editorMode.value, (newMode, oldMode) => {
 // Initialize: load from localStorage on mount
 onMounted(() => {
   loadFromLocalStorage();
-  setTimeout(() => {
+  restoreTimeout.value = setTimeout(() => {
     isRestoring.value = false;
+    restoreTimeout.value = null;
   }, RESTORE_DELAY_MS);
 });
 
 // Cleanup on unmount
 onUnmounted(() => {
-  if (autosaveTimeout) {
-    clearTimeout(autosaveTimeout);
-    autosaveTimeout = null;
+  if (autosaveTimeout.value) {
+    clearTimeout(autosaveTimeout.value);
+    autosaveTimeout.value = null;
+  }
+  if (restoreTimeout.value) {
+    clearTimeout(restoreTimeout.value);
+    restoreTimeout.value = null;
   }
 });
 
