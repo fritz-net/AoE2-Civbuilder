@@ -105,7 +105,7 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     expect(reloadedHealth).toBe(initialHealth);
   });
 
-  test('should clear persisted data when switching modes', async ({ page }) => {
+  test('should save active mode when switching between modes', async ({ page }) => {
     await page.goto('/v2/demo/custom-uu');
     
     // Set up unit in Build Mode
@@ -124,13 +124,13 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
       return localStorage.getItem(key) !== null;
     }, { timeout: 5000 });
     
-    // Switch to Demo Mode (should clear build mode data from UI but keep in localStorage)
+    // Switch to Demo Mode (data stays in localStorage but UI clears)
     await page.getByRole('button', { name: /Demo \(Unlimited\)/i }).click();
     
     // Reload page
     await page.reload();
     
-    // Should be in Demo mode after reload (active mode saved)
+    // Should be in Demo mode after reload (active mode was saved)
     const demoButton = page.getByRole('button', { name: /Demo \(Unlimited\)/i });
     await expect(demoButton).toBeVisible();
   });
@@ -148,13 +148,17 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await unitNameInput.fill('PersistentKnight');
     
-    // Wait for autosave
+    // Wait for autosave - verify data is saved correctly
     await page.waitForFunction(() => {
       const key = 'aoe2-custom-uu-build';
       const data = localStorage.getItem(key);
       if (!data) return false;
-      const parsed = JSON.parse(data);
-      return parsed.unit && parsed.unit.name === 'PersistentKnight';
+      try {
+        const parsed = JSON.parse(data);
+        return parsed.unit && parsed.unit.name === 'PersistentKnight';
+      } catch (e) {
+        return false;
+      }
     }, { timeout: 5000 });
     
     // First reload

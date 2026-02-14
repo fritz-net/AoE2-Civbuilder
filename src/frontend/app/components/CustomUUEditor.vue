@@ -674,8 +674,8 @@ const {
 setMode(initialMode);
 
 const validationErrors = ref<any[]>([]);
-// Set compactMode to true by default for draft mode
-const compactMode = ref(props.initialMode === 'draft');
+// Set compactMode based on the actual initial mode (which may be restored from localStorage)
+const compactMode = ref(initialMode === 'draft');
 const isRestoring = ref(true); // Prevent autosave during initial load
 
 // Timeout tracking for proper cleanup
@@ -877,9 +877,9 @@ const RESTORE_DELAY_MS = 100; // Delay after restore to prevent immediate autosa
 
 const saveToLocalStorage = () => {
   if (typeof window === 'undefined' || isRestoring.value) return;
+  
+  // Don't clear storage during restore - only save if we have valid data
   if (!customUnit.value) {
-    // If no unit, clear storage
-    localStorage.removeItem(getStorageKey(editorMode.value));
     return;
   }
   
