@@ -644,7 +644,10 @@ function restoreBonusSelections() {
     // Convert loaded bonuses to the expected format
     selectedCivBonuses.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.CIV])
     // Unique units are plain numbers in legacy format, but we normalize to [id, 1] internally
-    selectedUniqueUnit.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.UNIQUE_UNIT])
+    // Skip normalizing if we're in custom UU mode (the data is already an object, not a number)
+    if (!isCustomUUMode.value) {
+      selectedUniqueUnit.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.UNIQUE_UNIT])
+    }
     selectedCastleTech.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.CASTLE_TECH])
     selectedImpTech.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.IMPERIAL_TECH])
     selectedTeamBonus.value = normalizeBonus(civConfig.bonuses[BONUS_INDEX.TEAM])
@@ -744,6 +747,8 @@ function saveToLocalStorage() {
   const saveData = {
     config: { ...civConfig },
     currentStep: currentStep.value,
+    isCustomUUMode: isCustomUUMode.value,
+    customUUData: customUUData.value,
     timestamp: new Date().toISOString()
   }
   
@@ -762,6 +767,15 @@ function loadFromLocalStorage(): boolean {
   try {
     const parsed = JSON.parse(savedData)
     if (parsed.config) {
+      // Restore custom UU mode FIRST, before restoring bonuses
+      // This is critical because restoreBonusSelections() needs to know if we're in custom UU mode
+      if (parsed.isCustomUUMode !== undefined) {
+        isCustomUUMode.value = parsed.isCustomUUMode
+      }
+      if (parsed.customUUData !== undefined) {
+        customUUData.value = parsed.customUUData
+      }
+      
       // Use Object.keys to iterate and assign properties individually
       // This ensures Vue's reactivity system properly tracks the changes
       const mergedConfig = { ...createDefaultCiv(), ...parsed.config }
@@ -820,7 +834,7 @@ function debouncedSave() {
 }
 
 // Watch for changes and autosave
-watch([civConfig, selectedCivBonuses, selectedUniqueUnit, selectedTeamBonus, currentStep], () => {
+watch([civConfig, selectedCivBonuses, selectedUniqueUnit, selectedTeamBonus, currentStep, isCustomUUMode, customUUData], () => {
   if (autosaveEnabled.value) {
     debouncedSave()
   }
@@ -1236,7 +1250,7 @@ defineExpose({
 .uu-mode-toggle {
   margin-bottom: 2rem;
   padding: 1rem;
-  background: rgba(212, 175, 55, 0.1);
+  background: rgba(139, 69, 19, 0.75);
   border: 2px solid #d4af37;
   border-radius: 8px;
 }
