@@ -107,6 +107,9 @@ export class DraftPlayerPage extends BasePage {
     await expect(doneButton).toBeEnabled();
     await doneButton.click();
 
+    // Wait for backend to process the click
+    await this.wait(1000);
+
     // Handle optional confirmation modal
     // Modal appears when finishing tech tree with unspent points or in certain draft configurations
     const confirmButton = this.page.getByRole('button', { name: /Yes, Done/i });
@@ -116,6 +119,9 @@ export class DraftPlayerPage extends BasePage {
     } catch {
       // No confirmation modal appeared - this is fine
     }
+
+    // Wait for mod generation to begin (matches DraftHostPage pattern)
+    await this.wait(3000);
   }
 
   /**
