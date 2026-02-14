@@ -84,27 +84,30 @@ export class BuildPage extends BasePage {
 
   /**
    * Complete tech tree and submit for mod creation
+   * This handles the multi-step process:
+   * 1. Click "Done" on Tech Tree step to advance to Review step
+   * 2. Click "Create Mod" on Review step to trigger download
    */
   async completeTechTree(): Promise<void> {
     await this.waitForTechTree();
     
-    // Click Done or Create Mod button
-    const doneButton = this.page.getByRole('button', { name: /Done|Create Mod/i });
+    // Step 1: Click Done button on Tech Tree step
+    const doneButton = this.page.getByRole('button', { name: /Done/i });
     
     try {
       await expect(doneButton).toBeVisible({ timeout: 5000 });
       await expect(doneButton).toBeEnabled();
-      console.log('[BuildPage] Found and clicking Done/Create Mod button');
+      console.log('[BuildPage] Found and clicking Done button on Tech Tree');
       await doneButton.click();
-      console.log('[BuildPage] Button clicked successfully');
+      console.log('[BuildPage] Done button clicked - advancing to Review step');
     } catch (error) {
-      console.error('[BuildPage] Failed to find or click Done/Create Mod button:', error);
+      console.error('[BuildPage] Failed to find or click Done button:', error);
       // Take a screenshot for debugging
-      await this.page.screenshot({ path: `debug-button-not-found-${Date.now()}.png` });
-      throw new Error('Done/Create Mod button not found or not clickable');
+      await this.page.screenshot({ path: `debug-done-button-not-found-${Date.now()}.png` });
+      throw new Error('Done button not found or not clickable');
     }
 
-    // Handle optional confirmation modal
+    // Handle optional confirmation modal after Done
     const confirmButton = this.page.getByRole('button', { name: /Yes, Done|Confirm/i });
     try {
       await expect(confirmButton).toBeVisible({ timeout: 2000 });
@@ -113,6 +116,23 @@ export class BuildPage extends BasePage {
     } catch {
       // No confirmation modal - that's fine
       console.log('[BuildPage] No confirmation modal found (this is OK)');
+    }
+    
+    // Step 2: Wait for Review step to load and click "Create Mod"
+    await this.wait(500); // Give time for step transition
+    const createModButton = this.page.getByRole('button', { name: /Create Mod/i });
+    
+    try {
+      await expect(createModButton).toBeVisible({ timeout: 5000 });
+      await expect(createModButton).toBeEnabled();
+      console.log('[BuildPage] Found and clicking Create Mod button on Review step');
+      await createModButton.click();
+      console.log('[BuildPage] Create Mod button clicked - mod creation should start');
+    } catch (error) {
+      console.error('[BuildPage] Failed to find or click Create Mod button:', error);
+      // Take a screenshot for debugging
+      await this.page.screenshot({ path: `debug-create-mod-button-not-found-${Date.now()}.png` });
+      throw new Error('Create Mod button not found or not clickable on Review step');
     }
   }
 
