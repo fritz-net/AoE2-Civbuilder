@@ -611,7 +611,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useCustomUU, type CustomUUData } from '~/composables/useCustomUU';
 import BudgetSlider from './BudgetSlider.vue';
 import ValidationDashboard from './ValidationDashboard.vue';
@@ -632,6 +632,10 @@ const emit = defineEmits<{
   (e: 'update', unit: CustomUUData): void;
   (e: 'save', unit: CustomUUData): void;
 }>();
+
+// Local storage keys for persistence
+const STORAGE_KEY_PREFIX = 'aoe2-custom-uu';
+const getStorageKey = (mode: string) => `${STORAGE_KEY_PREFIX}-${mode}`;
 
 const {
   customUnit,
@@ -658,6 +662,7 @@ setMode(props.initialMode);
 const validationErrors = ref<any[]>([]);
 // Set compactMode to true by default for draft mode
 const compactMode = ref(props.initialMode === 'draft');
+const isRestoring = ref(true); // Prevent autosave during initial load
 
 const unitTypes = [
   {
@@ -848,6 +853,116 @@ const exportUnit = () => {
     alert('Unit JSON copied to clipboard!');
   }
 };
+
+// Autosave functionality
+const saveToLocalStorage = () => {
+  if (typeof window === 'undefined' || isRestoring.value) return;
+  if (!customUnit.value) {
+    // If no unit, clear storage
+    localStorage.removeItem(getStorageKey(editorMode.value));
+    return;
+  }
+  
+  const saveData = {
+    unit: customUnit.value,
+    mode: editorMode.value,
+    compactMode: compactMode.value,
+    timestamp: Date.now()
+  };
+  
+  localStorage.setItem(getStorageKey(editorMode.value), JSON.stringify(saveData));
+};
+
+const loadFromLocalStorage = () => {
+  if (typeof window === 'undefined') return;
+  
+  const storageKey = getStorageKey(editorMode.value);
+  const savedData = localStorage.getItem(storageKey);
+  
+  if (savedData) {
+    try {
+      const parsed = JSON.parse(savedData);
+      if (parsed.unit && parsed.mode === editorMode.value) {
+        customUnit.value = parsed.unit;
+        if (parsed.compactMode !== undefined) {
+          compactMode.value = parsed.compactMode;
+        }
+        onUnitChange();
+      }
+    } catch (e) {
+      console.error('Failed to load custom UU from localStorage:', e);
+      localStorage.removeItem(storageKey);
+    }
+  }
+};
+
+const clearLocalStorage = (mode: string) => {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(getStorageKey(mode));
+};
+
+// Debounced autosave to prevent performance issues
+let autosaveTimeout: ReturnType<typeof setTimeout> | null = null;
+const debouncedSave = () => {
+  if (autosaveTimeout) {
+    clearTimeout(autosaveTimeout);
+  }
+  autosaveTimeout = setTimeout(() => {
+    saveToLocalStorage();
+  }, 500); // 500ms debounce
+};
+
+// Watch for changes and autosave
+watch(() => customUnit.value, () => {
+  if (!isRestoring.value && customUnit.value) {
+    debouncedSave();
+  }
+}, { deep: true });
+
+watch(() => compactMode.value, () => {
+  if (!isRestoring.value) {
+    debouncedSave();
+  }
+});
+
+// Watch for mode changes
+watch(() => editorMode.value, (newMode, oldMode) => {
+  if (oldMode && newMode !== oldMode) {
+    // Save current data before switching
+    if (customUnit.value) {
+      const saveData = {
+        unit: customUnit.value,
+        mode: oldMode,
+        compactMode: compactMode.value,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(getStorageKey(oldMode), JSON.stringify(saveData));
+    }
+    
+    // Load data for new mode
+    isRestoring.value = true;
+    loadFromLocalStorage();
+    setTimeout(() => {
+      isRestoring.value = false;
+    }, 100);
+  }
+});
+
+// Initialize: load from localStorage on mount
+onMounted(() => {
+  loadFromLocalStorage();
+  setTimeout(() => {
+    isRestoring.value = false;
+  }, 100);
+});
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (autosaveTimeout) {
+    clearTimeout(autosaveTimeout);
+    autosaveTimeout = null;
+  }
+});
 
 // Watch for initial load
 watch(() => customUnit.value, (newVal) => {
