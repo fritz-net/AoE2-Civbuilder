@@ -19,7 +19,11 @@ test.describe('Custom UU Editor - Build Mode', () => {
     // Switch to Build Mode
     const buildModeButton = page.getByRole('button', { name: /Build Mode \(150 pts\)/i });
     await buildModeButton.click();
-    await page.waitForTimeout(500);
+    
+    // Wait for mode to be saved in localStorage
+    await page.waitForFunction(() => {
+      return localStorage.getItem('aoe2-custom-uu-active-mode') === 'build';
+    }, { timeout: 5000 });
     
     // Verify mode is active (button should still be visible and might have different styling)
     await expect(buildModeButton).toBeVisible();
@@ -136,30 +140,35 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     
     // Setup in Build Mode
     await page.getByRole('button', { name: /Build Mode \(150 pts\)/i }).click();
-    await page.waitForTimeout(500);
     
-    await page.getByTestId('type-button-cavalry').click();
-    await page.waitForTimeout(1000);
+    const cavalryButton = page.getByTestId('type-button-cavalry');
+    await cavalryButton.click();
     
     const unitNameInput = page.getByLabel(/Unit Name/i);
+    await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await unitNameInput.fill('PersistentKnight');
-    await page.waitForTimeout(1000);
+    
+    // Wait for autosave
+    await page.waitForFunction(() => {
+      const key = 'aoe2-custom-uu-build';
+      const data = localStorage.getItem(key);
+      if (!data) return false;
+      const parsed = JSON.parse(data);
+      return parsed.unit && parsed.unit.name === 'PersistentKnight';
+    }, { timeout: 5000 });
     
     // First reload
     await page.reload();
-    await page.waitForTimeout(1000);
     await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await expect(unitNameInput).toHaveValue('PersistentKnight');
     
     // Second reload
     await page.reload();
-    await page.waitForTimeout(1000);
     await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await expect(unitNameInput).toHaveValue('PersistentKnight');
     
     // Third reload
     await page.reload();
-    await page.waitForTimeout(1000);
     await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await expect(unitNameInput).toHaveValue('PersistentKnight');
   });
@@ -171,18 +180,22 @@ test.describe('Custom UU Editor - Draft Mode Persistence', () => {
     
     // Set up unit in Draft Mode (100 pts budget)
     await page.getByRole('button', { name: /Draft Mode \(100 pts\)/i }).click();
-    await page.waitForTimeout(500);
     
-    await page.getByTestId('type-button-archer').click();
-    await page.waitForTimeout(1000);
+    const archerButton = page.getByTestId('type-button-archer');
+    await archerButton.click();
     
     const unitNameInput = page.getByLabel(/Unit Name/i);
+    await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await unitNameInput.fill('DraftArcher');
-    await page.waitForTimeout(1000);
+    
+    // Wait for autosave in draft mode
+    await page.waitForFunction(() => {
+      const key = 'aoe2-custom-uu-draft';
+      return localStorage.getItem(key) !== null;
+    }, { timeout: 5000 });
     
     // Reload
     await page.reload();
-    await page.waitForTimeout(1000);
     
     // Verify Draft Mode persists
     const draftButton = page.getByRole('button', { name: /Draft Mode \(100 pts\)/i });
