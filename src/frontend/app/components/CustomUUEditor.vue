@@ -865,6 +865,8 @@ const exportUnit = () => {
 };
 
 // Autosave functionality
+const RESTORE_DELAY_MS = 100; // Delay after restore to prevent immediate autosave
+
 const saveToLocalStorage = () => {
   if (typeof window === 'undefined' || isRestoring.value) return;
   if (!customUnit.value) {
@@ -964,7 +966,7 @@ watch(() => editorMode.value, (newMode, oldMode) => {
     loadFromLocalStorage();
     setTimeout(() => {
       isRestoring.value = false;
-    }, 100);
+    }, RESTORE_DELAY_MS);
   }
 });
 
@@ -973,7 +975,7 @@ onMounted(() => {
   loadFromLocalStorage();
   setTimeout(() => {
     isRestoring.value = false;
-  }, 100);
+  }, RESTORE_DELAY_MS);
 });
 
 // Cleanup on unmount

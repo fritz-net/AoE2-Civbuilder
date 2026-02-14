@@ -34,31 +34,30 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     // Step 2: Switch to Build Mode (150 pts budget)
     const buildModeButton = page.getByRole('button', { name: /Build Mode \(150 pts\)/i });
     await buildModeButton.click();
-    await page.waitForTimeout(500);
     
     // Step 3: Select Infantry unit type
     const infantryButton = page.getByTestId('type-button-infantry');
     await expect(infantryButton).toBeVisible();
     await infantryButton.click();
-    await page.waitForTimeout(1000);
     
-    // Step 4: Fill in unit name
+    // Step 4: Wait for unit name field to appear and fill it
     const unitNameInput = page.getByLabel(/Unit Name/i);
     await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await unitNameInput.fill('PersistWarrior');
     
-    // Wait for autosave to trigger
-    await page.waitForTimeout(1000);
+    // Wait for autosave to trigger (check localStorage is set)
+    await page.waitForFunction(() => {
+      const key = 'aoe2-custom-uu-build';
+      return localStorage.getItem(key) !== null;
+    }, { timeout: 5000 });
     
     // Step 5: Reload the page to test persistence
     await page.reload();
-    await page.waitForTimeout(1000);
     
-    // Step 6: Verify Build Mode is still active (restored)
+    // Step 6: Wait for page to load and verify Build Mode is restored
     await expect(buildModeButton).toBeVisible();
     
     // Step 7: Verify unit data is restored - the unit name field should be visible and populated
-    // After reload with restored data, we should be in the editor view (not type selection)
     await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await expect(unitNameInput).toHaveValue('PersistWarrior', { timeout: 5000 });
     
@@ -72,14 +71,14 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     
     // Switch to Build Mode
     await page.getByRole('button', { name: /Build Mode \(150 pts\)/i }).click();
-    await page.waitForTimeout(500);
     
     // Select Infantry
-    await page.getByTestId('type-button-infantry').click();
-    await page.waitForTimeout(1000);
+    const infantryButton = page.getByTestId('type-button-infantry');
+    await infantryButton.click();
     
-    // Fill unit name
+    // Wait for editor to load and fill unit name
     const unitNameInput = page.getByLabel(/Unit Name/i);
+    await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await unitNameInput.fill('TestUnit');
     
     // Get initial health value
@@ -87,12 +86,14 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     await expect(healthInput).toBeVisible();
     const initialHealth = await healthInput.inputValue();
     
-    // Wait for autosave
-    await page.waitForTimeout(1000);
+    // Wait for autosave to complete
+    await page.waitForFunction(() => {
+      const key = 'aoe2-custom-uu-build';
+      return localStorage.getItem(key) !== null;
+    }, { timeout: 5000 });
     
     // Reload page
     await page.reload();
-    await page.waitForTimeout(1000);
     
     // Verify health value persists
     await expect(healthInput).toBeVisible({ timeout: 10000 });
@@ -105,25 +106,27 @@ test.describe('Custom UU Editor - Autosave Persistence', () => {
     
     // Set up unit in Build Mode
     await page.getByRole('button', { name: /Build Mode \(150 pts\)/i }).click();
-    await page.waitForTimeout(500);
     
-    await page.getByTestId('type-button-infantry').click();
-    await page.waitForTimeout(1000);
+    const infantryButton = page.getByTestId('type-button-infantry');
+    await infantryButton.click();
     
     const unitNameInput = page.getByLabel(/Unit Name/i);
+    await expect(unitNameInput).toBeVisible({ timeout: 10000 });
     await unitNameInput.fill('BuildModeUnit');
-    await page.waitForTimeout(1000);
     
-    // Switch to Demo Mode (should clear build mode data)
+    // Wait for autosave
+    await page.waitForFunction(() => {
+      const key = 'aoe2-custom-uu-build';
+      return localStorage.getItem(key) !== null;
+    }, { timeout: 5000 });
+    
+    // Switch to Demo Mode (should clear build mode data from UI but keep in localStorage)
     await page.getByRole('button', { name: /Demo \(Unlimited\)/i }).click();
-    await page.waitForTimeout(500);
     
     // Reload page
     await page.reload();
-    await page.waitForTimeout(1000);
     
-    // Should be in Demo mode, not Build mode
-    // Build mode data should not persist
+    // Should be in Demo mode after reload (active mode saved)
     const demoButton = page.getByRole('button', { name: /Demo \(Unlimited\)/i });
     await expect(demoButton).toBeVisible();
   });
