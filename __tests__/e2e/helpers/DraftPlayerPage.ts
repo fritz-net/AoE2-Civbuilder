@@ -116,6 +116,10 @@ export class DraftPlayerPage extends BasePage {
     } catch {
       // No confirmation modal appeared - this is fine
     }
+
+    // Wait for tech tree to disappear (phase transition starting)
+    // This ensures the Done button action has been processed before returning
+    await expect(techTreeContainer).not.toBeVisible({ timeout: 5000 });
   }
 
   /**
