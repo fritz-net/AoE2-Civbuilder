@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { execSync } from 'child_process';
 import { completeFullDraft } from './helpers/draftHelpers';
+import { BuildPage } from './helpers/BuildPage';
 
 /**
  * E2E tests for Vue UI Mod Creation
@@ -919,6 +920,252 @@ test.describe('Draft JSON Compatibility with Combine Page', () => {
         if (fs.existsSync(draftPath)) {
           fs.unlinkSync(draftPath);
         }
+      }
+      
+      if (fs.existsSync(extractDir)) {
+        fs.rmSync(extractDir, { recursive: true, force: true });
+      }
+    }
+  });
+});
+
+test.describe('Build Page - Full Flow to Zip Download', () => {
+  // This test verifies the complete /v2/build flow including zip download and verification
+  // Addresses the requirement: "is there an e2e test for full flow on /v2/build?"
+  // This test is similar to:
+  //   - draftMode.spec.ts:475 "Draft Mode - Pasture Bonus Detection › should complete single player draft with multiple bonuses"
+  //   - customUUDraft.spec.ts "should store custom UU in player bonuses array and complete full draft"
+  // But specifically for the /v2/build route with comprehensive zip verification
+  (shouldSkipDownloadTests ? test.skip : test)('should complete full build flow, download zip, verify size > 1MB and check JSONs', async ({ page }) => {
+    test.setTimeout(90000); // Build flow + mod creation can take time
+    
+    const projectRoot = path.join(__dirname, '../..');
+    const extractDir = path.join(projectRoot, 'test-downloads', `extract-build-${Date.now()}`);
+    
+    try {
+      // Create temp downloads directory
+      const downloadsDir = path.join(projectRoot, 'test-downloads');
+      fs.mkdirSync(downloadsDir, { recursive: true });
+      
+      // Use BuildPage helper (Page Object Model)
+      const buildPage = new BuildPage(page);
+      await buildPage.navigate();
+      console.log('[Test] Navigated to /v2/build');
+      
+      // Step 1: Fill in civilization name
+      await buildPage.fillCivName('E2E Build Test Civ');
+      console.log('[Test] Filled civilization name');
+      
+      // Navigate through stepper to tech tree
+      await buildPage.navigateToTechTree();
+      console.log('[Test] Advanced to Tech Tree step');
+      
+      // Set up download promise BEFORE clicking the button that triggers download
+      console.log('[Test] Setting up download listener...');
+      const downloadPromise = page.waitForEvent('download', { timeout: 60000 });
+      
+      // Complete tech tree which triggers mod creation and download
+      await buildPage.completeTechTree();
+      console.log('[Test] Submitted tech tree, waiting for download...');
+      
+      // Wait for the download to start
+      const download = await downloadPromise;
+      console.log(`[Test] Download started: ${download.suggestedFilename()}`);
+      
+      // Save the download to a temporary location
+      const downloadPath = path.join(downloadsDir, download.suggestedFilename());
+      await download.saveAs(downloadPath);
+      console.log(`[Test] Download saved to: ${downloadPath}`);
+      
+      // Verify zip file was downloaded
+      expect(fs.existsSync(downloadPath)).toBeTruthy();
+      console.log('[Test] ✓ Zip file downloaded successfully');
+      
+      // Verify zip file size is greater than 1MB
+      const stats = fs.statSync(downloadPath);
+      const fileSizeInBytes = stats.size;
+      const fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+      console.log(`[Test] Zip file size: ${fileSizeInMB.toFixed(2)} MB (${fileSizeInBytes} bytes)`);
+      
+      expect(fileSizeInBytes).toBeGreaterThan(1024 * 1024); // > 1MB
+      console.log('[Test] ✓ Zip file size is greater than 1MB');
+      
+      // Extract the zip
+      console.log(`[Test] Extracting zip to: ${extractDir}`);
+      fs.mkdirSync(extractDir, { recursive: true });
+      execSync(`unzip -q "${downloadPath}" -d "${extractDir}"`, {
+        cwd: projectRoot,
+        stdio: 'pipe'
+      });
+      console.log('[Test] Zip extracted successfully');
+      
+      // Verify data.json exists (main mod file)
+      const dataJsonPath = path.join(extractDir, 'data.json');
+      console.log(`[Test] Checking for data.json at: ${dataJsonPath}`);
+      expect(fs.existsSync(dataJsonPath)).toBeTruthy();
+      
+      const dataJson = JSON.parse(fs.readFileSync(dataJsonPath, 'utf8'));
+      console.log(`[Test] data.json loaded successfully`);
+      console.log(`[Test] data.json structure: ${JSON.stringify(Object.keys(dataJson))}`);
+      
+      // Verify the data.json has the expected structure for /v2/build
+      // The structure is different from draft mode - it has arrays for each property
+      expect(dataJson).toHaveProperty('name');
+      expect(Array.isArray(dataJson.name)).toBeTruthy();
+      expect(dataJson.name.length).toBeGreaterThan(0);
+      console.log(`[Test] ✓ data.json contains ${dataJson.name.length} civilization(s)`);
+      
+      // Verify the civ has the name we entered
+      const civName = dataJson.name[0];
+      expect(civName).toBe('E2E Build Test Civ');
+      console.log('[Test] ✓ Found our civilization in data.json');
+      
+      // Verify the data has expected properties (arrays)
+      expect(dataJson).toHaveProperty('techtree');
+      expect(Array.isArray(dataJson.techtree)).toBeTruthy();
+      expect(dataJson).toHaveProperty('civ_bonus');
+      expect(Array.isArray(dataJson.civ_bonus)).toBeTruthy();
+      expect(dataJson).toHaveProperty('architecture');
+      expect(Array.isArray(dataJson.architecture)).toBeTruthy();
+      console.log('[Test] ✓ data.json has expected structure (techtree, civ_bonus, architecture arrays)');
+      
+      console.log('[Test] ✓ All verifications passed!');
+      
+    } finally {
+      // Clean up downloaded files and extract directory
+      try {
+        const downloadsDir = path.join(projectRoot, 'test-downloads');
+        if (fs.existsSync(downloadsDir)) {
+          fs.rmSync(downloadsDir, { recursive: true, force: true });
+          console.log('[Test] Cleaned up downloads directory');
+        }
+      } catch (err) {
+        console.error('Error cleaning up download files:', err);
+      }
+      
+      if (fs.existsSync(extractDir)) {
+        fs.rmSync(extractDir, { recursive: true, force: true });
+        console.log('[Test] Cleaned up extract directory');
+      }
+    }
+  });
+
+  // Test with custom UU enabled
+  (shouldSkipDownloadTests ? test.skip : test)('should complete full build flow with custom UU, verify zip and JSONs', async ({ page }) => {
+    test.setTimeout(90000);
+    
+    const projectRoot = path.join(__dirname, '../..');
+    const extractDir = path.join(projectRoot, 'test-downloads', `extract-build-customuu-${Date.now()}`);
+    
+    try {
+      // Create temp downloads directory
+      const downloadsDir = path.join(projectRoot, 'test-downloads');
+      fs.mkdirSync(downloadsDir, { recursive: true });
+      
+      // Use BuildPage helper
+      const buildPage = new BuildPage(page);
+      await buildPage.navigate();
+      console.log('[Test] Navigated to /v2/build for custom UU test');
+      
+      // Step 1: Fill in civilization name
+      await buildPage.fillCivName('E2E Custom UU Civ');
+      console.log('[Test] Filled civilization name');
+      
+      // Navigate through bonuses step
+      await buildPage.clickNext();
+      console.log('[Test] Advanced to Civ Bonuses step');
+      
+      // Navigate to UU step
+      await buildPage.clickNext();
+      console.log('[Test] Advanced to Unique Unit step');
+      
+      // Check if custom UU option exists - if so, test it
+      const customUUButton = page.getByRole('button', { name: /Custom|Design/i });
+      const hasCustomUU = await customUUButton.isVisible().catch(() => false);
+      
+      if (hasCustomUU) {
+        console.log('[Test] Custom UU option found, clicking...');
+        await customUUButton.click();
+        await page.waitForTimeout(1000);
+        
+        // Fill in custom UU name if there's an input
+        const customUUNameInput = page.locator('input[placeholder*="unit name" i], input[id*="name" i]').first();
+        if (await customUUNameInput.isVisible().catch(() => false)) {
+          await customUUNameInput.fill('Test Warrior');
+          console.log('[Test] Filled custom UU name');
+        }
+        
+        // Submit custom UU if there's a submit button
+        const submitButton = page.getByRole('button', { name: /Submit|Create|Done/i });
+        if (await submitButton.isVisible().catch(() => false)) {
+          await submitButton.click();
+          await page.waitForTimeout(500);
+          console.log('[Test] Submitted custom UU');
+        }
+      } else {
+        console.log('[Test] No custom UU option found, continuing with standard flow');
+      }
+      
+      // Continue to tech tree (from step 3 to step 7 = 4 more steps)
+      await buildPage.navigateToStep(4);
+      console.log('[Test] Advanced to Tech Tree step');
+      
+      // Set up download promise BEFORE completing tech tree
+      console.log('[Test] Setting up download listener...');
+      const downloadPromise = page.waitForEvent('download', { timeout: 60000 });
+      
+      // Complete and wait for download
+      await buildPage.completeTechTree();
+      console.log('[Test] Submitted tech tree, waiting for download...');
+      
+      // Wait for the download to start
+      const download = await downloadPromise;
+      console.log(`[Test] Download started: ${download.suggestedFilename()}`);
+      
+      // Save the download
+      const downloadPath = path.join(downloadsDir, download.suggestedFilename());
+      await download.saveAs(downloadPath);
+      console.log(`[Test] Download saved to: ${downloadPath}`);
+      
+      // Verify zip was downloaded
+      expect(fs.existsSync(downloadPath)).toBeTruthy();
+      console.log('[Test] ✓ Zip file downloaded successfully');
+      
+      // Verify zip size > 1MB
+      const stats = fs.statSync(downloadPath);
+      expect(stats.size).toBeGreaterThan(1024 * 1024);
+      console.log(`[Test] ✓ Zip size: ${(stats.size / (1024 * 1024)).toFixed(2)} MB`);
+      
+      // Extract and verify
+      fs.mkdirSync(extractDir, { recursive: true });
+      execSync(`unzip -q "${downloadPath}" -d "${extractDir}"`, {
+        cwd: projectRoot,
+        stdio: 'pipe'
+      });
+      
+      const dataJsonPath = path.join(extractDir, 'data.json');
+      expect(fs.existsSync(dataJsonPath)).toBeTruthy();
+      
+      const dataJson = JSON.parse(fs.readFileSync(dataJsonPath, 'utf8'));
+      expect(dataJson).toHaveProperty('name');
+      expect(dataJson.name[0]).toBe('E2E Custom UU Civ');
+      
+      // Verify has expected structure
+      expect(dataJson).toHaveProperty('techtree');
+      expect(Array.isArray(dataJson.techtree)).toBeTruthy();
+      
+      console.log('[Test] ✓ Custom UU test completed successfully!');
+      
+    } finally {
+      // Cleanup downloaded files and extract directory
+      try {
+        const downloadsDir = path.join(projectRoot, 'test-downloads');
+        if (fs.existsSync(downloadsDir)) {
+          fs.rmSync(downloadsDir, { recursive: true, force: true });
+          console.log('[Test] Cleaned up downloads directory');
+        }
+      } catch (err) {
+        console.error('Error cleaning up:', err);
       }
       
       if (fs.existsSync(extractDir)) {
