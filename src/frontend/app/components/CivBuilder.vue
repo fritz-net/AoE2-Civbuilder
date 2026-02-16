@@ -686,6 +686,12 @@ function updateBonusesInConfig() {
 }
 
 function handleFinish() {
+  // Validate that civ name is provided
+  if (!civConfig.alias || civConfig.alias.trim() === '') {
+    alert('Please enter a civilization name before creating the mod')
+    return
+  }
+  
   updateBonusesInConfig()
   emit('next', { ...civConfig })
 }
