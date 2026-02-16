@@ -44,7 +44,7 @@
           <li>Launch Age of Empires II: Definitive Edition</li>
           <li>Your mod is enabled by default</li>
           <li>Make sure only one custom civ UI mod is enabled at a time</li>
-          <li>On game start, select the data mod to use</li>
+          <li>Before starting a match, make sure to select your data mod under game settings</li>
         </ol>
       </div>
       

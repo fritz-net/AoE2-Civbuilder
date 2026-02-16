@@ -611,7 +611,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useCustomUU, type CustomUUData } from '~/composables/useCustomUU';
 import BudgetSlider from './BudgetSlider.vue';
 import ValidationDashboard from './ValidationDashboard.vue';
@@ -633,6 +633,24 @@ const emit = defineEmits<{
   (e: 'save', unit: CustomUUData): void;
 }>();
 
+// Local storage keys for persistence
+const STORAGE_KEY_PREFIX = 'aoe2-custom-uu';
+const ACTIVE_MODE_KEY = 'aoe2-custom-uu-active-mode';
+const getStorageKey = (mode: string) => `${STORAGE_KEY_PREFIX}-${mode}`;
+
+// Helper function to get initial mode from localStorage or props
+const getInitialMode = (): 'demo' | 'build' | 'draft' => {
+  if (typeof window !== 'undefined' && props.showModeSelector) {
+    const savedMode = localStorage.getItem(ACTIVE_MODE_KEY);
+    if (savedMode === 'build' || savedMode === 'draft' || savedMode === 'demo') {
+      return savedMode;
+    }
+  }
+  return props.initialMode;
+};
+
+const initialMode = getInitialMode();
+
 const {
   customUnit,
   createCustomUnit,
@@ -650,14 +668,19 @@ const {
   setMode,
   getMaxStatValue,
   ARMOR_CLASS_NAMES
-} = useCustomUU(props.initialMode);
+} = useCustomUU(initialMode);
 
-// Set initial mode
-setMode(props.initialMode);
+// Set initial mode (this will be the restored mode if available)
+setMode(initialMode);
 
 const validationErrors = ref<any[]>([]);
-// Set compactMode to true by default for draft mode
-const compactMode = ref(props.initialMode === 'draft');
+// Set compactMode based on the actual initial mode (which may be restored from localStorage)
+const compactMode = ref(initialMode === 'draft');
+const isRestoring = ref(true); // Prevent autosave during initial load
+
+// Timeout tracking for proper cleanup
+const autosaveTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
+const restoreTimeout = ref<ReturnType<typeof setTimeout> | null>(null);
 
 const unitTypes = [
   {
@@ -848,6 +871,139 @@ const exportUnit = () => {
     alert('Unit JSON copied to clipboard!');
   }
 };
+
+// Autosave functionality
+const RESTORE_DELAY_MS = 100; // Delay after restore to prevent immediate autosave
+
+const saveToLocalStorage = () => {
+  if (typeof window === 'undefined' || isRestoring.value) return;
+  
+  // Don't clear storage during restore - only save if we have valid data
+  if (!customUnit.value) {
+    return;
+  }
+  
+  const saveData = {
+    unit: customUnit.value,
+    mode: editorMode.value,
+    compactMode: compactMode.value,
+    timestamp: Date.now()
+  };
+  
+  localStorage.setItem(getStorageKey(editorMode.value), JSON.stringify(saveData));
+  
+  // Also save which mode is currently active (only if mode selector is shown)
+  if (props.showModeSelector) {
+    localStorage.setItem(ACTIVE_MODE_KEY, editorMode.value);
+  }
+};
+
+const loadFromLocalStorage = () => {
+  if (typeof window === 'undefined') return;
+  
+  const storageKey = getStorageKey(editorMode.value);
+  const savedData = localStorage.getItem(storageKey);
+  
+  if (savedData) {
+    try {
+      const parsed = JSON.parse(savedData);
+      if (parsed.unit && parsed.mode === editorMode.value) {
+        customUnit.value = parsed.unit;
+        if (parsed.compactMode !== undefined) {
+          compactMode.value = parsed.compactMode;
+        }
+        onUnitChange();
+      }
+    } catch (e) {
+      console.error('Failed to load custom UU from localStorage:', e);
+      localStorage.removeItem(storageKey);
+    }
+  }
+};
+
+const clearLocalStorage = (mode: string) => {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(getStorageKey(mode));
+};
+
+// Debounced autosave to prevent performance issues
+const debouncedSave = () => {
+  if (autosaveTimeout.value) {
+    clearTimeout(autosaveTimeout.value);
+  }
+  autosaveTimeout.value = setTimeout(() => {
+    saveToLocalStorage();
+  }, 500); // 500ms debounce
+};
+
+// Watch for changes and autosave
+watch(() => customUnit.value, () => {
+  if (!isRestoring.value && customUnit.value) {
+    debouncedSave();
+  }
+}, { deep: true });
+
+watch(() => compactMode.value, () => {
+  if (!isRestoring.value) {
+    debouncedSave();
+  }
+});
+
+// Watch for mode changes
+watch(() => editorMode.value, (newMode, oldMode) => {
+  if (oldMode && newMode !== oldMode) {
+    // Clear any pending restore timeout
+    if (restoreTimeout.value) {
+      clearTimeout(restoreTimeout.value);
+      restoreTimeout.value = null;
+    }
+    
+    // Save current data before switching
+    if (customUnit.value) {
+      const saveData = {
+        unit: customUnit.value,
+        mode: oldMode,
+        compactMode: compactMode.value,
+        timestamp: Date.now()
+      };
+      localStorage.setItem(getStorageKey(oldMode), JSON.stringify(saveData));
+    }
+    
+    // Save the new active mode
+    if (props.showModeSelector) {
+      localStorage.setItem(ACTIVE_MODE_KEY, newMode);
+    }
+    
+    // Load data for new mode
+    isRestoring.value = true;
+    loadFromLocalStorage();
+    restoreTimeout.value = setTimeout(() => {
+      isRestoring.value = false;
+      restoreTimeout.value = null;
+    }, RESTORE_DELAY_MS);
+  }
+});
+
+// Initialize: load from localStorage on mount
+onMounted(() => {
+  loadFromLocalStorage();
+  restoreTimeout.value = setTimeout(() => {
+    isRestoring.value = false;
+    restoreTimeout.value = null;
+  }, RESTORE_DELAY_MS);
+});
+
+// Cleanup on unmount
+onUnmounted(() => {
+  if (autosaveTimeout.value) {
+    clearTimeout(autosaveTimeout.value);
+    autosaveTimeout.value = null;
+  }
+  if (restoreTimeout.value) {
+    clearTimeout(restoreTimeout.value);
+    restoreTimeout.value = null;
+  }
+});
 
 // Watch for initial load
 watch(() => customUnit.value, (newVal) => {

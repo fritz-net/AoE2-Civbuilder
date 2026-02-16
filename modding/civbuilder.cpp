@@ -4490,6 +4490,7 @@ void Civbuilder::createCivBonuses() {
     t.RequiredTechCount = 1;
     t.RequiredTechs.push_back(39);
     t.EffectID = (int)(this->df->Effects.size() - 1);
+    setResearchLocation(t, -1, 0, 0);
     this->df->Techs.push_back(t);
     this->civBonuses[CIV_BONUS_325_HUSBANDRY_AFFECTS_ATTACK_SPEED] = {(int)(this->df->Techs.size() - 1)};
 
