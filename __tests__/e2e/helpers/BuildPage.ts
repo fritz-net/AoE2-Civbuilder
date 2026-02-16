@@ -23,6 +23,14 @@ export class BuildPage extends BasePage {
   }
 
   /**
+   * Navigate to build page (override with default URL)
+   * Can be called with no arguments to go to /v2/build/
+   */
+  async goto(url: string = '/v2/build/'): Promise<void> {
+    await super.goto(url);
+  }
+
+  /**
    * Navigate to build page
    */
   async navigate(): Promise<void> {
