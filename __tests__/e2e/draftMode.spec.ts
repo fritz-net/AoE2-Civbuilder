@@ -479,7 +479,7 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     // Create simple 1-player draft with 1 bonus (matches working customUUDraft pattern)
     const result = await draftCreatePage.createDraft({
       numPlayers: 1,
-      bonuses: 1,
+      bonuses: 1, // 1 bonus round
       // make sure pasture is included
       requiredFirstRoll: '356', // 356 is ID of pasture bonus
     });
@@ -498,12 +498,12 @@ test.describe('Draft Mode - Pasture Bonus Detection', () => {
     const firstCardImgSrc = await firstCard.locator('img.card-image').getAttribute('src');
     expect(firstCardImgSrc).toContain('bonus_356'); // pasture bonus ID is 356
 
-    // select first card (which is pasture)
-    await playerPage.selectCards(1);
+    // Complete civ bonuses round (select first card which is pasture)
+    await playerPage.selectFirstCard();
     
-    // Select cards for all draft rounds (bonus, UU, castle tech, imperial tech, team bonus)
-    // selectCards will stop when no more cards available or tech tree phase reached
-    await playerPage.selectCards(7);
+    // Complete remaining card selection rounds (UU, Castle, Imperial, Team)
+    // With 1 bonus round, there are 4 more rounds to complete
+    await playerPage.selectCards(4);
     
     // Should reach tech tree phase after all card selections
     await playerPage.assertInTechTreePhase();
