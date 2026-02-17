@@ -124,7 +124,7 @@ branch name should start with "agent/123-description-of-task" where 123 is the c
     - wrong: https://github.com/user-attachments/assets/ribbon1-classic.png
     - good: https://github.com/user-attachments/assets/7091a86c-8cbf-4970-bccd-1c3fee4780fe
     - good: https://private-user-images.githubusercontent.com/122795841/518943158-75803498-1b92-4fce-9b8e-75e68400169c.png?jwt=...token... # gets replaced from former link
-- PR title should follow convetional commit style
+- PR title should follow conventional commit style
 
 ## git usage
 - create commits after each step/task
