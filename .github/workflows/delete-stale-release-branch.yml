@@ -1,0 +1,35 @@
+name: Delete Stale Release Please Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Branch name to delete (default: release-please--branches--main)'
+        required: false
+        default: 'release-please--branches--main'
+
+permissions:
+  contents: write
+
+jobs:
+  delete-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Delete branch
+        run: |
+          BRANCH="${{ github.event.inputs.branch_name }}"
+          echo "Attempting to delete branch: $BRANCH"
+          
+          # Check if branch exists
+          if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
+            echo "Branch $BRANCH exists, deleting..."
+            git push origin --delete "$BRANCH"
+            echo "✅ Branch $BRANCH deleted successfully"
+          else
+            echo "ℹ️  Branch $BRANCH does not exist or already deleted"
+          fi
