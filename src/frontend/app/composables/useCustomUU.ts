@@ -68,6 +68,8 @@ export interface BaseUnitOption {
   techtreeIconId?: number; // Unit ID for techtree icon
   range?: number; // Override default range for this base unit
   minRange?: number; // Override default min range for this base unit
+
+  // TODO use base cost, same base units need to incur cost because of passive effects
 }
 
 interface UnitTypeDefaults {
@@ -126,18 +128,36 @@ const UNIT_TYPE_DEFAULTS: Record<string, UnitTypeDefaults> = {
 
 const ARMOR_CLASS_NAMES: Record<number, string> = {
   1: 'Infantry',
-  3: 'Archers',
+  // 2 - Turtle ships
+  3: 'Base Pierce',
   4: 'Base Melee',
-  5: 'Cavalry',
-  8: 'Cavalry Archers',
-  11: 'Buildings',
-  13: 'Stone Buildings',
+  5: 'War Elephants',
+  8: 'Cavalry',
+
+  11: 'Buildings', // All Buildings (except Port)
+  13: 'Stone Buildings', // walls, gates, towers (not castles?)
+  //14: 'Predator Animals',
   15: 'Archers',
-  16: 'Ships',
-  19: 'Unique Units',
+  // 16 ships and saboteur
+  //17: 'Rams & Trebuchet & Siege Towers',
+  // 18 Trees
+  19: 'Unique Units', // except turtle shit
   20: 'Siege Weapons',
-  21: 'Buildings',
-  30: 'War Elephants'
+  21: 'Buildings', // 'Standard Buildings',
+  22: 'Walls & Gates',
+  23: 'Gunpowder Units',
+  //24: 'Hunted Predator Animals',
+  25: 'Monks',
+  26: 'Castle',
+  27: 'Spearman',
+  28: 'Cavalry Archers',
+  29: 'Eagle Warriors',
+  30: 'Camels',
+  //31: 'Leitis Attack',
+  32: 'Condottiero',
+  34: 'Fishing Ships',
+  35: 'Mamelukes',
+  36: 'Heros'
 };
 
 // Base unit options for each type with UU graphic IDs
@@ -149,7 +169,7 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
   infantry: [
     // simple units
     { id: 1699, name: 'Flemish Militia', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 1699 },
-    { id: 1697, name: 'Flemish Militia Female', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 1697 },
+    { id: 1697, name: 'Flemish Militia Female', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 1699 }, // we need to use the male icon since the female one is missing
 
     { id: 74, name: 'Militia Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 74 },
     { id: 75, name: 'Man-at-Arms', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 75 },
@@ -182,13 +202,15 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 692, name: 'Berserk', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 692 }, // elite=694
 
     // ranged melee uu based units
+    // TODO add allowed maxRange properties and adopt rule to directly use those in validation
     { id: 281, name: 'Throwing Axeman', type: 'infantry', isRanged: true, isMelee: true, range: 3, minRange: 0, uuGraphicId: 281 }, // Hybrid ranged+melee; elite=531
     { id: 1013, name: 'Gbeto', type: 'infantry', isRanged: true, isMelee: true, range: 5, minRange: 0, uuGraphicId: 1013 }, // Hybrid ranged+melee; elite=1015
-    
     { id: 879, name: 'Kamayuk', type: 'infantry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 879 }, // Hybrid ranged+melee (1 range); elit=881
 
-    // cheat based units
+    // cheat, campaign and scenario based units
     // 1145 ninja
+    // swiss pikeman
+    // flamethrower
   ],
   cavalry: [
     { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 6 },
@@ -457,7 +479,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
   const calculatePowerBudget = (unit: CustomUUData): number => {
     const basePoints: Record<string, number> = {
       infantry: 50,
-      cavalry: 65,
+      cavalry: 35, // Reduced from 65 to give cavalry +30 budget bonus (like hero mode: lower base = more budget)
       archer: 45,
       siege: 70
     };
@@ -536,14 +558,6 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     unit.attackBonuses.forEach(bonus => {
       points += (bonus.amount / 5) * 8;
     });
-    
-    // Cost adjustments: expensive units get points, cheap units cost points
-    const totalCost = unit.cost.food + unit.cost.wood + unit.cost.stone + unit.cost.gold;
-    const defaultCost = defaults.cost.food + defaults.cost.wood + defaults.cost.stone + defaults.cost.gold;
-    const costDiff = totalCost - defaultCost;
-    
-    // For every 10 resources above/below default, give/take 2 points
-    points += (costDiff / 10) * 2;
 
     return Math.round(points);
   };
@@ -558,10 +572,34 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     // Multipliers ensure that max-point heroes reach appropriate cost levels (400-600 range)
     if (unit.heroMode) {
       // Cavalry heroes get an extra multiplier to reach ~500-600 cost at max points
-      if (unit.unitType === 'cavalry') {
-        totalCost = Math.round(totalCost * 3.0); // Increased from 2.2x to 3.0x for proper scaling
-      } else {
-        totalCost = Math.round(totalCost * 2.5); // Increased from 1.8x to 2.5x
+      switch (unit.unitType) {
+        case 'infantry':
+          totalCost = Math.round(totalCost * 2.4);
+          break;
+        case 'cavalry':
+          totalCost = Math.round(totalCost * 3.0);
+          break;
+        case 'archer':
+          totalCost = Math.round(totalCost * 2.5);
+          break;
+        case 'siege':
+          totalCost = Math.round(totalCost * 4.0);
+          break;
+      }
+    } else {
+      switch (unit.unitType) {
+        case 'infantry':
+          totalCost = Math.round(totalCost * 1.2);
+          break;
+        case 'cavalry':
+          totalCost = Math.round(totalCost * 1.5);
+          break;
+        case 'archer':
+          totalCost = Math.round(totalCost * 1.25);
+          break;
+        case 'siege':
+          totalCost = Math.round(totalCost * 2.0);
+          break;
       }
     }
 
@@ -586,8 +624,10 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
 
     if (dist.resource === 'wood') {
       return { food: 0, wood: primaryCost, stone: 0, gold: secondaryCost };
-    } else {
+    } else if (dist.resource === 'food') {
       return { food: primaryCost, wood: 0, stone: 0, gold: secondaryCost };
+    } else {
+      throw new Error('Invalid resource distribution');
     }
   };
 
@@ -615,16 +655,26 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     return undefined;
   };
 
-  const getUnitIconUrl = (option: BaseUnitOption): string => {
-    if (option.uuGraphicId !== null) {
-      // Use UU graphics for unique units
-      return `/v2/img/unitgraphics/uu_${option.uuGraphicId}.jpg`;
-    } else if (option.techtreeIconId !== undefined) {
-      // Use techtree graphics for standard units
-      return `/v2/img/unitgraphics/${option.techtreeIconId}.jpg`;
+  // Accept either a BaseUnitOption or a numeric id (tests sometimes pass a number)
+  const getUnitIconUrl = (option: BaseUnitOption | number): string => {
+    let id: number | undefined;
+    if (typeof option === 'number') {
+      id = option;
+    } else {
+      if (option.uuGraphicId !== null && option.uuGraphicId !== undefined) {
+        id = option.uuGraphicId as number;
+      } else if (option.techtreeIconId !== undefined) {
+        id = option.techtreeIconId;
+      }
     }
-    // Fallback to generic icon
-    return `/v2/img/unitgraphics/uu_39.jpg`;
+
+    // Serve images from the techtree assets (public/aoe2techtree/img/Units)
+    if (id !== undefined && id !== null) {
+      return `/aoe2techtree/img/Units/${id}.jpg`;
+    }
+
+    // Fallback to a generic unit icon available in the techtree assets
+    return `/aoe2techtree/img/Units/unique_unit.jpg`;
   };
 
   const calculateEliteStats = (unit: CustomUUData): EliteStats => {

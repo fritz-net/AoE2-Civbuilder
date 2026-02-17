@@ -163,6 +163,7 @@ const testBonusesGrouped = [
       { id: 286, name: 'Can upgrade to Houfnice' },
       { id: 309, name: 'Can upgrade to Royal Battle Elephants' },
       { id: 310, name: 'Can upgrade to Royal Lancers' },
+      { id: 363, name: 'Can upgrade Paladin to Imperial Paladin' },
     ]
   },
   {
