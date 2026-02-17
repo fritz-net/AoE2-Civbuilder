@@ -39,6 +39,7 @@ export interface LaneRows {
   castle_2: Caret[]
   imperial_1: Caret[]
   imperial_2: Caret[]
+  imperial_3: Caret[]
 }
 
 export interface Lane {
@@ -58,6 +59,7 @@ export interface TreeOffsets {
   castle_2: number
   imperial_1: number
   imperial_2: number
+  imperial_3: number
 }
 
 export interface Tree {
@@ -268,6 +270,7 @@ export const ARCHITECTURE = 51
 export const TREADMILL_CRANE = 54
 export const WINGED_HUSSAR = 1707
 export const SAVAR = 1813
+export const IMPERIAL_PALADIN = 2615 // Note: Dynamically allocated in C++ (varies by dat file version)
 export const LEGIONARY = 1793
 export const FOLWARK = 1734
 export const FORTIFIED_CHURCH = 1806
