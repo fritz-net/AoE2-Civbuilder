@@ -19,12 +19,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Delete branch
         run: |
           BRANCH="${{ github.event.inputs.branch_name }}"
           echo "Attempting to delete branch: $BRANCH"
-          
+
           # Check if branch exists
           if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
             echo "Branch $BRANCH exists, deleting..."
