@@ -59,6 +59,7 @@
           <div class="advanced-options">
             <LanguageSelector v-model="civConfig.language" :disabled="readOnly" />
             <WonderSelector v-model="civConfig.wonder" :disabled="readOnly" />
+            <CastleSelector v-model="civConfig.castle" :disabled="readOnly" />
           </div>
         </div>
       </div>
