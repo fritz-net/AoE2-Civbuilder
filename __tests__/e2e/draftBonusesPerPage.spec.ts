@@ -112,25 +112,11 @@ test.describe('Draft Mode - Bonuses Per Page Setting', () => {
     // Set custom bonuses per page value
     await draftCreatePage.setBonusesPerPage(50);
     
-    // Create draft
     await draftCreatePage.clickStartDraft();
     
-    // Wait for modal or error
-    await page.waitForTimeout(2000);
-    
-    // Check if modal appeared (draft created successfully)
     const modal = page.locator('.modal-overlay');
-    const isModalVisible = await modal.isVisible().catch(() => false);
-    
-    if (isModalVisible) {
-      // Draft was created - we can't directly verify the backend value,
-      // but the fact that it created successfully means the value was sent
-      await expect(modal).toBeVisible();
-      await expect(page.getByRole('heading', { name: /Draft Created/i })).toBeVisible();
-    } else {
-      // Server not available - that's okay for this test
-      console.log('Server not available - skipping draft creation verification');
-    }
+    await expect(modal).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Draft Created/i })).toBeVisible();
   });
 });
 
@@ -153,18 +139,11 @@ test.describe('Draft Mode - Bonuses Per Page Backend Integration', () => {
     // Navigate to host page
     await page.goto(result.hostLink);
     
-    // Wait for page to load
-    await page.waitForTimeout(3000);
-    
     // Draft should load successfully with custom bonuses per page setting
     // We can't directly verify the number of cards yet, but the page should load
     const joinForm = page.locator('#playerName');
-    const isJoinFormVisible = await joinForm.isVisible().catch(() => false);
     
-    if (isJoinFormVisible) {
-      // Join form is showing - draft loaded successfully
-      await expect(joinForm).toBeVisible();
-    }
+    await expect(joinForm).toBeVisible();
   });
 });
 

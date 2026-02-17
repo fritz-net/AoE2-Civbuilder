@@ -68,6 +68,8 @@ export interface BaseUnitOption {
   techtreeIconId?: number; // Unit ID for techtree icon
   range?: number; // Override default range for this base unit
   minRange?: number; // Override default min range for this base unit
+
+  // TODO use base cost, same base units need to incur cost because of passive effects
 }
 
 interface UnitTypeDefaults {
@@ -126,18 +128,36 @@ const UNIT_TYPE_DEFAULTS: Record<string, UnitTypeDefaults> = {
 
 const ARMOR_CLASS_NAMES: Record<number, string> = {
   1: 'Infantry',
-  3: 'Archers',
+  // 2 - Turtle ships
+  3: 'Base Pierce',
   4: 'Base Melee',
-  5: 'Cavalry',
-  8: 'Cavalry Archers',
-  11: 'Buildings',
-  13: 'Stone Buildings',
+  5: 'War Elephants',
+  8: 'Cavalry',
+
+  11: 'Buildings', // All Buildings (except Port)
+  13: 'Stone Buildings', // walls, gates, towers (not castles?)
+  //14: 'Predator Animals',
   15: 'Archers',
-  16: 'Ships',
-  19: 'Unique Units',
+  // 16 ships and saboteur
+  //17: 'Rams & Trebuchet & Siege Towers',
+  // 18 Trees
+  19: 'Unique Units', // except turtle shit
   20: 'Siege Weapons',
-  21: 'Buildings',
-  30: 'War Elephants'
+  21: 'Buildings', // 'Standard Buildings',
+  22: 'Walls & Gates',
+  23: 'Gunpowder Units',
+  //24: 'Hunted Predator Animals',
+  25: 'Monks',
+  26: 'Castle',
+  27: 'Spearman',
+  28: 'Cavalry Archers',
+  29: 'Eagle Warriors',
+  30: 'Camels',
+  //31: 'Leitis Attack',
+  32: 'Condottiero',
+  34: 'Fishing Ships',
+  35: 'Mamelukes',
+  36: 'Heros'
 };
 
 // Base unit options for each type with UU graphic IDs
@@ -147,19 +167,50 @@ const ARMOR_CLASS_NAMES: Record<number, string> = {
 // 6=Cataphract, 7=Chu Ko Nu, 8=Mameluke, 9=Janissary, 10=War Wagon, 11=Mangudai, etc.
 const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
   infantry: [
-    { id: 1067, name: 'Jaguar Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 14 },
-    { id: 1723, name: 'Teutonic Knight', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 3 },
-    { id: 1570, name: 'Woad Raider', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 12 },
-    { id: 1145, name: 'Huskarl', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 2 },
-    { id: 1306, name: 'Samurai', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 4 },
-    { id: 1317, name: 'Berserk', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 13 },
-    { id: 1645, name: 'Throwing Axeman', type: 'infantry', isRanged: true, isMelee: true, range: 3, minRange: 0, uuGraphicId: 16 }, // Hybrid ranged+melee
-    { id: 1009, name: 'Gbeto', type: 'infantry', isRanged: true, isMelee: true, range: 5, minRange: 0, uuGraphicId: 53 }, // Hybrid ranged+melee
-    { id: 1800, name: 'Kamayuk', type: 'infantry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 55 }, // Hybrid ranged+melee (1 range)
-    { id: 75, name: 'Militia Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 75 },
+    // simple units
+    { id: 1699, name: 'Flemish Militia', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 1699 },
+    { id: 1697, name: 'Flemish Militia Female', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 1699 }, // we need to use the male icon since the female one is missing
+
+    { id: 74, name: 'Militia Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 74 },
+    { id: 75, name: 'Man-at-Arms', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 75 },
+    { id: 77, name: 'Longswordman', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 77 },
+    { id: 473, name: 'Two-Handed Swordsman', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 473 },
+    { id: 567, name: 'Champion', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 567 },
+    
     { id: 93, name: 'Spearman Line', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 93 },
-    { id: 473, name: 'Champion', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 473 },
-    { id: 555, name: 'Halberdier', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 555 },
+    { id: 358, name: 'Pikeman', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 358 },
+    { id: 359, name: 'Halberdier', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 359 },
+
+    { id: 751, name: 'Eagle Scout', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 751 },
+    { id: 753, name: 'Eagle Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 753 },
+    { id: 752, name: 'Elite Eagle Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 752 },
+
+    // uu based units
+    { id: 725, name: 'Jaguar Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 725 }, // elite is 725 in web techtree; 1067=Itzcoat
+    { id: 232, name: 'Woad Raider', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 534 }, // elite=534
+    { id: 41, name: 'Huskarl', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 41 }, // elite=555
+    { id: 291, name: 'Samurai', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 291 }, // elite=560
+    { id: 1735, name: 'Urumi Swordsman', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1735 }, // elite=1737
+    { id: 1016, name: 'Shotel Warrior', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1016 }, // elite=1018
+    { id: 1747, name: 'Ghulam', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1747 }, // elite=1749
+    { id: 1920, name: 'Liao Dao', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1920 }, // elite=1922
+    { id: 1123, name: 'Karambit', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1123 }, // elite=1125
+    { id: 1701, name: 'Obuch', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1701 }, // elite=1703
+    { id: 1959, name: 'White Feather Guard', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1959 }, // elite=1961
+    { id: 1658, name: 'Serjeant', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 1658 }, // elite=1659
+    { id: 25, name: 'Teutonic Knight', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 25 }, // elite = 554
+    { id: 692, name: 'Berserk', type: 'infantry', isRanged: false, isMelee: true, uuGraphicId: 692 }, // elite=694
+
+    // ranged melee uu based units
+    // TODO add allowed maxRange properties and adopt rule to directly use those in validation
+    { id: 281, name: 'Throwing Axeman', type: 'infantry', isRanged: true, isMelee: true, range: 3, minRange: 0, uuGraphicId: 281 }, // Hybrid ranged+melee; elite=531
+    { id: 1013, name: 'Gbeto', type: 'infantry', isRanged: true, isMelee: true, range: 5, minRange: 0, uuGraphicId: 1013 }, // Hybrid ranged+melee; elite=1015
+    { id: 879, name: 'Kamayuk', type: 'infantry', isRanged: true, isMelee: true, range: 1, minRange: 0, uuGraphicId: 879 }, // Hybrid ranged+melee (1 range); elit=881
+
+    // cheat, campaign and scenario based units
+    // 1145 ninja
+    // swiss pikeman
+    // flamethrower
   ],
   cavalry: [
     { id: 1281, name: 'Cataphract', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: 6 },
@@ -172,6 +223,10 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 207, name: 'Camel Line', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 207 },
     { id: 546, name: 'Light Cavalry', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 546 },
     { id: 441, name: 'Hussar', type: 'cavalry', isRanged: false, isMelee: true, uuGraphicId: null, techtreeIconId: 441 },
+
+    // 1723 crusader knight
+    // 1570 xolotl Warrior
+
   ],
   archer: [
     { id: 873, name: 'Longbowman', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: 0 },
@@ -182,9 +237,11 @@ const BASE_UNIT_OPTIONS: Record<string, BaseUnitOption[]> = {
     { id: 5, name: 'Archer Line', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 5 },
     { id: 24, name: 'Crossbowman', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 24 },
     { id: 943, name: 'Cavalry Archer', type: 'archer', isRanged: true, isMelee: false, uuGraphicId: null, techtreeIconId: 943 },
+
+    // 1800=Composite Bowman
   ],
   siege: [
-    { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, isMelee: false, range: 6, minRange: 1, uuGraphicId: 10 },
+    { id: 1699, name: 'War Wagon', type: 'siege', isRanged: true, isMelee: false, range: 6, minRange: 1, uuGraphicId: 10 }, // currently shows berserk, in game its felmish militia
     { id: 280, name: 'Mangonel Line', type: 'siege', isRanged: true, isMelee: false, range: 7, minRange: 3, uuGraphicId: null, techtreeIconId: 280 },
     { id: 279, name: 'Scorpion', type: 'siege', isRanged: true, isMelee: false, range: 5, minRange: 1, uuGraphicId: null, techtreeIconId: 279 },
     { id: 36, name: 'Bombard Cannon', type: 'siege', isRanged: true, isMelee: false, range: 12, minRange: 5, uuGraphicId: null, techtreeIconId: 36 },
@@ -422,7 +479,7 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
   const calculatePowerBudget = (unit: CustomUUData): number => {
     const basePoints: Record<string, number> = {
       infantry: 50,
-      cavalry: 65,
+      cavalry: 35, // Reduced from 65 to give cavalry +30 budget bonus (like hero mode: lower base = more budget)
       archer: 45,
       siege: 70
     };
@@ -501,14 +558,6 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     unit.attackBonuses.forEach(bonus => {
       points += (bonus.amount / 5) * 8;
     });
-    
-    // Cost adjustments: expensive units get points, cheap units cost points
-    const totalCost = unit.cost.food + unit.cost.wood + unit.cost.stone + unit.cost.gold;
-    const defaultCost = defaults.cost.food + defaults.cost.wood + defaults.cost.stone + defaults.cost.gold;
-    const costDiff = totalCost - defaultCost;
-    
-    // For every 10 resources above/below default, give/take 2 points
-    points += (costDiff / 10) * 2;
 
     return Math.round(points);
   };
@@ -523,10 +572,34 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     // Multipliers ensure that max-point heroes reach appropriate cost levels (400-600 range)
     if (unit.heroMode) {
       // Cavalry heroes get an extra multiplier to reach ~500-600 cost at max points
-      if (unit.unitType === 'cavalry') {
-        totalCost = Math.round(totalCost * 3.0); // Increased from 2.2x to 3.0x for proper scaling
-      } else {
-        totalCost = Math.round(totalCost * 2.5); // Increased from 1.8x to 2.5x
+      switch (unit.unitType) {
+        case 'infantry':
+          totalCost = Math.round(totalCost * 2.4);
+          break;
+        case 'cavalry':
+          totalCost = Math.round(totalCost * 3.0);
+          break;
+        case 'archer':
+          totalCost = Math.round(totalCost * 2.5);
+          break;
+        case 'siege':
+          totalCost = Math.round(totalCost * 4.0);
+          break;
+      }
+    } else {
+      switch (unit.unitType) {
+        case 'infantry':
+          totalCost = Math.round(totalCost * 1.2);
+          break;
+        case 'cavalry':
+          totalCost = Math.round(totalCost * 1.5);
+          break;
+        case 'archer':
+          totalCost = Math.round(totalCost * 1.25);
+          break;
+        case 'siege':
+          totalCost = Math.round(totalCost * 2.0);
+          break;
       }
     }
 
@@ -551,8 +624,10 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
 
     if (dist.resource === 'wood') {
       return { food: 0, wood: primaryCost, stone: 0, gold: secondaryCost };
-    } else {
+    } else if (dist.resource === 'food') {
       return { food: primaryCost, wood: 0, stone: 0, gold: secondaryCost };
+    } else {
+      throw new Error('Invalid resource distribution');
     }
   };
 
@@ -580,16 +655,26 @@ export function useCustomUU(initialMode: EditorMode = 'demo') {
     return undefined;
   };
 
-  const getUnitIconUrl = (option: BaseUnitOption): string => {
-    if (option.uuGraphicId !== null) {
-      // Use UU graphics for unique units
-      return `/v2/img/unitgraphics/uu_${option.uuGraphicId}.jpg`;
-    } else if (option.techtreeIconId !== undefined) {
-      // Use techtree graphics for standard units
-      return `/v2/img/unitgraphics/${option.techtreeIconId}.jpg`;
+  // Accept either a BaseUnitOption or a numeric id (tests sometimes pass a number)
+  const getUnitIconUrl = (option: BaseUnitOption | number): string => {
+    let id: number | undefined;
+    if (typeof option === 'number') {
+      id = option;
+    } else {
+      if (option.uuGraphicId !== null && option.uuGraphicId !== undefined) {
+        id = option.uuGraphicId as number;
+      } else if (option.techtreeIconId !== undefined) {
+        id = option.techtreeIconId;
+      }
     }
-    // Fallback to generic icon
-    return `/v2/img/unitgraphics/uu_39.jpg`;
+
+    // Serve images from the techtree assets (public/aoe2techtree/img/Units)
+    if (id !== undefined && id !== null) {
+      return `/aoe2techtree/img/Units/${id}.jpg`;
+    }
+
+    // Fallback to a generic unit icon available in the techtree assets
+    return `/aoe2techtree/img/Units/unique_unit.jpg`;
   };
 
   const calculateEliteStats = (unit: CustomUUData): EliteStats => {

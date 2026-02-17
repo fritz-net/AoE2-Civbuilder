@@ -1138,9 +1138,21 @@ function updateTimerRemaining(draft) {
 }
 
 // Helper function to determine current player's turn based on round type
+function getBaseRoundType(draft) {
+	var numPlayers = draft["preset"]["slots"];
+	return Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
+}
+
 function getCurrentPlayer(draft) {
 	var numPlayers = draft["preset"]["slots"];
-	var roundType = Math.max(Math.floor(draft["gamestate"]["turn"] / numPlayers) - (draft["preset"]["rounds"] - 1), 0);
+	var baseRoundType = getBaseRoundType(draft);
+	
+	// If custom UU mode is enabled and we would be in roundType 1 (UU selection),
+	// skip to roundType 2 (castle techs) instead
+	var roundType = (draft["preset"]["custom_uu_mode"] && baseRoundType >= 1) 
+		? baseRoundType + 1 
+		: baseRoundType;
+	
 	var turnModPlayers = draft["gamestate"]["turn"] % numPlayers;
 	var player = draft["gamestate"]["order"][turnModPlayers];
 	
@@ -1154,7 +1166,13 @@ function getCurrentPlayer(draft) {
 		}
 	} else {
 		// Legacy mode: only reverse on specific round types
-		if (roundType == 2 || roundType == 4) {
+		// Adjust for shifted round types when custom UU mode is active
+		var CASTLE_ROUND_TYPE = 2;
+		var IMPERIAL_ROUND_TYPE = 4;
+		var reverseRoundTypes = draft["preset"]["custom_uu_mode"] 
+			? [CASTLE_ROUND_TYPE + 1, IMPERIAL_ROUND_TYPE + 1] 
+			: [CASTLE_ROUND_TYPE, IMPERIAL_ROUND_TYPE];
+		if (reverseRoundTypes.indexOf(roundType) !== -1) {
 			player = draft["gamestate"]["order"][numPlayers - 1 - turnModPlayers];
 		}
 	}
@@ -1173,29 +1191,38 @@ function processCardPick(draft, pick) {
 	
 	// If it's the last turn of a round, distribute new cards, otherwise make the card unavailable to others
 	if ((roundType > 0 || Math.floor(draft["gamestate"]["turn"] / numPlayers) == draft["preset"]["rounds"] - 1) && draft["gamestate"]["turn"] % numPlayers == numPlayers - 1) {
-		if (roundType == 4) {
-			// Last turn of the game - check if custom UU mode is enabled
-			if (draft["preset"]["custom_uu_mode"]) {
-				// Move to custom UU design phase after bonus selection
-				draft["gamestate"]["custom_uu_phase"] = true;
-				for (var i = 0; i < numPlayers; i++) {
-					draft["players"][i]["ready"] = 0;
-				}
-				console.log("Moving to custom UU design phase after bonus selection");
-			} else {
-				// Normal flow: move to tech tree phase
-				draft["gamestate"]["phase"] = 3;
+		// Determine if this is the last round (team bonuses)
+		// Use the shared helper to calculate base round type
+		var baseRoundType = getBaseRoundType(draft);
+		
+		// In custom UU mode, we skip one round (UU selection), so the last round happens at baseRoundType 3
+		// In normal mode, the last round is at baseRoundType 4
+		var lastBaseRoundType = draft["preset"]["custom_uu_mode"] ? 3 : 4;
+		
+		if (baseRoundType == lastBaseRoundType) {
+			// Last turn of the game - move to tech tree phase
+			draft["gamestate"]["phase"] = 3;
+		} else if (roundType == 0 && draft["preset"]["custom_uu_mode"]) {
+			// After civ bonuses (round 0), enter custom UU design phase if enabled
+			draft["gamestate"]["custom_uu_phase"] = true;
+			for (var i = 0; i < numPlayers; i++) {
+				draft["players"][i]["ready"] = 0;
 			}
+			console.log("Moving to custom UU design phase after civ bonuses");
 		} else {
 			draft["gamestate"]["cards"] = [];
 			// Use configurable bonuses_per_page, default to 30 for backward compatibility
 			var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
 			// For subsequent rounds after first, use a smaller base value (2/3 of bonuses_per_page rounded down)
 			var subsequentBase = Math.floor(bonusesPerPage * 2 / 3);
+			
+			// Next round type is simply current + 1 (shifting is handled in getCurrentPlayer)
+			var nextRoundType = roundType + 1;
+			
 			for (var i = 0; i < 2 * numPlayers + subsequentBase; i++) {
-				var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][roundType + 1].length);
-				draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][roundType + 1][rand]);
-				draft["gamestate"]["available_cards"][roundType + 1].splice(rand, 1);
+				var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][nextRoundType].length);
+				draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][nextRoundType][rand]);
+				draft["gamestate"]["available_cards"][nextRoundType].splice(rand, 1);
 			}
 		}
 	} else {
@@ -1519,6 +1546,11 @@ function draftIO(io) {
 						mod_data.language = [];
 						mod_data.castle = [];
 						mod_data.wonder = [];
+						// Array to store custom UU data for each player
+						// Each entry is either null (regular UU or no UU) or a custom UU object
+						// Custom UU objects have: type, unitType, baseUnit, name, health, attack, armor, speed, etc.
+						// This array parallels the players array and is used by the C++ mod builder
+						mod_data.custom_units = [];
 						mod_data.modifiers = {
 							randomCosts: false,
 							hp: 1,
@@ -1539,10 +1571,24 @@ function draftIO(io) {
 							mod_data.description.push(draft["players"][i]["description"]);
 							mod_data.castle.push(draft["players"][i]["castle"]);
 							mod_data.wonder.push(draft["players"][i]["wonder"]);
-							//Unique Unit
+							//Unique Unit - check if it's a custom UU or regular UU
+							var customUUForPlayer = null;
 							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][1] && draft["players"][i]["bonuses"][1][0] !== undefined) {
-								player_techtree[0] = extractBonusId(draft["players"][i]["bonuses"][1][0], "unique unit");
+								var uuData = draft["players"][i]["bonuses"][1][0];
+								// Check if this is a custom UU object (has type: 'custom')
+								if (typeof uuData === 'object' && uuData !== null && uuData.type === 'custom') {
+									// It's a custom UU - store it separately and don't add to techtree
+									customUUForPlayer = uuData;
+									console.log(`[${draft["id"]}]: Player ${i} has custom UU: ${uuData.name}`);
+									// Set techtree[0] to 0 (no unique unit in traditional sense)
+									player_techtree[0] = 0;
+								} else {
+									// Regular unique unit - extract the ID
+									player_techtree[0] = extractBonusId(uuData, "unique unit");
+								}
 							}
+							// Store custom UU (or null if player doesn't have one)
+							mod_data.custom_units.push(customUUForPlayer);
 							//Castle Tech
 							var castletechs = [];
 							if (draft["players"][i]["bonuses"] && draft["players"][i]["bonuses"][2] && draft["players"][i]["bonuses"][2][0] !== undefined) {
@@ -1595,38 +1641,42 @@ function draftIO(io) {
 							for (var i = 0; i < blanks.length; i++) {
 								osUtil.execCommand(`cp ./public/img/uniticons/blank.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${blanks[i]}_50730.png`, function () {});
 							}
+							
+							// Process unique unit icons
+							var iconCopyNeeded = false;
+							var lastIconIndex = -1;
+							
+							// First, determine if any icon copying is needed and find the last valid index
 							for (var i = 0; i < mod_data.techtree.length; i++) {
 								var unitId = mod_data.techtree[i][0];
 								
-								// Validate that unitId is defined and within valid range
-								if (unitId === undefined || unitId === null) {
-									console.error(`[${draft["id"]}]: Warning - Unit ID is undefined for civ techtree index ${i}`);
+								// Skip icon copying for custom UUs (unitId will be 0)
+								if (mod_data.custom_units && mod_data.custom_units[i] !== null && mod_data.custom_units[i] !== undefined) {
 									continue;
 								}
 								
-								var iconsrc = iconids[unitId];
-								
-								// Validate that icon source exists
-								if (iconsrc === undefined) {
-									console.error(`[${draft["id"]}]: Warning - No icon found for unit ID ${unitId} at techtree index ${i}`);
-									continue;
+								// Check if this unit needs icon copying
+								if (unitId && unitId !== 0 && iconids[unitId] !== undefined) {
+									iconCopyNeeded = true;
+									lastIconIndex = i;
 								}
-								
-								if (i == mod_data.techtree.length - 1) {
-									osUtil.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {
-										//Write Tech Tree
-										createTechtreeJson.createTechtreeJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civTechTrees.json`);
-										createCivilizationsJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civilizations.json`);
-										//Add voices
-										let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ./public/vanillaFiles/voiceFiles`;
-										let uniqueLanguages = [];
-										for (var i = 0; i < mod_data.language.length; i++) {
-											if (uniqueLanguages.indexOf(mod_data.language[i]) == -1) {
-												uniqueLanguages.push(mod_data.language[i]);
-												command += ` ${mod_data.language[i]}`;
-											}
-										}
-										osUtil.execCommand(command, function () {
+							}
+							
+							// Function to continue after icon copying (or immediately if no icons needed)
+							var continueToTechTree = function() {
+								//Write Tech Tree
+								createTechtreeJson.createTechtreeJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civTechTrees.json`);
+								createCivilizationsJson(`./modding/requested_mods/${draft["id"]}/data.json`, `./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/civilizations.json`);
+								//Add voices
+								let command = `sh ./process_mod/copyVoices.sh ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/drs/sounds ./public/vanillaFiles/voiceFiles`;
+								let uniqueLanguages = [];
+								for (var i = 0; i < mod_data.language.length; i++) {
+									if (uniqueLanguages.indexOf(mod_data.language[i]) == -1) {
+										uniqueLanguages.push(mod_data.language[i]);
+										command += ` ${mod_data.language[i]}`;
+									}
+								}
+								osUtil.execCommand(command, function () {
 											//Write Dat File
 											osUtil.execCommand(`./modding/build/create-data-mod ./modding/requested_mods/${draft["id"]}/data.json ./public/vanillaFiles/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-data/resources/_common/dat/empires2_x2_p1.dat ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/ai/aiconfig.json`, function () {
 												// Copy JSON files to mod folder for user reference
@@ -1680,9 +1730,45 @@ function draftIO(io) {
 												});
 											});
 										});
-									});
-								} else {
-									osUtil.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {});
+									};
+							
+							// If no icons need to be copied, proceed directly
+							if (!iconCopyNeeded) {
+								console.log(`[${draft["id"]}]: No unique unit icons to copy (all players have custom UUs or no UUs)`);
+								continueToTechTree();
+							} else {
+								// Copy icons for players with regular (non-custom) unique units
+								for (var i = 0; i < mod_data.techtree.length; i++) {
+									var unitId = mod_data.techtree[i][0];
+									
+									// Skip icon copying for custom UUs
+									if (mod_data.custom_units && mod_data.custom_units[i] !== null && mod_data.custom_units[i] !== undefined) {
+										console.log(`[${draft["id"]}]: Skipping icon copy for player ${i} (has custom UU: ${mod_data.custom_units[i].name})`);
+										continue;
+									}
+									
+									// Skip if no unit or unitId is invalid
+									if (!unitId || unitId === 0) {
+										console.log(`[${draft["id"]}]: No unique unit for player ${i}`);
+										continue;
+									}
+									
+									var iconsrc = iconids[unitId];
+									
+									// Validate that icon source exists
+									if (iconsrc === undefined) {
+										console.error(`[${draft["id"]}]: Warning - No icon found for unit ID ${unitId} at techtree index ${i}`);
+										continue;
+									}
+									
+									// Copy the icon, and if this is the last one, continue to tech tree
+									if (i == lastIconIndex) {
+										osUtil.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {
+											continueToTechTree();
+										});
+									} else {
+										osUtil.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${draft["id"]}/${draft["id"]}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {});
+									}
 								}
 							}
 						});
@@ -1968,6 +2054,9 @@ function draftIO(io) {
 			draft["players"][playerNumber]["custom_uu"] = customUU;
 			draft["players"][playerNumber]["ready"] = 1;
 			
+			// Also store in bonuses[1] array (unique unit slot) as an object
+			draft["players"][playerNumber]["bonuses"][1] = [customUU];
+			
 			console.log(`Player ${playerNumber} submitted custom UU: ${customUU.name}`);
 			
 			// Save draft state
@@ -1990,13 +2079,24 @@ function draftIO(io) {
 			
 			// If all players submitted, move to next phase
 			if (allSubmitted) {
-				console.log("All players submitted custom UUs, advancing to tech tree phase");
-				// Move to phase 3 (tech tree)
-				draft["gamestate"]["phase"] = 3;
+				console.log("All players submitted custom UUs, continuing with castle techs round");
+				// Exit custom UU phase and continue with draft phase 2
 				draft["gamestate"]["custom_uu_phase"] = false;
 				
-				// Reset ready flags for tech tree phase
-				for (var i = 0; i < draft["preset"]["slots"]; i++) {
+				// Distribute castle tech cards (roundType 2)
+				draft["gamestate"]["cards"] = [];
+				var bonusesPerPage = draft["preset"]["bonuses_per_page"] !== undefined ? draft["preset"]["bonuses_per_page"] : 30;
+				var subsequentBase = Math.floor(bonusesPerPage * 2 / 3);
+				var numPlayers = draft["preset"]["slots"];
+				
+				for (var i = 0; i < 2 * numPlayers + subsequentBase; i++) {
+					var rand = Math.floor(Math.random() * draft["gamestate"]["available_cards"][2].length);
+					draft["gamestate"]["cards"].push(draft["gamestate"]["available_cards"][2][rand]);
+					draft["gamestate"]["available_cards"][2].splice(rand, 1);
+				}
+				
+				// Reset ready flags for next draft round
+				for (var i = 0; i < numPlayers; i++) {
 					draft["players"][i]["ready"] = 0;
 				}
 				

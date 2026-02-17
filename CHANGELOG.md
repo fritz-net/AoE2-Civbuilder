@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.12.1...v1.13.0) (2026-01-06)
+
+
+### Features
+
+* /v2 techtree in web now correctus shows civ boni ([#247](https://github.com/fritz-net/AoE2-Civbuilder/issues/247)) ([ca0e316](https://github.com/fritz-net/AoE2-Civbuilder/commit/ca0e316a83ab57ffa47c321f5ec4fdcae8b68269))
+* Implement mod ingame techtree generation for pastures, royal units, and all "can train/recruit/... *" bonuses ([#218](https://github.com/fritz-net/AoE2-Civbuilder/issues/218)) ([af81815](https://github.com/fritz-net/AoE2-Civbuilder/commit/af81815b250887ca667d0eaeee6ccec062a17647))
+
+
+### Bug Fixes
+
+* custom UU phase placement, mod generation, C++ unit creation ([#243](https://github.com/fritz-net/AoE2-Civbuilder/issues/243)) ([8d33ac2](https://github.com/fritz-net/AoE2-Civbuilder/commit/8d33ac235a88d106dbf827b391f6e7633921e7b0))
+
 ## [1.12.1](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.12.0...v1.12.1) (2026-01-05)
 
 

@@ -89,6 +89,10 @@ __tests__/e2e/
 │   ├── BasePage.ts              # Base page object class
 │   ├── DraftCreatePage.ts       # Draft creation page object
 │   ├── DraftHostPage.ts         # Draft host page object
+│   ├── DraftPlayerPage.ts       # Draft player interactions page object
+│   ├── CustomUUEditorPage.ts    # Custom UU editor page object
+│   ├── TechTreeDemoPage.ts      # Tech tree demo page object
+│   ├── CombinePage.ts           # Combine page object
 │   ├── TestHelpers.ts           # Utility helper classes
 │   └── draftHelpers.ts          # Legacy helpers (backward compatible)
 ├── techtree.spec.ts             # Tech tree functionality tests
@@ -97,6 +101,7 @@ __tests__/e2e/
 ├── draftFlow.spec.ts            # Complete draft flow tests
 ├── draftTimer.spec.ts           # Draft timer tests
 ├── customUUEditor.spec.ts       # Custom UU editor tests
+├── customUUDraft.spec.ts        # Custom UU draft integration tests
 └── updatesPage.spec.ts          # Updates page tests
 ```
 
@@ -306,8 +311,32 @@ Key settings:
    - Clean up after tests when necessary
 
 5. **Use consistent waiting strategies**
-   - Use `WaitHelper` for consistent timeouts
-   - Avoid arbitrary `waitForTimeout` calls
+   - Rely on global timeout settings from `playwright.config.ts`
+   - Use Playwright's built-in waiting mechanisms (e.g., `toBeVisible()`, `toBeEnabled()`)
+   - Avoid arbitrary `waitForTimeout` calls - use element state checks instead
+   - Maximum timeout for most operations: 2 seconds
+   - Exception: Mod generation download phase can take up to 30 seconds in CI environments
+
+6. **Never use `.catch(() => false)` or similar patterns**
+   - Do not swallow errors to create conditional test logic
+   - Tests should fail clearly when elements are not found
+   - Avoid code branches that exit real testing based on element existence
+   - Use proper assertions that will fail the test if conditions aren't met
+   - **Exception**: Try-catch is acceptable for truly optional UI elements (e.g., confirmation modals that only appear in certain configurations)
+   - When using try-catch for optional elements, include a comment explaining why the element is optional
+   - Example of what NOT to do:
+     ```typescript
+     // ❌ BAD - exits real testing if element not found
+     const isVisible = await element.isVisible().catch(() => false);
+     if (isVisible) {
+       // test continues
+     } else {
+       // test silently passes or branches away
+     }
+     
+     // ✅ GOOD - test fails if element not found
+     await expect(element).toBeVisible();
+     ```
 
 ## Benefits of This Architecture
 

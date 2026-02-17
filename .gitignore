@@ -36,3 +36,5 @@ src/frontend/dist
 # Playwright test results
 test-results/
 playwright-report/
+*.o
+server.log

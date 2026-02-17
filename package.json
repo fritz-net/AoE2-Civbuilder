@@ -3,9 +3,9 @@
     "test": "jest --verbose",
     "test:watch": "jest --watch",
     "pretest:e2e": "npm run build:nuxt",
-    "test:e2e": "playwright test",
-    "test:e2e:headed": "playwright test --headed",
-    "test:e2e:ui": "playwright test --ui",
+    "test:e2e": "npx playwright test",
+    "test:e2e:headed": "npx playwright test --headed",
+    "test:e2e:ui": "npx playwright test --ui",
     "build:nuxt": "cd src/frontend && npm ci && npm run generate",
     "dev:nuxt": "cd src/frontend && npm run dev",
     "start": "node server.js"
@@ -23,18 +23,18 @@
     "maxConcurrency": 12
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "body-parser": "^1.19.0",
-    "canvas": "^2.11.2",
+    "axios": "^0.30.2",
+    "body-parser": "^1.20.4",
     "cookie-parser": "^1.4.6",
-    "express": "^4.17.1",
+    "express": "^4.22.1",
     "express-easy-zip": "^1.1.5",
+    "pngjs": "^7.0.0",
     "pug": "^3.0.2",
     "socket.io": "^4.0.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
+    "@playwright/test": "^1.58.2",
     "jest": "^29.7.0",
-    "playwright": "^1.57.0"
+    "playwright": "^1.58.2"
   }
 }

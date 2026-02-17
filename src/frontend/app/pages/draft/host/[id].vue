@@ -51,6 +51,7 @@
             <ArchitectureSelector v-model="civConfig.architecture" class="selector-spacing" />
             <LanguageSelector v-model="civConfig.language" class="selector-spacing" />
             <WonderSelector v-model="civConfig.wonder" class="selector-spacing" />
+            <CastleSelector v-model="civConfig.castle" class="selector-spacing" />
             
             <div class="civ-name-input">
               <label for="civName">Civilization Name</label>
@@ -191,7 +192,7 @@
           :points="techTreePoints"
           :editable="true"
           :relative-path="techtreePath"
-          :show-pastures="showPasturesInTechtree"
+          :selected-bonuses="selectedBonusesForTechtree"
           :sidebar-content="sidebarContent"
           :sidebar-title="sidebarTitle"
           mode="draft"
@@ -336,6 +337,7 @@ const {
   resumeTimer,
   notifyTimerExpired,
   syncTimer,
+  submitCustomUU,
   setupSocketListeners,
   cleanup,
 } = useDraft()
@@ -388,10 +390,20 @@ const isValidCustomUU = computed(() => {
   return customUU.value !== null && customUUValidationErrors.value.length === 0
 })
 
-const showPasturesInTechtree = computed(() => {
-  // Check if PASTURES_BONUS_ID is selected in civ bonuses (bonuses[0] array)
-  if (!currentPlayer.value?.bonuses?.[0]) return false
-  return currentPlayer.value.bonuses[0].includes(PASTURES_BONUS_ID)
+// Convert draft bonuses format to TechTree selectedBonuses format
+const selectedBonusesForTechtree = computed(() => {
+  if (!currentPlayer.value?.bonuses) {
+    return { civ: [], uu: [], castle: [], imp: [], team: [] }
+  }
+  
+  const bonuses = currentPlayer.value.bonuses
+  return {
+    civ: bonuses[0] || [],
+    uu: bonuses[1] || [],
+    castle: bonuses[2] || [],
+    imp: bonuses[3] || [],
+    team: bonuses[4] || []
+  }
 })
 
 // Generate sidebar HTML content from player's selected bonuses
@@ -716,32 +728,8 @@ const handleSubmitCustomUU = async () => {
   isSubmittingUU.value = true
   
   try {
-    // Get socket from draft state
-    const socket = initSocket()
-    if (!socket) {
-      throw new Error('Socket not available')
-    }
-    
-    // Emit submit event to server
-    socket.emit('submit custom uu', draftId.value, playerNumber.value, customUU.value)
-    
-    // Wait for confirmation from server
-    await new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('Submission timeout'))
-      }, 10000)
-      
-      socket.once('custom uu submitted', () => {
-        clearTimeout(timeout)
-        resolve()
-      })
-      
-      socket.once('error', (err: any) => {
-        clearTimeout(timeout)
-        reject(err)
-      })
-    })
-    
+    // Use the submitCustomUU function from the composable
+    await submitCustomUU(playerNumber.value, customUU.value)
     console.log('Custom UU submitted successfully')
   } catch (err) {
     console.error('Failed to submit custom UU:', err)

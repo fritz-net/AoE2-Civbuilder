@@ -39,6 +39,8 @@ class Civbuilder {
     int vilspear = -1;
     int vilpike = -1;
     int vilhalb = -1;
+    
+    int imperialPaladinID = -1;  // Dynamically allocated unit ID for Imperial Paladin
 
     int numPlayerCivs;
 
@@ -75,6 +77,7 @@ class Civbuilder {
     void createCivBonus(int civbuilderID, Effect e, string name, vector<int> requirements);
     void createTeamBonus(int civbuilderID, Effect e, string name);
     void createUU(int civbuilderID, int baseID, string name, vector<int> techCosts, int techTime, int techDLL);
+    void createCustomUU(int civIndex, Value customData);
     void setupData();
     void createData();
     void assignData();

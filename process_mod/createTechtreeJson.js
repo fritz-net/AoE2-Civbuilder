@@ -5,6 +5,25 @@ module.exports = {
 	createTechtreeJson,
 };
 
+/**
+ * Extract bonus ID from bonus data
+ * Bonus data can be either a number (legacy) or [id, multiplier] (new UI)
+ * @param {number|number[]} bonus - Either a number or [id, multiplier] array
+ * @returns {number} - The bonus ID
+ */
+function extractBonusId(bonus) {
+	if (Array.isArray(bonus)) {
+		if (bonus.length === 0) {
+			return 0;
+		}
+		return bonus[0]; // Return the ID from [id, multiplier]
+	}
+	if (bonus === null || bonus === undefined) {
+		return 0;
+	}
+	return bonus; // Return the number directly
+}
+
 function addSpecialNodes(specialNodes, nodeList, prerequisite, beforeNode = "") {
 	for (let specialNode of specialNodes) {
 		let node = JSON.parse(JSON.stringify(specialNode));
@@ -65,6 +84,66 @@ function getUUNodes(index) {
 	return nodes;
 }
 
+/**
+ * Create unique unit nodes for custom UUs
+ * @param {object} customUU - Custom UU data { name, baseUnit, type, health, attack, etc. }
+ * @param {number} civIndex - Civilization index
+ * @returns {array} - Array of 2 nodes [base, elite]
+ */
+function getCustomUUNodes(customUU, civIndex) {
+	// Get base unit icon from UUArray
+	// baseUnit is the unit ID (e.g., 1372 for Teutonic Knight)
+	// We need to find the matching Picture Index in UUArray
+	// As a fallback, we use the base unit ID itself if not found in UUArray
+	let pictureIndex = 107; // Default to Longbowman icon (safest default)
+	
+	// Try to match baseUnit to known UU Picture Indexes
+	// This is a simplification - ideally we'd have a mapping of unit ID to picture index
+	// For now, use the baseUnit modulo to get a reasonable icon
+	if (customUU.baseUnit && customUU.baseUnit > 0) {
+		// Use baseUnit directly as picture index (it should already be the icon ID from C++)
+		// The C++ code sets IconID from civ.Units[baseUnit].IconID
+		pictureIndex = customUU.baseUnit;
+	}
+	
+	// Generate unique node IDs (use negative numbers to avoid conflicts)
+	// Start from -1000 and subtract civIndex to ensure uniqueness
+	const baseNodeId = -1000 - (civIndex * 2);
+	const eliteNodeId = baseNodeId - 1;
+	const eliteTechId = -2000 - civIndex;  // Negative tech ID for elite upgrade
+	
+	let nodes = [{}, {}];
+	
+	// Base unit node
+	nodes[0]["Age ID"] = 3;
+	nodes[0]["Building ID"] = 82;  // Castle
+	nodes[0]["Draw Node Type"] = "UnitTech";
+	nodes[0]["Help String ID"] = 0;  // Custom units don't have string IDs
+	nodes[0]["Link ID"] = -1;
+	nodes[0]["Link Node Type"] = "BuildingTech";
+	nodes[0]["Name"] = customUU.name || "Custom Unit";
+	nodes[0]["Name String ID"] = 0;
+	nodes[0]["Node ID"] = baseNodeId;
+	nodes[0]["Node Status"] = "ResearchedCompleted";
+	nodes[0]["Node Type"] = "UniqueUnit";
+	nodes[0]["Picture Index"] = pictureIndex;
+	nodes[0]["Prerequisite IDs"] = [0, 0, 0, 0, 0];
+	nodes[0]["Prerequisite Types"] = ["None", "None", "None", "None", "None"];
+	nodes[0]["Trigger Tech ID"] = -1;
+	nodes[0]["Use Type"] = "Unit";
+	
+	// Elite unit node
+	nodes[1] = JSON.parse(JSON.stringify(nodes[0]));
+	nodes[1]["Age ID"] = 4;  // Imperial Age
+	nodes[1]["Link ID"] = baseNodeId;  // Links to base unit
+	nodes[1]["Link Node Type"] = "UniqueUnit";
+	nodes[1]["Name"] = "Elite " + nodes[0]["Name"];
+	nodes[1]["Node ID"] = eliteNodeId;
+	nodes[1]["Trigger Tech ID"] = eliteTechId;
+	
+	return nodes;
+}
+
 function createTechtreeJson(data_json, techtree_json) {
 	let raw_data = fs.readFileSync(data_json);
 	let civ = JSON.parse(raw_data);
@@ -101,8 +180,19 @@ function createTechtreeJson(data_json, techtree_json) {
 		}
 
 		//Add special technology nodes for civ bonuses
+		// Helper function to check if a bonus is active
+		const hasBonusId = (checkBonusId) => {
+			for (let k = 0; k < civ.civ_bonus[i].length; k++) {
+				if (extractBonusId(civ.civ_bonus[i][k]) === checkBonusId) {
+					return true;
+				}
+			}
+			return false;
+		};
+		
 		for (let j = 0; j < civ.civ_bonus[i].length; j++) {
-			switch (civ.civ_bonus[i][j]) {
+			const bonusId = extractBonusId(civ.civ_bonus[i][j]);
+			switch (bonusId) {
 				case 43:
 					addSpecialNodes([specialNodes["missionary"]], techtree.civ_techs_units, civ.techtree[i][146]);
 					break;
@@ -191,6 +281,11 @@ function createTechtreeJson(data_json, techtree_json) {
 					}
 					break;
 				case 280:
+					// Folwark replaces Mill - skip if Pastures bonus is also active (they're mutually exclusive)
+					if (hasBonusId(356)) {
+						// Pastures takes precedence, skip Folwark
+						break;
+					}
 					removeNode("Mill", techtree.civ_techs_buildings);
 					addSpecialNodes([specialNodes["folwark"]], techtree.civ_techs_buildings, 1);
 					for (let k = 0; k < techtree.civ_techs_buildings.length; k++) {
@@ -278,6 +373,55 @@ function createTechtreeJson(data_json, techtree_json) {
 						}
 					}
 					break;
+				case 193:
+					// Can recruit Warrior Priests (Note: case 316 also adds warrior priest for Fortified Church bonus)
+					// This is for standalone warrior priest recruitment without Fortified Church
+					// Skip to avoid duplication if both bonuses are present - handled by case 316
+					break;
+				case 337:
+					// Can recruit War Chariots
+					addSpecialNodes([specialNodes["war_chariot"]], techtree.civ_techs_units, 1);
+					break;
+				case 343:
+					// Can recruit Jian Swordsmen (no elite version)
+					addSpecialNodes([specialNodes["jian_swordsman"]], techtree.civ_techs_units, 1);
+					break;
+				case 348:
+					// Can recruit Xianbei Raiders
+					addSpecialNodes([specialNodes["xianbei_raider"]], techtree.civ_techs_units, 1);
+					break;
+				case 355:
+					// Can recruit Grenadiers
+					addSpecialNodes([specialNodes["grenadier"]], techtree.civ_techs_units, 1);
+					break;
+				case 361:
+					// Can train Mounted Trebuchets
+					addSpecialNodes([specialNodes["mounted_trebuchet"]], techtree.civ_techs_units, 1);
+					break;
+				case 309:
+					// Can upgrade Elite Battle Elephants to Royal Battle Elephants
+					addSpecialNodes([specialNodes["royal_elephant"]], techtree.civ_techs_units, civ.techtree[i][38]);
+					break;
+				case 310:
+					// Can upgrade Elite Steppe Lancers to Royal Lancers
+					addSpecialNodes([specialNodes["royal_lancer"]], techtree.civ_techs_units, civ.techtree[i][40]);
+					break;
+				case 356:
+					// Pastures replace Farms and Mill upgrades
+					// Note: If Folwark is also active, Pastures takes precedence (this is applied after Folwark check)
+					removeNode("Mill", techtree.civ_techs_buildings);
+					removeNode("Farm", techtree.civ_techs_buildings);
+					removeNode("Folwark", techtree.civ_techs_buildings); // Also remove Folwark if it was added
+					addSpecialNodes([specialNodes["pasture"]], techtree.civ_techs_buildings, 1);
+					// Add pasture upgrade techs
+					addSpecialNodes([specialNodes["domestication"]], techtree.civ_techs_units, 1);
+					addSpecialNodes([specialNodes["pastoralism"]], techtree.civ_techs_units, 1);
+					addSpecialNodes([specialNodes["transhumance"]], techtree.civ_techs_units, 1);
+					// Remove farm upgrades (they're replaced by pasture upgrades) and reset their building if changed by Folwark
+					removeNode("Horse Collar", techtree.civ_techs_units);
+					removeNode("Heavy Plow", techtree.civ_techs_units);
+					removeNode("Crop Rotation", techtree.civ_techs_units);
+					break;
 			}
 		}
 
@@ -297,7 +441,16 @@ function createTechtreeJson(data_json, techtree_json) {
 		}
 
 		//Add unique unit nodes
-		let uniqueNodes = getUUNodes(civ.techtree[i][0]);
+		// Check if this is a custom UU (indicated by techtree[i][0] == 0 and custom_units data present)
+		let uniqueNodes;
+		if (civ.techtree[i][0] === 0 && civ.custom_units && civ.custom_units[i]) {
+			// Custom UU - create nodes from custom_units data
+			const customUU = civ.custom_units[i];
+			uniqueNodes = getCustomUUNodes(customUU, i);
+		} else {
+			// Regular UU from UUArray
+			uniqueNodes = getUUNodes(civ.techtree[i][0]);
+		}
 		techtree.civ_techs_units.unshift(uniqueNodes[0], uniqueNodes[1]);
 
 		//Add unique tech nodes
@@ -1064,6 +1217,206 @@ const specialNodes = {
 		"Node Status": "ResearchedCompleted",
 		"Node Type": "UniqueUnit",
 		"Picture Index": 270,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	pasture: {
+		"Age ID": 1,
+		"Building ID": 1889,
+		"Building in new column": false,
+		"Building upgraded from ID": -1,
+		"Draw Node Type": "Building",
+		"Help String ID": 101889,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Pasture",
+		"Name String ID": 11889,
+		"Node ID": 1889,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "BuildingTech",
+		"Picture Index": 442,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Building",
+	},
+	domestication: {
+		"Age ID": 1,
+		"Building ID": 1889,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101014,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Domestication",
+		"Name String ID": 11014,
+		"Node ID": 1014,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "Research",
+		"Picture Index": 443,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": 1014,
+		"Use Type": "Tech",
+	},
+	pastoralism: {
+		"Age ID": 2,
+		"Building ID": 1889,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101013,
+		"Link ID": 1014,
+		"Link Node Type": "Research",
+		Name: "Pastoralism",
+		"Name String ID": 11013,
+		"Node ID": 1013,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "Research",
+		"Picture Index": 444,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": 1013,
+		"Use Type": "Tech",
+	},
+	transhumance: {
+		"Age ID": 3,
+		"Building ID": 1889,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101012,
+		"Link ID": 1013,
+		"Link Node Type": "Research",
+		Name: "Transhumance",
+		"Name String ID": 11012,
+		"Node ID": 1012,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "Research",
+		"Picture Index": 445,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": 1012,
+		"Use Type": "Tech",
+	},
+	royal_elephant: {
+		"Age ID": 4,
+		"Building ID": 101,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101180,
+		"Link ID": 1134,
+		"Link Node Type": "UnitUpgrade",
+		Name: "Royal Battle Elephant",
+		"Name String ID": 11180,
+		"Node ID": 1180,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 246,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	royal_lancer: {
+		"Age ID": 4,
+		"Building ID": 101,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101181,
+		"Link ID": 1372,
+		"Link Node Type": "UnitUpgrade",
+		Name: "Royal Lancer",
+		"Name String ID": 11181,
+		"Node ID": 1181,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 274,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	war_chariot: {
+		"Age ID": 3,
+		"Building ID": 49,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 102150,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "War Chariot",
+		"Name String ID": 12150,
+		"Node ID": 2150,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 458,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	jian_swordsman: {
+		"Age ID": 3,
+		"Building ID": 12,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101974,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Jian Swordsman",
+		"Name String ID": 11974,
+		"Node ID": 1974,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 461,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	xianbei_raider: {
+		"Age ID": 2,
+		"Building ID": 87,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101952,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Xianbei Raider",
+		"Name String ID": 11952,
+		"Node ID": 1952,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 460,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	grenadier: {
+		"Age ID": 3,
+		"Building ID": 87,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101911,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Grenadier",
+		"Name String ID": 11911,
+		"Node ID": 1911,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 456,
+		"Prerequisite IDs": [0, 0, 0, 0, 0],
+		"Prerequisite Types": ["None", "None", "None", "None", "None"],
+		"Trigger Tech ID": -1,
+		"Use Type": "Unit",
+	},
+	mounted_trebuchet: {
+		"Age ID": 4,
+		"Building ID": 49,
+		"Draw Node Type": "UnitTech",
+		"Help String ID": 101923,
+		"Link ID": -1,
+		"Link Node Type": "BuildingTech",
+		Name: "Mounted Trebuchet",
+		"Name String ID": 11923,
+		"Node ID": 1923,
+		"Node Status": "ResearchedCompleted",
+		"Node Type": "UniqueUnit",
+		"Picture Index": 459,
 		"Prerequisite IDs": [0, 0, 0, 0, 0],
 		"Prerequisite Types": ["None", "None", "None", "None", "None"],
 		"Trigger Tech ID": -1,

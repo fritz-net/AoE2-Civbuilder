@@ -59,6 +59,7 @@
           <div class="advanced-options">
             <LanguageSelector v-model="civConfig.language" :disabled="readOnly" />
             <WonderSelector v-model="civConfig.wonder" :disabled="readOnly" />
+            <CastleSelector v-model="civConfig.castle" :disabled="readOnly" />
           </div>
         </div>
       </div>
@@ -181,7 +182,7 @@
         :relative-path="techtreePath"
         :sidebar-content="sidebarContent"
         :sidebar-title="civConfig.alias || 'Custom Civilization'"
-        :show-pastures="showPasturesInTechtree"
+        :selected-bonuses="selectedBonusesForTechtree"
         mode="build"
         @done="handleTechtreeDone"
         @update:tree="handleTechtreeUpdate"
@@ -484,13 +485,14 @@ ${teamBonusHtml || '<p>No team bonus selected</p>'}
 `
 })
 
-const showPasturesInTechtree = computed(() => {
-  // Check if bonus 356 is selected in civ bonuses
-  return selectedCivBonuses.value.some(entry => {
-    const bonusId = Array.isArray(entry) ? entry[0] : entry
-    return bonusId === PASTURES_BONUS_ID
-  })
-})
+// Computed property for selected bonuses to pass to TechTree
+const selectedBonusesForTechtree = computed(() => ({
+  civ: selectedCivBonuses.value,
+  uu: selectedUniqueUnit.value,
+  castle: selectedCastleTech.value,
+  imp: selectedImpTech.value,
+  team: selectedTeamBonus.value,
+}))
 
 // Computed properties for civ bonus limit enforcement
 const civBonusMaxUniqueSelections = computed(() => {
@@ -688,6 +690,12 @@ function updateBonusesInConfig() {
 }
 
 function handleFinish() {
+  // Validate that civ name is provided
+  if (!civConfig.alias || civConfig.alias.trim() === '') {
+    alert('Please enter a civilization name before creating the mod')
+    return
+  }
+  
   updateBonusesInConfig()
   emit('next', { ...civConfig })
 }

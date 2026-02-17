@@ -38,7 +38,7 @@ The project has two parallel frontends:
 - `public/aoe2techtree/` - Modified version of https://github.com/SiegeEngineers/aoe2techtree
 - Used for displaying and editing tech trees in both UIs
 
-### Testing
+### Testing (javascript/TypeScript)
 - use full cpp backend (needs to be compiled first) not only node server
 
 **Unit Tests** (`__tests__/`)
@@ -52,10 +52,18 @@ The project has two parallel frontends:
 - Test fixtures: `__tests__/fixtures/`
 - Test helpers: `__tests__/helpers/`
 
-**E2E Tests for Vue/Nuxt UI**
-- uses playwright and locally installed chromium -> u have all the tools to run the tests
+
+#### E2E Tests for Vue/Nuxt UI
+- agents AND CI, use playwright and locally installed chromium -> u have all the tools to run the tests
 - location: likely `src/frontend/tests/` or `__tests__/e2e/`
-- u are NOT allowed to increase timeouts. If we run into a timeout in nearly all cases selectors are wrong, the flow changed, something is really broken.
+- use Page Object Model and Component Object Model for e2e tests
+- always at last create 1 happy path test doing the full flow of a feature till the end (eg. download mod)
+- additional infos see ./__tests__/e2e/README.md
+
+- u are NOT allowed to increase timeouts. If we run into a timeout in nearly all cases selectors are wrong, the flow changed, something is really broken. also do not add new timeouts/waits
+- no explicit timeouts/waits this is usually a smell, timeouts are set globally
+- tests should do meaningful actions, checking if things are loaded are not really meaningful since other tests can or already do cover that
+- Avoid code branches that exit real testing (eg. catch all into log; branching of because the server could not be there, which should fail test anyway since server is required for e2e tests)
 
 ### Tools and Utilities
 
@@ -116,7 +124,7 @@ branch name should start with "agent/123-description-of-task" where 123 is the c
     - wrong: https://github.com/user-attachments/assets/ribbon1-classic.png
     - good: https://github.com/user-attachments/assets/7091a86c-8cbf-4970-bccd-1c3fee4780fe
     - good: https://private-user-images.githubusercontent.com/122795841/518943158-75803498-1b92-4fce-9b8e-75e68400169c.png?jwt=...token... # gets replaced from former link
-- PR title should follow convetional commit style
+- PR title should follow conventional commit style
 
 ## git usage
 - create commits after each step/task

@@ -14,6 +14,9 @@ export interface DraftPreset {
   timer_enabled: boolean
   timer_duration: number
   snake_draft?: boolean
+  custom_uu_mode?: boolean
+  blind_picks?: boolean
+  bonuses_per_page?: number
 }
 
 export interface DraftPlayer {
@@ -30,6 +33,7 @@ export interface DraftPlayer {
   wonder: number
   castle: number
   description: string
+  custom_uu?: any
 }
 
 export interface DraftGameState {
@@ -41,6 +45,9 @@ export interface DraftGameState {
   timer_paused: boolean
   timer_remaining: number
   timer_last_update: number | null
+  custom_uu_phase?: boolean
+  highlighted?: number[]
+  available_cards?: number[][]
 }
 
 export interface Draft {
@@ -74,10 +81,17 @@ export const useDraft = () => {
   const currentTurn = computed(() => {
     if (!draft.value) return null
     const numPlayers = draft.value.preset.slots
-    const roundType = Math.max(
+    const baseRoundType = Math.max(
       Math.floor(draft.value.gamestate.turn / numPlayers) - (draft.value.preset.rounds - 1),
       0
     )
+    
+    // If custom UU mode is enabled and we would be in roundType 1 (UU selection),
+    // skip to roundType 2 (castle techs) instead
+    const roundType = (draft.value.preset.custom_uu_mode && baseRoundType >= 1) 
+      ? baseRoundType + 1 
+      : baseRoundType
+    
     const turnModPlayers = draft.value.gamestate.turn % numPlayers
     let playerNum = draft.value.gamestate.order[turnModPlayers]
     
@@ -91,7 +105,13 @@ export const useDraft = () => {
       }
     } else {
       // Legacy mode: only reverse on specific round types
-      if (roundType === 2 || roundType === 4) {
+      // Adjust for shifted round types when custom UU mode is active
+      const CASTLE_ROUND_TYPE = 2
+      const IMPERIAL_ROUND_TYPE = 4
+      const reverseRoundTypes = draft.value.preset.custom_uu_mode 
+        ? [CASTLE_ROUND_TYPE + 1, IMPERIAL_ROUND_TYPE + 1] 
+        : [CASTLE_ROUND_TYPE, IMPERIAL_ROUND_TYPE]
+      if (reverseRoundTypes.includes(roundType)) {
         playerNum = draft.value.gamestate.order[numPlayers - 1 - turnModPlayers]
       }
     }
@@ -325,6 +345,34 @@ export const useDraft = () => {
     socket.value.emit('sync timer', draft.value.id)
   }
 
+  // Submit custom UU
+  const submitCustomUU = (playerNumber: number, customUU: any): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (!socket.value || !draft.value) {
+        reject(new Error('Socket not available'))
+        return
+      }
+
+      const timeout = setTimeout(() => {
+        reject(new Error('Submission timeout'))
+      }, 10000)
+
+      // Set up one-time listeners for response
+      socket.value.once('custom uu submitted', () => {
+        clearTimeout(timeout)
+        resolve()
+      })
+
+      socket.value.once('custom uu error', (errorMsg: string) => {
+        clearTimeout(timeout)
+        reject(new Error(errorMsg))
+      })
+
+      // Emit the submission
+      socket.value.emit('submit custom uu', draft.value.id, playerNumber, customUU)
+    })
+  }
+
   // Setup socket listeners
   const setupSocketListeners = () => {
     if (!socket.value) return
@@ -411,6 +459,7 @@ export const useDraft = () => {
     resumeTimer,
     notifyTimerExpired,
     syncTimer,
+    submitCustomUU,
     setupSocketListeners,
     cleanup,
   }
