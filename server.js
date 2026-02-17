@@ -36,6 +36,10 @@ const hostname = process.env.CIVBUILDER_HOSTNAME || "https://krakenmeister.com/c
 const routeSubdir = new URL(hostname).pathname.replace(/\/$/, "") || "/";
 const port = 4000;
 
+// Environment variable flags to disable custom UU features
+const disableCustomUUBuild = process.env.DISABLE_CUSTOM_UU_BUILD === 'true';
+const disableCustomUUDraft = process.env.DISABLE_CUSTOM_UU_DRAFT === 'true';
+
 console.log("running with hostname:", hostname);
 console.log("route subdir:", routeSubdir);
 console.log("temp directory:", tempdir);
@@ -234,7 +238,8 @@ const createDraft = (req, res, next) => {
 	// Snake draft setting (default disabled for backward compatibility)
 	preset["snake_draft"] = req.body.snake_draft === "true";
 	// Custom UU mode setting (default disabled for backward compatibility)
-	preset["custom_uu_mode"] = req.body.custom_uu_mode === "true";
+	// Force to false if disabled via environment variable
+	preset["custom_uu_mode"] = disableCustomUUDraft ? false : (req.body.custom_uu_mode === "true");
 	// Number of cards to show per roll (default 3 if not specified)
 	preset["cards_per_roll"] = req.body.cards_per_roll ? parseInt(req.body.cards_per_roll, 10) : 3;
 	// Number of bonuses displayed per page/round (default 30 if not specified)
@@ -448,6 +453,34 @@ function reshuffleCards(draft) {
 // Note: chToTmpDir and chToAppDir have been removed.
 // All commands now use { cwd: __dirname } option to enable parallel execution.
 // Using process.chdir() is not safe for concurrent requests as it changes global state.
+
+const validateCustomUU = (req, res, next) => {
+	if (!disableCustomUUBuild || req.body.civs === "false") {
+		next();
+		return;
+	}
+
+	try {
+		const presets = JSON.parse(req.body.presets);
+		if (presets && presets.presets) {
+			for (const civ of presets.presets) {
+				// Check if any civ has custom UU in bonuses[1]
+				if (civ.bonuses && civ.bonuses[1]) {
+					const uuData = civ.bonuses[1][0];
+					// Custom UU is identified by having type: 'custom'
+					if (uuData && typeof uuData === 'object' && uuData.type === 'custom') {
+						console.log(`[${req.body.seed}]: Rejected - Custom UU is disabled via environment variable`);
+						return res.status(403).json({ error: 'Custom Unique Units are disabled' });
+					}
+				}
+			}
+		}
+	} catch (err) {
+		console.error('Error validating custom UU:', err);
+	}
+
+	next();
+};
 
 const createModFolder = (req, res, next) => {
 	console.log(`[${req.body.seed}]: creating mod folder`);
@@ -1011,7 +1044,7 @@ router.post("/random", createModFolder, createCivIcons, copyCivIcons, generateJs
 	res.download(__dirname + "/modding/requested_mods/" + filename + ".zip");
 });
 
-router.post("/create", createModFolder, writeIconsJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
+router.post("/create", validateCustomUU, createModFolder, writeIconsJson, writeNames, copyNames, addVoiceFiles, writeUUIcons, writeCivilizations, writeTechTree, writeDatFile, writeAIFiles, zipModFolder, (req, res) => {
 	console.log(`[${req.body.seed}]: Completed generation!`);
 	const filename = req.modFilename || req.body.seed;
 	res.download(__dirname + "/modding/requested_mods/" + filename + ".zip");

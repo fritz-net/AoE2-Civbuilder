@@ -36,7 +36,9 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || '',
-      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || ''
+      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL || '',
+      disableCustomUUBuild: process.env.NUXT_PUBLIC_DISABLE_CUSTOM_UU_BUILD === 'true',
+      disableCustomUUDraft: process.env.NUXT_PUBLIC_DISABLE_CUSTOM_UU_DRAFT === 'true'
     }
   },
   

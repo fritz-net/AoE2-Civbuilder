@@ -115,7 +115,7 @@
           </div>
         </div>
 
-        <div class="form-section custom-uu-mode-section">
+        <div v-if="!isCustomUUDisabled" class="form-section custom-uu-mode-section">
           <label class="form-label">
             <input
               v-model="draftSettings.customUUMode"
@@ -323,10 +323,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const config = useRuntimeConfig()
 
 const rarityTexts = ['Ordinary', 'Distinguished', 'Superior', 'Epic', 'Legendary']
 
@@ -346,6 +347,8 @@ const draftSettings = ref({
   bonusesPerPage: 30, // Optional: total number of bonus cards displayed on the draft board
   requiredFirstRoll: '', // Optional: comma-separated bonus IDs for testing (e.g., "356" for pasture bonus)
 })
+
+const isCustomUUDisabled = computed(() => config.public.disableCustomUUDraft)
 
 const draftLinks = ref<{
   host: string

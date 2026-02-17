@@ -83,7 +83,7 @@
     <!-- Step 3: Unique Unit -->
     <div v-show="currentStep === 2" class="step-content">
       <!-- Toggle between existing and custom UU -->
-      <div class="uu-mode-toggle">
+      <div v-if="!isCustomUUDisabled" class="uu-mode-toggle">
         <label class="toggle-label">
           <input 
             type="checkbox" 
@@ -393,6 +393,7 @@ const isCustomUUMode = ref(false)
 const customUUEditorRef = ref<any>(null)
 const customUUData = ref<CustomUUData | null>(null)
 const { setMode } = useCustomUU('build')
+const isCustomUUDisabled = computed(() => config.public.disableCustomUUBuild)
 
 // Computed sidebar content for techtree
 const sidebarContent = computed(() => {
@@ -877,6 +878,12 @@ onMounted(() => {
     
     // Add beforeunload listener
     window.addEventListener('beforeunload', handleBeforeUnload)
+  }
+  
+  // Ensure custom UU mode is disabled if the flag is set
+  if (isCustomUUDisabled.value && isCustomUUMode.value) {
+    isCustomUUMode.value = false
+    customUUData.value = null
   }
 })
 
