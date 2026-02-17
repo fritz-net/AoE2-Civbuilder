@@ -72,3 +72,8 @@ docker run --rm -e CIVBUILDER_HOSTNAME=http://localhost:4000 -p 4000:4000 ghcr.i
 ```
 
 Both frontends (old and new Vue3) are included in the Docker image.
+
+## Troubleshooting
+
+### Release-Please Issues
+If you encounter issues with the Release-Please GitHub Action failing with "Error updating ref" errors, see [Release-Please Troubleshooting Guide](./docs/release-please-troubleshooting.md) for detailed instructions on how to resolve this issue.
