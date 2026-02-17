@@ -393,7 +393,7 @@ const isCustomUUMode = ref(false)
 const customUUEditorRef = ref<any>(null)
 const customUUData = ref<CustomUUData | null>(null)
 const { setMode } = useCustomUU('build')
-const isCustomUUDisabled = computed(() => config.public.disableCustomUUBuild ?? false)
+const isCustomUUDisabled = computed(() => config.public.disableCustomUUBuild)
 
 // Computed sidebar content for techtree
 const sidebarContent = computed(() => {
@@ -851,6 +851,12 @@ watch(() => props.initialConfig, (newConfig) => {
 
 // Lifecycle hooks
 onMounted(() => {
+  // Ensure custom UU mode is disabled if the flag is set (do this early)
+  if (isCustomUUDisabled.value && isCustomUUMode.value) {
+    isCustomUUMode.value = false
+    customUUData.value = null
+  }
+  
   if (typeof window !== 'undefined') {
     // Load autosave preference (defaults to true if not set)
     const savedAutosave = localStorage.getItem(AUTOSAVE_KEY)
@@ -878,12 +884,6 @@ onMounted(() => {
     
     // Add beforeunload listener
     window.addEventListener('beforeunload', handleBeforeUnload)
-  }
-  
-  // Ensure custom UU mode is disabled if the flag is set
-  if (isCustomUUDisabled.value && isCustomUUMode.value) {
-    isCustomUUMode.value = false
-    customUUData.value = null
   }
 })
 

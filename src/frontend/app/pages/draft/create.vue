@@ -348,7 +348,7 @@ const draftSettings = ref({
   requiredFirstRoll: '', // Optional: comma-separated bonus IDs for testing (e.g., "356" for pasture bonus)
 })
 
-const isCustomUUDisabled = computed(() => config.public.disableCustomUUDraft ?? false)
+const isCustomUUDisabled = computed(() => config.public.disableCustomUUDraft)
 
 const draftLinks = ref<{
   host: string
