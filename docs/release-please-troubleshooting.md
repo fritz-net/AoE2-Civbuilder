@@ -24,8 +24,9 @@ The GITHUB_TOKEN used by GitHub Actions does not have permission to force-push t
 #### Immediate Fix (Manual)
 To resolve the current failure:
 
-1. **Close the existing stale release-please PR** (currently PR #267)
-   - Navigate to https://github.com/fritz-net/AoE2-Civbuilder/pull/267
+1. **Close the existing stale release-please PR**
+   - Find the PR with branch name `release-please--branches--main`
+   - Navigate to the PR URL (check your repository's Pull Requests page)
    - Close the PR (do not merge it if it's outdated)
 
 2. **Trigger a new workflow run**
@@ -45,8 +46,10 @@ To minimize future occurrences:
 
 #### Configuration Changes Made
 The workflow has been updated with:
-- `config-file` and `manifest-file` parameters to use the repository's release-please configuration
+- `config-file` and `manifest-file` parameters to explicitly use the existing repository configuration files (`.release-please-config.json` and `.release-please-manifest.json`)
 - `skip-labeling: true` to reduce potential label conflicts during PR updates
+
+The configuration files were already present in the repository but were not being explicitly referenced by the workflow.
 
 ### Additional Resources
 - [Release-Please Documentation](https://github.com/googleapis/release-please)
