@@ -60,6 +60,7 @@
             <ArchitectureSelector v-model="civConfig.architecture" class="selector-spacing" />
             <LanguageSelector v-model="civConfig.language" class="selector-spacing" />
             <WonderSelector v-model="civConfig.wonder" class="selector-spacing" />
+            <CastleSelector v-model="civConfig.castle" class="selector-spacing" />
             
             <div class="civ-name-input">
               <label for="civName">Civilization Name</label>
