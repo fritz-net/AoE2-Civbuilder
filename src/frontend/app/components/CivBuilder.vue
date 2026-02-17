@@ -393,7 +393,7 @@ const isCustomUUMode = ref(false)
 const customUUEditorRef = ref<any>(null)
 const customUUData = ref<CustomUUData | null>(null)
 const { setMode } = useCustomUU('build')
-const isCustomUUDisabled = computed(() => config.public.disableCustomUUBuild)
+const isCustomUUDisabled = computed(() => config.public.disableCustomUUBuild ?? false)
 
 // Computed sidebar content for techtree
 const sidebarContent = computed(() => {

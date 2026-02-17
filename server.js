@@ -455,11 +455,13 @@ function reshuffleCards(draft) {
 // Using process.chdir() is not safe for concurrent requests as it changes global state.
 
 const validateCustomUU = (req, res, next) => {
+	// Skip validation if custom UU is allowed (flag not set) or if this is a random civ request
 	if (!disableCustomUUBuild || req.body.civs === "false") {
 		next();
 		return;
 	}
 
+	// Custom UU is disabled - validate that no custom UU data is present
 	try {
 		const presets = JSON.parse(req.body.presets);
 		if (presets && presets.presets) {
