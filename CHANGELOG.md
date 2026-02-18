@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.13.0...v1.14.0) (2026-02-18)
+
+
+### Features
+
+* add castle selector to v2 build and draft pages ([#299](https://github.com/fritz-net/AoE2-Civbuilder/issues/299)) ([bb28860](https://github.com/fritz-net/AoE2-Civbuilder/commit/bb28860442e5a7df0b47dfd3ebb76107a3edb0f1))
+
+
+### Bug Fixes
+
+* autosave persistence for Custom UU Editor ([#295](https://github.com/fritz-net/AoE2-Civbuilder/issues/295)) ([77a8e2d](https://github.com/fritz-net/AoE2-Civbuilder/commit/77a8e2d389a0b0d95efd8e351f5654e7ca57493f))
+* custom uu base units, balancing and other custom UU editor fixes ([#272](https://github.com/fritz-net/AoE2-Civbuilder/issues/272)) ([2d6d4d3](https://github.com/fritz-net/AoE2-Civbuilder/commit/2d6d4d34323092048073ce011e2721a5d862c0ee))
+* missing ResearchLocation for Husbandry attack speed bonus ([#290](https://github.com/fritz-net/AoE2-Civbuilder/issues/290)) ([05824ea](https://github.com/fritz-net/AoE2-Civbuilder/commit/05824eadfd7b53936afe945fcee0e1cc63b5210f))
+* remove circular symlink causing potential path resolution issues ([#308](https://github.com/fritz-net/AoE2-Civbuilder/issues/308)) ([67d46fd](https://github.com/fritz-net/AoE2-Civbuilder/commit/67d46fd9665b9fae50dd93b89bf1398efcae36ea))
+* updated wrong base units for melee custom UU ([c38748e](https://github.com/fritz-net/AoE2-Civbuilder/commit/c38748eae21f8cd3c4bc23b007a930477592edd7))
+* v2 discord button width inconsistency and add maintainer credits ([#309](https://github.com/fritz-net/AoE2-Civbuilder/issues/309)) ([b47e08f](https://github.com/fritz-net/AoE2-Civbuilder/commit/b47e08f40c3883fadf89c6921e833c83880e1032))
+
 ## [1.13.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.12.1...v1.13.0) (2026-01-06)
 
 
