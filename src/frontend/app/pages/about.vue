@@ -51,6 +51,22 @@
           <p>Support the project on <a href="https://www.buymeacoffee.com/krakenmeister" target="_blank" rel="noopener noreferrer">Buy Me a Coffee</a></p>
         </div>
         
+        <div class="credit-section">
+          <h2>Maintainer</h2>
+          <p>Maintained by <strong>andesia</strong> since august 2025/<strong>v1.1.0</strong></p>
+          <p>Contributions:</p>
+          <ul class="contributions-list">
+            <li>created new UI v2</li>
+            <li>added Docker support</li>
+            <li>"The Last Chieftains" DLC basic support and other dat updates added</li>
+            <li>many improvements and bug fixes</li>
+            <li>
+              hosting <a href="https://github.com/fritz-net/AoE2-Civbuilder" target="_blank" rel="noopener noreferrer">fork</a> at
+              <a href="https://civbuilder.velarix.space/v2" target="_blank" rel="noopener noreferrer">https://civbuilder.velarix.space/v2</a>
+            </li>
+          </ul>
+        </div>
+        
         <div class="back-button-wrapper">
           <NuxtLink to="/" class="back-button">Back to Home</NuxtLink>
         </div>
@@ -170,6 +186,24 @@
 .credit-section a:hover {
   color: hsl(52, 100%, 70%);
   text-decoration: underline;
+}
+
+.contributions-list {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.5rem;
+}
+
+.contributions-list li {
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.contributions-list li:before {
+  content: "⚔️";
+  position: absolute;
+  left: 0;
 }
 
 .back-button-wrapper {

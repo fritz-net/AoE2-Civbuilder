@@ -253,7 +253,7 @@ describe('useCustomUU - Base Unit Options', () => {
     const { getUnitIconUrl } = useCustomUU();
     
     const url = getUnitIconUrl(14);
-    expect(url).toBe('/v2/img/unitgraphics/uu_14.jpg');
+    expect(url).toBe('/aoe2techtree/img/Units/14.jpg');
   });
 });
 
