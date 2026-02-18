@@ -130,7 +130,8 @@ const showNavigation = computed(() => {
 }
 
 .discord-invite {
-  height: 100px;
+  width: 125px;
+  height: 125px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
@@ -153,6 +154,7 @@ const showNavigation = computed(() => {
   text-decoration: none;
   display: inline-block;
   text-align: center;
+  width: 125px;
 }
 
 .donate-button:hover {
