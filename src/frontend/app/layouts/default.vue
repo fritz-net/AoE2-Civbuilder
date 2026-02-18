@@ -154,7 +154,6 @@ const showNavigation = computed(() => {
   text-decoration: none;
   display: inline-block;
   text-align: center;
-  width: 125px;
 }
 
 .donate-button:hover {
