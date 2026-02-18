@@ -23,14 +23,6 @@ export class BuildPage extends BasePage {
   }
 
   /**
-   * Navigate to build page (override with default URL)
-   * Can be called with no arguments to go to /v2/build/
-   */
-  async goto(url: string = '/v2/build/'): Promise<void> {
-    await super.goto(url);
-  }
-
-  /**
    * Navigate to build page
    */
   async navigate(): Promise<void> {
@@ -70,21 +62,6 @@ export class BuildPage extends BasePage {
     for (let i = 0; i < targetStep; i++) {
       await this.clickNext();
     }
-  }
-
-  /**
-   * Navigate to the civ bonuses step by filling basic info and clicking Next
-   * (From Imperial Paladin PR)
-   */
-  async goToCivBonusesStep() {
-    // Fill in a civ name to enable the Next button
-    await this.fillCivName('TestCiv');
-    
-    // Click Next to go to Civ Bonuses step
-    await this.clickNext();
-    
-    // Wait for the Civ Bonuses heading
-    await this.page.getByRole('heading', { name: /Civilization Bonuses/i }).waitFor({ state: 'visible', timeout: 10000 });
   }
 
   /**
@@ -217,95 +194,5 @@ export class BuildPage extends BasePage {
    */
   async assertStep(stepName: RegExp): Promise<void> {
     await expect(this.page.getByRole('heading', { name: stepName })).toBeVisible();
-  }
-
-  // ========================================
-  // Imperial Paladin PR - Bonus Management Methods
-  // ========================================
-
-  /**
-   * Get bonus card by ID
-   * (From Imperial Paladin PR)
-   */
-  getBonusCard(bonusId: number) {
-    return this.page.locator(`.bonus-card[data-bonus-id="${bonusId}"]`);
-  }
-
-  /**
-   * Get bonus card by text content (searches in title and description) - only in visible step
-   * (From Imperial Paladin PR)
-   */
-  getBonusCardByText(text: string) {
-    return this.page.locator('.step-content:visible .bonus-card').filter({ hasText: text }).first();
-  }
-
-  /**
-   * Select a bonus by ID
-   * (From Imperial Paladin PR)
-   */
-  async selectBonus(bonusId: number) {
-    const card = this.getBonusCard(bonusId);
-    await card.scrollIntoViewIfNeeded();
-    await card.click();
-    await this.page.waitForTimeout(300); // Wait for selection animation
-  }
-
-  /**
-   * Select a bonus by text
-   * (From Imperial Paladin PR)
-   */
-  async selectBonusByText(text: string) {
-    const card = this.getBonusCardByText(text);
-    await card.scrollIntoViewIfNeeded();
-    await card.click();
-    await this.page.waitForTimeout(300); // Wait for selection animation
-  }
-
-  /**
-   * Check if a bonus is selected
-   * (From Imperial Paladin PR)
-   */
-  async isBonusSelected(bonusId: number): Promise<boolean> {
-    const card = this.getBonusCard(bonusId);
-    const classes = await card.getAttribute('class');
-    return classes?.includes('selected') || false;
-  }
-
-  /**
-   * Get the total number of bonus cards (visible ones only in current step)
-   * (From Imperial Paladin PR)
-   */
-  async getBonusCardCount(): Promise<number> {
-    return await this.page.locator('.step-content:visible .bonus-card').count();
-  }
-
-  /**
-   * Get the number of selected bonuses (visible ones only in current step)
-   * (From Imperial Paladin PR)
-   */
-  async getSelectedBonusCount(): Promise<number> {
-    return await this.page.locator('.step-content:visible .bonus-card.bonus-selected').count();
-  }
-
-  /**
-   * Search for a bonus
-   * (From Imperial Paladin PR)
-   */
-  async searchBonus(query: string) {
-    // Use the filter input that's currently visible (in the active step)
-    const searchInput = this.page.locator('.step-content:visible .filter-input');
-    await searchInput.fill(query);
-    await this.page.waitForTimeout(500); // Wait for search to filter
-  }
-
-  /**
-   * Clear search
-   * (From Imperial Paladin PR)
-   */
-  async clearSearch() {
-    // Use the filter input that's currently visible (in the active step)
-    const searchInput = this.page.locator('.step-content:visible .filter-input');
-    await searchInput.clear();
-    await this.page.waitForTimeout(500);
   }
 }

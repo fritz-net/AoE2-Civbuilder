@@ -21,7 +21,7 @@ export const editionNames = ['Base Edition', 'First Edition'] as const
 
 // Number of cards per bonus type
 export const numCards = {
-  civ: 364,
+  civ: 363,
   uu: 88,
   castle: 60,
   imp: 59,
@@ -466,7 +466,6 @@ const cardDescriptions: [string, number, number, number][][] = [
     ["Heavy Cavalry Archer upgrade available in Castle Age and costs -50%", 1, -53, 0],
     ["Can train Mounted Trebuchets", 2, -53, 0],
     ["Dragon Ships replace Fast Fire Ships", 2, -6, 0],
-    ["Can upgrade Paladin to Imperial Paladin", 2, 1, 0],
   ],
 
   // Unique Units (index 1 in original format)
