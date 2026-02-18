@@ -33,6 +33,7 @@ src/frontend/.nuxt
 src/frontend/.output
 src/frontend/node_modules
 src/frontend/dist
+public/v2
 # Playwright test results
 test-results/
 playwright-report/
