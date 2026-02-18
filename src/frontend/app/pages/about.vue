@@ -53,12 +53,17 @@
         
         <div class="credit-section">
           <h2>Maintainer</h2>
-          <p>Maintained by <strong>andesia</strong> since <strong>v1.1.0</strong></p>
+          <p>Maintained by <strong>andesia</strong> since august 2025/<strong>v1.1.0</strong></p>
           <p>Contributions:</p>
           <ul class="contributions-list">
-            <li>UI v2 development</li>
-            <li>Docker support</li>
-            <li>Hosting fork at <a href="https://civbuilder.velarix.space/v2" target="_blank" rel="noopener noreferrer">civbuilder.velarix.space/v2</a></li>
+            <li>created new UI v2</li>
+            <li>added Docker support</li>
+            <li>"The Last Chieftains" DLC basic support and other dat updates added</li>
+            <li>many improvements and bug fixes</li>
+            <li>
+              hosting <a href="https://github.com/fritz-net/AoE2-Civbuilder" target="_blank" rel="noopener noreferrer">fork</a> at
+              <a href="https://civbuilder.velarix.space/v2" target="_blank" rel="noopener noreferrer">https://civbuilder.velarix.space/v2</a>
+            </li>
           </ul>
         </div>
         
