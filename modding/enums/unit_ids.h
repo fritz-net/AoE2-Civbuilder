@@ -2452,7 +2452,6 @@ enum UnitID {
     UNIT_SMALL_RICE_FARM_DROP = 1038,  // Alias for UNIT_HTRISTAN
     UNIT_FEUDAL_KNIGHT = 1262,    // Alias for UNIT_EKESHIK
     UNIT_CITY_WALL = 370          // Alias for UNIT_CWAL
-    // Note: UNIT_IMPERIAL_PALADIN is dynamically allocated at runtime in civbuilder.cpp
 };
 
 #endif // UNIT_IDS_H

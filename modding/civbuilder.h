@@ -39,8 +39,6 @@ class Civbuilder {
     int vilspear = -1;
     int vilpike = -1;
     int vilhalb = -1;
-    
-    int imperialPaladinID = -1;  // Dynamically allocated unit ID for Imperial Paladin
 
     int numPlayerCivs;
 

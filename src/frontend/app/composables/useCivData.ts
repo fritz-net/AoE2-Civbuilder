@@ -146,57 +146,59 @@ export const wonders = [
   'Pagoda of Fogong Temple (Khitans)',
 ]
 
+// Castles ordered by game/release order to match vanilla civ indices
+// Order matches: Britons(0), Franks(1), Goths(2), ... Armenians(43), Georgians(44), ... Khitans(49)
 export const castles = [
-  'Armenian Castle',
-  'Aztec Castle',
-  'Bengali Castle',
-  'Berber Castle',
-  'Bohemian Castle',
-  'Briton Castle',
-  'Bulgarian Castle',
-  'Burgundian Castle',
-  'Burmese Castle',
-  'Byzantine Castle',
-  'Celtic Castle',
-  'Chinese Castle',
-  'Cuman Castle',
-  'Dravidian Castle',
-  'Ethiopian Castle',
-  'Frankish Castle',
-  'Georgian Castle',
-  'Gothic Castle',
-  'Gurjara Castle',
-  'Hindustani Castle',
-  'Hun Castle',
-  'Incan Castle',
-  'Italian Castle',
-  'Japanese Castle',
-  'Jurchen Castle',
-  'Khitan Castle',
-  'Khmer Castle',
-  'Korean Castle',
-  'Lithuanian Castle',
-  'Magyar Castle',
-  'Malay Castle',
-  'Malian Castle',
-  'Mayan Castle',
-  'Mongol Castle',
-  'Persian Castle',
-  'Polish Castle',
-  'Portuguese Castle',
-  'Roman Castle',
-  'Saracen Castle',
-  'Shu Castle',
-  'Sicilian Castle',
-  'Slavic Castle',
-  'Spanish Castle',
-  'Tatar Castle',
-  'Teutonic Castle',
-  'Turkish Castle',
-  'Vietnamese Castle',
-  'Viking Castle',
-  'Wei Castle',
-  'Wu Castle',
+  'Briton Castle', // 0
+  'Frankish Castle', // 1
+  'Gothic Castle', // 2
+  'Teutonic Castle', // 3
+  'Japanese Castle', // 4
+  'Chinese Castle', // 5
+  'Byzantine Castle', // 6
+  'Persian Castle', // 7
+  'Saracen Castle', // 8
+  'Turkish Castle', // 9
+  'Viking Castle', // 10
+  'Mongol Castle', // 11
+  'Celtic Castle', // 12
+  'Spanish Castle', // 13
+  'Aztec Castle', // 14
+  'Mayan Castle', // 15
+  'Hun Castle', // 16
+  'Korean Castle', // 17
+  'Italian Castle', // 18
+  'Hindustani Castle', // 19
+  'Incan Castle', // 20
+  'Magyar Castle', // 21
+  'Slavic Castle', // 22
+  'Portuguese Castle', // 23
+  'Ethiopian Castle', // 24
+  'Malian Castle', // 25
+  'Berber Castle', // 26
+  'Khmer Castle', // 27
+  'Malay Castle', // 28
+  'Burmese Castle', // 29
+  'Vietnamese Castle', // 30
+  'Bulgarian Castle', // 31
+  'Tatar Castle', // 32
+  'Cuman Castle', // 33
+  'Lithuanian Castle', // 34
+  'Burgundian Castle', // 35
+  'Sicilian Castle', // 36
+  'Polish Castle', // 37
+  'Bohemian Castle', // 38
+  'Dravidian Castle', // 39
+  'Bengali Castle', // 40
+  'Gurjara Castle', // 41
+  'Roman Castle', // 42
+  'Armenian Castle', // 43
+  'Georgian Castle', // 44
+  'Shu Castle', // 45
+  'Wu Castle', // 46
+  'Wei Castle', // 47
+  'Jurchen Castle', // 48
+  'Khitan Castle', // 49
 ]
 
 export interface CivConfig {
