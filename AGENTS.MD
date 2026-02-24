@@ -38,6 +38,15 @@ The project has two parallel frontends:
 - `public/aoe2techtree/` - Modified version of https://github.com/SiegeEngineers/aoe2techtree
 - Used for displaying and editing tech trees in both UIs
 
+**Civilization Ordering**
+- **Game/Release Order**: Civilizations are numbered in the order they were released in the game
+  - Example: Britons (0), Franks (1), Goths (2), Teutons (3), ... Armenians (43), Georgians (44), ... Khitans (49)
+  - This order is used in vanilla civ JSON files (`public/vanillaFiles/vanillaCivs/VanillaJson/`)
+  - Castle and wonder indices must follow this order
+  - Defined in `src/frontend/app/pages/combine.vue` as `vanillaCivNames` array
+- **Important**: Castle and wonder arrays in `src/frontend/app/composables/useCivData.ts` must be ordered by game/release order, NOT alphabetically
+- The game internally uses these numeric indices (0-49) to reference civilizations
+
 ### Testing (javascript/TypeScript)
 - use full cpp backend (needs to be compiled first) not only node server
 
