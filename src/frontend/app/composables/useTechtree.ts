@@ -92,7 +92,6 @@ import {
   PALADIN,
   WINGED_HUSSAR,
   SAVAR,
-  IMPERIAL_PALADIN,
   LEGIONARY,
   // Can-build bonus buildings/units
   FEITORIA,
@@ -245,7 +244,6 @@ import {
   BONUS_ID_WINGED_HUSSAR,
   BONUS_ID_LEGIONARY,
   BONUS_ID_SAVAR,
-  BONUS_ID_IMPERIAL_PALADIN,
   BONUS_ID_FEITORIA,
   BONUS_ID_CARAVEL,
   BONUS_ID_KREPOST,
@@ -337,7 +335,6 @@ function createLane(): Lane {
       castle_2: [],
       imperial_1: [],
       imperial_2: [],
-      imperial_3: [],
     },
     x: 0,
     y: 0,
@@ -476,7 +473,6 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [u(KNIGHT), u(CAVALIER)],
     [u(CAVALIER), u(PALADIN)],
     [u(CAVALIER), u(SAVAR)], // Replacement: Savar replaces Paladin
-    [u(PALADIN), u(IMPERIAL_PALADIN)], // Bonus: Imperial Paladin upgrades from Paladin
     [b(DOCK), u(FISHING_SHIP)],
     [b(DOCK), u(TRANSPORT_SHIP)],
     [b(DOCK), u(DROMON)],
@@ -754,9 +750,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
       castle_2: 0,
       imperial_1: 0,
       imperial_2: 0,
-      imperial_3: 0,
     },
-    height: Math.max(windowHeight - 80, 1300),
+    height: Math.max(windowHeight - 80, 100),
     width: 0,
     padding: 20,
     element_height: 0,
@@ -764,9 +759,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
     offset_x: 150,
   }
 
-  // Update offsets - calculate element height based on number of rows (9 rows now with imperial_3)
-  const numRows = 9
-  tree.element_height = (tree.height - (tree.padding * 2)) / (numRows + (numRows - 1) * 0.5)
+  // Update offsets
+  tree.element_height = tree.height / 4 / 3
   const element_offset = tree.element_height / 2
 
   tree.offsets.dark_1 = tree.padding
@@ -777,7 +771,6 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   tree.offsets.castle_2 = tree.offsets.castle_1 + tree.element_height + element_offset
   tree.offsets.imperial_1 = tree.offsets.castle_2 + tree.element_height + element_offset
   tree.offsets.imperial_2 = tree.offsets.imperial_1 + tree.element_height + element_offset
-  tree.offsets.imperial_3 = tree.offsets.imperial_2 + tree.element_height + element_offset
 
   // Create lanes
   const archerylane = createLane()
@@ -844,7 +837,6 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   } else {
     stablelane.rows.imperial_1.push(unit(HUSSAR))
   }
-  
   stablelane.rows.imperial_1.push(unit(CAVALIER))
   stablelane.rows.imperial_1.push(unit(HEAVY_CAMEL_RIDER))
   stablelane.rows.imperial_1.push(unit(ELITE_BATTLE_ELEPHANT))
@@ -858,8 +850,6 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
     stablelane.rows.imperial_2.push(unit(PALADIN))
   }
   if (isBonusSelected(BONUS_ID_IMPERIAL_CAMEL)) stablelane.rows.imperial_2.push(unit(IMPERIAL_CAMEL_RIDER)) // Bonus unit: Can upgrade to Imperial Camel Rider (after Heavy Camel)
-  // Imperial Paladin comes after Paladin in imperial_3 row (keeping same column position to avoid crossing lines)
-  if (isBonusSelected(BONUS_ID_IMPERIAL_PALADIN)) stablelane.rows.imperial_3.push(unit(IMPERIAL_PALADIN)) // Bonus unit: Can upgrade Paladin to Imperial Paladin
   tree.lanes.push(stablelane)
 
   const siegeworkshoplane = createLane()
