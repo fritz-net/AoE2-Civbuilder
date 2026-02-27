@@ -224,10 +224,7 @@ import {
   TRANSHUMANCE,
   PASTORALISM,
   DOMESTICATION,
-  // New dock techs
-  WAR_GALLEY_TECH,
-  GALLEON_TECH,
-  DEMOLITION_SHIP_TECH,
+  // New dock techs (feudal/castle/imperial age)
   FISHING_LINES,
   CARVEL_HULL,
   CLINKER_CONSTRUCTION,
