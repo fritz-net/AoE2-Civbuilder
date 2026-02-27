@@ -41,7 +41,40 @@ function loadPng(relPath) {
     console.warn(`  Warning: image not found: ${relPath}, using blank`);
     return createBlank(64, 64);
   }
-  return PNG.sync.read(fs.readFileSync(fullPath));
+  const png = PNG.sync.read(fs.readFileSync(fullPath));
+  // Unit icons (and other game assets) are stored as RGB without alpha channel;
+  // their background is pure black. Convert black → transparent so they composite
+  // cleanly over the card background.
+  if (!png.alpha) {
+    blackToAlpha(png);
+  }
+  return png;
+}
+
+/**
+ * In-place "black to alpha" conversion for RGB images without an alpha channel.
+ * Each pixel's alpha is set to max(r, g, b), making pure-black pixels fully
+ * transparent and bright pixels fully opaque.  RGB channels are normalised to
+ * avoid premultiplied-alpha darkening.
+ */
+function blackToAlpha(png) {
+  for (let i = 0; i < png.width * png.height; i++) {
+    const base = i << 2;
+    const r = png.data[base];
+    const g = png.data[base + 1];
+    const b = png.data[base + 2];
+    const a = Math.max(r, g, b);
+    if (a === 0) {
+      png.data[base + 3] = 0;
+    } else {
+      // Normalise to preserve brightness
+      png.data[base] = Math.min(255, Math.round((r * 255) / a));
+      png.data[base + 1] = Math.min(255, Math.round((g * 255) / a));
+      png.data[base + 2] = Math.min(255, Math.round((b * 255) / a));
+      png.data[base + 3] = a;
+    }
+  }
+  png.alpha = true;
 }
 
 function createBlank(width, height) {
