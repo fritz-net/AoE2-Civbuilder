@@ -146,6 +146,9 @@ const testBonusesGrouped = [
       { id: 348, name: 'Can recruit Xianbei Raiders' },
       { id: 355, name: 'Can recruit Grenadiers' },
       { id: 142, name: 'Can recruit Missionaries' },
+      { id: 364, name: 'Can recruit Champi Warriors' },
+      { id: 365, name: 'Can recruit Champi Riders' },
+      { id: 366, name: 'Can recruit Champi Scouts' },
     ]
   },
   {

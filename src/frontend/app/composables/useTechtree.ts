@@ -144,6 +144,11 @@ import {
   XIANBEI_RAIDER,
   WAR_CHARIOT,
   JIAN_SWORDSMAN,
+  // Americas DLC regional units
+  CHAMPI_RIDER,
+  CHAMPI_WARRIOR,
+  ELITE_CHAMPI_WARRIOR,
+  CHAMPI_SCOUT,
   // Tech IDs
   TOWN_WATCH,
   CROP_ROTATION,
@@ -256,6 +261,9 @@ import {
   BONUS_ID_CARAVEL,
   BONUS_ID_KREPOST,
   BONUS_ID_DONJON,
+  BONUS_ID_CHAMPI_WARRIOR,
+  BONUS_ID_CHAMPI_RIDER,
+  BONUS_ID_CHAMPI_SCOUT,
 } from './useBonusTechMapping'
 
 let techtreeData: TechtreeData | null = null
@@ -835,6 +843,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.imperial_1.push(unit(HALBERDIER))
   barrackslane.rows.imperial_1.push(unit(ELITE_EAGLE_WARRIOR))
   barrackslane.rows.imperial_1.push(unit(ELITE_FIRE_LANCER))
+  if (isBonusSelected(BONUS_ID_CHAMPI_WARRIOR)) barrackslane.rows.imperial_1.push(unit(CHAMPI_WARRIOR)) // Bonus unit: Can recruit Champi Warriors (Americas DLC)
+  if (isBonusSelected(BONUS_ID_CHAMPI_WARRIOR)) barrackslane.rows.imperial_2.push(unit(ELITE_CHAMPI_WARRIOR)) // auto-enabled with Champi Warrior
   tree.lanes.push(barrackslane)
 
   const stablelane = createLane()
@@ -849,6 +859,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.castle_1.push(unit(STEPPE_LANCER))
   stablelane.rows.castle_1.push(unit(HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.castle_1.push(unit(SHRIVAMSHA_RIDER)) // Bonus unit: Can recruit Shrivamsha Riders
+  if (isBonusSelected(BONUS_ID_CHAMPI_RIDER)) stablelane.rows.castle_1.push(unit(CHAMPI_RIDER)) // Bonus unit: Can recruit Champi Riders (Americas DLC)
   stablelane.rows.castle_1.push(tech(HUSBANDRY))
   // Hussar or Winged Hussar (replacement bonus 282)
   if (isBonusSelected(BONUS_ID_WINGED_HUSSAR)) {
@@ -863,6 +874,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.imperial_1.push(unit(ELITE_STEPPE_LANCER))
   stablelane.rows.imperial_1.push(unit(HEAVY_HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.imperial_1.push(unit(ELITE_SHRIVAMSHA_RIDER))
+  if (isBonusSelected(BONUS_ID_CHAMPI_SCOUT)) stablelane.rows.imperial_1.push(unit(CHAMPI_SCOUT)) // Bonus unit: Can recruit Champi Scouts (Americas DLC)
   // Paladin or Savar (replacement bonus 314)
   if (isBonusSelected(BONUS_ID_SAVAR)) {
     stablelane.rows.imperial_2.push(unit(SAVAR)) // Savar replaces Paladin

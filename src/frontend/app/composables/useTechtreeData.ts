@@ -251,6 +251,16 @@ export const ELITE_WAR_CHARIOT = 1964
 export const JIAN_SWORDSMAN = 1974
 // Note: No Elite Jian Swordsman exists in game
 
+// Americas DLC regional units (shared by Mapuche, Muisca, Tupi)
+export const CHAMPI_RIDER = 2550       // Castle Age cavalry
+export const CHAMPI_WARRIOR = 2552     // Imperial Age infantry
+export const ELITE_CHAMPI_WARRIOR = 2554
+export const CHAMPI_SCOUT = 2588       // Imperial Age scout (stable)
+// Mapuche-specific regional units
+export const BOLAS_RIDER = 2569        // Castle Age cavalry
+export const ELITE_BOLAS_RIDER = 2571
+// TODO: Add BONUS_ID_BOLAS_RIDER when Bolas Rider bonus flag is needed (Mapuche-specific)
+
 // Tech IDs
 export const TOWN_WATCH = 8
 export const CROP_ROTATION = 12
@@ -455,6 +465,13 @@ export const regionalCarets = [
   'unit_1964',  // Elite War Chariot
   'unit_1974',  // Jian Swordsman
   'unit_1975',  // Elite Jian Swordsman
+  // Americas DLC regional units
+  'unit_2550',  // Champi Rider
+  'unit_2552',  // Champi Warrior
+  'unit_2554',  // Elite Champi Warrior
+  'unit_2569',  // Bolas Rider
+  'unit_2571',  // Elite Bolas Rider
+  'unit_2588',  // Champi Scout
 ]
 
 export function useTechtreeData() {

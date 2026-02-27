@@ -30,6 +30,10 @@ export const BONUS_ID_WINGED_HUSSAR = 282
 export const BONUS_ID_LEGIONARY = 307
 export const BONUS_ID_SAVAR = 314
 export const BONUS_ID_FORTIFIED_CHURCH = 316
+// Americas DLC regional units
+export const BONUS_ID_CHAMPI_WARRIOR = 364
+export const BONUS_ID_CHAMPI_RIDER = 365
+export const BONUS_ID_CHAMPI_SCOUT = 366
 
 export interface BonusTechMapping {
   bonusId: number
@@ -305,6 +309,27 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 109,
     bonusType: 'civ',
     buildings: [1665],  // Donjon
+  },
+
+  // CIV_BONUS_364: "Can recruit Champi Warriors" (Americas DLC regional infantry)
+  {
+    bonusId: 364,
+    bonusType: 'civ',
+    units: [2552, 2554],  // Champi Warrior + Elite Champi Warrior
+  },
+
+  // CIV_BONUS_365: "Can recruit Champi Riders" (Americas DLC regional cavalry)
+  {
+    bonusId: 365,
+    bonusType: 'civ',
+    units: [2550],  // Champi Rider
+  },
+
+  // CIV_BONUS_366: "Can recruit Champi Scouts" (Americas DLC regional scout cavalry)
+  {
+    bonusId: 366,
+    bonusType: 'civ',
+    units: [2588],  // Champi Scout
   },
 ]
 
