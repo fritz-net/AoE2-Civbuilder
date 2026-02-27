@@ -340,6 +340,15 @@ export const HERBAL_MEDICINE = 441
 export const ARSON = 602
 export const ARROWSLITS = 608
 export const GAMBESONS = 875
+// New dock upgrade techs
+export const WAR_GALLEY_TECH = 34
+export const GALLEON_TECH = 35
+export const DEMOLITION_SHIP_TECH = 905
+export const FISHING_LINES = 906
+export const CARVEL_HULL = 907
+export const CLINKER_CONSTRUCTION = 908
+export const SIPHONS = 909
+export const INCENDIARIES = 910
 
 // Pasture Tech IDs (for CIV_BONUS_105)
 export const TRANSHUMANCE = 1012 // 3. Pastures tech / Grazing Grasslands
