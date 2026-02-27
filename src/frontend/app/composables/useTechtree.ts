@@ -224,6 +224,15 @@ import {
   TRANSHUMANCE,
   PASTORALISM,
   DOMESTICATION,
+  // New dock techs
+  WAR_GALLEY_TECH,
+  GALLEON_TECH,
+  DEMOLITION_SHIP_TECH,
+  FISHING_LINES,
+  CARVEL_HULL,
+  CLINKER_CONSTRUCTION,
+  SIPHONS,
+  INCENDIARIES,
 } from './useTechtreeData'
 
 import {
@@ -491,6 +500,12 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [t(CAREENING), t(DRY_DOCK)],
     [b(DOCK), t(SHIPWRIGHT)],
     [b(DOCK), b(FISH_TRAP)],
+    // New dock techs (906-910)
+    [b(DOCK), t(FISHING_LINES)],
+    [b(DOCK), t(CLINKER_CONSTRUCTION)],
+    [b(DOCK), t(CARVEL_HULL)],
+    [b(DOCK), t(SIPHONS)],
+    [b(DOCK), t(INCENDIARIES)],
     // Can-build bonus: Caravel connections
     [b(DOCK), u(CARAVEL)],
     [u(CARAVEL), u(ELITE_CARAVEL)],
@@ -911,6 +926,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   docklane.rows.feudal_1.push(unit(TRADE_COG))
   docklane.rows.feudal_1.push(unit(DEMOLITION_RAFT))
   docklane.rows.feudal_1.push(unit(GALLEY))
+  docklane.rows.feudal_2.push(tech(FISHING_LINES))      // New: Fishing Lines (feudal)
+  docklane.rows.feudal_2.push(tech(CLINKER_CONSTRUCTION)) // New: Clinker Construction (feudal)
   docklane.rows.castle_1.push(unit(FIRE_SHIP))
   docklane.rows.castle_1.push(tech(GILLNETS))
   docklane.rows.castle_1.push(unit(DEMOLITION_SHIP))
@@ -919,6 +936,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   if (isBonusSelected(BONUS_ID_TURTLE_SHIP)) docklane.rows.castle_1.push(unit(TURTLE_SHIP)) // Bonus unit: Can train Turtle Ships
   if (isBonusSelected(BONUS_ID_CARAVEL)) docklane.rows.castle_1.push(unit(CARAVEL)) // Bonus unit: Can build Caravels
   docklane.rows.castle_1.push(tech(CAREENING))
+  docklane.rows.castle_2.push(tech(CARVEL_HULL))         // New: Carvel Hull (castle)
+  docklane.rows.castle_2.push(tech(SIPHONS))             // New: Siphons (castle)
   docklane.rows.imperial_1.push(unit(FAST_FIRE_SHIP))
   docklane.rows.imperial_1.push(unit(CANNON_GALLEON))
   docklane.rows.imperial_1.push(unit(HEAVY_DEMO_SHIP))
@@ -926,12 +945,13 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   if (isBonusSelected(BONUS_ID_LONGBOAT)) docklane.rows.imperial_1.push(unit(ELITE_LONGBOAT))
   if (isBonusSelected(BONUS_ID_TURTLE_SHIP)) docklane.rows.imperial_1.push(unit(ELITE_TURTLE_SHIP))
   if (isBonusSelected(BONUS_ID_CARAVEL)) docklane.rows.imperial_1.push(unit(ELITE_CARAVEL)) // Bonus unit: Elite Caravel (auto-enabled with Caravel)
+  docklane.rows.imperial_1.push(tech(DRY_DOCK))
+  docklane.rows.imperial_1.push(tech(SHIPWRIGHT))
   docklane.rows.imperial_2.push(unit(LOU_CHUAN))
   docklane.rows.imperial_2.push(unit(ELITE_CANNON_GALLEON))
   docklane.rows.imperial_2.push(unit(DROMON))
   if (isBonusSelected(BONUS_ID_THIRISADAI)) docklane.rows.imperial_2.push(unit(THIRISADAI)) // Bonus unit: Can train Thirisadai
-  docklane.rows.imperial_1.push(tech(DRY_DOCK))
-  docklane.rows.imperial_1.push(tech(SHIPWRIGHT))
+  docklane.rows.imperial_2.push(tech(INCENDIARIES))      // New: Incendiaries (imperial)
   tree.lanes.push(docklane)
 
   const fishtraplane = createLane()
