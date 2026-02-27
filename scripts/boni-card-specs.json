@@ -1,0 +1,76 @@
+{
+  "_comment": "Card image specs for bonuses, castle/imperial techs and team bonuses. IDs must not overlap with existing cards (bonus 0-363, castle 0-59, imp 0-58, team 0-79). If 'id' is omitted, cards are auto-numbered from 'startId'.",
+  "bonus": {
+    "startId": 364,
+    "cards": [
+      {
+        "label": "Archers +1 Range",
+        "mainIcons": ["uniticons/035_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "range" }
+        ]
+      },
+      {
+        "label": "Cavalry +HP and +Armor",
+        "mainIcons": ["uniticons/038_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "hp" },
+          { "modifier": "plus", "stat": "armor" }
+        ]
+      },
+      {
+        "label": "Infantry cheaper (-food, -wood)",
+        "mainIcons": ["uniticons/093_50730.png", "uniticons/097_50730.png"],
+        "statModifiers": [
+          { "modifier": "minus", "stat": "food" },
+          { "modifier": "minus", "stat": "wood" }
+        ]
+      },
+      {
+        "label": "Siege units +HP and +Range Armor",
+        "mainIcons": ["uniticons/350_50730.png", "uniticons/351_50730.png", "uniticons/354_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "hp" },
+          { "modifier": "plus", "stat": "range-armor" }
+        ]
+      }
+    ]
+  },
+  "castle": {
+    "startId": 60,
+    "cards": [
+      {
+        "label": "Unique Tech: Chemistry free",
+        "mainIcons": ["staticons/powerup.png"],
+        "statModifiers": [
+          { "modifier": "free", "stat": "gold" }
+        ]
+      }
+    ]
+  },
+  "imp": {
+    "startId": 59,
+    "cards": [
+      {
+        "label": "All mounted units +1/+1 armor",
+        "mainIcons": ["uniticons/038_50730.png", "uniticons/105_50730.png", "uniticons/099_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "armor" },
+          { "modifier": "plus", "stat": "range-armor" }
+        ]
+      }
+    ]
+  },
+  "team": {
+    "startId": 80,
+    "cards": [
+      {
+        "label": "Docks work 25% faster",
+        "mainIcons": ["uniticons/229_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "workrate" }
+        ]
+      }
+    ]
+  }
+}

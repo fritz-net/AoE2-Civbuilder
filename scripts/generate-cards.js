@@ -1,0 +1,328 @@
+#!/usr/bin/env node
+'use strict';
+
+/**
+ * generate-cards.js
+ *
+ * Generates 256×256 PNG card images from scripts/boni-card-specs.json.
+ * Output goes to public/img/cards/{type}_{id}.png.
+ *
+ * Layout:
+ *   - Background: cards/card_background.png
+ *   - 1–3 main icons (unit/building type) in the upper portion
+ *     - 1 icon: centered
+ *     - 2 icons: side by side
+ *     - 3 icons: triangle (2 back-faded + 1 front)
+ *   - Stat modifier strip at the bottom:
+ *     - modifier symbol (plus/minus/free) drawn programmatically
+ *     - stat icons from staticons/
+ *     - when all modifiers are the same type, one modifier icon precedes all stat icons
+ *   - Border overlay: cards/card_border.png
+ *
+ * Usage: node scripts/generate-cards.js [--spec <path>]
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { PNG } = require('pngjs');
+
+const CARD_SIZE = 256;
+const REPO_ROOT = path.join(__dirname, '..');
+const IMG_DIR = path.join(REPO_ROOT, 'public', 'img');
+const CARDS_DIR = path.join(IMG_DIR, 'cards');
+
+const CARD_TYPES = ['bonus', 'castle', 'imp', 'team'];
+
+// ── image primitives ──────────────────────────────────────────────────────────
+
+function loadPng(relPath) {
+  const fullPath = path.join(IMG_DIR, relPath);
+  if (!fs.existsSync(fullPath)) {
+    console.warn(`  Warning: image not found: ${relPath}, using blank`);
+    return createBlank(64, 64);
+  }
+  return PNG.sync.read(fs.readFileSync(fullPath));
+}
+
+function createBlank(width, height) {
+  const png = new PNG({ width, height });
+  png.data = Buffer.alloc(width * height * 4, 0);
+  return png;
+}
+
+/** Nearest-neighbour scale */
+function scaleNearest(src, w, h) {
+  const dst = createBlank(w, h);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const sx = Math.min(Math.floor((x * src.width) / w), src.width - 1);
+      const sy = Math.min(Math.floor((y * src.height) / h), src.height - 1);
+      const si = (src.width * sy + sx) << 2;
+      const di = (w * y + x) << 2;
+      dst.data[di] = src.data[si];
+      dst.data[di + 1] = src.data[si + 1];
+      dst.data[di + 2] = src.data[si + 2];
+      dst.data[di + 3] = src.data[si + 3];
+    }
+  }
+  return dst;
+}
+
+/** Porter-Duff "over" compositing with optional global alpha */
+function alphaBlend(base, overlay, destX, destY, globalAlpha = 1.0) {
+  for (let y = 0; y < overlay.height; y++) {
+    const by = destY + y;
+    if (by < 0 || by >= base.height) continue;
+    for (let x = 0; x < overlay.width; x++) {
+      const bx = destX + x;
+      if (bx < 0 || bx >= base.width) continue;
+      const si = (overlay.width * y + x) << 2;
+      const di = (base.width * by + bx) << 2;
+      const srcA = (overlay.data[si + 3] / 255) * globalAlpha;
+      if (srcA === 0) continue;
+      const dstA = base.data[di + 3] / 255;
+      const outA = srcA + dstA * (1 - srcA);
+      if (outA === 0) continue;
+      base.data[di] = Math.round(
+        (overlay.data[si] * srcA + base.data[di] * dstA * (1 - srcA)) / outA
+      );
+      base.data[di + 1] = Math.round(
+        (overlay.data[si + 1] * srcA + base.data[di + 1] * dstA * (1 - srcA)) / outA
+      );
+      base.data[di + 2] = Math.round(
+        (overlay.data[si + 2] * srcA + base.data[di + 2] * dstA * (1 - srcA)) / outA
+      );
+      base.data[di + 3] = Math.round(outA * 255);
+    }
+  }
+}
+
+function fillRect(png, x, y, w, h, r, g, b, a = 255) {
+  const x0 = Math.max(0, x);
+  const y0 = Math.max(0, y);
+  const x1 = Math.min(png.width, x + w);
+  const y1 = Math.min(png.height, y + h);
+  for (let py = y0; py < y1; py++) {
+    for (let px = x0; px < x1; px++) {
+      const i = (png.width * py + px) << 2;
+      png.data[i] = r;
+      png.data[i + 1] = g;
+      png.data[i + 2] = b;
+      png.data[i + 3] = a;
+    }
+  }
+}
+
+function drawCircleOutline(png, cx, cy, radius, r, g, b, a = 255) {
+  for (let dy = -radius; dy <= radius; dy++) {
+    for (let dx = -radius; dx <= radius; dx++) {
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d >= radius - 1.5 && d <= radius + 0.5) {
+        const px = cx + dx;
+        const py = cy + dy;
+        if (px >= 0 && px < png.width && py >= 0 && py < png.height) {
+          const i = (png.width * py + px) << 2;
+          png.data[i] = r;
+          png.data[i + 1] = g;
+          png.data[i + 2] = b;
+          png.data[i + 3] = a;
+        }
+      }
+    }
+  }
+}
+
+// ── modifier symbol icons ─────────────────────────────────────────────────────
+
+/**
+ * Creates a 36×36 PNG icon for a stat modifier type.
+ *   plus     – green plus sign
+ *   minus    – red minus sign
+ *   free     – blue double circle (zero cost)
+ *   multiply – yellow × sign
+ */
+function makeModifierIcon(type) {
+  const S = 36;
+  const png = createBlank(S, S);
+  const mid = S / 2;
+  const barLen = 22;
+  const barThick = 6;
+  const bx = Math.floor((S - barLen) / 2); // 7
+  const by = Math.floor((S - barThick) / 2); // 15
+
+  switch (type) {
+    case 'plus':
+      fillRect(png, bx, by, barLen, barThick, 60, 200, 60, 255); // horizontal
+      fillRect(png, by, bx, barThick, barLen, 60, 200, 60, 255); // vertical
+      break;
+
+    case 'minus':
+      fillRect(png, bx, by, barLen, barThick, 220, 60, 60, 255);
+      break;
+
+    case 'free':
+      // Double circle = "0 cost"
+      drawCircleOutline(png, mid, mid, mid - 4, 80, 140, 220, 255);
+      drawCircleOutline(png, mid, mid, mid - 7, 80, 140, 220, 255);
+      break;
+
+    case 'multiply':
+      fillRect(png, bx, by, barLen, barThick, 220, 200, 60, 255); // horizontal
+      fillRect(png, by, bx, barThick, barLen, 220, 200, 60, 255); // vertical
+      break;
+
+    default:
+      fillRect(png, bx, by, barLen, barThick, 150, 150, 150, 255);
+  }
+  return png;
+}
+
+// ── layout helpers ────────────────────────────────────────────────────────────
+
+/**
+ * Place 1–3 main icons in the upper portion of the card (y ≈ 15–165).
+ *   1 icon  – centered
+ *   2 icons – side by side
+ *   3 icons – triangle: two back-faded icons + one front icon
+ */
+function placeMainIcons(canvas, iconPaths) {
+  if (iconPaths.length === 0) return;
+  const paths = iconPaths.slice(0, 3);
+
+  if (paths.length === 1) {
+    const size = 130;
+    const x = Math.floor((CARD_SIZE - size) / 2);
+    const icon = scaleNearest(loadPng(paths[0]), size, size);
+    alphaBlend(canvas, icon, x, 18);
+  } else if (paths.length === 2) {
+    const size = 105;
+    const gap = 16;
+    const startX = Math.floor((CARD_SIZE - size * 2 - gap) / 2);
+    alphaBlend(canvas, scaleNearest(loadPng(paths[0]), size, size), startX, 25);
+    alphaBlend(canvas, scaleNearest(loadPng(paths[1]), size, size), startX + size + gap, 25);
+  } else {
+    // Triangle: back-left and back-right (slightly faded), front centered lower
+    const backSize = 95;
+    const frontSize = 105;
+    const backAlpha = 0.72;
+    alphaBlend(canvas, scaleNearest(loadPng(paths[0]), backSize, backSize), 15, 15, backAlpha);
+    alphaBlend(
+      canvas,
+      scaleNearest(loadPng(paths[1]), backSize, backSize),
+      CARD_SIZE - 15 - backSize,
+      15,
+      backAlpha
+    );
+    const frontX = Math.floor((CARD_SIZE - frontSize) / 2);
+    alphaBlend(canvas, scaleNearest(loadPng(paths[2]), frontSize, frontSize), frontX, 55);
+  }
+}
+
+/**
+ * Place stat-modifier icons in the bottom strip (y ≈ 185–221).
+ *
+ * When all entries share the same modifier, renders:
+ *   [mod_icon] [stat_icon] [stat_icon] …
+ * Otherwise renders pairs:
+ *   [mod_icon] [stat_icon] [mod_icon] [stat_icon] …
+ */
+function placeStatModifiers(canvas, statModifiers) {
+  if (statModifiers.length === 0) return;
+
+  const ICON_SIZE = 36;
+  const GAP = 6;
+
+  const allSame =
+    statModifiers.length > 1 &&
+    statModifiers.every((m) => m.modifier === statModifiers[0].modifier);
+
+  const items = [];
+  if (allSame) {
+    items.push({ kind: 'mod', modifier: statModifiers[0].modifier });
+    for (const sm of statModifiers) items.push({ kind: 'stat', stat: sm.stat });
+  } else {
+    for (const sm of statModifiers) {
+      items.push({ kind: 'mod', modifier: sm.modifier });
+      items.push({ kind: 'stat', stat: sm.stat });
+    }
+  }
+
+  const totalW = items.length * ICON_SIZE + (items.length - 1) * GAP;
+  let x = Math.floor((CARD_SIZE - totalW) / 2);
+  const y = 185;
+
+  for (const item of items) {
+    let icon;
+    if (item.kind === 'mod') {
+      icon = makeModifierIcon(item.modifier);
+    } else {
+      icon = scaleNearest(loadPng(`staticons/${item.stat}.png`), ICON_SIZE, ICON_SIZE);
+    }
+    alphaBlend(canvas, icon, x, y);
+    x += ICON_SIZE + GAP;
+  }
+}
+
+// ── card generation ───────────────────────────────────────────────────────────
+
+function generateCard(spec) {
+  const canvas = createBlank(CARD_SIZE, CARD_SIZE);
+
+  // 1. Background
+  const bg = scaleNearest(loadPng('cards/card_background.png'), CARD_SIZE, CARD_SIZE);
+  alphaBlend(canvas, bg, 0, 0);
+
+  // 2. Main icons
+  placeMainIcons(canvas, spec.mainIcons || []);
+
+  // 3. Stat modifiers
+  placeStatModifiers(canvas, spec.statModifiers || []);
+
+  // 4. Border (drawn last so it sits on top)
+  const border = scaleNearest(loadPng('cards/card_border.png'), CARD_SIZE, CARD_SIZE);
+  alphaBlend(canvas, border, 0, 0);
+
+  return canvas;
+}
+
+// ── main ──────────────────────────────────────────────────────────────────────
+
+function main() {
+  const args = process.argv.slice(2);
+  const specIdx = args.indexOf('--spec');
+  const specPath =
+    specIdx !== -1
+      ? path.resolve(args[specIdx + 1])
+      : path.join(__dirname, 'boni-card-specs.json');
+
+  if (!fs.existsSync(specPath)) {
+    console.error(`Spec file not found: ${specPath}`);
+    process.exit(1);
+  }
+
+  const spec = JSON.parse(fs.readFileSync(specPath, 'utf8'));
+  let generated = 0;
+
+  for (const cardType of CARD_TYPES) {
+    if (!spec[cardType]) continue;
+
+    const group = spec[cardType];
+    const cards = group.cards || [];
+    let nextId = group.startId ?? 0;
+
+    for (const cardSpec of cards) {
+      const id = cardSpec.id ?? nextId;
+      nextId = id + 1;
+
+      console.log(`  ${cardType}_${id}.png  –  ${cardSpec.label || '(no label)'}`);
+      const card = generateCard(cardSpec);
+      const outPath = path.join(CARDS_DIR, `${cardType}_${id}.png`);
+      fs.writeFileSync(outPath, PNG.sync.write(card));
+      generated++;
+    }
+  }
+
+  console.log(`\nGenerated ${generated} card(s) → ${CARDS_DIR}`);
+}
+
+main();
