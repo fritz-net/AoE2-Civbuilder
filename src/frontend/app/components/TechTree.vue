@@ -184,6 +184,7 @@
             :y="caret.y"
             :width="caret.width * 0.6"
             :height="caret.height * 0.6"
+            @error="onImageError($event)"
           />
 
           <!-- Cross (disabled indicator) -->
@@ -806,6 +807,18 @@ function getAgePath(image: string): string {
 
 function getImagePath(id: string): string {
   return `${props.relativePath}/img/${imagePrefix(id)}.jpg`
+}
+
+function getFallbackImagePath(): string {
+  return `${props.relativePath}/img/Units/unique_unit.jpg`
+}
+
+function onImageError(event: Event): void {
+  const img = event.target as SVGImageElement
+  const fallback = getFallbackImagePath()
+  if (img.href.baseVal !== fallback) {
+    img.href.baseVal = fallback
+  }
 }
 
 function getCrossPath(): string {

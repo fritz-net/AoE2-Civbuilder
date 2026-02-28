@@ -149,6 +149,8 @@ import {
   CHAMPI_WARRIOR,
   ELITE_CHAMPI_WARRIOR,
   CHAMPI_SCOUT,
+  IBIRAPEMA_WARRIOR,
+  ELITE_IBIRAPEMA_WARRIOR,
   // Tech IDs
   TOWN_WATCH,
   CROP_ROTATION,
@@ -261,9 +263,8 @@ import {
   BONUS_ID_CARAVEL,
   BONUS_ID_KREPOST,
   BONUS_ID_DONJON,
-  BONUS_ID_CHAMPI_WARRIOR,
-  BONUS_ID_CHAMPI_RIDER,
-  BONUS_ID_CHAMPI_SCOUT,
+  BONUS_ID_CHAMPI,
+  BONUS_ID_IBIRAPEMA,
 } from './useBonusTechMapping'
 
 let techtreeData: TechtreeData | null = null
@@ -649,6 +650,14 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(MONASTERY), u(WARRIOR_PRIEST)],
     // Missionary (bonus 142)
     [b(MONASTERY), u(MISSIONARY)],
+    // Champi (bonus 364) - Americas DLC - lane: stable and barracks
+    [b(STABLE), u(CHAMPI_RIDER)],
+    [u(CHAMPI_RIDER), u(CHAMPI_SCOUT)],
+    [b(BARRACKS), u(CHAMPI_WARRIOR)],
+    [u(CHAMPI_WARRIOR), u(ELITE_CHAMPI_WARRIOR)],
+    // Ibirapema Warrior (bonus 365) - Tupi-specific
+    [b(BARRACKS), u(IBIRAPEMA_WARRIOR)],
+    [u(IBIRAPEMA_WARRIOR), u(ELITE_IBIRAPEMA_WARRIOR)],
   ]
 
   // Helper to get Mill or Folwark building ID based on bonus selection
@@ -831,6 +840,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.castle_1.push(unit(EAGLE_WARRIOR))
   barrackslane.rows.castle_1.push(unit(FIRE_LANCER))
   if (isBonusSelected(BONUS_ID_JIAN_SWORDSMAN)) barrackslane.rows.castle_1.push(unit(JIAN_SWORDSMAN)) // Bonus unit: Can recruit Jian Swordsmen (no elite)
+  if (isBonusSelected(BONUS_ID_IBIRAPEMA)) barrackslane.rows.castle_1.push(unit(IBIRAPEMA_WARRIOR)) // Bonus unit: Can recruit Ibirapema Warriors (Tupi DLC)
   barrackslane.rows.castle_1.push(tech(GAMBESONS))
   barrackslane.rows.castle_1.push(tech(SQUIRES))
   // Two-Handed Swordsman or Legionary (replacement bonus 307)
@@ -843,8 +853,9 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.imperial_1.push(unit(HALBERDIER))
   barrackslane.rows.imperial_1.push(unit(ELITE_EAGLE_WARRIOR))
   barrackslane.rows.imperial_1.push(unit(ELITE_FIRE_LANCER))
-  if (isBonusSelected(BONUS_ID_CHAMPI_WARRIOR)) barrackslane.rows.imperial_1.push(unit(CHAMPI_WARRIOR)) // Bonus unit: Can recruit Champi Warriors (Americas DLC)
-  if (isBonusSelected(BONUS_ID_CHAMPI_WARRIOR)) barrackslane.rows.imperial_2.push(unit(ELITE_CHAMPI_WARRIOR)) // auto-enabled with Champi Warrior
+  if (isBonusSelected(BONUS_ID_CHAMPI)) barrackslane.rows.imperial_1.push(unit(CHAMPI_WARRIOR)) // Bonus: Champi (all Champi units) - Americas DLC
+  if (isBonusSelected(BONUS_ID_CHAMPI)) barrackslane.rows.imperial_2.push(unit(ELITE_CHAMPI_WARRIOR)) // auto-enabled with Champi bonus
+  if (isBonusSelected(BONUS_ID_IBIRAPEMA)) barrackslane.rows.imperial_1.push(unit(ELITE_IBIRAPEMA_WARRIOR)) // auto-enabled with Ibirapema bonus
   tree.lanes.push(barrackslane)
 
   const stablelane = createLane()
@@ -859,7 +870,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.castle_1.push(unit(STEPPE_LANCER))
   stablelane.rows.castle_1.push(unit(HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.castle_1.push(unit(SHRIVAMSHA_RIDER)) // Bonus unit: Can recruit Shrivamsha Riders
-  if (isBonusSelected(BONUS_ID_CHAMPI_RIDER)) stablelane.rows.castle_1.push(unit(CHAMPI_RIDER)) // Bonus unit: Can recruit Champi Riders (Americas DLC)
+  if (isBonusSelected(BONUS_ID_CHAMPI)) stablelane.rows.castle_1.push(unit(CHAMPI_RIDER)) // Bonus: Champi (all Champi units) - Americas DLC
   stablelane.rows.castle_1.push(tech(HUSBANDRY))
   // Hussar or Winged Hussar (replacement bonus 282)
   if (isBonusSelected(BONUS_ID_WINGED_HUSSAR)) {
@@ -874,7 +885,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.imperial_1.push(unit(ELITE_STEPPE_LANCER))
   stablelane.rows.imperial_1.push(unit(HEAVY_HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.imperial_1.push(unit(ELITE_SHRIVAMSHA_RIDER))
-  if (isBonusSelected(BONUS_ID_CHAMPI_SCOUT)) stablelane.rows.imperial_1.push(unit(CHAMPI_SCOUT)) // Bonus unit: Can recruit Champi Scouts (Americas DLC)
+  if (isBonusSelected(BONUS_ID_CHAMPI)) stablelane.rows.imperial_1.push(unit(CHAMPI_SCOUT)) // Bonus: Champi (all Champi units) - Americas DLC
   // Paladin or Savar (replacement bonus 314)
   if (isBonusSelected(BONUS_ID_SAVAR)) {
     stablelane.rows.imperial_2.push(unit(SAVAR)) // Savar replaces Paladin

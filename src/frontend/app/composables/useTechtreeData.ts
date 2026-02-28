@@ -260,6 +260,9 @@ export const CHAMPI_SCOUT = 2588       // Imperial Age scout (stable)
 export const BOLAS_RIDER = 2569        // Castle Age cavalry
 export const ELITE_BOLAS_RIDER = 2571
 // TODO: Add BONUS_ID_BOLAS_RIDER when Bolas Rider bonus flag is needed (Mapuche-specific)
+// Tupi-specific regional units
+export const IBIRAPEMA_WARRIOR = 2582  // Castle Age infantry
+export const ELITE_IBIRAPEMA_WARRIOR = 2584
 
 // Tech IDs
 export const TOWN_WATCH = 8
@@ -471,6 +474,8 @@ export const regionalCarets = [
   'unit_2554',  // Elite Champi Warrior
   'unit_2569',  // Bolas Rider
   'unit_2571',  // Elite Bolas Rider
+  'unit_2582',  // Ibirapema Warrior
+  'unit_2584',  // Elite Ibirapema Warrior
   'unit_2588',  // Champi Scout
 ]
 
