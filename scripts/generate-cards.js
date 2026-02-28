@@ -41,23 +41,31 @@ function loadPng(relPath) {
     console.warn(`  Warning: image not found: ${relPath}, using blank`);
     return createBlank(64, 64);
   }
-  const png = PNG.sync.read(fs.readFileSync(fullPath));
-  // Unit icons (and other game assets) are stored as RGB without alpha channel;
-  // their background is pure black. Convert black → transparent so they composite
-  // cleanly over the card background.
-  if (!png.alpha) {
-    blackToAlpha(png);
-  }
-  return png;
+  return PNG.sync.read(fs.readFileSync(fullPath));
 }
 
 /**
- * In-place "black to alpha" conversion for RGB images without an alpha channel.
- * Each pixel's alpha is set to max(r, g, b), making pure-black pixels fully
- * transparent and bright pixels fully opaque.  RGB channels are normalised to
- * avoid premultiplied-alpha darkening.
+ * Load a unit/building icon and strip its black background.
+ * Game assets are often stored as RGB PNGs (no alpha channel) or as RGBA PNGs
+ * where the alpha channel is unused (all pixels fully opaque) and black is
+ * used as the background colour.  In both cases we convert black → transparent
+ * so icons composite cleanly over the card background.
+ *
+ * alpha = max(r, g, b) — pure black → α=0, bright pixels → α=255.
+ * RGB channels are normalised to avoid premultiplied-alpha darkening.
  */
-function blackToAlpha(png) {
+function loadUnitIcon(relPath) {
+  const png = loadPng(relPath);
+  // Detect black-background images: no alpha channel, OR alpha channel present
+  // but no pixel is actually transparent (all alpha=255, black used as bg colour).
+  if (png.alpha) {
+    // Only scan if the PNG header claims an alpha channel; skip if it doesn't.
+    let hasTransparentPixel = false;
+    for (let i = 3; i < png.data.length; i += 4) {
+      if (png.data[i] < 255) { hasTransparentPixel = true; break; }
+    }
+    if (hasTransparentPixel) return png;
+  }
   for (let i = 0; i < png.width * png.height; i++) {
     const base = i << 2;
     const r = png.data[base];
@@ -67,7 +75,6 @@ function blackToAlpha(png) {
     if (a === 0) {
       png.data[base + 3] = 0;
     } else {
-      // Normalise to preserve brightness
       png.data[base] = Math.min(255, Math.round((r * 255) / a));
       png.data[base + 1] = Math.min(255, Math.round((g * 255) / a));
       png.data[base + 2] = Math.min(255, Math.round((b * 255) / a));
@@ -75,6 +82,7 @@ function blackToAlpha(png) {
     }
   }
   png.alpha = true;
+  return png;
 }
 
 function createBlank(width, height) {
@@ -225,29 +233,29 @@ function placeMainIcons(canvas, iconPaths) {
   if (paths.length === 1) {
     const size = 130;
     const x = Math.floor((CARD_SIZE - size) / 2);
-    const icon = scaleNearest(loadPng(paths[0]), size, size);
+    const icon = scaleNearest(loadUnitIcon(paths[0]), size, size);
     alphaBlend(canvas, icon, x, 18);
   } else if (paths.length === 2) {
     const size = 105;
     const gap = 16;
     const startX = Math.floor((CARD_SIZE - size * 2 - gap) / 2);
-    alphaBlend(canvas, scaleNearest(loadPng(paths[0]), size, size), startX, 25);
-    alphaBlend(canvas, scaleNearest(loadPng(paths[1]), size, size), startX + size + gap, 25);
+    alphaBlend(canvas, scaleNearest(loadUnitIcon(paths[0]), size, size), startX, 25);
+    alphaBlend(canvas, scaleNearest(loadUnitIcon(paths[1]), size, size), startX + size + gap, 25);
   } else {
     // Triangle: back-left and back-right (slightly faded), front centered lower
     const backSize = 95;
     const frontSize = 105;
     const backAlpha = 0.72;
-    alphaBlend(canvas, scaleNearest(loadPng(paths[0]), backSize, backSize), 15, 15, backAlpha);
+    alphaBlend(canvas, scaleNearest(loadUnitIcon(paths[0]), backSize, backSize), 15, 15, backAlpha);
     alphaBlend(
       canvas,
-      scaleNearest(loadPng(paths[1]), backSize, backSize),
+      scaleNearest(loadUnitIcon(paths[1]), backSize, backSize),
       CARD_SIZE - 15 - backSize,
       15,
       backAlpha
     );
     const frontX = Math.floor((CARD_SIZE - frontSize) / 2);
-    alphaBlend(canvas, scaleNearest(loadPng(paths[2]), frontSize, frontSize), frontX, 55);
+    alphaBlend(canvas, scaleNearest(loadUnitIcon(paths[2]), frontSize, frontSize), frontX, 55);
   }
 }
 
@@ -262,7 +270,7 @@ function placeMainIcons(canvas, iconPaths) {
 function placeStatModifiers(canvas, statModifiers) {
   if (statModifiers.length === 0) return;
 
-  const ICON_SIZE = 36;
+  const ICON_SIZE = 58;
   const GAP = 6;
 
   const allSame =
@@ -287,7 +295,7 @@ function placeStatModifiers(canvas, statModifiers) {
   for (const item of items) {
     let icon;
     if (item.kind === 'mod') {
-      icon = makeModifierIcon(item.modifier);
+      icon = scaleNearest(makeModifierIcon(item.modifier), ICON_SIZE, ICON_SIZE);
     } else {
       icon = scaleNearest(loadPng(`staticons/${item.stat}.png`), ICON_SIZE, ICON_SIZE);
     }
@@ -310,10 +318,6 @@ function generateCard(spec) {
 
   // 3. Stat modifiers
   placeStatModifiers(canvas, spec.statModifiers || []);
-
-  // 4. Border (drawn last so it sits on top)
-  const border = scaleNearest(loadPng('cards/card_border.png'), CARD_SIZE, CARD_SIZE);
-  alphaBlend(canvas, border, 0, 0);
 
   return canvas;
 }
