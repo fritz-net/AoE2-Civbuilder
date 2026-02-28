@@ -153,6 +153,29 @@ function fillRect(png, x, y, w, h, r, g, b, a = 255) {
   }
 }
 
+function drawLine(png, x0, y0, x1, y1, r, g, b, a = 255) {
+  const dx = Math.abs(x1 - x0);
+  const dy = Math.abs(y1 - y0);
+  const steps = Math.max(dx, dy, 1);
+  for (let t = 0; t <= steps; t++) {
+    const px = Math.round(x0 + (x1 - x0) * t / steps);
+    const py = Math.round(y0 + (y1 - y0) * t / steps);
+    for (let oy = -1; oy <= 1; oy++) {
+      for (let ox = -1; ox <= 1; ox++) {
+        const nx = px + ox;
+        const ny = py + oy;
+        if (nx >= 0 && nx < png.width && ny >= 0 && ny < png.height) {
+          const i = (png.width * ny + nx) << 2;
+          png.data[i] = r;
+          png.data[i + 1] = g;
+          png.data[i + 2] = b;
+          png.data[i + 3] = a;
+        }
+      }
+    }
+  }
+}
+
 function drawCircleOutline(png, cx, cy, radius, r, g, b, a = 255) {
   for (let dy = -radius; dy <= radius; dy++) {
     for (let dx = -radius; dx <= radius; dx++) {
@@ -178,8 +201,10 @@ function drawCircleOutline(png, cx, cy, radius, r, g, b, a = 255) {
  * Creates a 36×36 PNG icon for a stat modifier type.
  *   plus     – green plus sign
  *   minus    – red minus sign
- *   free     – blue double circle (zero cost)
+ *   free     – red forbidden sign (🚫, zero cost)
  *   multiply – yellow × sign
+ *   faster   – three right-pointing green chevrons (speed increase)
+ *   instant  – white stopwatch face with hand at 12 o'clock (no research time)
  */
 function makeModifierIcon(type) {
   const S = 36;
@@ -227,6 +252,30 @@ function makeModifierIcon(type) {
       fillRect(png, bx, by, barLen, barThick, 220, 200, 60, 255); // horizontal
       fillRect(png, by, bx, barThick, barLen, 220, 200, 60, 255); // vertical
       break;
+
+    case 'faster': {
+      // Three right-pointing green chevrons: >>> (speed / faster)
+      const H = 7; // half-height of each chevron arm
+      const tipXs = [11, 20, 29]; // tip x-coordinates for 3 chevrons
+      for (const tipX of tipXs) {
+        drawLine(png, tipX - H, mid - H, tipX, mid, 60, 200, 60, 255); // upper arm
+        drawLine(png, tipX - H, mid + H, tipX, mid, 60, 200, 60, 255); // lower arm
+      }
+      break;
+    }
+
+    case 'instant': {
+      // Stopwatch: circular face + hand at 12 o'clock (= instant / no research time)
+      const circR = mid - 3;
+      drawCircleOutline(png, mid, mid, circR, 230, 230, 230, 255);
+      // Hand pointing straight up (12 o'clock)
+      drawLine(png, mid, mid, mid, mid - circR + 2, 230, 230, 230, 255);
+      // Center dot
+      fillRect(png, mid - 1, mid - 1, 3, 3, 230, 230, 230, 255);
+      // Crown / button at the top
+      fillRect(png, mid - 2, 0, 5, 3, 230, 230, 230, 255);
+      break;
+    }
 
     default:
       fillRect(png, bx, by, barLen, barThick, 150, 150, 150, 255);

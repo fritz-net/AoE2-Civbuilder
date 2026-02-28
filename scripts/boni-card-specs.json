@@ -27,11 +27,89 @@
         ]
       },
       {
-        "label": "Siege units +HP and +Range Armor",
+        "label": "Siege units +HP and +Pierce Armor",
         "mainIcons": ["uniticons/350_50730.png", "uniticons/351_50730.png", "uniticons/354_50730.png"],
         "statModifiers": [
           { "modifier": "plus", "stat": "hp" },
           { "modifier": "plus", "stat": "pierceArmor" }
+        ]
+      },
+      {
+        "label": "Cavalry move 15% faster",
+        "mainIcons": ["uniticons/038_50730.png"],
+        "statModifiers": [
+          { "modifier": "faster", "stat": "movementSpeed" }
+        ]
+      },
+      {
+        "label": "Archers fire faster",
+        "mainIcons": ["uniticons/035_50730.png"],
+        "statModifiers": [
+          { "modifier": "faster", "stat": "reloadTime" }
+        ]
+      },
+      {
+        "label": "Siege weapons +blast radius",
+        "mainIcons": ["uniticons/350_50730.png", "uniticons/354_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "blastRadius" }
+        ]
+      },
+      {
+        "label": "Infantry +damage and +HP",
+        "mainIcons": ["uniticons/093_50730.png", "uniticons/097_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "damage" },
+          { "modifier": "plus", "stat": "hp" }
+        ]
+      },
+      {
+        "label": "Units garrison more (+garrison space)",
+        "mainIcons": ["uniticons/093_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "garrison" }
+        ]
+      },
+      {
+        "label": "Cavalry regenerate HP",
+        "mainIcons": ["uniticons/038_50730.png", "uniticons/099_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "hpRegen" }
+        ]
+      },
+      {
+        "label": "Skirmishers deal bleed damage",
+        "mainIcons": ["uniticons/036_50730.png", "uniticons/037_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "damageBleed" }
+        ]
+      },
+      {
+        "label": "Infantry damage bypasses armor",
+        "mainIcons": ["uniticons/093_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "damageBypass" }
+        ]
+      },
+      {
+        "label": "Enemies take HP loss over time",
+        "mainIcons": ["uniticons/035_50730.png", "uniticons/093_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "hpLoss" }
+        ]
+      },
+      {
+        "label": "Archers deal pierce damage that bypasses armor",
+        "mainIcons": ["uniticons/035_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "pierceAttackBypass" }
+        ]
+      },
+      {
+        "label": "Archers deal pierce bleed damage",
+        "mainIcons": ["uniticons/035_50730.png", "uniticons/036_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "pierceAttackBleed" }
         ]
       }
     ]
@@ -44,6 +122,13 @@
         "mainIcons": ["staticons/powerup.png"],
         "statModifiers": [
           { "modifier": "free", "stat": "gold" }
+        ]
+      },
+      {
+        "label": "Unique Tech researched instantly",
+        "mainIcons": ["staticons/powerup.png"],
+        "statModifiers": [
+          { "modifier": "instant", "stat": "powerup" }
         ]
       }
     ]
@@ -69,6 +154,13 @@
         "mainIcons": ["uniticons/229_50730.png"],
         "statModifiers": [
           { "modifier": "plus", "stat": "workrate" }
+        ]
+      },
+      {
+        "label": "All buildings and villagers work faster",
+        "mainIcons": ["uniticons/229_50730.png", "uniticons/230_50730.png"],
+        "statModifiers": [
+          { "modifier": "faster", "stat": "workrate" }
         ]
       }
     ]
