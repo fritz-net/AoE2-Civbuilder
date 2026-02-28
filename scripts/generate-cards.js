@@ -8,16 +8,16 @@
  * Output goes to public/img/cards/{type}_{id}.png.
  *
  * Layout:
- *   - Background: cards/card_background.png
+ *   - Background: cards/card_background.png (includes the border frame)
  *   - 1–3 main icons (unit/building type) in the upper portion
  *     - 1 icon: centered
  *     - 2 icons: side by side
  *     - 3 icons: triangle (2 back-faded + 1 front)
- *   - Stat modifier strip at the bottom:
+ *   - Stat modifier strip at the bottom (y=166–230):
  *     - modifier symbol (plus/minus/free) drawn programmatically
  *     - stat icons from staticons/
  *     - when all modifiers are the same type, one modifier icon precedes all stat icons
- *   - Border overlay: cards/card_border.png
+ *   (card_border.png is NOT used; the ornate border is baked into card_background.png)
  *
  * Usage: node scripts/generate-cards.js [--spec <path>]
  */
@@ -32,6 +32,10 @@ const IMG_DIR = path.join(REPO_ROOT, 'public', 'img');
 const CARDS_DIR = path.join(IMG_DIR, 'cards');
 
 const CARD_TYPES = ['bonus', 'castle', 'imp', 'team'];
+
+// Pixels whose max(R,G,B) is at or below this value are treated as pure-black
+// background and made fully transparent during unit-icon loading.
+const BLACK_THRESHOLD = 10;
 
 // ── image primitives ──────────────────────────────────────────────────────────
 
@@ -66,20 +70,13 @@ function loadUnitIcon(relPath) {
     }
     if (hasTransparentPixel) return png;
   }
+  // Apply hard threshold: pure-black background pixels (max(r,g,b) ≤ BLACK_THRESHOLD)
+  // become fully transparent; all other pixels stay fully opaque.  This preserves dark
+  // unit art (shadow, armour) that a soft luminance-alpha would make semi-transparent.
   for (let i = 0; i < png.width * png.height; i++) {
     const base = i << 2;
-    const r = png.data[base];
-    const g = png.data[base + 1];
-    const b = png.data[base + 2];
-    const a = Math.max(r, g, b);
-    if (a === 0) {
-      png.data[base + 3] = 0;
-    } else {
-      png.data[base] = Math.min(255, Math.round((r * 255) / a));
-      png.data[base + 1] = Math.min(255, Math.round((g * 255) / a));
-      png.data[base + 2] = Math.min(255, Math.round((b * 255) / a));
-      png.data[base + 3] = a;
-    }
+    const maxRGB = Math.max(png.data[base], png.data[base + 1], png.data[base + 2]);
+    png.data[base + 3] = maxRGB <= BLACK_THRESHOLD ? 0 : 255;
   }
   png.alpha = true;
   return png;
@@ -260,18 +257,23 @@ function placeMainIcons(canvas, iconPaths) {
 }
 
 /**
- * Place stat-modifier icons in the bottom strip (y ≈ 185–221).
+ * Place stat-modifier icons in the bottom strip.
+ * Bottom edge is y=166+64=230, flush with the inner border of card_background.png.
  *
  * When all entries share the same modifier, renders:
  *   [mod_icon] [stat_icon] [stat_icon] …
  * Otherwise renders pairs:
  *   [mod_icon] [stat_icon] [mod_icon] [stat_icon] …
+ *
+ * The modifier icon uses a tight gap (MOD_GAP) before its stat icon so the
+ * indicator sits visually attached to the value it modifies.
  */
 function placeStatModifiers(canvas, statModifiers) {
   if (statModifiers.length === 0) return;
 
-  const ICON_SIZE = 58;
-  const GAP = 6;
+  const ICON_SIZE = 64;
+  const GAP = 8;     // gap between stat icons / between pairs
+  const MOD_GAP = 2; // tight gap between a modifier icon and its stat icon
 
   const allSame =
     statModifiers.length > 1 &&
@@ -288,11 +290,17 @@ function placeStatModifiers(canvas, statModifiers) {
     }
   }
 
-  const totalW = items.length * ICON_SIZE + (items.length - 1) * GAP;
-  let x = Math.floor((CARD_SIZE - totalW) / 2);
-  const y = 185;
+  // Total width with variable gaps (mod→stat tight, everything else normal)
+  let totalW = items.length * ICON_SIZE;
+  for (let i = 0; i < items.length - 1; i++) {
+    totalW += items[i].kind === 'mod' ? MOD_GAP : GAP;
+  }
 
-  for (const item of items) {
+  let x = Math.floor((CARD_SIZE - totalW) / 2);
+  const y = 166; // bottom edge = 166 + 64 = 230, flush with inner border
+
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
     let icon;
     if (item.kind === 'mod') {
       icon = scaleNearest(makeModifierIcon(item.modifier), ICON_SIZE, ICON_SIZE);
@@ -300,7 +308,9 @@ function placeStatModifiers(canvas, statModifiers) {
       icon = scaleNearest(loadPng(`staticons/${item.stat}.png`), ICON_SIZE, ICON_SIZE);
     }
     alphaBlend(canvas, icon, x, y);
-    x += ICON_SIZE + GAP;
+    if (i < items.length - 1) {
+      x += ICON_SIZE + (items[i].kind === 'mod' ? MOD_GAP : GAP);
+    }
   }
 }
 
