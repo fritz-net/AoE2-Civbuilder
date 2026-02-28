@@ -1,0 +1,168 @@
+{
+  "_comment": "Card image specs for bonuses, castle/imperial techs and team bonuses. IDs must not overlap with existing cards (bonus 0-363, castle 0-59, imp 0-58, team 0-79). If 'id' is omitted, cards are auto-numbered from 'startId'.",
+  "bonus": {
+    "startId": 364,
+    "cards": [
+      {
+        "label": "Archers +1 Range",
+        "mainIcons": ["uniticons/035_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "range" }
+        ]
+      },
+      {
+        "label": "Cavalry +HP and +Armor",
+        "mainIcons": ["uniticons/038_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "hp" },
+          { "modifier": "plus", "stat": "meleeArmor" }
+        ]
+      },
+      {
+        "label": "Infantry cheaper (-food, -wood)",
+        "mainIcons": ["uniticons/093_50730.png", "uniticons/097_50730.png"],
+        "statModifiers": [
+          { "modifier": "minus", "stat": "food" },
+          { "modifier": "minus", "stat": "wood" }
+        ]
+      },
+      {
+        "label": "Siege units +HP and +Pierce Armor",
+        "mainIcons": ["uniticons/350_50730.png", "uniticons/351_50730.png", "uniticons/354_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "hp" },
+          { "modifier": "plus", "stat": "pierceArmor" }
+        ]
+      },
+      {
+        "label": "Cavalry move 15% faster",
+        "mainIcons": ["uniticons/038_50730.png"],
+        "statModifiers": [
+          { "modifier": "faster", "stat": "movementSpeed" }
+        ]
+      },
+      {
+        "label": "Archers fire faster",
+        "mainIcons": ["uniticons/035_50730.png"],
+        "statModifiers": [
+          { "modifier": "faster", "stat": "reloadTime" }
+        ]
+      },
+      {
+        "label": "Siege weapons +blast radius",
+        "mainIcons": ["uniticons/350_50730.png", "uniticons/354_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "blastRadius" }
+        ]
+      },
+      {
+        "label": "Infantry +damage and +HP",
+        "mainIcons": ["uniticons/093_50730.png", "uniticons/097_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "damage" },
+          { "modifier": "plus", "stat": "hp" }
+        ]
+      },
+      {
+        "label": "Units garrison more (+garrison space)",
+        "mainIcons": ["uniticons/093_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "garrison" }
+        ]
+      },
+      {
+        "label": "Cavalry regenerate HP",
+        "mainIcons": ["uniticons/038_50730.png", "uniticons/099_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "hpRegen" }
+        ]
+      },
+      {
+        "label": "Skirmishers deal bleed damage",
+        "mainIcons": ["uniticons/036_50730.png", "uniticons/037_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "damageBleed" }
+        ]
+      },
+      {
+        "label": "Infantry damage bypasses armor",
+        "mainIcons": ["uniticons/093_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "damageBypass" }
+        ]
+      },
+      {
+        "label": "Enemies take HP loss over time",
+        "mainIcons": ["uniticons/035_50730.png", "uniticons/093_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "hpLoss" }
+        ]
+      },
+      {
+        "label": "Archers deal pierce damage that bypasses armor",
+        "mainIcons": ["uniticons/035_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "pierceAttackBypass" }
+        ]
+      },
+      {
+        "label": "Archers deal pierce bleed damage",
+        "mainIcons": ["uniticons/035_50730.png", "uniticons/036_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "pierceAttackBleed" }
+        ]
+      }
+    ]
+  },
+  "castle": {
+    "startId": 60,
+    "cards": [
+      {
+        "label": "Unique Tech: Chemistry free",
+        "mainIcons": ["staticons/powerup.png"],
+        "statModifiers": [
+          { "modifier": "free", "stat": "gold" }
+        ]
+      },
+      {
+        "label": "Unique Tech researched instantly",
+        "mainIcons": ["staticons/powerup.png"],
+        "statModifiers": [
+          { "modifier": "instant", "stat": "powerup" }
+        ]
+      }
+    ]
+  },
+  "imp": {
+    "startId": 59,
+    "cards": [
+      {
+        "label": "All mounted units +1/+1 armor",
+        "mainIcons": ["uniticons/038_50730.png", "uniticons/105_50730.png", "uniticons/099_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "meleeArmor" },
+          { "modifier": "plus", "stat": "pierceArmor" }
+        ]
+      }
+    ]
+  },
+  "team": {
+    "startId": 80,
+    "cards": [
+      {
+        "label": "Docks work 25% faster",
+        "mainIcons": ["uniticons/229_50730.png"],
+        "statModifiers": [
+          { "modifier": "plus", "stat": "workrate" }
+        ]
+      },
+      {
+        "label": "All buildings and villagers work faster",
+        "mainIcons": ["uniticons/229_50730.png", "uniticons/230_50730.png"],
+        "statModifiers": [
+          { "modifier": "faster", "stat": "workrate" }
+        ]
+      }
+    ]
+  }
+}
