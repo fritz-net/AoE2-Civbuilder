@@ -584,6 +584,11 @@ const writeUUIcons = (req, res, next) => {
 	}
 	var data = fs.readFileSync(`./modding/requested_mods/${req.body.seed}/data.json`);
 	var civ = JSON.parse(data);
+	
+	// Track if any icons need to be copied and find the last valid icon index
+	var iconCopyNeeded = false;
+	var lastIconIndex = -1;
+	
 	for (var i = 0; i < civ.techtree.length; i++) {
 		//Persians and Saracens are index 7 & 8 but War Elephants and Mamelukes are index 8 & 7
 		var unitId = civ.techtree[i][0];
@@ -591,6 +596,21 @@ const writeUUIcons = (req, res, next) => {
 		// Validate that unitId is defined and within valid range
 		if (unitId === undefined || unitId === null) {
 			console.error(`[${req.body.seed}]: Warning - Unit ID is undefined for civ techtree index ${i}`);
+			continue;
+		}
+		
+		// Handle custom UU objects (they have type: 'custom')
+		if (typeof unitId === 'object') {
+			if (unitId.type === 'custom') {
+				console.log(`[${req.body.seed}]: Skipping icon copy for custom UU at techtree index ${i}: ${unitId.name || 'unnamed'}`);
+			} else {
+				console.error(`[${req.body.seed}]: Warning - Unexpected object format for unit ID at techtree index ${i}: ${JSON.stringify(unitId)}`);
+			}
+			continue;
+		}
+		
+		// Skip if unitId is 0 (no unique unit)
+		if (unitId === 0) {
 			continue;
 		}
 		
@@ -602,7 +622,34 @@ const writeUUIcons = (req, res, next) => {
 			continue;
 		}
 		
-		if (i == civ.techtree.length - 1) {
+		// Mark that we need to copy icons and track the last valid index
+		iconCopyNeeded = true;
+		lastIconIndex = i;
+	}
+	
+	// If no icons need to be copied, call next immediately
+	if (!iconCopyNeeded || lastIconIndex === -1) {
+		console.log(`[${req.body.seed}]: No unique unit icons to copy (all players have custom UUs or no UUs)`);
+		next();
+		return;
+	}
+	
+	// Copy icons for units that need them
+	for (var i = 0; i < civ.techtree.length; i++) {
+		var unitId = civ.techtree[i][0];
+		
+		// Skip non-numeric unit IDs (custom UUs, undefined, null, 0)
+		if (typeof unitId !== 'number' || unitId === 0) {
+			continue;
+		}
+		
+		var iconsrc = iconids[unitId];
+		if (iconsrc === undefined) {
+			continue;
+		}
+		
+		// Call next() on the last valid icon index
+		if (i === lastIconIndex) {
 			osUtil.execCommand(`cp ./public/img/uniticons/${iconsrc}_50730.png ./modding/requested_mods/${req.body.seed}/${req.body.seed}-ui/resources/_common/wpfg/resources/uniticons/${iconsrc}_50730.png`, function () {
 				next();
 			});
@@ -680,13 +727,20 @@ const zipModFolder = (req, res, next) => {
 
 /**
  * Helper function to extract bonus ID from bonus data
- * Bonus data can be either a number (legacy) or [id, multiplier] (new UI)
- * @param {number|number[]} bonus - Either a number (legacy format) or [id, multiplier] array (new UI format)
+ * Bonus data can be either a number (legacy) or [id, multiplier] (new UI) or a custom UU object
+ * @param {number|number[]|object} bonus - Either a number (legacy format), [id, multiplier] array (new UI format), or a custom UU object
  * @param {string} [context] - Optional context for error messages (e.g., "civ bonus", "unique unit")
- * @returns {number} - The bonus ID
+ * @returns {number} - The bonus ID, or 0 for custom UUs
  */
 function extractBonusId(bonus, context) {
 	const errorContext = context ? ` in ${context}` : '';
+	
+	// Handle null/undefined
+	if (bonus === null || bonus === undefined) {
+		console.error(`Warning: Null or undefined bonus encountered${errorContext}`);
+		return 0;
+	}
+	
 	if (Array.isArray(bonus)) {
 		// Validate array has at least one element
 		if (bonus.length === 0) {
@@ -695,11 +749,19 @@ function extractBonusId(bonus, context) {
 		}
 		return bonus[0]; // Return the ID from [id, multiplier]
 	}
-	// Handle null/undefined
-	if (bonus === null || bonus === undefined) {
-		console.error(`Warning: Null or undefined bonus encountered${errorContext}`);
+	
+	// Handle custom UU objects (they have type: 'custom')
+	if (typeof bonus === 'object' && bonus.type === 'custom') {
+		// Custom UUs should return 0 for the techtree (they are handled separately)
 		return 0;
 	}
+	
+	// Handle plain objects (unexpected format)
+	if (typeof bonus === 'object') {
+		console.error(`Warning: Unexpected object format encountered${errorContext}: ${JSON.stringify(bonus)}`);
+		return 0;
+	}
+	
 	return bonus; // Return the number directly
 }
 
