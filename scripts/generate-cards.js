@@ -35,7 +35,9 @@ const CARD_TYPES = ['bonus', 'castle', 'imp', 'team'];
 
 // Pixels whose max(R,G,B) is at or below this value are treated as pure-black
 // background and made fully transparent during unit-icon loading.
-const BLACK_THRESHOLD = 10;
+// Value of 25 captures antialiased edge pixels (dark halos) while preserving
+// genuine dark unit-art pixels that exceed this brightness.
+const BLACK_THRESHOLD = 25;
 
 // ── image primitives ──────────────────────────────────────────────────────────
 
@@ -198,11 +200,28 @@ function makeModifierIcon(type) {
       fillRect(png, bx, by, barLen, barThick, 220, 60, 60, 255);
       break;
 
-    case 'free':
-      // Double circle = "0 cost"
-      drawCircleOutline(png, mid, mid, mid - 4, 80, 140, 220, 255);
-      drawCircleOutline(png, mid, mid, mid - 7, 80, 140, 220, 255);
+    case 'free': {
+      // Forbidden / "no-cost" sign: red circle with diagonal slash (🚫)
+      const DIAG = 0.7071; // cos(45°) = sin(45°) = √2/2 — direction of 45° diagonal
+      const SLASH_HALF_WIDTH = 3; // half stroke width for the slash line in pixels
+      const circR = mid - 3;
+      drawCircleOutline(png, mid, mid, circR, 220, 60, 60, 255);
+      // Slash from upper-left to lower-right: parametric along 45° direction
+      for (let t = -circR; t <= circR; t++) {
+        for (let w = -SLASH_HALF_WIDTH; w <= SLASH_HALF_WIDTH; w++) {
+          const px = Math.round(mid + (t - w) * DIAG);
+          const py = Math.round(mid + (t + w) * DIAG);
+          if (px >= 0 && px < S && py >= 0 && py < S) {
+            const idx = (S * py + px) << 2;
+            png.data[idx] = 220;
+            png.data[idx + 1] = 60;
+            png.data[idx + 2] = 60;
+            png.data[idx + 3] = 255;
+          }
+        }
+      }
       break;
+    }
 
     case 'multiply':
       fillRect(png, bx, by, barLen, barThick, 220, 200, 60, 255); // horizontal

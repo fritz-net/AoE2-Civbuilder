@@ -15,7 +15,7 @@
         "mainIcons": ["uniticons/038_50730.png"],
         "statModifiers": [
           { "modifier": "plus", "stat": "hp" },
-          { "modifier": "plus", "stat": "armor" }
+          { "modifier": "plus", "stat": "meleeArmor" }
         ]
       },
       {
@@ -31,7 +31,7 @@
         "mainIcons": ["uniticons/350_50730.png", "uniticons/351_50730.png", "uniticons/354_50730.png"],
         "statModifiers": [
           { "modifier": "plus", "stat": "hp" },
-          { "modifier": "plus", "stat": "range-armor" }
+          { "modifier": "plus", "stat": "pierceArmor" }
         ]
       }
     ]
@@ -55,8 +55,8 @@
         "label": "All mounted units +1/+1 armor",
         "mainIcons": ["uniticons/038_50730.png", "uniticons/105_50730.png", "uniticons/099_50730.png"],
         "statModifiers": [
-          { "modifier": "plus", "stat": "armor" },
-          { "modifier": "plus", "stat": "range-armor" }
+          { "modifier": "plus", "stat": "meleeArmor" },
+          { "modifier": "plus", "stat": "pierceArmor" }
         ]
       }
     ]
