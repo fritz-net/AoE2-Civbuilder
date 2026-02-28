@@ -144,6 +144,13 @@ import {
   XIANBEI_RAIDER,
   WAR_CHARIOT,
   JIAN_SWORDSMAN,
+  // Americas DLC regional units
+  CHAMPI_RIDER,
+  CHAMPI_WARRIOR,
+  ELITE_CHAMPI_WARRIOR,
+  CHAMPI_SCOUT,
+  IBIRAPEMA_WARRIOR,
+  ELITE_IBIRAPEMA_WARRIOR,
   // Tech IDs
   TOWN_WATCH,
   CROP_ROTATION,
@@ -224,6 +231,12 @@ import {
   TRANSHUMANCE,
   PASTORALISM,
   DOMESTICATION,
+  // New dock techs (feudal/castle/imperial age)
+  FISHING_LINES,
+  CARVEL_HULL,
+  CLINKER_CONSTRUCTION,
+  SIPHONS,
+  INCENDIARIES,
 } from './useTechtreeData'
 
 import {
@@ -250,6 +263,8 @@ import {
   BONUS_ID_CARAVEL,
   BONUS_ID_KREPOST,
   BONUS_ID_DONJON,
+  BONUS_ID_CHAMPI,
+  BONUS_ID_IBIRAPEMA,
 } from './useBonusTechMapping'
 
 let techtreeData: TechtreeData | null = null
@@ -491,6 +506,12 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [t(CAREENING), t(DRY_DOCK)],
     [b(DOCK), t(SHIPWRIGHT)],
     [b(DOCK), b(FISH_TRAP)],
+    // New dock techs (906-910)
+    [b(DOCK), t(FISHING_LINES)],
+    [b(DOCK), t(CLINKER_CONSTRUCTION)],
+    [b(DOCK), t(CARVEL_HULL)],
+    [b(DOCK), t(SIPHONS)],
+    [b(DOCK), t(INCENDIARIES)],
     // Can-build bonus: Caravel connections
     [b(DOCK), u(CARAVEL)],
     [u(CARAVEL), u(ELITE_CARAVEL)],
@@ -629,6 +650,14 @@ export function getConnections(selectedBonuses: number[] = []): [string, string]
     [b(MONASTERY), u(WARRIOR_PRIEST)],
     // Missionary (bonus 142)
     [b(MONASTERY), u(MISSIONARY)],
+    // Champi (bonus 364) - Americas DLC - lane: stable and barracks
+    [b(STABLE), u(CHAMPI_RIDER)],
+    [u(CHAMPI_RIDER), u(CHAMPI_SCOUT)],
+    [b(BARRACKS), u(CHAMPI_WARRIOR)],
+    [u(CHAMPI_WARRIOR), u(ELITE_CHAMPI_WARRIOR)],
+    // Ibirapema Warrior (bonus 365) - Tupi-specific
+    [b(BARRACKS), u(IBIRAPEMA_WARRIOR)],
+    [u(IBIRAPEMA_WARRIOR), u(ELITE_IBIRAPEMA_WARRIOR)],
   ]
 
   // Helper to get Mill or Folwark building ID based on bonus selection
@@ -811,6 +840,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.castle_1.push(unit(EAGLE_WARRIOR))
   barrackslane.rows.castle_1.push(unit(FIRE_LANCER))
   if (isBonusSelected(BONUS_ID_JIAN_SWORDSMAN)) barrackslane.rows.castle_1.push(unit(JIAN_SWORDSMAN)) // Bonus unit: Can recruit Jian Swordsmen (no elite)
+  if (isBonusSelected(BONUS_ID_IBIRAPEMA)) barrackslane.rows.castle_1.push(unit(IBIRAPEMA_WARRIOR)) // Bonus unit: Can recruit Ibirapema Warriors (Tupi DLC)
   barrackslane.rows.castle_1.push(tech(GAMBESONS))
   barrackslane.rows.castle_1.push(tech(SQUIRES))
   // Two-Handed Swordsman or Legionary (replacement bonus 307)
@@ -823,6 +853,9 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   barrackslane.rows.imperial_1.push(unit(HALBERDIER))
   barrackslane.rows.imperial_1.push(unit(ELITE_EAGLE_WARRIOR))
   barrackslane.rows.imperial_1.push(unit(ELITE_FIRE_LANCER))
+  if (isBonusSelected(BONUS_ID_CHAMPI)) barrackslane.rows.imperial_1.push(unit(CHAMPI_WARRIOR)) // Bonus: Champi (all Champi units) - Americas DLC
+  if (isBonusSelected(BONUS_ID_CHAMPI)) barrackslane.rows.imperial_2.push(unit(ELITE_CHAMPI_WARRIOR)) // auto-enabled with Champi bonus
+  if (isBonusSelected(BONUS_ID_IBIRAPEMA)) barrackslane.rows.imperial_1.push(unit(ELITE_IBIRAPEMA_WARRIOR)) // auto-enabled with Ibirapema bonus
   tree.lanes.push(barrackslane)
 
   const stablelane = createLane()
@@ -837,6 +870,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.castle_1.push(unit(STEPPE_LANCER))
   stablelane.rows.castle_1.push(unit(HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.castle_1.push(unit(SHRIVAMSHA_RIDER)) // Bonus unit: Can recruit Shrivamsha Riders
+  if (isBonusSelected(BONUS_ID_CHAMPI)) stablelane.rows.castle_1.push(unit(CHAMPI_RIDER)) // Bonus: Champi (all Champi units) - Americas DLC
   stablelane.rows.castle_1.push(tech(HUSBANDRY))
   // Hussar or Winged Hussar (replacement bonus 282)
   if (isBonusSelected(BONUS_ID_WINGED_HUSSAR)) {
@@ -851,6 +885,7 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   stablelane.rows.imperial_1.push(unit(ELITE_STEPPE_LANCER))
   stablelane.rows.imperial_1.push(unit(HEAVY_HEI_GUANG_CAVALRY))
   if (isBonusSelected(BONUS_ID_SHRIVAMSHA_RIDER)) stablelane.rows.imperial_1.push(unit(ELITE_SHRIVAMSHA_RIDER))
+  if (isBonusSelected(BONUS_ID_CHAMPI)) stablelane.rows.imperial_1.push(unit(CHAMPI_SCOUT)) // Bonus: Champi (all Champi units) - Americas DLC
   // Paladin or Savar (replacement bonus 314)
   if (isBonusSelected(BONUS_ID_SAVAR)) {
     stablelane.rows.imperial_2.push(unit(SAVAR)) // Savar replaces Paladin
@@ -911,6 +946,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   docklane.rows.feudal_1.push(unit(TRADE_COG))
   docklane.rows.feudal_1.push(unit(DEMOLITION_RAFT))
   docklane.rows.feudal_1.push(unit(GALLEY))
+  docklane.rows.feudal_2.push(tech(FISHING_LINES))      // New: Fishing Lines (feudal)
+  docklane.rows.feudal_2.push(tech(CLINKER_CONSTRUCTION)) // New: Clinker Construction (feudal)
   docklane.rows.castle_1.push(unit(FIRE_SHIP))
   docklane.rows.castle_1.push(tech(GILLNETS))
   docklane.rows.castle_1.push(unit(DEMOLITION_SHIP))
@@ -919,6 +956,8 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   if (isBonusSelected(BONUS_ID_TURTLE_SHIP)) docklane.rows.castle_1.push(unit(TURTLE_SHIP)) // Bonus unit: Can train Turtle Ships
   if (isBonusSelected(BONUS_ID_CARAVEL)) docklane.rows.castle_1.push(unit(CARAVEL)) // Bonus unit: Can build Caravels
   docklane.rows.castle_1.push(tech(CAREENING))
+  docklane.rows.castle_2.push(tech(CARVEL_HULL))         // New: Carvel Hull (castle)
+  docklane.rows.castle_2.push(tech(SIPHONS))             // New: Siphons (castle)
   docklane.rows.imperial_1.push(unit(FAST_FIRE_SHIP))
   docklane.rows.imperial_1.push(unit(CANNON_GALLEON))
   docklane.rows.imperial_1.push(unit(HEAVY_DEMO_SHIP))
@@ -926,12 +965,13 @@ export function getDefaultTree(windowHeight: number = 600, options: TreeOptions 
   if (isBonusSelected(BONUS_ID_LONGBOAT)) docklane.rows.imperial_1.push(unit(ELITE_LONGBOAT))
   if (isBonusSelected(BONUS_ID_TURTLE_SHIP)) docklane.rows.imperial_1.push(unit(ELITE_TURTLE_SHIP))
   if (isBonusSelected(BONUS_ID_CARAVEL)) docklane.rows.imperial_1.push(unit(ELITE_CARAVEL)) // Bonus unit: Elite Caravel (auto-enabled with Caravel)
+  docklane.rows.imperial_1.push(tech(DRY_DOCK))
+  docklane.rows.imperial_1.push(tech(SHIPWRIGHT))
   docklane.rows.imperial_2.push(unit(LOU_CHUAN))
   docklane.rows.imperial_2.push(unit(ELITE_CANNON_GALLEON))
   docklane.rows.imperial_2.push(unit(DROMON))
   if (isBonusSelected(BONUS_ID_THIRISADAI)) docklane.rows.imperial_2.push(unit(THIRISADAI)) // Bonus unit: Can train Thirisadai
-  docklane.rows.imperial_1.push(tech(DRY_DOCK))
-  docklane.rows.imperial_1.push(tech(SHIPWRIGHT))
+  docklane.rows.imperial_2.push(tech(INCENDIARIES))      // New: Incendiaries (imperial)
   tree.lanes.push(docklane)
 
   const fishtraplane = createLane()

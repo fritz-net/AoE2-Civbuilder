@@ -30,6 +30,9 @@ export const BONUS_ID_WINGED_HUSSAR = 282
 export const BONUS_ID_LEGIONARY = 307
 export const BONUS_ID_SAVAR = 314
 export const BONUS_ID_FORTIFIED_CHURCH = 316
+// Americas DLC regional units
+export const BONUS_ID_CHAMPI = 364
+export const BONUS_ID_IBIRAPEMA = 365
 
 export interface BonusTechMapping {
   bonusId: number
@@ -305,6 +308,20 @@ export const BONUS_TECH_MAPPINGS: BonusTechMapping[] = [
     bonusId: 109,
     bonusType: 'civ',
     buildings: [1665],  // Donjon
+  },
+
+  // CIV_BONUS_364: "Can recruit Champi" (Americas DLC - all Champi units for Mapuche/Muisca/Tupi)
+  {
+    bonusId: 364,
+    bonusType: 'civ',
+    units: [2550, 2552, 2554, 2588],  // Champi Rider + Champi Warrior + Elite Champi Warrior + Champi Scout
+  },
+
+  // CIV_BONUS_365: "Can recruit Ibirapema Warriors" (Americas DLC Tupi-specific)
+  {
+    bonusId: 365,
+    bonusType: 'civ',
+    units: [2582, 2584],  // Ibirapema Warrior + Elite Ibirapema Warrior
   },
 ]
 
