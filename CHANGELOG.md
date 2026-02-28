@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.14.0...v1.15.0) (2026-02-28)
+
+
+### Features
+
+* disable custom UU in /v2/build and /v2/draft via environment variable flags ([#303](https://github.com/fritz-net/AoE2-Civbuilder/issues/303)) ([ca41cc9](https://github.com/fritz-net/AoE2-Civbuilder/commit/ca41cc981a97a1a686aacb218ed93b5dfaa2d974))
+
+
+### Bug Fixes
+
+* reorder castles array to match game release order ([#316](https://github.com/fritz-net/AoE2-Civbuilder/issues/316)) ([229798b](https://github.com/fritz-net/AoE2-Civbuilder/commit/229798bed1773270792e1ef41f9c20030b947ecc))
+* set Discord and Donate buttons to matching width in UI v2 ([#315](https://github.com/fritz-net/AoE2-Civbuilder/issues/315)) ([3a05da8](https://github.com/fritz-net/AoE2-Civbuilder/commit/3a05da85e6cd07337fc8951a154f4d2de57bbdd3))
+
 ## [1.14.0](https://github.com/fritz-net/AoE2-Civbuilder/compare/v1.13.0...v1.14.0) (2026-02-18)
 
 
