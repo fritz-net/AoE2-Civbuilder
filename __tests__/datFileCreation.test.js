@@ -19,7 +19,7 @@ describe('Dat File Creation', () => {
   });
 
   // Helper function to run the test with a specific dat file
-  const testDatFileCreation = (datFileName, shouldPass) => {
+  const testDatFileCreation = (datFileName, shouldPass, expectedExitCode = null) => {
     const projectRoot = path.join(__dirname, '..');
     const createDataModPath = path.join(projectRoot, 'modding', 'build', 'create-data-mod');
     const testDataPath = path.join(__dirname, 'fixtures', 'crash-test-data.json');
@@ -85,6 +85,11 @@ describe('Dat File Creation', () => {
       // Check that output files have content
       const datStats = fs.statSync(outputDatPath);
       expect(datStats.size).toBeGreaterThan(0);
+    } else if (expectedExitCode !== null) {
+      // This dat file should exit gracefully with a specific error code
+      expect(exitCode).toBe(expectedExitCode);
+      // Verify it's not a crash
+      expect(exitCode).not.toBe(139);
     } else {
       // This dat file is expected to crash (for now)
       expect(exitCode).toBe(139);
@@ -96,10 +101,9 @@ describe('Dat File Creation', () => {
     testDatFileCreation('empires2_x2_p1.dat', true);
   }, 60000);
 
-  // Test the 3k dat file - still has issues (vector length error)
-  // Skipping this test until the 3k dat file specific issue is resolved
-  test.skip('should handle empires2_x2_p1_3k.dat (3 Kingdoms - has vector length error)', () => {
-    testDatFileCreation('empires2_x2_p1_3k.dat', false);
+  // Test the 3k dat file - now handled gracefully with exit code 2
+  test('should handle empires2_x2_p1_3k.dat (3 Kingdoms - has vector length error)', () => {
+    testDatFileCreation('empires2_x2_p1_3k.dat', false, 2);
   }, 60000);
 
   // Test the august2025 dat file - should now work
