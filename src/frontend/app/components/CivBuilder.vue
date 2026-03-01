@@ -9,6 +9,8 @@
       :steps="stepLabels"
       v-model:current-step="currentStep"
       :allow-navigation="!readOnly"
+      :can-proceed-to-next="canProceed"
+      :accessible-steps="accessibleSteps"
     />
     
     <!-- Step 1: Basic Info -->
@@ -515,6 +517,19 @@ const canProceed = computed(() => {
     return civConfig.alias && civConfig.alias.length > 0
   }
   return true
+})
+
+// Compute which steps have valid data and should be accessible
+const accessibleSteps = computed(() => {
+  const accessible: number[] = [0] // Step 0 (Basic Info) is always accessible
+  
+  // Step 0 is valid if we have a civ name
+  if (civConfig.alias && civConfig.alias.length > 0) {
+    // All subsequent steps are accessible once step 0 is valid
+    accessible.push(...Array.from({ length: stepLabels.length - 1 }, (_, i) => i + 1))
+  }
+  
+  return accessible
 })
 
 // Helper function to get unique unit name for review
