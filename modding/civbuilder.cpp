@@ -72,6 +72,61 @@ int16_t Civbuilder::getResearchLocation(const Tech& tech) {
     return tech.ResearchLocation;
 }
 
+// Helper method to check if a civ index (1-based, where 1 is first player civ) is a chronicle civ
+// Chronicle civs are at positions 47-49 and 55-57 (1-based) in the dat file
+// These correspond to: Archaemenids (47), Athenians (48), Spartans (49), Macedonians (55), Thracians (56), Puru (57)
+bool Civbuilder::isChronicleCiv(int civIndex) {
+    // civIndex is 1-based (Civ[1] is first player civ)
+    // NOTE: These constants are also defined in configIndexToCivIndex() - keep them in sync!
+    // First chronicle group: Archaemenids (47), Athenians (48), Spartans (49)
+    static const int FIRST_CHRONICLE_START = 47;
+    static const int FIRST_CHRONICLE_END = 49;
+    // Second chronicle group: Macedonians (55), Thracians (56), Puru (57)
+    static const int SECOND_CHRONICLE_START = 55;
+    static const int SECOND_CHRONICLE_END = 57;
+    
+    return (civIndex >= FIRST_CHRONICLE_START && civIndex <= FIRST_CHRONICLE_END) || 
+           (civIndex >= SECOND_CHRONICLE_START && civIndex <= SECOND_CHRONICLE_END);
+}
+
+// Helper method to map config index (0-based) to dat civ index (1-based), skipping chronicle civs
+// The config array doesn't include chronicle civs, so we need to account for them when accessing the dat file
+// Example mapping:
+//   config[0] -> Civ[1] (Britons)
+//   config[45] -> Civ[46] (Georgians, just before first chronicle group)
+//   config[46] -> Civ[50] (Shu, skip 47-49 chronicle civs)
+//   config[51] -> Civ[54] (Khitans, just before second chronicle group)
+//   config[52] -> Civ[58] (skip 55-57 chronicle civs)
+int Civbuilder::configIndexToCivIndex(int configIndex) {
+    // Validate input
+    if (configIndex < 0) {
+        cerr << "[C++]: WARNING - Invalid negative config index: " << configIndex << endl;
+        return 1; // Return first valid civ as fallback
+    }
+    
+    // NOTE: These constants must match those in isChronicleCiv() - keep them in sync!
+    int civIndex = configIndex + 1; // Start at 1 (first player civ)
+    
+    // First chronicle group: Archaemenids (47), Athenians (48), Spartans (49)
+    static const int FIRST_CHRONICLE_START = 47;
+    static const int CHRONICLE_GROUP_SIZE = 3;
+    
+    // If we're at or past the first chronicle group, add 3 to skip them
+    if (civIndex >= FIRST_CHRONICLE_START) {
+        civIndex += CHRONICLE_GROUP_SIZE;
+    }
+    
+    // Second chronicle group: Macedonians (55), Thracians (56), Puru (57)
+    static const int SECOND_CHRONICLE_START = 55;
+    
+    // If we're at or past the second chronicle group, add another 3 to skip them
+    if (civIndex >= SECOND_CHRONICLE_START) {
+        civIndex += CHRONICLE_GROUP_SIZE;
+    }
+    
+    return civIndex;
+}
+
 
 void Civbuilder::initialize() {
     // Log loaded dat file information
@@ -489,32 +544,40 @@ void Civbuilder::assignWonders() {
     cout << "[C++]: Assigning wonders for " << numPlayerCivs << " civs" << endl;
     
     // Create wonder graphic dictionary with bounds checking
+    // NOTE: We collect from ALL civs INCLUDING chronicle civs (they serve as source templates)
+    // This loop intentionally uses i+1 instead of configIndexToCivIndex() because we want
+    // to gather all available wonder graphics, including those from chronicle civs
     for (int i = 0; i < numPlayerCivs; i++) {
-        if (i + 1 >= df->Civs.size()) {
-            cerr << "[C++]: WARNING - Cannot access Civ[" << (i+1) << "], only " 
+        int civIndex = i + 1;
+        if (civIndex >= df->Civs.size()) {
+            cerr << "[C++]: WARNING - Cannot access Civ[" << civIndex << "], only " 
                  << df->Civs.size() << " civs available" << endl;
             break;
         }
-        if (df->Civs[i + 1].Units.size() <= 276) {
-            cerr << "[C++]: WARNING - Civ " << (i+1) << " has only " 
-                 << df->Civs[i + 1].Units.size() << " units (need >276 for wonder)" << endl;
+        if (df->Civs[civIndex].Units.size() <= 276) {
+            cerr << "[C++]: WARNING - Civ " << civIndex << " has only " 
+                 << df->Civs[civIndex].Units.size() << " units (need >276 for wonder)" << endl;
             continue;
         }
-        wonderGraphics.push_back(this->df->Civs[i + 1].Units[276]);
+        wonderGraphics.push_back(this->df->Civs[civIndex].Units[276]);
     }
 
+    // Assign wonders to civs, SKIPPING chronicle civs
+    // This loop uses configIndexToCivIndex() to map config indices to dat civ indices
     for (int i = 0; i < this->config["wonder"].size(); i++) {
-        if (i + 1 >= df->Civs.size()) {
-            cerr << "[C++]: WARNING - Cannot assign wonder to Civ[" << (i+1) << "]" << endl;
+        int civIndex = configIndexToCivIndex(i);
+        
+        if (civIndex >= df->Civs.size()) {
+            cerr << "[C++]: WARNING - Cannot assign wonder to Civ[" << civIndex << "]" << endl;
             break;
         }
-        if (df->Civs[i + 1].Units.size() <= 276) {
-            cerr << "[C++]: WARNING - Cannot assign wonder to Civ " << (i+1) << endl;
+        if (df->Civs[civIndex].Units.size() <= 276) {
+            cerr << "[C++]: WARNING - Cannot assign wonder to Civ " << civIndex << endl;
             continue;
         }
         int wonderIndex = getJsonInt(this->config["wonder"][i]);
         if (wonderIndex >= 0 && wonderIndex < wonderGraphics.size()) {
-            this->df->Civs[i + 1].Units[276] = wonderGraphics[wonderIndex];
+            this->df->Civs[civIndex].Units[276] = wonderGraphics[wonderIndex];
         } else {
             cerr << "[C++]: WARNING - Invalid wonder index " << wonderIndex << endl;
         }
@@ -526,33 +589,40 @@ void Civbuilder::assignCastles() {
     cout << "[C++]: Assigning castles for " << numPlayerCivs << " civs" << endl;
     
     // Create castle graphic dictionary with bounds checking
+    // NOTE: We collect from ALL civs INCLUDING chronicle civs (they serve as source templates)
+    // This loop intentionally uses i+1 instead of configIndexToCivIndex() because we want
+    // to gather all available castle graphics, including those from chronicle civs
     for (int i = 0; i < numPlayerCivs; i++) {
-        if (i + 1 >= df->Civs.size()) {
-            cerr << "[C++]: WARNING - Cannot access Civ[" << (i+1) << "], only " 
+        int civIndex = i + 1;
+        if (civIndex >= df->Civs.size()) {
+            cerr << "[C++]: WARNING - Cannot access Civ[" << civIndex << "], only " 
                  << df->Civs.size() << " civs available" << endl;
             break;
         }
-        if (df->Civs[i + 1].Units.size() <= 82) {
-            cerr << "[C++]: WARNING - Civ " << (i+1) << " has only " 
-                 << df->Civs[i + 1].Units.size() << " units (need >82 for castle)" << endl;
+        if (df->Civs[civIndex].Units.size() <= 82) {
+            cerr << "[C++]: WARNING - Civ " << civIndex << " has only " 
+                 << df->Civs[civIndex].Units.size() << " units (need >82 for castle)" << endl;
             continue;
         }
-        castleGraphics.push_back(this->df->Civs[i + 1].Units[82]);
+        castleGraphics.push_back(this->df->Civs[civIndex].Units[82]);
     }
 
-    // Assign castles with bounds checking
+    // Assign castles to civs, SKIPPING chronicle civs
+    // This loop uses configIndexToCivIndex() to map config indices to dat civ indices
     for (int i = 0; i < this->config["castle"].size(); i++) {
-        if (i + 1 >= df->Civs.size()) {
-            cerr << "[C++]: WARNING - Cannot assign castle to Civ[" << (i+1) << "]" << endl;
+        int civIndex = configIndexToCivIndex(i);
+        
+        if (civIndex >= df->Civs.size()) {
+            cerr << "[C++]: WARNING - Cannot assign castle to Civ[" << civIndex << "]" << endl;
             break;
         }
-        if (df->Civs[i + 1].Units.size() <= 82) {
-            cerr << "[C++]: WARNING - Cannot assign castle to Civ " << (i+1) << endl;
+        if (df->Civs[civIndex].Units.size() <= 82) {
+            cerr << "[C++]: WARNING - Cannot assign castle to Civ " << civIndex << endl;
             continue;
         }
         int castleIndex = getJsonInt(this->config["castle"][i]);
         if (castleIndex >= 0 && castleIndex < castleGraphics.size()) {
-            this->df->Civs[i + 1].Units[82] = castleGraphics[castleIndex];
+            this->df->Civs[civIndex].Units[82] = castleGraphics[castleIndex];
         } else {
             cerr << "[C++]: WARNING - Invalid castle index " << castleIndex << endl;
         }
@@ -564,25 +634,29 @@ void Civbuilder::assignCastles() {
 void Civbuilder::assignLanguages() {
     int civOffset = 100;
 
-    // Copy language sound items of the civilization we want
+    // Copy language sound items of the civilization we want, SKIPPING chronicle civs
     for (int i = 0; i < this->config["language"].size(); i++) {
+        int civIndex = configIndexToCivIndex(i);
+        
         for (int j = 0; j < this->df->Sounds.size(); j++) {
             int soundSize = this->df->Sounds[j].Items.size();
             for (int k = 0; k < soundSize; k++) {
                 if (this->df->Sounds[j].Items[k].Civilization == (getJsonInt(this->config["language"][i]) + 1)) {
                     // Make a copy, but change its civilization so that it doesn't get re-copied
                     SoundItem copySound = this->df->Sounds[j].Items[k];
-                    copySound.Civilization = i + 1 + civOffset;
+                    copySound.Civilization = civIndex + civOffset;
                     this->df->Sounds[j].Items.push_back(copySound);
                 }
             }
         }
     }
 
-    // Remove all the old sound items
+    // Remove all the old sound items (but keep chronicle civ sounds untouched)
     for (int i = 0; i < this->df->Sounds.size(); i++) {
         for (int j = 0; j < this->df->Sounds[i].Items.size(); j++) {
-            if (this->df->Sounds[i].Items[j].Civilization<civOffset &&this->df->Sounds[i].Items[j].Civilization> 0) {
+            int civId = this->df->Sounds[i].Items[j].Civilization;
+            // Remove if it's a valid civ (< civOffset), not Gaia (> 0), and not a chronicle civ
+            if (civId < civOffset && civId > 0 && !isChronicleCiv(civId)) {
                 this->df->Sounds[i].Items.erase(this->df->Sounds[i].Items.begin() + j);
                 j--;
             }
@@ -620,13 +694,16 @@ void Civbuilder::assignArchitectures() {
     // Save the architecture of one of each type for copying
     vector<int> repArch = {3, 1, 5, 8, 15, 7, 20, 22, 25, 28, 33};
     
-    // Add bounds checking
-    for (int i = 0; i < dest.size(); i++) {
-        if (find(repArch.begin(), repArch.end(), (i + 1)) == repArch.end()) {
+    // Add bounds checking and skip chronicle civs
+    for (int i = 0; i < this->config["architecture"].size(); i++) {
+        int civIndex = configIndexToCivIndex(i);
+        
+        // Skip if this is a representative architecture civ
+        if (find(repArch.begin(), repArch.end(), civIndex) == repArch.end()) {
             int archIndex = dest[i] - 1;
             if (archIndex < 0 || archIndex >= repArch.size()) {
                 cerr << "[C++]: WARNING - Invalid architecture index " << archIndex 
-                     << " for civ " << i << ", skipping" << endl;
+                     << " for config index " << i << " (civ " << civIndex << "), skipping" << endl;
                 continue;
             }
             if (repArch[archIndex] >= df->Civs.size()) {
@@ -634,12 +711,12 @@ void Civbuilder::assignArchitectures() {
                      << " out of range, skipping" << endl;
                 continue;
             }
-            if ((i + 1) >= df->Civs.size()) {
-                cerr << "[C++]: WARNING - Target civ " << (i+1) 
+            if (civIndex >= df->Civs.size()) {
+                cerr << "[C++]: WARNING - Target civ " << civIndex 
                      << " out of range, skipping" << endl;
                 continue;
             }
-            copyArchitecture(df, repArch[archIndex], (i + 1));
+            copyArchitecture(df, repArch[archIndex], civIndex);
         }
     }
     
@@ -6641,6 +6718,8 @@ void Civbuilder::cleanup() {
 
 void Civbuilder::assignUniqueUnits() {
     for (int i = 0; i < this->config["techtree"].size(); i++) {
+        int civIndex = configIndexToCivIndex(i);
+        
         // Check if there's a custom unit for this civ
         bool hasCustomUU = false;
         if (this->config.isMember("custom_units") && 
@@ -6649,7 +6728,7 @@ void Civbuilder::assignUniqueUnits() {
             !this->config["custom_units"][i].isNull()) {
             
             // This civ has a custom UU - create it
-            cout << "[C++]: Processing custom UU for civ " << i << endl;
+            cout << "[C++]: Processing custom UU for config index " << i << " (civ " << civIndex << ")" << endl;
             createCustomUU(i, this->config["custom_units"][i]);
             hasCustomUU = true;
             
@@ -6658,12 +6737,12 @@ void Civbuilder::assignUniqueUnits() {
             int customUUID = -1000 - i;
             if (this->uuTechIDs.find(customUUID) != this->uuTechIDs.end()) {
                 // Make unique unit available for this civ
-                allocateTech(this->df, this->uuTechIDs[customUUID].first, i + 1);
+                allocateTech(this->df, this->uuTechIDs[customUUID].first, civIndex);
                 // Give them elite upgrade
-                allocateTech(this->df, this->uuTechIDs[customUUID].second, i + 1);
-                cout << "[C++]: Custom UU techs allocated for civ " << i << endl;
+                allocateTech(this->df, this->uuTechIDs[customUUID].second, civIndex);
+                cout << "[C++]: Custom UU techs allocated for civ " << civIndex << endl;
             } else {
-                cerr << "[C++]: ERROR - Custom UU tech IDs not found for civ " << i << endl;
+                cerr << "[C++]: ERROR - Custom UU tech IDs not found for config index " << i << endl;
             }
         }
         
@@ -6672,9 +6751,9 @@ void Civbuilder::assignUniqueUnits() {
             int uniqueUnit = this->config["techtree"][i][0].asInt();
             if (uniqueUnit > 0) {
                 // Make unique unit available
-                allocateTech(this->df, this->uuTechIDs[uniqueUnit].first, i + 1);
+                allocateTech(this->df, this->uuTechIDs[uniqueUnit].first, civIndex);
                 // Give them elite upgrade
-                allocateTech(this->df, this->uuTechIDs[uniqueUnit].second, i + 1);
+                allocateTech(this->df, this->uuTechIDs[uniqueUnit].second, civIndex);
             }
         }
     }
@@ -6682,6 +6761,8 @@ void Civbuilder::assignUniqueUnits() {
 
 void Civbuilder::assignBasicTechs() {
     for (int i = 0; i < this->config["techtree"].size(); i++) {
+        int civIndex = configIndexToCivIndex(i);
+        
         for (int j = 0; j < this->config["techtree"][i].size(); j++) {
             if (this->config["techtree"][i][j] == 0) {
                 // Disable tech
@@ -6693,18 +6774,18 @@ void Civbuilder::assignBasicTechs() {
         }
 
         // Default: scout start
-        this->df->Civs[i + 1].Resources[263] = 448;
+        this->df->Civs[civIndex].Resources[263] = 448;
         // Eagle start
         for (int j = 0; j < this->config["techtree"][i].size(); j++) {
             if (this->config["techtree"][i][j] == 1 && j == 12) {
-                this->df->Civs[i + 1].Resources[263] = 751;
+                this->df->Civs[civIndex].Resources[263] = 751;
                 j = this->config["techtree"][i].size();
             }
         }
         // Camel start
         for (int j = 0; j < this->config["civ_bonus"][i].size(); j++) {
             if (this->config["civ_bonus"][i][j] == 300) {
-                this->df->Civs[i + 1].Resources[263] = 1755;
+                this->df->Civs[civIndex].Resources[263] = 1755;
                 j = this->config["civ_bonus"][i].size();
             }
         }
@@ -6714,6 +6795,8 @@ void Civbuilder::assignBasicTechs() {
 void Civbuilder::assignUniqueTechs() {
     // Castle age unique techs
     for (int i = 0; i < this->config["castletech"].size(); i++) {
+        int civIndex = configIndexToCivIndex(i);
+        
         int uniqueIndex = this->config["techtree"][i][0].asInt();
         int uniqueUnit = this->df->Effects[this->df->Techs[this->uuTechIDs[uniqueIndex].first].EffectID].EffectCommands[0].A;
         int uniqueElite = this->df->Effects[this->df->Techs[this->uuTechIDs[uniqueIndex].second].EffectID].EffectCommands[0].B;
@@ -6732,7 +6815,7 @@ void Civbuilder::assignUniqueTechs() {
             Tech &castleTech = this->df->Techs[this->castleUniqueTechIDs[castleIndex]];
 
             // Actually give the unique tech
-            int allocatedTech = allocateTech(this->df, this->castleUniqueTechIDs[castleIndex], i + 1);
+            int allocatedTech = allocateTech(this->df, this->castleUniqueTechIDs[castleIndex], civIndex);
 
             this->multipliedEffects.push_back({allocatedTech, castleCopies});
 
@@ -6757,7 +6840,7 @@ void Civbuilder::assignUniqueTechs() {
                     int dupUUe = (int)(df->Civs[0].Units.size() - 1);
 
                     for (Tech &tech : this->df->Techs) {
-                        if (tech.Name.find("Gothic Anarchy") != string::npos && tech.Civ == (i + 1)) {
+                        if (tech.Name.find("Gothic Anarchy") != string::npos && tech.Civ == civIndex) {
                             Effect enableUnit = Effect();
                             enableUnit.Name = "Enable barracks unit";
                             enableUnit.EffectCommands.push_back(createEC(2, dupUU, 1, -1, 0));
@@ -6800,7 +6883,7 @@ void Civbuilder::assignUniqueTechs() {
                     int dupUUe = (int)(this->df->Civs[0].Units.size() - 1);
 
                     for (Tech &tech : this->df->Techs) {
-                        if (tech.Name.find("Huns UT") != string::npos && tech.Civ == (i + 1)) {
+                        if (tech.Name.find("Huns UT") != string::npos && tech.Civ == civIndex) {
                             Effect enableUnit = Effect();
                             enableUnit.Name = "Enable stable unit";
                             enableUnit.EffectCommands.push_back(createEC(2, dupUU, 1, -1, 0));
@@ -6830,7 +6913,7 @@ void Civbuilder::assignUniqueTechs() {
                 // First Crusade
                 case 29: {
                     for (Tech &tech : this->df->Techs) {
-                        if (tech.Name.find("First Crusade") != string::npos && tech.Civ == (i + 1)) {
+                        if (tech.Name.find("First Crusade") != string::npos && tech.Civ == civIndex) {
                             Effect crusadeUnit = Effect();
                             crusadeUnit.Name = "Enable crusade unit";
                             crusadeUnit.EffectCommands.push_back(createEC(1, 234, 0, -1, 5));
@@ -6850,6 +6933,8 @@ void Civbuilder::assignUniqueTechs() {
 
     // Imperial age unique techs
     for (int i = 0; i < this->config["imptech"].size(); i++) {
+        int civIndex = configIndexToCivIndex(i);
+        
         int uniqueIndex = this->config["techtree"][i][0].asInt();
         int uniqueUnit = this->df->Effects[this->df->Techs[this->uuTechIDs[uniqueIndex].first].EffectID].EffectCommands[0].A;
         int uniqueElite = this->df->Effects[this->df->Techs[this->uuTechIDs[uniqueIndex].second].EffectID].EffectCommands[0].B;
@@ -6868,7 +6953,7 @@ void Civbuilder::assignUniqueTechs() {
             Tech &impTech = this->df->Techs[this->impUniqueTechIDs[impIndex]];
 
             // Actually give the unique tech
-            int allocatedTech = allocateTech(this->df, this->impUniqueTechIDs[impIndex], i + 1);
+            int allocatedTech = allocateTech(this->df, this->impUniqueTechIDs[impIndex], civIndex);
 
             this->multipliedEffects.push_back({allocatedTech, impCopies});
 
@@ -6896,6 +6981,8 @@ void Civbuilder::assignUniqueTechs() {
 
 void Civbuilder::assignCivBonuses() {
     for (int i = 0; i < this->config["civ_bonus"].size(); i++) {
+        int civIndex = configIndexToCivIndex(i);
+        
         for (int j = 0; j < this->config["civ_bonus"][i].size(); j++) {
             int civBonusIndex = -1;
             int civBonusCopies = -1;
@@ -6910,7 +6997,7 @@ void Civbuilder::assignCivBonuses() {
 
             // Actually give the techs associated with that bonus
             for (int k = 0; k < this->civBonuses[civBonusIndex].size(); k++) {
-                int allocatedTech = allocateTech(df, this->civBonuses[civBonusIndex][k], i + 1);
+                int allocatedTech = allocateTech(df, this->civBonuses[civBonusIndex][k], civIndex);
                 // Store information so that we can multiply all effects after the effectcommands have been configured correctly
                 this->multipliedEffects.push_back({allocatedTech, civBonusCopies});
             }
@@ -6939,7 +7026,7 @@ void Civbuilder::assignCivBonuses() {
                     int dupUUe = (int)(this->df->Civs[0].Units.size() - 1);
 
                     for (Tech &tech : this->df->Techs) {
-                        if (tech.Name.find("C-Bonus, Enable Krepost") != string::npos && tech.Civ == (i + 1)) {
+                        if (tech.Name.find("C-Bonus, Enable Krepost") != string::npos && tech.Civ == civIndex) {
                             Effect enableUnit = Effect();
                             enableUnit.Name = "Enable Krepost & Unit";
                             enableUnit.EffectCommands.push_back(createEC(2, 1251, 1, -1, 0));
@@ -6972,7 +7059,7 @@ void Civbuilder::assignCivBonuses() {
                     int dupUUe = (int)(this->df->Civs[0].Units.size() - 1);
 
                     for (Tech &tech : this->df->Techs) {
-                        if (tech.Name.find("Enable Donjon Unit") != string::npos && tech.Civ == (i + 1)) {
+                        if (tech.Name.find("Enable Donjon Unit") != string::npos && tech.Civ == civIndex) {
                             Effect enableUnit = Effect();
                             enableUnit.Name = "Enable Donjon Unit";
                             enableUnit.EffectCommands.push_back(createEC(2, dupUU, 1, -1, 0));
@@ -6994,7 +7081,7 @@ void Civbuilder::assignCivBonuses() {
                 // Wonder provides +50 bonus pop
                 case 140: {
                     // Use the "ore storage" resource to cap at 1 wonder
-                    Civ &civ = this->df->Civs[i + 1];
+                    Civ &civ = this->df->Civs[civIndex];
                     civ.Resources[56] = 1.1;
                     civ.Units[276].ResourceStorages[0].Type = 32;
                     civ.Units[276].ResourceStorages[0].Amount = 50;
@@ -7010,7 +7097,7 @@ void Civbuilder::assignCivBonuses() {
                 }
                 // Villagers give 25 food on death
                 case 211: {
-                    Civ &civ = this->df->Civs[i + 1];
+                    Civ &civ = this->df->Civs[civIndex];
                     const vector<int> vil_d = {58, 60, 224, 225, 353, 227, 228, 229, 215, 217, 219, 221, 213, 226, 211, 355, 229, 591, 593};
                     for (int k = 0; k < vil_d.size(); k++) {
                         civ.Units[vil_d[k]].ResourceStorages[1].Type = 0;
@@ -7021,14 +7108,14 @@ void Civbuilder::assignCivBonuses() {
                 }
                 // Mangonels can cut trees
                 case 213: {
-                    Civ &civ = this->df->Civs[i + 1];
+                    Civ &civ = this->df->Civs[civIndex];
                     civ.Units[280].Bird.TaskList[5].ClassID = 15;
                     civ.Units[280].Type50.BlastAttackLevel = 1;
                     break;
                 }
                 // Refund castle stone
                 case 218: {
-                    Civ &civ = this->df->Civs[i + 1];
+                    Civ &civ = this->df->Civs[civIndex];
                     //					civ.Units[1430].ResourceStorages[1].Type = 2;
                     //					civ.Units[1430].ResourceStorages[1].Amount = 350;
                     //					civ.Units[1430].ResourceStorages[1].Flag = 1;
@@ -7039,7 +7126,7 @@ void Civbuilder::assignCivBonuses() {
                 }
                 // Rams generate stone
                 case 229: {
-                    Civ &civ = this->df->Civs[i + 1];
+                    Civ &civ = this->df->Civs[civIndex];
                     for (int k = 0; k < this->unitClasses["ram"].size(); k++) {
                         civ.Units[this->unitClasses["ram"][k]].Bird.TaskList[civ.Units[this->unitClasses["ram"][k]].Bird.TaskList.size() - 1].ClassID = 3;
                     }
@@ -7052,6 +7139,8 @@ void Civbuilder::assignCivBonuses() {
 
 void Civbuilder::assignTeamBonuses() {
     for (int i = 0; i < this->config["team_bonus"].size(); i++) {
+        int civIndex = configIndexToCivIndex(i);
+        
         // Create a new effect with multiple team bonuses
         Effect tbEffect = Effect();
         tbEffect.Name = "Team Bonus, " + to_string(i) + " set";
@@ -7072,7 +7161,7 @@ void Civbuilder::assignTeamBonuses() {
             }
             switch (teamBonusIndex) {
                 case 30: {
-                    allocateTech(this->df, 721, i + 1);
+                    allocateTech(this->df, 721, civIndex);
                     break;
                 }
                 case 68: {
@@ -7083,7 +7172,7 @@ void Civbuilder::assignTeamBonuses() {
             ai["civs"][i]["tb"].append(this->config["team_bonus"][i][j]);
         }
         this->df->Effects.push_back(tbEffect);
-        this->df->Civs[i + 1].TeamBonusID = (this->df->Effects.size() - 1);
+        this->df->Civs[civIndex].TeamBonusID = (this->df->Effects.size() - 1);
     }
 }
 
