@@ -53,6 +53,16 @@ if (!fs.existsSync(tempdir)) {
 	fs.mkdirSync(`${tempdir}/drafts`, { recursive: true });
 }
 
+// Helper function to safely get color from palette
+// Returns the color if it exists, otherwise returns a fallback gray color
+function safeGetColor(colorIndex) {
+	if (colorIndex >= 0 && colorIndex < colours.length && colours[colorIndex]) {
+		return colours[colorIndex];
+	}
+	console.error(`[server] Invalid color index: ${colorIndex}. Valid range is 0-${colours.length - 1}. Using fallback gray color.`);
+	return [128, 128, 128]; // Fallback gray
+}
+
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "views"));
 
@@ -855,7 +865,13 @@ const writeIconsJson = async (req, res, next) => {
 			await Promise.all(writePromises);
 		} else {
 			//Draw the customized flag
-			var seed = [[colours[civs[i]["flag_palette"][0]], colours[civs[i]["flag_palette"][1]], colours[civs[i]["flag_palette"][2]], colours[civs[i]["flag_palette"][3]], colours[civs[i]["flag_palette"][4]]], civs[i]["flag_palette"][5], civs[i]["flag_palette"][6]];
+			var seed = [[
+				safeGetColor(civs[i]["flag_palette"][0]),
+				safeGetColor(civs[i]["flag_palette"][1]),
+				safeGetColor(civs[i]["flag_palette"][2]),
+				safeGetColor(civs[i]["flag_palette"][3]),
+				safeGetColor(civs[i]["flag_palette"][4])
+			], civs[i]["flag_palette"][5], civs[i]["flag_palette"][6]];
 			var symbol = civs[i]["flag_palette"][7] - 1;
 
 			if (civName == "berber" || civName == "inca") {
@@ -1533,7 +1549,13 @@ function draftIO(io) {
 					//Create Civ Icons
 					for (var i = 0; i < numPlayers; i++) {
 						var civName = nameArr[i];
-						var seed = [[colours[draft["players"][i]["flag_palette"][0]], colours[draft["players"][i]["flag_palette"][1]], colours[draft["players"][i]["flag_palette"][2]], colours[draft["players"][i]["flag_palette"][3]], colours[draft["players"][i]["flag_palette"][4]]], draft["players"][i]["flag_palette"][5], draft["players"][i]["flag_palette"][6]];
+						var seed = [[
+							safeGetColor(draft["players"][i]["flag_palette"][0]),
+							safeGetColor(draft["players"][i]["flag_palette"][1]),
+							safeGetColor(draft["players"][i]["flag_palette"][2]),
+							safeGetColor(draft["players"][i]["flag_palette"][3]),
+							safeGetColor(draft["players"][i]["flag_palette"][4])
+						], draft["players"][i]["flag_palette"][5], draft["players"][i]["flag_palette"][6]];
 						var symbol = draft["players"][i]["flag_palette"][7] - 1;
 						if (civName == "berber" || civName == "inca") { // TODO why do we have this here? both branches have exactly the same code
 							icons.drawFlag(
