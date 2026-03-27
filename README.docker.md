@@ -15,7 +15,7 @@ This guide explains how to build and run AoE2-Civbuilder using Docker. For gener
 AoE2-Civbuilder provides two Dockerfiles for different use cases:
 
 - [`Dockerfile.build-cpp`](Dockerfile.build-cpp:1):
-  Builds the C++ components (the genieutils  for .dat file editing) from source inside the container. Use this if you want to ensure the latest C++ code is compiled or if you are developing/updating the C++/genie parts.
+  Builds the C++ components (the genieutils for .dat file editing) from source inside the container. Use this if you want to ensure the latest C++ code is compiled or if you are developing/updating the C++/genie parts. This Dockerfile uses a 4-stage multi-stage build for optimal layer caching: separate stages for C++ build dependencies, C++ compilation, Node.js dependencies, and final runtime assembly.
 
 - [`Dockerfile.build-cpp`](Dockerfile.build-cpp:1):
   Uses precompiled C++ binaries (the genieutils). Use this for faster builds if you do not need to recompile the C++ code.
@@ -105,6 +105,21 @@ docker run -p 4000:4000 -e CIVBUILDER_HOSTNAME=http://localhost:4000/ aoe2-civbu
 - For development or debugging, you may want to mount the entire project directory as a volume.
 - If you need to recompile the C++ code, use [`Dockerfile.build-cpp`](Dockerfile.build-cpp:1).
 - For faster startup and if you do not need to modify C++ code, use [`Dockerfile.build-cpp`](Dockerfile.build-cpp:1).
+
+### Build Optimization
+
+The [`Dockerfile.build-cpp`](Dockerfile.build-cpp:1) uses a 4-stage multi-stage build for optimal Docker layer caching:
+
+1. **Stage 1 (cpp-dependencies)**: Installs C++ build tools and libraries - cached unless base image changes
+2. **Stage 2 (cpp-build)**: Builds C++ binaries - cached unless `modding/` directory changes  
+3. **Stage 3 (node-dependencies)**: Installs Node.js dependencies - cached unless `package.json` changes
+4. **Stage 4 (build)**: Final runtime image - assembles artifacts from previous stages
+
+This structure ensures that:
+- Changes to C++ code don't invalidate Node.js dependency cache (saving minutes on npm install)
+- Changes to Node.js code don't trigger C++ recompilation
+- Build and runtime dependencies are properly separated
+- Docker can maximize layer reuse for faster rebuilds
 
 ---
 
