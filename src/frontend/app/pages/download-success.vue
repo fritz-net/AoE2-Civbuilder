@@ -3,11 +3,18 @@
     <div class="download-container">
       <div class="success-icon">✅</div>
       
-      <h1 class="download-title">Mod Created Successfully!</h1>
+      <h1 class="download-title">
+        {{ autoInstalled ? 'Mod Installed Successfully!' : 'Mod Created Successfully!' }}
+      </h1>
       
       <div class="download-info">
         <p class="download-message">
-          Your civilization mod has been created and should download automatically.
+          <span v-if="autoInstalled">
+            Your civilization mod has been automatically installed to your Age of Empires II mods folder.
+          </span>
+          <span v-else>
+            Your civilization mod has been created and should download automatically.
+          </span>
         </p>
         
         <div class="civ-details" v-if="civNames.length > 0">
@@ -43,6 +50,26 @@
           <summary>What to do next?</summary>
           <div class="help-content">
             <h3>Installing Your Mod</h3>
+            <p>
+              <strong>Option 1: Auto-Install (Recommended)</strong>
+            </p>
+            <p>
+              When creating your mod, select "Auto-Install to Steam" for automatic installation:
+            </p>
+            <ol>
+              <li>Click "Create Mod" and wait for it to be generated</li>
+              <li>Select "Auto-Install to Steam" when prompted</li>
+              <li>Choose your Age of Empires II directory (usually <code>C:\Users\[YourUsername]\Games\Age of Empires 2 DE</code>)</li>
+              <li>If you have multiple Steam profiles, select the one you want to use</li>
+              <li>The mod will be automatically extracted and installed!</li>
+            </ol>
+            <p>
+              <strong>Note:</strong> Auto-install requires a Chromium-based browser (Chrome, Edge, Opera, etc.)
+            </p>
+            
+            <p>
+              <strong>Option 2: Manual Installation</strong>
+            </p>
             <ol>
               <li>Locate the downloaded .zip file</li>
               <li>Extract the contents to your Age of Empires II mods folder:
@@ -74,13 +101,14 @@
 <script setup lang="ts">
 const route = useRoute()
 
-// Get civNames and filename from query params
+// Get civNames, filename, and autoInstalled from query params
 const civNames = computed(() => {
   const names = route.query.civs as string | undefined
   return names ? names.split(',') : []
 })
 
 const filename = computed(() => route.query.filename as string | undefined)
+const autoInstalled = computed(() => route.query.autoInstalled === 'true')
 </script>
 
 <style scoped>

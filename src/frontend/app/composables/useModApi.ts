@@ -27,16 +27,23 @@ function generateSeed(): string {
   return seed
 }
 
+export interface ModCreationResult {
+  filename: string
+  blob: Blob
+}
+
 /**
  * Create a mod from one or more civ configurations
  * @param civs Array of civ configurations to include in the mod
  * @param options Optional parameters for mod creation
- * @returns Promise that resolves with the actual filename (e.g., "2025-12-02T23-15-30Z_a3f2_v1.6.2.zip") when download starts
+ * @param downloadImmediately If true, triggers download immediately. If false, returns blob without downloading
+ * @returns Promise that resolves with the actual filename and blob
  */
 export async function createMod(
   civs: CivConfig[],
-  options: ModCreationOptions = {}
-): Promise<string> {
+  options: ModCreationOptions = {},
+  downloadImmediately: boolean = true
+): Promise<ModCreationResult> {
   const seed = options.seed || generateSeed()
   
   // Format civs into the presets format expected by the server
@@ -113,18 +120,21 @@ export async function createMod(
     // Get the blob from the response
     const blob = await response.blob()
     
-    // Create a download link and trigger download
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
+    // Only trigger download if requested
+    if (downloadImmediately) {
+      // Create a download link and trigger download
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+    }
     
-    // Return the actual filename (not seed) for navigation purposes
-    return filename
+    // Return both filename and blob
+    return { filename, blob }
   } catch (error) {
     console.error('Error creating mod:', error)
     throw error
@@ -140,14 +150,15 @@ export function useModApi() {
   
   async function createModWithState(
     civs: CivConfig[],
-    options: ModCreationOptions = {}
-  ): Promise<string> {
+    options: ModCreationOptions = {},
+    downloadImmediately: boolean = true
+  ): Promise<ModCreationResult> {
     isCreating.value = true
     error.value = null
     
     try {
-      const seed = await createMod(civs, options)
-      return seed
+      const result = await createMod(civs, options, downloadImmediately)
+      return result
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Unknown error occurred'
       throw err
